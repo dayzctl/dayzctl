@@ -1,0 +1,9 @@
+[Unit]
+Description=DayZ prune backups (dayzctl)
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/local/bin/dayzctl prune
+TimeoutStartSec=3600

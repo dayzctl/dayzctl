@@ -1,0 +1,10 @@
+[Unit]
+Description=DayZ scheduled update timer (dayzctl)
+Requires=dayz-update.service
+
+[Timer]
+OnCalendar=daily
+Persistent=true
+
+[Install]
+WantedBy=timers.target

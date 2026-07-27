@@ -1,0 +1,46 @@
+## DayZ Server Configuration Template
+
+steam:
+  username: "%%STEAM_USER%%"
+
+paths:
+  base: "/srv/dayz"
+
+# Server instances
+instances:
+  - name: dayz
+    instanceId: 1
+    port: 2302
+    steam_query_port: 27016
+    template: dayzOffline.chernarusplus
+    hostname: "DayZ Server"
+    max_players: 60
+    enabled: true
+    rcon:
+      enabled: true
+      port: 2306
+      password: rcon123
+    mods: []
+    servermods: []
+
+# Backup settings
+backup:
+  enabled: true
+  retention_days: 14
+  keep_daily: 7
+  keep_weekly: 4
+
+# Update settings
+updates:
+  enabled: true
+  schedule: "04:00"
+
+# Healthcheck settings
+healthcheck:
+  enabled: true
+  startup_timeout: 300
+
+# Server-wide settings
+server:
+  max_players: 60
+  battleye: 1

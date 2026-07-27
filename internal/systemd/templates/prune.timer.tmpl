@@ -1,0 +1,10 @@
+[Unit]
+Description=DayZ prune timer (dayzctl)
+Requires=dayz-prune.service
+
+[Timer]
+OnCalendar=weekly
+Persistent=true
+
+[Install]
+WantedBy=timers.target

@@ -1,0 +1,9 @@
+[Unit]
+Description=DayZ scheduled update (dayzctl)
+After=network-online.target
+
+[Service]
+Type=oneshot
+User=root
+ExecStart=/usr/local/bin/dayzctl update
+TimeoutStartSec=3600

@@ -1,0 +1,28 @@
+[Unit]
+Description=DayZ Server Instance {{ .Name }}
+After=network.target
+
+[Service]
+Type=simple
+User=dayz
+Group=dayz
+WorkingDirectory={{ .ServerDir }}
+ExecStart={{ .ServerDir }}/DayZServer \
+  -config={{ .ServerDir }}/serverDZ-{{ .Name }}.cfg \
+  -port={{ .Port }} \
+  -profiles={{ .ServerDir }}/profiles/{{ .Name }} \
+  -BEpath={{ .BattlEyeDir }} \
+  -mod={{ .Mods }} \
+  -servermod={{ .ServerMods }} \
+  -cpuCount={{ .CPUCount }} \
+  -dologs \
+  -adminlog \
+  -netLog \
+  -freezecheck \
+  -filePatching
+Restart=on-failure
+RestartSec=10
+LimitNOFILE=4096
+
+[Install]
+WantedBy=multi-user.target

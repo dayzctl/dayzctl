@@ -1,0 +1,58 @@
+version: 2
+
+project_name: dayzctl
+
+before:
+  hooks:
+    - go mod download
+    - go mod tidy
+
+builds:
+  - id: dayzctl
+    main: ./cmd/dayzctl
+    binary: dayzctl
+    env:
+      - CGO_ENABLED=0
+    goos:
+      - linux
+      - windows
+    goarch:
+      - amd64
+      - arm64
+    ignore:
+      - goos: windows
+        goarch: arm64
+    ldflags:
+      - -s -w
+      - -X github.com/kabroxiko/dayzctl/internal/version.Version={{.Version}}
+      - -X github.com/kabroxiko/dayzctl/internal/version.BuildTime={{.Date}}
+
+archives:
+  - id: binary
+    formats: [tar.gz]
+    name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+release:
+  github:
+    owner: kabroxiko
+    name: dayzctl
+  draft: false
+  prerelease: auto
+  mode: replace
+  name_template: "{{.ProjectName}} {{.Version}}"
+
+checksum:
+  name_template: "checksums.txt"
+  algorithm: sha256
+
+changelog:
+  sort: asc
+  filters:
+    exclude:
+      - '^docs:'
+      - '^test:'
+      - '^ci:'
+      - '^chore:'
+      - '^Merge'
+
+dist: dist
