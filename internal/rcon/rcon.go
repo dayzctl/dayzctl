@@ -8,7 +8,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/kabroxiko/dayzctl/internal/logger"
+	"github.com/dayzctl/dayzctl/internal/logger"
 )
 
 // Client implements BattlEye RCon protocol matching bercon-cli
@@ -211,47 +211,101 @@ func (c *Client) Players() ([]Player, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	logger.Debug("RCON Players: raw response", "resp", resp)
 
+	// Normalize and split into lines
 	lines := strings.Split(strings.TrimSpace(resp), "\n")
 	var players []Player
-	inPlayers := false
 
-	for _, line := range lines {
-		line = strings.TrimSpace(line)
-		if !inPlayers {
-			if strings.Contains(line, "Players on server:") {
-				inPlayers = true
-			}
-			continue
+	// Find the start of the players table (if present)
+	start := 0
+	for i, l := range lines {
+		if strings.Contains(l, "Players on server:") {
+			start = i + 1
+			break
 		}
+	}
+
+	for _, line := range lines[start:] {
+		// stop at footer
 		if strings.Contains(line, "players in total") {
 			break
 		}
-		if strings.Contains(line, "[#]") || strings.Contains(line, "---") {
-			// header or separator line; skip
-			continue
-		}
-		if line == "" {
-			continue
-		}
-
-		fields := strings.Fields(line)
-		if len(fields) >= 5 {
-			id, _ := strconv.Atoi(fields[0])
-			players = append(players, Player{
-				ID:   id,
-				IP:   fields[1],
-				Port: fields[2],
-				Ping: fields[3],
-				GUID: fields[4],
-				Name: strings.Join(fields[5:], " "),
-			})
+		if pl, ok := parsePlayerLine(line); ok {
+			players = append(players, pl)
 		}
 	}
 
 	return players, nil
+}
+
+// parsePlayerLine parses a single line of `players` output into a Player.
+// Returns (Player, true) on success, (Player{}, false) when the line should be skipped.
+func parsePlayerLine(line string) (Player, bool) {
+	line = strings.TrimSpace(line)
+	if line == "" {
+		return Player{}, false
+	}
+	// skip header/separator lines
+	if strings.Contains(line, "[#]") || strings.Contains(line, "---") {
+		return Player{}, false
+	}
+
+	fields := strings.Fields(line)
+	if len(fields) < 2 {
+		return Player{}, false
+	}
+
+	id, err := strconv.Atoi(fields[0])
+	if err != nil {
+		return Player{}, false
+	}
+
+	var p Player
+	p.ID = id
+
+	// Common formats:
+	// 1) id ip:port ping guid name...
+	// 2) id ip port ping guid name...
+	if strings.Contains(fields[1], ":") {
+		// ip:port
+		hostport := strings.SplitN(fields[1], ":", 2)
+		p.IP = hostport[0]
+		if len(hostport) > 1 {
+			p.Port = hostport[1]
+		}
+		if len(fields) >= 5 {
+			p.Ping = fields[2]
+			p.GUID = fields[3]
+			p.Name = strings.Join(fields[4:], " ")
+		} else if len(fields) == 4 {
+			p.Ping = fields[2]
+			p.GUID = fields[3]
+		}
+		return p, true
+	}
+
+	// fallback: assume space-separated ip and port
+	if len(fields) >= 6 {
+		p.IP = fields[1]
+		p.Port = fields[2]
+		p.Ping = fields[3]
+		p.GUID = fields[4]
+		p.Name = strings.Join(fields[5:], " ")
+		return p, true
+	}
+
+	// if we only have minimal columns, try best-effort mapping
+	if len(fields) == 5 {
+		p.IP = fields[1]
+		p.Port = ""
+		p.Ping = fields[2]
+		p.GUID = fields[3]
+		p.Name = fields[4]
+		return p, true
+	}
+
+	return Player{}, false
 }
 
 // Kick kicks a player by ID

@@ -1,119 +1,150 @@
-#!/usr/bin/env bash
-#
-# dayzops uninstaller. Idempotent (running again does not cause errors).
-# Requires root.
-#
-# Usage:
-#   sudo ./scripts/uninstall.sh           Removes service, units, and package.
-#                                          PRESERVES ${DAYZ_HOME} (config,
-#                                          server, mods, backups, state).
-#   sudo ./scripts/uninstall.sh --purge   Everything above + DELETES ${DAYZ_HOME}
-#                                          and the system user (total removal).
-#   --yes / -y                            Does not ask for confirmation on --purge
-#                                          (non-interactive / scripts).
-#
-# Overridable variables (use the same as during installation):
-#   DAYZ_HOME  (default /srv/dayz or set via environment)
-#   DAYZ_USER  (default dayz)
-#
+#!/bin/bash
 set -euo pipefail
+
 DAYZ_HOME="${DAYZ_HOME:-/srv/dayz}"
-DAYZ_USER="${DAYZ_USER:-dayz}"
-VENV="${DAYZ_HOME}/.venv"
-BIN_LINK="/usr/local/bin/dayzops"
-PURGE=0
-ASSUME_YES=0
-log() { printf '[uninstall] %s\n' "$*"; }
-usage() {
-    sed -n '3,18p' "$0" | sed 's/^# \{0,1\}//'
-}
-for arg in "$@"; do
-    case "${arg}" in
-        --purge)   PURGE=1 ;;
-        --yes|-y)  ASSUME_YES=1 ;;
-        -h|--help) usage; exit 0 ;;
-        *) echo "unknown argument: ${arg}" >&2; usage; exit 2 ;;
-    esac
-done
-require_root() {
-    if [[ "${EUID}" -ne 0 ]]; then
-        echo "This uninstaller needs root. Run: sudo ./scripts/uninstall.sh" >&2
+CONFIG_PATH="/etc/dayzctl/config.yaml"
+
+GREEN='\033[0;32m'
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+NC='\033[0m'
+
+log() { echo -e "${GREEN}[uninstall]${NC} $*" || true; }
+warn() { echo -e "${YELLOW}[uninstall] WARNING:${NC} $*" >&2 || true; }
+error() { echo -e "${RED}[uninstall] ERROR:${NC} $*" >&2; exit 1; }
+
+if [ "$EUID" -ne 0 ]; then
+    error "Please run as root"
+fi
+
+# Ask for confirmation for destructive operations
+confirm() {
+    local prompt="$1"
+    if [ ! -t 0 ]; then
+        # non-interactive: require explicit YES environment
+        if [ "${YES:-}" = "1" ] || [ "${YES:-}" = "true" ]; then
+            return 0
+        fi
+        echo "$prompt"
+        echo "Run with YES=1 to skip interactive confirmation. Aborting." >&2
         exit 1
     fi
+
+    read -r -p "$prompt [y/N]: " ans
+    case "$ans" in
+        [Yy]|[Yy][Ee][Ss]) return 0 ;;
+        *) return 1 ;;
+    esac
 }
-stop_services() {
-    log "stopping and disabling services/timers"
-    systemctl disable --now dayz dayz-update.timer dayz-prune.timer >/dev/null 2>&1 || true
-}
-remove_units() {
-    log "removing systemd units"
-    rm -f /etc/systemd/system/dayz.service \
-          /etc/systemd/system/dayz-update.service \
-          /etc/systemd/system/dayz-update.timer \
-          /etc/systemd/system/dayz-prune.service \
-          /etc/systemd/system/dayz-prune.timer
-    systemctl daemon-reload >/dev/null 2>&1 || true
-    systemctl reset-failed >/dev/null 2>&1 || true
-}
-remove_package() {
-    # The current installer places dayzops in a virtualenv (${VENV}) and exposes
-    # the command via a symlink at ${BIN_LINK}. We remove both here. We keep a
-    # fallback of 'pip uninstall' for older installations (system-wide).
-    log "removing dayzops command"
-    if [[ -L "${BIN_LINK}" || -e "${BIN_LINK}" ]]; then
-        log "removing symlink ${BIN_LINK}"
-        rm -f "${BIN_LINK}"
+
+# Stop and disable systemd units created by dayzctl
+remove_systemd_units() {
+    if ! command -v systemctl >/dev/null 2>&1; then
+        warn "systemctl not present; skipping systemd unit cleanup"
+        return 0
     fi
-    # The venv is only deleted here in normal mode; on --purge it disappears
-    # along with ${DAYZ_HOME}. Explicitly removing it avoids leaving the venv
-    # orphaned when data is preserved.
-    if [[ "${PURGE}" -ne 1 && -d "${VENV}" ]]; then
-        log "removing virtualenv ${VENV}"
-        rm -rf "${VENV}"
-    fi
-    # Fallback: older installation via global/system-wide pip.
-    if command -v pip >/dev/null 2>&1 || command -v pip3 >/dev/null 2>&1; then
-        local pip_bin
-        pip_bin="$(command -v pip || command -v pip3)"
-        if "${pip_bin}" uninstall -y dayzops >/dev/null 2>&1 \
-           || "${pip_bin}" uninstall -y --break-system-packages dayzops >/dev/null 2>&1; then
-            log "dayzops package (pip system-wide) removed"
+
+    log "Stopping and disabling dayz@*.service units"
+    # Stop any instance units
+    INSTANCES=$(systemctl list-units --type=service --no-legend | awk '{print $1}' | grep '^dayz@' || true)
+    for u in $INSTANCES; do
+        log "Stopping $u"
+        systemctl stop "$u" || true
+        log "Disabling $u"
+        systemctl disable "$u" || true
+    done
+
+    # Stop/disable update/prune timers and services
+    for s in dayz-update.service dayz-update.timer dayz-prune.service dayz-prune.timer; do
+        if systemctl list-unit-files | grep -q "^$s"; then
+            log "Stopping/disabling $s"
+            systemctl stop "$s" || true
+            systemctl disable "$s" || true
         fi
-    fi
-}
-purge_data() {
-    if [[ "${ASSUME_YES}" -ne 1 ]]; then
-        echo
-        echo "ATTENTION: --purge will PERMANENTLY DELETE:"
-        echo "  - ${DAYZ_HOME} (config, server, mods, backups, state, SteamCMD cache)"
-        echo "  - the system user '${DAYZ_USER}'"
-        echo
-        read -r -p "Are you sure? type 'yes' to confirm: " answer
-        if [[ "${answer}" != "yes" ]]; then
-            log "purge cancelled; data preserved in ${DAYZ_HOME}"
-            return
+    done
+
+    # Remove unit files in /etc/systemd/system if any were written there
+    for f in /etc/systemd/system/dayz@*.service /etc/systemd/system/dayz-update.* /etc/systemd/system/dayz-prune.*; do
+        if ls $f 2>/dev/null >/dev/null; then
+            for ff in $f; do
+                log "Removing $ff"
+                rm -f "$ff" || true
+            done
         fi
-    fi
-    if [[ -d "${DAYZ_HOME}" ]]; then
-        log "deleting ${DAYZ_HOME}"
-        rm -rf "${DAYZ_HOME}"
-    fi
-    if id "${DAYZ_USER}" &>/dev/null; then
-        log "removing user ${DAYZ_USER}"
-        userdel "${DAYZ_USER}" >/dev/null 2>&1 \
-            || log "WARNING: could not remove ${DAYZ_USER} (active processes?)"
-    fi
+    done
+
+    log "Reloading systemd daemon"
+    systemctl daemon-reload || true
 }
-main() {
-    require_root
-    stop_services
-    remove_units
-    remove_package
-    if [[ "${PURGE}" -eq 1 ]]; then
-        purge_data
+
+remove_binary_and_config() {
+    if [ -f /usr/local/bin/dayzctl ]; then
+        log "Removing /usr/local/bin/dayzctl"
+        rm -f /usr/local/bin/dayzctl || warn "Failed to remove /usr/local/bin/dayzctl"
     else
-        log "data in ${DAYZ_HOME} preserved (use --purge to remove everything)"
+        log "No /usr/local/bin/dayzctl present"
     fi
-    log "done."
+
+    if [ -f "$CONFIG_PATH" ]; then
+        if confirm "Remove config at $CONFIG_PATH?"; then
+            rm -f "$CONFIG_PATH" || warn "Failed to remove $CONFIG_PATH"
+            rmdir --ignore-fail-on-non-empty /etc/dayzctl 2>/dev/null || true
+            log "Config removed"
+        else
+            log "Preserving config at $CONFIG_PATH"
+        fi
+    else
+        log "No config found at $CONFIG_PATH"
+    fi
 }
+
+remove_data_and_user() {
+    if confirm "Remove server files at $DAYZ_HOME (this will delete server files, workshop, backups)?"; then
+        log "Removing $DAYZ_HOME"
+        rm -rf "$DAYZ_HOME" || warn "Failed to remove some files under $DAYZ_HOME"
+    else
+        log "Preserving $DAYZ_HOME"
+    fi
+
+    if id "dayz" &>/dev/null; then
+        if confirm "Remove 'dayz' user and its home?"; then
+            log "Removing user 'dayz'"
+            userdel -r dayz || warn "Failed to remove user 'dayz' cleanly"
+        else
+            log "Preserving user 'dayz'"
+        fi
+    else
+        log "User 'dayz' not present"
+    fi
+}
+
+main() {
+    echo
+    log "=== DayZ Server Uninstall ==="
+    echo
+
+    # Basic sanity: if dayzctl binary exists, attempt to stop running instances using it
+    if command -v /usr/local/bin/dayzctl >/dev/null 2>&1; then
+        log "Attempting to stop instances via dayzctl"
+        # try to list instances and stop them
+        if /usr/local/bin/dayzctl list >/dev/null 2>&1; then
+            INSTS=$(/usr/local/bin/dayzctl list | awk 'NR>1 {print $1}' || true)
+            for i in $INSTS; do
+                log "Stopping instance $i"
+                /usr/local/bin/dayzctl stop "$i" || true
+            done
+        fi
+    fi
+
+    if confirm "Proceed with uninstall?"; then
+        remove_systemd_units
+        remove_binary_and_config
+        remove_data_and_user
+        log "Uninstall complete"
+    else
+        log "Aborted by user"
+        exit 0
+    fi
+}
+
 main "$@"

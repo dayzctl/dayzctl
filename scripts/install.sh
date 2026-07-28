@@ -209,7 +209,7 @@ install_dayzctl() {
     fi
 
     log "Fetching latest release from GitHub API..."
-    API_URL="https://api.github.com/repos/kabroxiko/dayzctl/releases/latest"
+    API_URL="https://api.github.com/repos/dayzctl/dayzctl/releases/latest"
 
     TMP_RESPONSE=$(mktemp)
     TMP_ERROR=$(mktemp)
@@ -259,8 +259,8 @@ install_dayzctl() {
     log "Extracted version: $VERSION"
 
     ASSET="dayzctl_${VERSION}_${OS}_${ARCH}.tar.gz"
-    DL_URL="https://github.com/kabroxiko/dayzctl/releases/download/v${VERSION}/${ASSET}"
-    CHECKSUM_URL="https://github.com/kabroxiko/dayzctl/releases/download/v${VERSION}/checksums.txt"
+    DL_URL="https://github.com/dayzctl/dayzctl/releases/download/v${VERSION}/${ASSET}"
+    CHECKSUM_URL="https://github.com/dayzctl/dayzctl/releases/download/v${VERSION}/checksums.txt"
 
     log "Installing dayzctl v${VERSION}"
     log "Asset: $ASSET"
@@ -347,7 +347,7 @@ create_config() {
     # Create /etc/dayzctl directory
     mkdir -p /etc/dayzctl || error "Failed to create /etc/dayzctl"
 
-    TEMPLATE_URL="https://raw.githubusercontent.com/kabroxiko/dayzctl/main/configs/config.yaml.tmpl"
+    TEMPLATE_URL="https://raw.githubusercontent.com/dayzctl/dayzctl/main/configs/config.yaml.tmpl"
     TMP_TEMPLATE=$(mktemp)
 
     if [ -z "$TMP_TEMPLATE" ]; then

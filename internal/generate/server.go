@@ -7,7 +7,7 @@ import (
 	"strings"
 	"text/template"
 
-	"github.com/kabroxiko/dayzctl/internal/config"
+	"github.com/dayzctl/dayzctl/internal/config"
 )
 
 // ServerConfigData represents data for server config templates

@@ -13,7 +13,7 @@ func TestBuildAndHelp(t *testing.T) {
 
 	outPath := filepath.Join(os.TempDir(), "dayzctl-integ")
 	// Build binary from module import path to avoid relative cwd issues
-	cmd := exec.Command("go", "build", "-o", outPath, "github.com/kabroxiko/dayzctl/cmd/dayzctl")
+	cmd := exec.Command("go", "build", "-o", outPath, "github.com/dayzctl/dayzctl/cmd/dayzctl")
 	var bout, berr bytes.Buffer
 	cmd.Stdout = &bout
 	cmd.Stderr = &berr
@@ -40,7 +40,7 @@ func TestBuildAndListWithConfig(t *testing.T) {
 
 	outPath := filepath.Join(os.TempDir(), "dayzctl-integ")
 	// Build binary from module import path to avoid relative cwd issues
-	cmd := exec.Command("go", "build", "-o", outPath, "github.com/kabroxiko/dayzctl/cmd/dayzctl")
+	cmd := exec.Command("go", "build", "-o", outPath, "github.com/dayzctl/dayzctl/cmd/dayzctl")
 	if out, err := cmd.CombinedOutput(); err != nil {
 		t.Fatalf("build failed: %v\n%s", err, string(out))
 	}

@@ -24,8 +24,8 @@ builds:
         goarch: arm64
     ldflags:
       - -s -w
-      - -X github.com/kabroxiko/dayzctl/internal/version.Version={{.Version}}
-      - -X github.com/kabroxiko/dayzctl/internal/version.BuildTime={{.Date}}
+      - -X github.com/dayzctl/dayzctl/internal/version.Version={{.Version}}
+      - -X github.com/dayzctl/dayzctl/internal/version.BuildTime={{.Date}}
 
 archives:
   - id: binary

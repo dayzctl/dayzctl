@@ -7,9 +7,9 @@ import (
 	"path/filepath"
 	"text/template"
 
-	"github.com/kabroxiko/dayzctl/internal/config"
-	"github.com/kabroxiko/dayzctl/internal/logger"
-	"github.com/kabroxiko/dayzctl/internal/utils"
+	"github.com/dayzctl/dayzctl/internal/config"
+	"github.com/dayzctl/dayzctl/internal/logger"
+	"github.com/dayzctl/dayzctl/internal/utils"
 )
 
 // GenerateBattlEyeConfig generates beserver_x64.cfg for all instances

@@ -12,8 +12,8 @@ import (
 	"sync"
 	"time"
 
-	"github.com/kabroxiko/dayzctl/internal/logger"
-	"github.com/kabroxiko/dayzctl/internal/utils"
+	"github.com/dayzctl/dayzctl/internal/logger"
+	"github.com/dayzctl/dayzctl/internal/utils"
 )
 
 // Common errors

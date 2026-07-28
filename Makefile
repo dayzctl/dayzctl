@@ -1,6 +1,6 @@
 # Makefile for dayzctl
 
-PROJECT := github.com/kabroxiko/dayzctl
+PROJECT := github.com/dayzctl/dayzctl
 BINARY := dayzctl
 VERSION := $(shell cat pkg/version/version.txt 2>/dev/null || echo "dev")
 BUILD_TIME := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)

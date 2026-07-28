@@ -7,7 +7,7 @@ import (
 	"os"
 	"text/template"
 
-	"github.com/kabroxiko/dayzctl/internal/config"
+	"github.com/dayzctl/dayzctl/internal/config"
 )
 
 //go:embed templates/serverDZ.cfg.tmpl

@@ -8,10 +8,11 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/kabroxiko/dayzctl/internal/config"
-	"github.com/kabroxiko/dayzctl/internal/generate"
-	"github.com/kabroxiko/dayzctl/internal/logger"
-	"github.com/kabroxiko/dayzctl/internal/systemd"
+	"github.com/dayzctl/dayzctl/internal/config"
+	"github.com/dayzctl/dayzctl/internal/generate"
+	"github.com/dayzctl/dayzctl/internal/logger"
+	"github.com/dayzctl/dayzctl/internal/systemd"
+
 	"gopkg.in/yaml.v3"
 )
 

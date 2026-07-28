@@ -7,9 +7,9 @@ import (
 	"regexp"
 	"strings"
 
-	"github.com/kabroxiko/dayzctl/internal/config"
-	"github.com/kabroxiko/dayzctl/internal/logger"
-	"github.com/kabroxiko/dayzctl/internal/utils"
+	"github.com/dayzctl/dayzctl/internal/config"
+	"github.com/dayzctl/dayzctl/internal/logger"
+	"github.com/dayzctl/dayzctl/internal/utils"
 )
 
 // Mod represents a mod with its ID and metadata

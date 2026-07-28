@@ -20,7 +20,7 @@ Install (one-liner):
 This repository provides an installer script at `scripts/install.sh`. To install `dayzctl` from the `main` branch, run:
 
 ```bash
-bash -c "$(curl -fsSL https://raw.githubusercontent.com/kabroxiko/dayzctl/refs/heads/main/scripts/install.sh)"
+bash -c "$(curl -fsSL https://raw.githubusercontent.com/dayzctl/dayzctl/refs/heads/main/scripts/install.sh)"
 ```
 
 ## Build (compile from source)

@@ -8,8 +8,8 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kabroxiko/dayzctl/cmd/dayzctl/commands/shared"
-	"github.com/kabroxiko/dayzctl/internal/config"
+	"github.com/dayzctl/dayzctl/cmd/dayzctl/commands/shared"
+	"github.com/dayzctl/dayzctl/internal/config"
 )
 
 func captureStdout(f func()) string {

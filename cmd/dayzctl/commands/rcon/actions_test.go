@@ -7,9 +7,9 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/kabroxiko/dayzctl/cmd/dayzctl/commands/shared"
-	"github.com/kabroxiko/dayzctl/internal/config"
-	intrcon "github.com/kabroxiko/dayzctl/internal/rcon"
+	"github.com/dayzctl/dayzctl/cmd/dayzctl/commands/shared"
+	"github.com/dayzctl/dayzctl/internal/config"
+	intrcon "github.com/dayzctl/dayzctl/internal/rcon"
 )
 
 func captureStdout(f func()) string {

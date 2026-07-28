@@ -5,7 +5,7 @@ import (
 	"path/filepath"
 	"testing"
 
-	"github.com/kabroxiko/dayzctl/internal/config"
+	"github.com/dayzctl/dayzctl/internal/config"
 )
 
 func TestGetInstanceErrors(t *testing.T) {

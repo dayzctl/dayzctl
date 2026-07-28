@@ -5,15 +5,15 @@ import (
 	"os/exec"
 	"strings"
 
-	"github.com/kabroxiko/dayzctl/cmd/dayzctl/commands/shared"
-	"github.com/kabroxiko/dayzctl/internal/config"
-	"github.com/kabroxiko/dayzctl/internal/generate"
-	"github.com/kabroxiko/dayzctl/internal/lock"
-	"github.com/kabroxiko/dayzctl/internal/logger"
-	"github.com/kabroxiko/dayzctl/internal/mods"
-	"github.com/kabroxiko/dayzctl/internal/steamcmd"
-	"github.com/kabroxiko/dayzctl/internal/systemd"
-	"github.com/kabroxiko/dayzctl/internal/version"
+	"github.com/dayzctl/dayzctl/cmd/dayzctl/commands/shared"
+	"github.com/dayzctl/dayzctl/internal/config"
+	"github.com/dayzctl/dayzctl/internal/generate"
+	"github.com/dayzctl/dayzctl/internal/lock"
+	"github.com/dayzctl/dayzctl/internal/logger"
+	"github.com/dayzctl/dayzctl/internal/mods"
+	"github.com/dayzctl/dayzctl/internal/steamcmd"
+	"github.com/dayzctl/dayzctl/internal/systemd"
+	"github.com/dayzctl/dayzctl/internal/version"
 )
 
 // StartAction starts an instance or all

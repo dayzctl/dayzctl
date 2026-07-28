@@ -3,7 +3,7 @@ package mods
 import (
 	"testing"
 
-	"github.com/kabroxiko/dayzctl/internal/config"
+	"github.com/dayzctl/dayzctl/internal/config"
 )
 
 func TestGetSymlinkNameFormats(t *testing.T) {

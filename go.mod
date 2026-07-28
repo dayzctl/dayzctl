@@ -1,4 +1,4 @@
-module github.com/kabroxiko/dayzctl
+module github.com/dayzctl/dayzctl
 
 go 1.25.5
 
