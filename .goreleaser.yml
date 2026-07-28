@@ -34,7 +34,7 @@ archives:
 
 release:
   github:
-    owner: kabroxiko
+    owner: dayzctl
     name: dayzctl
   draft: false
   prerelease: auto

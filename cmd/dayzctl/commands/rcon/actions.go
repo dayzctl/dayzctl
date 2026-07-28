@@ -39,26 +39,9 @@ func PlayersAction(instanceName string, args []string) error {
 		if instanceName == "" {
 			return fmt.Errorf("instance name required")
 		}
-		instances, err := shared.GetInstances(instanceName)
-		if err != nil {
-			return err
-		}
-		runningList, running := getRunningMap()
-
-		for _, inst := range instances {
-			skip, stop := precheckInstance(inst, running, len(instances), len(runningList))
-			if stop {
-				return nil
-			}
-			if skip {
-				continue
-			}
-
-			if err := processPlayersForInstance(inst, newClient, len(instances)); err != nil {
-				return err
-			}
-		}
-		return nil
+		return forEachInstance(instanceName, func(inst *config.Instance, total int) error {
+			return processPlayersForInstance(inst, newClient, total)
+		})
 	})
 	return nil
 }
@@ -132,28 +115,37 @@ func SendAction(instanceName string, args []string) error {
 		if len(args) == 0 {
 			return fmt.Errorf("command required")
 		}
-		instances, err := shared.GetInstances(instanceName)
-		if err != nil {
+		cmd := strings.Join(args, " ")
+		return forEachInstance(instanceName, func(inst *config.Instance, total int) error {
+			return processSendForInstance(inst, cmd, newClient, total)
+		})
+	})
+	return nil
+}
+
+// forEachInstance runs the provided action for each matching instance after
+// performing the common pre-checks. The action receives the instance and the
+// total number of instances requested.
+func forEachInstance(instanceName string, action func(*config.Instance, int) error) error {
+	instances, err := shared.GetInstances(instanceName)
+	if err != nil {
+		return err
+	}
+	runningList, running := getRunningMap()
+	total := len(instances)
+
+	for _, inst := range instances {
+		skip, stop := precheckInstance(inst, running, total, len(runningList))
+		if stop {
+			return nil
+		}
+		if skip {
+			continue
+		}
+		if err := action(inst, total); err != nil {
 			return err
 		}
-		cmd := strings.Join(args, " ")
-		runningList, running := getRunningMap()
-
-		for _, inst := range instances {
-			skip, stop := precheckInstance(inst, running, len(instances), len(runningList))
-			if stop {
-				return nil
-			}
-			if skip {
-				continue
-			}
-
-			if err := processSendForInstance(inst, cmd, newClient, len(instances)); err != nil {
-				return err
-			}
-		}
-		return nil
-	})
+	}
 	return nil
 }
 
@@ -192,26 +184,9 @@ func KickAction(instanceName string, args []string) error {
 		if len(args) > 1 {
 			reason = strings.Join(args[1:], " ")
 		}
-		instances, err := shared.GetInstances(instanceName)
-		if err != nil {
-			return err
-		}
-		runningList, running := getRunningMap()
-
-		for _, inst := range instances {
-			skip, stop := precheckInstance(inst, running, len(instances), len(runningList))
-			if stop {
-				return nil
-			}
-			if skip {
-				continue
-			}
-
-			if err := processKickForInstance(inst, id, reason, newClient, len(instances)); err != nil {
-				return err
-			}
-		}
-		return nil
+		return forEachInstance(instanceName, func(inst *config.Instance, total int) error {
+			return processKickForInstance(inst, id, reason, newClient, total)
+		})
 	})
 	return nil
 }
@@ -252,26 +227,9 @@ func BanAction(instanceName string, args []string) error {
 		if len(args) > 2 {
 			reason = strings.Join(args[2:], " ")
 		}
-		instances, err := shared.GetInstances(instanceName)
-		if err != nil {
-			return err
-		}
-		runningList, running := getRunningMap()
-
-		for _, inst := range instances {
-			skip, stop := precheckInstance(inst, running, len(instances), len(runningList))
-			if stop {
-				return nil
-			}
-			if skip {
-				continue
-			}
-
-			if err := processBanForInstance(inst, id, minutes, reason, newClient, len(instances)); err != nil {
-				return err
-			}
-		}
-		return nil
+		return forEachInstance(instanceName, func(inst *config.Instance, total int) error {
+			return processBanForInstance(inst, id, minutes, reason, newClient, total)
+		})
 	})
 	return nil
 }
@@ -301,26 +259,9 @@ func SayAction(instanceName string, args []string) error {
 			return fmt.Errorf("message required")
 		}
 		msg := strings.Join(args, " ")
-		instances, err := shared.GetInstances(instanceName)
-		if err != nil {
-			return err
-		}
-		runningList, running := getRunningMap()
-
-		for _, inst := range instances {
-			skip, stop := precheckInstance(inst, running, len(instances), len(runningList))
-			if stop {
-				return nil
-			}
-			if skip {
-				continue
-			}
-
-			if err := processSayForInstance(inst, msg, newClient, len(instances)); err != nil {
-				return err
-			}
-		}
-		return nil
+		return forEachInstance(instanceName, func(inst *config.Instance, total int) error {
+			return processSayForInstance(inst, msg, newClient, total)
+		})
 	})
 	return nil
 }

@@ -83,62 +83,89 @@ func RestartAction(target string) error {
 func StatusAction(arg string) error {
 	shared.RunCommand(func() error {
 		sysd := systemd.New()
-
 		if arg == "" || arg == "all" {
-			fmt.Print("\n=== DayZ Server Status ===\n\n")
-
-			fmt.Printf("Configured instances: %v\n", shared.Config.GetInstanceNames())
-
-			running, _ := sysd.ListRunningInstances()
-			fmt.Printf("Running instances: %v\n", running)
-
-			for _, inst := range shared.Config.Instances {
-				if !inst.Enabled {
-					continue
-				}
-				isRunning := false
-				for _, r := range running {
-					if r == inst.Name {
-						isRunning = true
-						break
-					}
-				}
-				status := "stopped"
-				if isRunning {
-					status = "running"
-				}
-				fmt.Printf("\nInstance: %s\n", inst.Name)
-				fmt.Printf("  Port: %d\n", inst.Port)
-				fmt.Printf("  Status: %s\n", status)
-				fmt.Printf("  Mods: %d\n", len(inst.Mods))
-				if inst.RCON.Enabled {
-					fmt.Printf("  RCON: enabled on port %d\n", inst.RCON.Port)
-				}
-			}
-
-			fmt.Print("\n=== Timers ===\n")
-			for _, timer := range []string{"dayz-update.timer", "dayz-prune.timer"} {
-				status, _ := sysd.Status(timer)
-				for _, line := range strings.Split(status, "\n") {
-					if strings.Contains(line, "Active:") || strings.Contains(line, "Trigger:") {
-						fmt.Println("  " + strings.TrimSpace(line))
-					}
-				}
-			}
-			fmt.Println()
-		} else {
-			instance, err := shared.GetInstance(arg)
-			if err != nil {
-				return err
-			}
-			status, err := sysd.Status("dayz@" + instance.Name)
-			if err != nil {
-				return err
-			}
-			fmt.Println(status)
+			return printAllStatus(sysd)
 		}
+		instance, err := shared.GetInstance(arg)
+		if err != nil {
+			return err
+		}
+		return printSingleStatus(sysd, instance)
 		return nil
 	})
+	return nil
+}
+
+// printAllStatus prints the overall server status, enabled instances, and timers.
+func printAllStatus(sysd *systemd.Systemd) error {
+	fmt.Print("\n=== DayZ Server Status ===\n\n")
+
+	fmt.Printf("Configured instances: %v\n", shared.Config.GetInstanceNames())
+
+	running, _ := sysd.ListRunningInstances()
+	fmt.Printf("Running instances: %v\n", running)
+
+	for _, inst := range shared.Config.Instances {
+		if !inst.Enabled {
+			continue
+		}
+		printInstanceSummary(inst, running)
+	}
+
+	fmt.Print("\n=== Timers ===\n")
+	if err := printTimers(sysd); err != nil {
+		return err
+	}
+	fmt.Println()
+	return nil
+}
+
+// printInstanceSummary prints a short status summary for a single instance.
+func printInstanceSummary(inst config.Instance, running []string) {
+	isRunning := false
+	for _, r := range running {
+		if r == inst.Name {
+			isRunning = true
+			break
+		}
+	}
+	status := "stopped"
+	if isRunning {
+		status = "running"
+	}
+	fmt.Printf("\nInstance: %s\n", inst.Name)
+	fmt.Printf("  Port: %d\n", inst.Port)
+	fmt.Printf("  Status: %s\n", status)
+	fmt.Printf("  Mods: %d\n", len(inst.Mods))
+	if inst.RCON.Enabled {
+		fmt.Printf("  RCON: enabled on port %d\n", inst.RCON.Port)
+	}
+}
+
+// printTimers prints selected systemd timer statuses.
+func printTimers(sysd *systemd.Systemd) error {
+	for _, timer := range []string{"dayz-update.timer", "dayz-prune.timer"} {
+		status, err := sysd.Status(timer)
+		if err != nil {
+			// Non-fatal: continue to next timer
+			continue
+		}
+		for _, line := range strings.Split(status, "\n") {
+			if strings.Contains(line, "Active:") || strings.Contains(line, "Trigger:") {
+				fmt.Println("  " + strings.TrimSpace(line))
+			}
+		}
+	}
+	return nil
+}
+
+// printSingleStatus prints the full systemd status for a single instance unit.
+func printSingleStatus(sysd *systemd.Systemd, inst *config.Instance) error {
+	status, err := sysd.Status("dayz@" + inst.Name)
+	if err != nil {
+		return err
+	}
+	fmt.Println(status)
 	return nil
 }
 
