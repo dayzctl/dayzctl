@@ -91,7 +91,6 @@ func StatusAction(arg string) error {
 			return err
 		}
 		return printSingleStatus(sysd, instance)
-		return nil
 	})
 	return nil
 }
@@ -172,162 +171,256 @@ func printSingleStatus(sysd *systemd.Systemd, inst *config.Instance) error {
 // ApplyAction applies config
 func ApplyAction(target string) error {
 	shared.RunCommand(func() error {
-		var instances []*config.Instance
-
-		if target == "" || target == "all" {
-			enabled := shared.Config.GetEnabledInstances()
-			// Convert to []*config.Instance
-			instances = make([]*config.Instance, len(enabled))
-			for i := range enabled {
-				instances[i] = &enabled[i]
-			}
-		} else {
-			insts, getErr := shared.GetInstances(target)
-			if getErr != nil {
-				return getErr
-			}
-			instances = insts
-		}
-
-		if len(instances) == 0 {
-			return fmt.Errorf("no instances selected for apply")
-		}
-
-		fmt.Println("Generating server and BattlEye configs...")
-		if err := generate.GenerateForInstances(shared.Config, instances); err != nil {
-			return fmt.Errorf("failed to generate server configs: %w", err)
-		}
-
-		sysd := systemd.New()
-		fmt.Println("Generating systemd units...")
-		if err := sysd.GenerateUnits(shared.Config); err != nil {
-			return fmt.Errorf("failed to generate units: %w", err)
-		}
-		if err := sysd.Reload(); err != nil {
-			return fmt.Errorf("failed to reload systemd: %w", err)
-		}
-
-		for _, instance := range instances {
-			if instance.Enabled {
-				fmt.Printf("Enabling instance %s\n", instance.Name)
-				if err := sysd.Enable("dayz@" + instance.Name); err != nil {
-					fmt.Printf("Failed to enable instance %s: %v\n", instance.Name, err)
-				}
-			}
-		}
-
-		if shared.Config.Updates.Enabled {
-			fmt.Println("Enabling update timer...")
-			if err := sysd.Enable("dayz-update.timer"); err != nil {
-				fmt.Printf("Failed to enable update timer: %v\n", err)
-			}
-		}
-
-		fmt.Println("Configuration applied successfully")
-		fmt.Println("Services are NOT started/stopped/restarted. Use 'dayzctl start/stop/restart' to control services.")
-		return nil
+		return applyOrchestrator(target)
 	})
 	return nil
+}
+
+// applyOrchestrator performs the high-level apply steps by composing smaller helpers.
+func applyOrchestrator(target string) error {
+	instances, err := collectApplyInstances(target)
+	if err != nil {
+		return err
+	}
+	if len(instances) == 0 {
+		return fmt.Errorf("no instances selected for apply")
+	}
+
+	fmt.Println("Generating server and BattlEye configs...")
+	if err := generate.GenerateForInstances(shared.Config, instances); err != nil {
+		return fmt.Errorf("failed to generate server configs: %w", err)
+	}
+
+	sysd := systemd.New()
+	if err := generateAndReloadSystemd(sysd); err != nil {
+		return err
+	}
+
+	enableInstances(sysd, instances)
+
+	if shared.Config.Updates.Enabled {
+		enableUpdateTimer(sysd)
+	}
+
+	fmt.Println("Configuration applied successfully")
+	fmt.Println("Services are NOT started/stopped/restarted. Use 'dayzctl start/stop/restart' to control services.")
+	return nil
+}
+
+// collectApplyInstances returns the set of instances to operate on based on target.
+func collectApplyInstances(target string) ([]*config.Instance, error) {
+	if target == "" || target == "all" {
+		enabled := shared.Config.GetEnabledInstances()
+		instances := make([]*config.Instance, len(enabled))
+		for i := range enabled {
+			instances[i] = &enabled[i]
+		}
+		return instances, nil
+	}
+	return shared.GetInstances(target)
+}
+
+// generateAndReloadSystemd generates systemd unit files and reloads systemd.
+func generateAndReloadSystemd(sysd *systemd.Systemd) error {
+	fmt.Println("Generating systemd units...")
+	if err := sysd.GenerateUnits(shared.Config); err != nil {
+		return fmt.Errorf("failed to generate units: %w", err)
+	}
+	if err := sysd.Reload(); err != nil {
+		return fmt.Errorf("failed to reload systemd: %w", err)
+	}
+	return nil
+}
+
+// enableInstances enables systemd services for enabled instances.
+func enableInstances(sysd *systemd.Systemd, instances []*config.Instance) {
+	for _, instance := range instances {
+		if instance.Enabled {
+			fmt.Printf("Enabling instance %s\n", instance.Name)
+			if err := sysd.Enable("dayz@" + instance.Name); err != nil {
+				fmt.Printf("Failed to enable instance %s: %v\n", instance.Name, err)
+			}
+		}
+	}
+}
+
+// enableUpdateTimer enables the periodic update timer.
+func enableUpdateTimer(sysd *systemd.Systemd) {
+	fmt.Println("Enabling update timer...")
+	if err := sysd.Enable("dayz-update.timer"); err != nil {
+		fmt.Printf("Failed to enable update timer: %v\n", err)
+	}
 }
 
 // UpdateAction runs update
 func UpdateAction() error {
 	shared.RunCommand(func() error {
-		l, err := lock.New("/run/dayzctl.lock")
-		if err != nil {
-			return fmt.Errorf("failed to acquire lock: %w", err)
-		}
-		defer func() {
-			if err := l.Release(); err != nil {
-				logger.Warn("Failed to release lock", "error", err)
-			}
-		}()
-
-		if !shared.Config.Updates.Enabled {
-			logger.Info("Updates are disabled in config")
-			return nil
-		}
-
-		logger.Info("Starting update check...")
-		if shared.Config.GetSteamcmdBin() == "" {
-			return fmt.Errorf("steamcmd path not configured; set 'paths.steamcmd_bin' in the config or install SteamCMD via the installer")
-		}
-		steam := steamcmd.New(shared.Config.GetSteamUser(), shared.Config.GetInstallDir(), shared.Config.GetSteamcmdBin(), shared.Config.GetWorkshopDir())
-
-		buildID, err := steam.GetBuildID()
-		if err != nil {
-			if steamcmd.IsRateLimitError(err) {
-				logger.Warn("Rate limit hit, please wait before retrying")
-				return err
-			}
-			return fmt.Errorf("failed to check build: %w", err)
-		}
-		logger.Info("Current build", "build_id", buildID)
-
-		needsUpdate, err := steam.NeedsUpdate()
-		if err != nil {
-			return fmt.Errorf("failed to check update status: %w", err)
-		}
-		if !needsUpdate {
-			logger.Info("Server is already up to date - no update available")
-			return nil
-		}
-
-		logger.Info("Update available! Proceeding with update...")
-
-		sysd := systemd.New()
-		instances, err := sysd.ListRunningInstances()
-		if err != nil {
-			logger.Warn("Failed to list running instances", "error", err)
-			instances = []string{}
-		}
-
-		if len(instances) > 0 {
-			logger.Info("Stopping running instances...")
-			for _, instance := range instances {
-				logger.Info("Stopping instance", "name", instance)
-				if err := sysd.Stop("dayz@" + instance); err != nil {
-					return fmt.Errorf("failed to stop %s: %w", instance, err)
-				}
-			}
-		} else {
-			logger.Info("No running instances to stop")
-		}
-
-		logger.Info("Updating DayZ server as dayz user...")
-		if err := steam.Update(); err != nil {
-			return fmt.Errorf("update failed: %w", err)
-		}
-		logger.Info("Update completed successfully")
-
-		modManager := mods.New(shared.Config.GetInstallDir(), shared.Config.GetWorkshopDir())
-		for _, instance := range shared.Config.Instances {
-			if instance.Enabled {
-				allMods := append(instance.Mods, instance.ServerMods...)
-				if len(allMods) > 0 {
-					logger.Info("Syncing mods for instance", "name", instance.Name, "count", len(allMods))
-					if err := modManager.SyncMods(allMods, instance.ServerMods); err != nil {
-						logger.Warn("Failed to sync mods", "instance", instance.Name, "error", err)
-					}
-				}
-			}
-		}
-
-		if len(instances) > 0 {
-			logger.Info("Restarting previously running instances...")
-			for _, instance := range instances {
-				logger.Info("Starting instance", "name", instance)
-				if err := sysd.Start("dayz@" + instance); err != nil {
-					return fmt.Errorf("failed to start %s: %w", instance, err)
-				}
-			}
-		} else {
-			logger.Info("No instances to restart (were not running before update)")
-		}
-
-		logger.Info("Update process completed successfully")
-		return nil
+		return updateOrchestrator()
 	})
+	return nil
+}
+
+// updateOrchestrator performs the update flow previously in UpdateAction
+// but broken out to improve readability and testability.
+func updateOrchestrator() error {
+	// Acquire lock
+	l, err := acquireUpdateLock()
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if err := l.Release(); err != nil {
+			logger.Warn("Failed to release lock", "error", err)
+		}
+	}()
+
+	if !checkUpdatesEnabled() {
+		logger.Info("Updates are disabled in config")
+		return nil
+	}
+
+	steam, err := ensureSteamcmd()
+	if err != nil {
+		return err
+	}
+
+	buildID, err := getBuildID(steam)
+	if err != nil {
+		return err
+	}
+	logger.Info("Current build", "build_id", buildID)
+
+	needs, err := checkNeedsUpdate(steam)
+	if err != nil {
+		return err
+	}
+	if !needs {
+		logger.Info("Server is already up to date - no update available")
+		return nil
+	}
+
+	logger.Info("Update available! Proceeding with update...")
+
+	sysd := systemd.New()
+	running, _ := listRunningInstances(sysd)
+
+	if err := stopRunningInstances(sysd, running); err != nil {
+		return err
+	}
+
+	if err := performUpdate(steam); err != nil {
+		return err
+	}
+
+	syncModsForAll()
+
+	if err := restartInstances(sysd, running); err != nil {
+		return err
+	}
+
+	logger.Info("Update process completed successfully")
+	return nil
+}
+
+func acquireUpdateLock() (*lock.Lock, error) {
+	l, err := lock.New("/run/dayzctl.lock")
+	if err != nil {
+		return nil, fmt.Errorf("failed to acquire lock: %w", err)
+	}
+	return l, nil
+}
+
+func checkUpdatesEnabled() bool {
+	return shared.Config.Updates.Enabled
+}
+
+func ensureSteamcmd() (*steamcmd.SteamCmd, error) {
+	if shared.Config.GetSteamcmdBin() == "" {
+		return nil, fmt.Errorf("steamcmd path not configured; set 'paths.steamcmd_bin' in the config or install SteamCMD via the installer")
+	}
+	return steamcmd.New(shared.Config.GetSteamUser(), shared.Config.GetInstallDir(), shared.Config.GetSteamcmdBin(), shared.Config.GetWorkshopDir()), nil
+}
+
+func getBuildID(steam *steamcmd.SteamCmd) (string, error) {
+	buildID, err := steam.GetBuildID()
+	if err != nil {
+		if steamcmd.IsRateLimitError(err) {
+			logger.Warn("Rate limit hit, please wait before retrying")
+			return "", err
+		}
+		return "", fmt.Errorf("failed to check build: %w", err)
+	}
+	return buildID, nil
+}
+
+func checkNeedsUpdate(steam *steamcmd.SteamCmd) (bool, error) {
+	needsUpdate, err := steam.NeedsUpdate()
+	if err != nil {
+		return false, fmt.Errorf("failed to check update status: %w", err)
+	}
+	return needsUpdate, nil
+}
+
+func listRunningInstances(sysd *systemd.Systemd) ([]string, error) {
+	instances, err := sysd.ListRunningInstances()
+	if err != nil {
+		logger.Warn("Failed to list running instances", "error", err)
+		return []string{}, nil
+	}
+	return instances, nil
+}
+
+func stopRunningInstances(sysd *systemd.Systemd, instances []string) error {
+	if len(instances) == 0 {
+		logger.Info("No running instances to stop")
+		return nil
+	}
+	logger.Info("Stopping running instances...")
+	for _, instance := range instances {
+		logger.Info("Stopping instance", "name", instance)
+		if err := sysd.Stop("dayz@" + instance); err != nil {
+			return fmt.Errorf("failed to stop %s: %w", instance, err)
+		}
+	}
+	return nil
+}
+
+func performUpdate(steam *steamcmd.SteamCmd) error {
+	logger.Info("Updating DayZ server as dayz user...")
+	if err := steam.Update(); err != nil {
+		return fmt.Errorf("update failed: %w", err)
+	}
+	logger.Info("Update completed successfully")
+	return nil
+}
+
+func syncModsForAll() {
+	modManager := mods.New(shared.Config.GetInstallDir(), shared.Config.GetWorkshopDir())
+	for _, instance := range shared.Config.Instances {
+		if instance.Enabled {
+			allMods := append(instance.Mods, instance.ServerMods...)
+			if len(allMods) > 0 {
+				logger.Info("Syncing mods for instance", "name", instance.Name, "count", len(allMods))
+				if err := modManager.SyncMods(allMods, instance.ServerMods); err != nil {
+					logger.Warn("Failed to sync mods", "instance", instance.Name, "error", err)
+				}
+			}
+		}
+	}
+}
+
+func restartInstances(sysd *systemd.Systemd, instances []string) error {
+	if len(instances) == 0 {
+		logger.Info("No instances to restart (were not running before update)")
+		return nil
+	}
+	logger.Info("Restarting previously running instances...")
+	for _, instance := range instances {
+		logger.Info("Starting instance", "name", instance)
+		if err := sysd.Start("dayz@" + instance); err != nil {
+			return fmt.Errorf("failed to start %s: %w", instance, err)
+		}
+	}
 	return nil
 }
 

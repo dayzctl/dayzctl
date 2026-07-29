@@ -47,54 +47,12 @@ func New(user, installDir, steamCmdPath, workshopDir string) *SteamCmd {
 	}
 }
 
-// runSteamCmd runs a steamcmd command as the dayz user
-func (s *SteamCmd) runSteamCmd(args ...string) error {
-	if s.SteamCmdPath == "" {
-		return fmt.Errorf("steamcmd binary path not configured")
-	}
-	cmdStr := fmt.Sprintf("%s %s", s.SteamCmdPath, strings.Join(args, " "))
-	logger.Debug("Executing steamcmd", "cmd", cmdStr, "user", s.User, "installDir", s.InstallDir)
-
-	cmd := exec.Command("runuser", "-u", "dayz", "--", "sh", "-c", cmdStr)
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-	if err := cmd.Run(); err != nil {
-		logger.Warn("steamcmd run failed", "cmd", cmdStr, "error", err)
-		return err
-	}
-	return nil
-}
-
-// runSteamCmdWithOutput runs a steamcmd command and returns output
-func (s *SteamCmd) runSteamCmdWithOutput(args ...string) (string, error) {
-	if s.SteamCmdPath == "" {
-		return "", fmt.Errorf("steamcmd binary path not configured")
-	}
-	cmdStr := fmt.Sprintf("%s %s", s.SteamCmdPath, strings.Join(args, " "))
-	logger.Debug("Executing steamcmd (with output)", "cmd", cmdStr, "user", s.User, "installDir", s.InstallDir)
-
-	cmd := exec.Command("runuser", "-u", "dayz", "--", "sh", "-c", cmdStr)
-	output, err := cmd.CombinedOutput()
-	outStr := string(output)
-	if err != nil {
-		logger.Warn("steamcmd returned error", "cmd", cmdStr, "error", err, "output", outStr)
-	} else {
-		logger.Debug("steamcmd output", "cmd", cmdStr)
-	}
-	return outStr, err
-}
+// note: command execution is handled by runSteamCmdInternal and runWithLogin
 
 // GetBuildID retrieves the current build ID from Steam
 func (s *SteamCmd) GetBuildID() (string, error) {
-	if cached := s.getCachedBuildID(); cached != "" {
-		logger.Debug("Using cached build ID", "build_id", cached)
-		return cached, nil
-	}
-
 	logger.Info("Fetching build ID from Steam...")
-	output, err := s.runSteamCmdWithOutput(
-		"+@sSteamCmdForcePlatformType", "linux",
-		"+login", "anonymous",
+	output, err := s.runWithLogin("anonymous", true,
 		"+app_info_print", "223350",
 		"+quit",
 	)
@@ -112,7 +70,6 @@ func (s *SteamCmd) GetBuildID() (string, error) {
 			parts := strings.Fields(line)
 			if len(parts) >= 2 {
 				buildID := strings.Trim(parts[1], `"`)
-				s.cacheBuildID(buildID)
 				logger.Info("Retrieved build ID", "build_id", buildID)
 				return buildID, nil
 			}
@@ -140,23 +97,13 @@ func (s *SteamCmd) getCurrentLocalBuildID() (string, error) {
 		}
 	} else {
 		logger.Warn("App manifest not found, server not installed", "path", appManifestPath)
-		// Clear the cache since server is not installed
-		s.clearCache()
 		return "", nil
 	}
 
 	return "", nil
 }
 
-// clearCache removes the cached build ID
-func (s *SteamCmd) clearCache() {
-	cacheFile := "/tmp/steam_buildid_" + s.User
-	if err := os.Remove(cacheFile); err != nil && !os.IsNotExist(err) {
-		logger.Warn("Failed to clear cache", "error", err)
-	} else {
-		logger.Debug("Cleared build ID cache", "file", cacheFile)
-	}
-}
+// build ID file cache removed: always fetch live build ID from Steam
 
 // NeedsUpdate checks if the server needs an update
 func (s *SteamCmd) NeedsUpdate() (bool, error) {
@@ -192,10 +139,8 @@ func (s *SteamCmd) Update() error {
 	}
 
 	logger.Info("Starting server update...")
-	err := s.runSteamCmd(
-		"+@sSteamCmdForcePlatformType", "linux",
+	_, err := s.runWithLogin(s.User, false,
 		"+force_install_dir", s.InstallDir,
-		"+login", s.User,
 		"+app_update", "223350", "validate",
 		"+quit",
 	)
@@ -231,10 +176,8 @@ func (s *SteamCmd) DownloadMod(modID string) error {
 		loginUser = s.User
 	}
 
-	output, err := s.runSteamCmdWithOutput(
-		"+@sSteamCmdForcePlatformType", "linux",
+	output, err := s.runWithLogin(loginUser, true,
 		"+force_install_dir", s.WorkshopDir,
-		"+login", loginUser,
 		"+workshop_download_item", "221100", modID, "validate",
 		"+quit",
 	)
@@ -302,23 +245,64 @@ func (s *SteamCmd) linkMod(modID string) error {
 
 // InteractiveLogin performs an interactive Steam login
 func (s *SteamCmd) InteractiveLogin() error {
-	cmdStr := fmt.Sprintf("%s +login %s +quit", s.SteamCmdPath, s.User)
-	logger.Info("Starting interactive Steam login", "cmd", cmdStr, "user", s.User)
-
-	cmd := exec.Command(
-		"runuser", "-u", "dayz", "--",
-		"sh", "-c", cmdStr,
-	)
-
-	cmd.Stdin = os.Stdin
-	cmd.Stdout = os.Stdout
-	cmd.Stderr = os.Stderr
-
-	if err := cmd.Run(); err != nil {
-		logger.Warn("interactive login failed", "cmd", cmdStr, "error", err)
+	logger.Info("Starting interactive Steam login", "user", s.User)
+	_, err := s.runWithLogin(s.User, false, "+quit")
+	if err != nil {
 		return fmt.Errorf("interactive login failed: %w", err)
 	}
 	return nil
+}
+
+// cmdArgsWithLogin builds the steamcmd argument list with forced platform and
+// a login. Extra args are appended after the login arguments.
+func (s *SteamCmd) cmdArgsWithLogin(login string, extra ...string) []string {
+	base := []string{"+@sSteamCmdForcePlatformType", "linux", "+login", login}
+	if len(extra) == 0 {
+		return base
+	}
+	return append(base, extra...)
+}
+
+// runWithLogin runs steamcmd with a login and returns output if requested.
+func (s *SteamCmd) runWithLogin(login string, captureOutput bool, extra ...string) (string, error) {
+	args := s.cmdArgsWithLogin(login, extra...)
+	cmdStr := fmt.Sprintf("%s %s", s.SteamCmdPath, strings.Join(args, " "))
+	return s.runSteamCmdInternal(cmdStr, captureOutput, false)
+}
+
+// runSteamCmdInternal is a centralized helper to execute steamcmd commands
+// as the 'dayz' user. If captureOutput is true it returns combined stdout+stderr
+// output; if attachStdin is true it connects os.Stdin to the command (for
+// interactive login).
+func (s *SteamCmd) runSteamCmdInternal(cmdStr string, captureOutput bool, attachStdin bool) (string, error) {
+	if s.SteamCmdPath == "" {
+		return "", fmt.Errorf("steamcmd binary path not configured")
+	}
+	logger.Debug("Executing steamcmd", "cmd", cmdStr, "user", s.User, "installDir", s.InstallDir)
+
+	cmd := exec.Command("runuser", "-u", "dayz", "--", "sh", "-c", cmdStr)
+	if attachStdin {
+		cmd.Stdin = os.Stdin
+	}
+
+	if captureOutput {
+		output, err := cmd.CombinedOutput()
+		outStr := string(output)
+		if err != nil {
+			logger.Warn("steamcmd returned error", "cmd", cmdStr, "error", err, "output", outStr)
+		} else {
+			logger.Debug("steamcmd output", "cmd", cmdStr)
+		}
+		return outStr, err
+	}
+
+	cmd.Stdout = os.Stdout
+	cmd.Stderr = os.Stderr
+	if err := cmd.Run(); err != nil {
+		logger.Warn("steamcmd run failed", "cmd", cmdStr, "error", err)
+		return "", err
+	}
+	return "", nil
 }
 
 // isRateLimited checks if we're rate limited
@@ -326,23 +310,7 @@ func (s *SteamCmd) isRateLimited() bool {
 	return time.Since(s.lastAttempt) < 5*time.Minute
 }
 
-// getCachedBuildID retrieves cached build ID
-func (s *SteamCmd) getCachedBuildID() string {
-	cacheFile := "/tmp/steam_buildid_" + s.User
-	data, err := os.ReadFile(cacheFile)
-	if err != nil {
-		return ""
-	}
-	return strings.TrimSpace(string(data))
-}
-
-// cacheBuildID caches the build ID
-func (s *SteamCmd) cacheBuildID(buildID string) {
-	cacheFile := "/tmp/steam_buildid_" + s.User
-	if err := os.WriteFile(cacheFile, []byte(buildID), 0644); err != nil {
-		_ = err
-	}
-}
+// build ID file cache removed: always fetch live build ID from Steam
 
 // IsRateLimitError checks if an error is a rate limit error
 func IsRateLimitError(err error) bool {

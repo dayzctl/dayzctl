@@ -20,6 +20,11 @@ import (
 //go:embed help/*.md
 var helpFS embed.FS
 
+const (
+	ArgInstanceAll = "[instance|all]"
+	ArgInstance    = "[instance]"
+)
+
 // printCommandExtended attempts to print an extended help block for a
 // named command using the command's Description, Usage, ArgsUsage and
 // subcommands. Returns true when printed.
@@ -220,7 +225,7 @@ func buildCommands() []*cli.Command {
 			Name:        "start",
 			Usage:       "Start a server instance or all instances",
 			Description: "",
-			ArgsUsage:   "[instance|all]",
+			ArgsUsage:   ArgInstanceAll,
 			Action: func(c *cli.Context) error {
 				target := c.Args().Get(0)
 				if target == "" {
@@ -233,7 +238,7 @@ func buildCommands() []*cli.Command {
 			Name:        "stop",
 			Usage:       "Stop a server instance or all instances",
 			Description: "",
-			ArgsUsage:   "[instance|all]",
+			ArgsUsage:   ArgInstanceAll,
 			Action: func(c *cli.Context) error {
 				target := c.Args().Get(0)
 				if target == "" {
@@ -246,7 +251,7 @@ func buildCommands() []*cli.Command {
 			Name:        "restart",
 			Usage:       "Restart a server instance or all instances",
 			Description: "",
-			ArgsUsage:   "[instance|all]",
+			ArgsUsage:   ArgInstanceAll,
 			Action: func(c *cli.Context) error {
 				target := c.Args().Get(0)
 				if target == "" {
@@ -259,7 +264,7 @@ func buildCommands() []*cli.Command {
 			Name:        "status",
 			Usage:       "Show status of server instance(s)",
 			Description: "",
-			ArgsUsage:   "[instance|all]",
+			ArgsUsage:   ArgInstanceAll,
 			Action: func(c *cli.Context) error {
 				arg := c.Args().Get(0)
 				return commands.StatusAction(arg)
@@ -269,7 +274,7 @@ func buildCommands() []*cli.Command {
 			Name:        "apply",
 			Usage:       "Apply configuration and generate systemd units",
 			Description: "",
-			ArgsUsage:   "[instance|all]",
+			ArgsUsage:   ArgInstanceAll,
 			Action: func(c *cli.Context) error {
 				target := c.Args().Get(0)
 				return commands.ApplyAction(target)
@@ -295,7 +300,7 @@ func buildCommands() []*cli.Command {
 			Name:        "render-config",
 			Usage:       "Render server config for an instance (dry-run)",
 			Description: "",
-			ArgsUsage:   "[instance]",
+			ArgsUsage:   ArgInstance,
 			Action: func(c *cli.Context) error {
 				inst := c.Args().Get(0)
 				if inst == "" {

@@ -124,35 +124,49 @@ func walkAndWrite(src string, tw *tar.Writer) error {
 			return nil
 		}
 
-		header, err := tar.FileInfoHeader(info, "")
-		if err != nil {
-			return err
-		}
-		header.Name = relPath
-
-		if err := tw.WriteHeader(header); err != nil {
-			return err
-		}
-
-		if info.IsDir() {
-			return nil
-		}
-
-		f, err := os.Open(path)
-		if err != nil {
-			return err
-		}
-		defer func() {
-			if cerr := f.Close(); cerr != nil {
-				logger.Warn("Failed to close file", "path", path, "error", cerr)
-			}
-		}()
-
-		if _, err := io.Copy(tw, f); err != nil {
-			return err
-		}
-		return nil
+		return processPath(relPath, path, info, tw)
 	})
+}
+
+// processPath creates the tar header for the given path and writes the
+// entry to the tar writer. Directories are written as headers only; regular
+// files have their contents copied into the tar writer.
+func processPath(relPath, fullPath string, info os.FileInfo, tw *tar.Writer) error {
+	header, err := tar.FileInfoHeader(info, "")
+	if err != nil {
+		return err
+	}
+	header.Name = relPath
+
+	if err := tw.WriteHeader(header); err != nil {
+		return err
+	}
+
+	if info.IsDir() {
+		return nil
+	}
+
+	return writeFileToTar(fullPath, tw)
+}
+
+// writeFileToTar opens the file at path and copies its contents into the
+// provided tar writer. It ensures the file is closed and logs any close
+// errors, matching previous behavior.
+func writeFileToTar(path string, tw *tar.Writer) error {
+	f, err := os.Open(path)
+	if err != nil {
+		return err
+	}
+	defer func() {
+		if cerr := f.Close(); cerr != nil {
+			logger.Warn("Failed to close file", "path", path, "error", cerr)
+		}
+	}()
+
+	if _, err := io.Copy(tw, f); err != nil {
+		return err
+	}
+	return nil
 }
 
 // RestoreLatest restores the latest backup
