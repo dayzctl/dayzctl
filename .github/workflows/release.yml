@@ -100,7 +100,7 @@ jobs:
           FROM ubuntu:24.04
           ARG DAYZ_HOME=/srv/dayz
           ENV DAYZ_HOME=${DAYZ_HOME}
-          RUN apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates lib32gcc-s1 util-linux rsync && rm -rf /var/lib/apt/lists/*
+          RUN apt-get update -qq && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ca-certificates util-linux rsync && rm -rf /var/lib/apt/lists/*
           COPY dayzctl /usr/local/bin/dayzctl
           RUN chmod 755 /usr/local/bin/dayzctl
           RUN mkdir -p /etc/dayzctl && echo "# volume-mounted config" > /etc/dayzctl/config.yaml
