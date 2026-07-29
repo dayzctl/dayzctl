@@ -290,7 +290,7 @@ func updateOrchestrator() error {
 	}
 	logger.Info("Current build", "build_id", buildID)
 
-	needs, err := checkNeedsUpdate(steam)
+	needs, err := checkNeedsUpdate(steam, buildID)
 	if err != nil {
 		return err
 	}
@@ -353,7 +353,14 @@ func getBuildID(steam *steamcmd.SteamCmd) (string, error) {
 	return buildID, nil
 }
 
-func checkNeedsUpdate(steam *steamcmd.SteamCmd) (bool, error) {
+func checkNeedsUpdate(steam *steamcmd.SteamCmd, latestBuildID string) (bool, error) {
+	if latestBuildID != "" {
+		needsUpdate, err := steam.NeedsUpdateWithLatest(latestBuildID)
+		if err != nil {
+			return false, fmt.Errorf("failed to check update status: %w", err)
+		}
+		return needsUpdate, nil
+	}
 	needsUpdate, err := steam.NeedsUpdate()
 	if err != nil {
 		return false, fmt.Errorf("failed to check update status: %w", err)

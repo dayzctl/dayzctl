@@ -103,6 +103,20 @@ func (s *SteamCmd) getCurrentLocalBuildID() (string, error) {
 	return "", nil
 }
 
+// NeedsUpdateWithLatest compares the provided latest build ID with the
+// locally installed build ID without making a network call.
+func (s *SteamCmd) NeedsUpdateWithLatest(latestBuildID string) (bool, error) {
+	localBuildID, err := s.getCurrentLocalBuildID()
+	if err != nil || localBuildID == "" {
+		logger.Warn("Could not determine local build ID, assuming update needed")
+		return true, nil
+	}
+	logger.Debug("Comparing builds", "local", localBuildID, "latest", latestBuildID)
+	needsUpdate := localBuildID != latestBuildID
+	logger.Info("Update status", "needs_update", needsUpdate, "local_build", localBuildID, "latest_build", latestBuildID)
+	return needsUpdate, nil
+}
+
 // build ID file cache removed: always fetch live build ID from Steam
 
 // NeedsUpdate checks if the server needs an update
