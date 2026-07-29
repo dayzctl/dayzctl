@@ -2,7 +2,11 @@ name: Build and push Docker image on release
 
 on:
   release:
-    types: [published]
+    types: [published, created]
+  workflow_dispatch: {}
+  push:
+    tags:
+      - 'v*'
 
 permissions:
   contents: read
