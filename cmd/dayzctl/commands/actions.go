@@ -60,7 +60,13 @@ func stopInstanceGracefully(sysd *systemd.Systemd, inst *config.Instance, force 
 	deadline := time.Now().Add(timeout)
 	for time.Now().Before(deadline) {
 		if !sysd.IsActive(unit) {
-			logger.Info("Instance stopped gracefully", "name", inst.Name)
+			// Ensure systemd does not immediately restart the unit after the
+			// process exits — issue an explicit stop to clear any restart job.
+			if err := sysd.Stop(unit); err != nil {
+				logger.Warn("Failed to stop unit after graceful exit", "name", inst.Name, "error", err)
+			} else {
+				logger.Info("Instance stopped gracefully", "name", inst.Name)
+			}
 			return nil
 		}
 		time.Sleep(shutdownPollInterval)
