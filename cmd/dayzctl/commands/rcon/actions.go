@@ -20,6 +20,7 @@ type Client interface {
 	Kick(id int, reason string) (string, error)
 	Ban(id int, minutes int, reason string) (string, error)
 	Say(msg string) (string, error)
+	Shutdown() (string, error)
 }
 
 // newClient is a factory for creating Client instances. Tests may override
@@ -278,5 +279,36 @@ func processSayForInstance(inst *config.Instance, msg string, clientFactory func
 		return err
 	}
 	logger.Info("Sent message", "msg", msg, "instance", inst.Name)
+	return nil
+}
+
+// ShutdownAction requests a graceful shutdown of the DayZ server process via
+// the BattlEye "#shutdown" RCON command. The server saves state and exits
+// cleanly; the systemd unit is left to report as stopped once the process
+// exits (it is not stopped by systemctl here).
+func ShutdownAction(instanceName string, args []string) error {
+	shared.RunCommand(func() error {
+		if instanceName == "" {
+			return fmt.Errorf("instance name required")
+		}
+		return forEachInstance(instanceName, func(inst *config.Instance, total int) error {
+			return processShutdownForInstance(inst, newClient, total)
+		})
+	})
+	return nil
+}
+
+// processShutdownForInstance sends a graceful #shutdown via RCON for a single instance.
+func processShutdownForInstance(inst *config.Instance, clientFactory func(int, string) Client, totalInstances int) error {
+	client := clientFactory(inst.RCON.Port, inst.RCON.Password)
+	_, err := client.Shutdown()
+	if err != nil {
+		if totalInstances > 1 {
+			fmt.Printf("RCON shutdown failed for instance %s: %v\n", inst.Name, err)
+			return nil
+		}
+		return err
+	}
+	logger.Info("Requested graceful shutdown", "instance", inst.Name)
 	return nil
 }

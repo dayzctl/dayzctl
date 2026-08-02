@@ -113,23 +113,48 @@ type Paths struct {
 
 // Instance represents a server instance
 type Instance struct {
-	Name           string   `yaml:"name"`
-	InstanceID     int      `yaml:"instanceId"`
-	Port           int      `yaml:"port"`
-	SteamQueryPort int      `yaml:"steam_query_port"`
-	Template       string   `yaml:"template"`
-	Hostname       string   `yaml:"hostname"`
-	MaxPlayers     int      `yaml:"max_players"`
-	Enabled        bool     `yaml:"enabled"`
-	RCON           RCON     `yaml:"rcon"`
-	Mods           []ModRef `yaml:"mods"`
-	ServerMods     []ModRef `yaml:"servermods"`
+	Name             string            `yaml:"name"`
+	InstanceID       int               `yaml:"instanceId"`
+	Port             int               `yaml:"port"`
+	SteamQueryPort   int               `yaml:"steam_query_port"`
+	Template         string            `yaml:"template"`
+	Hostname         string            `yaml:"hostname"`
+	MaxPlayers       int               `yaml:"max_players"`
+	Enabled          bool              `yaml:"enabled"`
+	RCON             RCON              `yaml:"rcon"`
+	Mods             []ModRef          `yaml:"mods"`
+	ServerMods       []ModRef          `yaml:"servermods"`
+	ShutdownMessages []ShutdownMessage `yaml:"shutdown_messages"`
 }
 
 // ModRef represents a mod reference in the config
 type ModRef struct {
 	ID   string `yaml:"id"`
 	Name string `yaml:"name"`
+}
+
+// ShutdownMessage represents a single scheduled entry written to the
+// mission's db/messages.xml. DayZ uses this file to broadcast countdown
+// warnings to players before a scheduled restart and, when Shutdown is
+// true, to perform the actual graceful shutdown (world/player state save,
+// then exit) once Deadline is reached - this is the server's own "gentle"
+// shutdown mechanism, distinct from killing the process externally.
+type ShutdownMessage struct {
+	// Deadline is the number of seconds after server start at which this
+	// message fires (DayZ schedules these relative to server uptime, not
+	// wall-clock time).
+	Deadline int `yaml:"deadline"`
+	// Text is the message broadcast to all connected players.
+	Text string `yaml:"text"`
+	// Shutdown, when true, tells the server to gracefully save and exit
+	// once this message's deadline is reached.
+	Shutdown bool `yaml:"shutdown"`
+	// Repeat is the interval in seconds to repeat this message; 0 means it
+	// fires only once.
+	Repeat int `yaml:"repeat,omitempty"`
+	// PlayerCount is the minimum number of online players required for the
+	// message to be shown; 0 means always show it.
+	PlayerCount int `yaml:"player_count,omitempty"`
 }
 
 // RCON represents RCON configuration

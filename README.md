@@ -90,6 +90,32 @@ All extended, user-facing help is stored in `cmd/dayzctl/help/*.md` and embedded
 
 This ensures a single source-of-truth for long-form command documentation and consistent formatting across platforms.
 
+## Gentle shutdowns and scheduled restarts
+
+- Immediate graceful shutdown (on-demand): use RCON to request the server save state and exit cleanly:
+
+```bash
+dayzctl rcon <instance> shutdown
+```
+
+- `stop`/`restart` now try a graceful shutdown first when RCON is enabled. Use the flags to control behavior:
+
+```bash
+dayzctl stop <instance> --timeout 60      # wait up to 60s for graceful shutdown, then force
+dayzctl stop <instance> --force           # skip graceful attempt and stop immediately
+dayzctl restart <instance> --timeout 120  # wait up to 120s, then restart
+```
+
+- Scheduled warnings and self-shutdown: configure `shutdown_messages` per instance in the config to write
+	the mission `db/messages.xml` (broadcasts countdown warnings and can trigger the server's built-in
+	graceful shutdown when a message has `shutdown: true`). These files are written to:
+
+```
+<installDir>/mpmissions/<template>/db/messages.xml
+```
+
+Configure examples are available in `configs/config.yaml.tmpl`.
+
 ## Testing & CI
 
 Run unit and integration tests locally:

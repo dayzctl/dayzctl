@@ -334,6 +334,14 @@ func (c *Client) Say(message string) (string, error) {
 	return c.Send(fmt.Sprintf("say -1 %s", message))
 }
 
+// Shutdown requests a graceful server shutdown via the BattlEye "#shutdown"
+// admin command. Unlike killing the process (e.g. via SIGTERM/SIGKILL from
+// systemd), this lets the DayZ server save the world/player state and exit
+// cleanly before the process terminates.
+func (c *Client) Shutdown() (string, error) {
+	return c.Send("#shutdown")
+}
+
 // Player represents a connected player
 type Player struct {
 	ID   int

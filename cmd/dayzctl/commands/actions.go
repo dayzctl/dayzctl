@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os/exec"
 	"strings"
+	"time"
 
 	"github.com/dayzctl/dayzctl/cmd/dayzctl/commands/shared"
 	"github.com/dayzctl/dayzctl/internal/config"
@@ -11,10 +12,63 @@ import (
 	"github.com/dayzctl/dayzctl/internal/lock"
 	"github.com/dayzctl/dayzctl/internal/logger"
 	"github.com/dayzctl/dayzctl/internal/mods"
+	"github.com/dayzctl/dayzctl/internal/rcon"
 	"github.com/dayzctl/dayzctl/internal/steamcmd"
 	"github.com/dayzctl/dayzctl/internal/systemd"
 	"github.com/dayzctl/dayzctl/internal/version"
 )
+
+// DefaultShutdownTimeout is how long to wait for an instance to stop on its
+// own after requesting a graceful RCON shutdown, before forcing a hard stop.
+const DefaultShutdownTimeout = 60 * time.Second
+
+// shutdownPollInterval controls how often we check whether an instance has
+// stopped while waiting for a graceful shutdown to complete.
+const shutdownPollInterval = 2 * time.Second
+
+// shutdownClient is the subset of the RCON client used to request a graceful
+// shutdown. Defined as an interface so tests can inject a fake.
+type shutdownClient interface {
+	Shutdown() (string, error)
+}
+
+// newShutdownClient is a factory for creating RCON clients used for graceful
+// shutdown. Tests may override this to inject a fake.
+var newShutdownClient = func(port int, password string) shutdownClient {
+	return rcon.New(port, password)
+}
+
+// stopInstanceGracefully attempts to stop an instance by requesting a
+// graceful shutdown via RCON's "#shutdown" command, which lets the DayZ
+// server save world/player state before exiting. If RCON is disabled, the
+// instance is not running, the request fails, or the instance does not stop
+// within the given timeout, it falls back to a hard `systemctl stop`.
+func stopInstanceGracefully(sysd *systemd.Systemd, inst *config.Instance, force bool, timeout time.Duration) error {
+	unit := "dayz@" + inst.Name
+
+	if force || !inst.RCON.Enabled || !sysd.IsActive(unit) {
+		return sysd.Stop(unit)
+	}
+
+	client := newShutdownClient(inst.RCON.Port, inst.RCON.Password)
+	if _, err := client.Shutdown(); err != nil {
+		logger.Warn("Graceful shutdown request failed, forcing stop", "name", inst.Name, "error", err)
+		return sysd.Stop(unit)
+	}
+
+	logger.Info("Requested graceful shutdown, waiting for instance to stop", "name", inst.Name, "timeout", timeout)
+	deadline := time.Now().Add(timeout)
+	for time.Now().Before(deadline) {
+		if !sysd.IsActive(unit) {
+			logger.Info("Instance stopped gracefully", "name", inst.Name)
+			return nil
+		}
+		time.Sleep(shutdownPollInterval)
+	}
+
+	logger.Warn("Graceful shutdown timed out, forcing stop", "name", inst.Name)
+	return sysd.Stop(unit)
+}
 
 // StartAction starts an instance or all
 func StartAction(target string) error {
@@ -37,8 +91,12 @@ func StartAction(target string) error {
 	return nil
 }
 
-// StopAction stops an instance or all
-func StopAction(target string) error {
+// StopAction stops an instance or all. When the instance has RCON enabled
+// and is running, a graceful shutdown is requested first (via RCON
+// "#shutdown") so the server can save state before exiting; if that fails
+// or times out, a hard `systemctl stop` is used as a fallback. Pass
+// force=true to skip the graceful attempt and stop immediately.
+func StopAction(target string, force bool, timeout time.Duration) error {
 	shared.RunCommand(func() error {
 		instances, err := shared.GetInstances(target)
 		if err != nil {
@@ -47,7 +105,7 @@ func StopAction(target string) error {
 
 		sysd := systemd.New()
 		for _, instance := range instances {
-			if err := sysd.Stop("dayz@" + instance.Name); err != nil {
+			if err := stopInstanceGracefully(sysd, instance, force, timeout); err != nil {
 				logger.Warn("Failed to stop instance", "name", instance.Name, "error", err)
 				continue
 			}
@@ -58,8 +116,10 @@ func StopAction(target string) error {
 	return nil
 }
 
-// RestartAction restarts an instance or all
-func RestartAction(target string) error {
+// RestartAction restarts an instance or all. It stops each instance using
+// the same graceful-shutdown-then-fallback behavior as StopAction before
+// starting it again. Pass force=true to skip the graceful attempt.
+func RestartAction(target string, force bool, timeout time.Duration) error {
 	shared.RunCommand(func() error {
 		instances, err := shared.GetInstances(target)
 		if err != nil {
@@ -68,8 +128,12 @@ func RestartAction(target string) error {
 
 		sysd := systemd.New()
 		for _, instance := range instances {
-			if err := sysd.Restart("dayz@" + instance.Name); err != nil {
-				logger.Warn("Failed to restart instance", "name", instance.Name, "error", err)
+			if err := stopInstanceGracefully(sysd, instance, force, timeout); err != nil {
+				logger.Warn("Failed to stop instance before restart", "name", instance.Name, "error", err)
+				continue
+			}
+			if err := sysd.Start("dayz@" + instance.Name); err != nil {
+				logger.Warn("Failed to start instance", "name", instance.Name, "error", err)
 				continue
 			}
 			logger.Info("Restarted instance", "name", instance.Name)
@@ -383,10 +447,14 @@ func stopRunningInstances(sysd *systemd.Systemd, instances []string) error {
 		return nil
 	}
 	logger.Info("Stopping running instances...")
-	for _, instance := range instances {
-		logger.Info("Stopping instance", "name", instance)
-		if err := sysd.Stop("dayz@" + instance); err != nil {
-			return fmt.Errorf("failed to stop %s: %w", instance, err)
+	for _, name := range instances {
+		logger.Info("Stopping instance", "name", name)
+		inst, err := shared.Config.GetInstanceByName(name)
+		if err != nil {
+			return fmt.Errorf("failed to find instance %s: %w", name, err)
+		}
+		if err := stopInstanceGracefully(sysd, inst, false, DefaultShutdownTimeout); err != nil {
+			return fmt.Errorf("failed to stop %s: %w", name, err)
 		}
 	}
 	return nil
@@ -467,6 +535,9 @@ func RenderConfigAction(instanceName string) error {
 			logger.Info("Rendering config for instance", "name", instance.Name)
 			configPath := fmt.Sprintf("%s/serverDZ-%s.cfg", shared.Config.GetInstallDir(), instance.Name)
 			logger.Info("Config would be written to", "path", configPath)
+			if len(instance.ShutdownMessages) > 0 {
+				logger.Info("Shutdown messages would be written to", "path", generate.MessagesPath(shared.Config, instance))
+			}
 		}
 
 		return nil

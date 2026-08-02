@@ -22,6 +22,17 @@ instances:
       password: rcon123
     mods: []
     servermods: []
+    # Optional: scheduled restart warnings + graceful shutdown, written to
+    # this instance's mission db/messages.xml. 'deadline' is seconds after
+    # server start. The message with 'shutdown: true' tells the DayZ server
+    # to save and exit cleanly once its deadline is reached (see
+    # 'dayzctl help apply').
+    shutdown_messages:
+      - deadline: 21600  # 6h - 5 min
+        text: "Server restart in 5 minutes"
+      - deadline: 21900  # 6h
+        text: "Server is restarting now!"
+        shutdown: true
 
 # Backup settings
 backup:

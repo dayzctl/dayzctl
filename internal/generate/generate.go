@@ -26,6 +26,15 @@ func GenerateAll(cfg *config.ServerConfig) error {
 		return fmt.Errorf("failed to generate battleye configs: %w", err)
 	}
 
+	enabled := cfg.GetEnabledInstances()
+	instances := make([]*config.Instance, len(enabled))
+	for i := range enabled {
+		instances[i] = &enabled[i]
+	}
+	if err := GenerateMessages(cfg, instances); err != nil {
+		return fmt.Errorf("failed to generate shutdown messages: %w", err)
+	}
+
 	return nil
 }
 
@@ -63,6 +72,10 @@ func GenerateForInstances(cfg *config.ServerConfig, instances []*config.Instance
 		if err := generateInstanceBattlEye(installDir, *instance, data, tmplBE); err != nil {
 			return fmt.Errorf("failed to generate battleye config for %s: %w", instance.Name, err)
 		}
+	}
+
+	if err := GenerateMessages(cfg, instances); err != nil {
+		return fmt.Errorf("failed to generate shutdown messages: %w", err)
 	}
 
 	return nil

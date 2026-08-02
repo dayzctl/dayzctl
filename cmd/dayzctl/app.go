@@ -6,6 +6,7 @@ import (
 	"log"
 	"os"
 	"strings"
+	"time"
 
 	"github.com/dayzctl/dayzctl/cmd/dayzctl/commands"
 	modsCmds "github.com/dayzctl/dayzctl/cmd/dayzctl/commands/mods"
@@ -76,6 +77,8 @@ func rconCommandHandler(c *cli.Context) error {
 		return rcon.BanAction(inst, tail)
 	case "say":
 		return rcon.SayAction(inst, tail)
+	case "shutdown":
+		return rcon.ShutdownAction(inst, tail)
 	default:
 		return showHelpSafe(c, "rcon")
 	}
@@ -239,12 +242,17 @@ func buildCommands() []*cli.Command {
 			Usage:       "Stop a server instance or all instances",
 			Description: "",
 			ArgsUsage:   ArgInstanceAll,
+			Flags: []cli.Flag{
+				&cli.BoolFlag{Name: "force", Aliases: []string{"f"}, Usage: "Skip graceful RCON shutdown and stop immediately"},
+				&cli.IntFlag{Name: "timeout", Value: 60, Usage: "Seconds to wait for a graceful shutdown before forcing a stop"},
+			},
 			Action: func(c *cli.Context) error {
 				target := c.Args().Get(0)
 				if target == "" {
 					return showHelpSafe(c, "stop")
 				}
-				return commands.StopAction(target)
+				timeout := time.Duration(c.Int("timeout")) * time.Second
+				return commands.StopAction(target, c.Bool("force"), timeout)
 			},
 		},
 		{
@@ -252,12 +260,17 @@ func buildCommands() []*cli.Command {
 			Usage:       "Restart a server instance or all instances",
 			Description: "",
 			ArgsUsage:   ArgInstanceAll,
+			Flags: []cli.Flag{
+				&cli.BoolFlag{Name: "force", Aliases: []string{"f"}, Usage: "Skip graceful RCON shutdown and stop immediately"},
+				&cli.IntFlag{Name: "timeout", Value: 60, Usage: "Seconds to wait for a graceful shutdown before forcing a stop"},
+			},
 			Action: func(c *cli.Context) error {
 				target := c.Args().Get(0)
 				if target == "" {
 					return showHelpSafe(c, "restart")
 				}
-				return commands.RestartAction(target)
+				timeout := time.Duration(c.Int("timeout")) * time.Second
+				return commands.RestartAction(target, c.Bool("force"), timeout)
 			},
 		},
 		{

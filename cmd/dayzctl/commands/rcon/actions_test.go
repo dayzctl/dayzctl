@@ -54,6 +54,7 @@ func (f *fakeClient) Send(cmd string) (string, error)                        { r
 func (f *fakeClient) Kick(id int, reason string) (string, error)             { return "ok", nil }
 func (f *fakeClient) Ban(id int, minutes int, reason string) (string, error) { return "ok", nil }
 func (f *fakeClient) Say(msg string) (string, error)                         { return "ok", nil }
+func (f *fakeClient) Shutdown() (string, error)                              { return "ok", nil }
 
 func TestPlayersAndSendActions(t *testing.T) {
 	_ = setupConfig(t)
@@ -103,5 +104,8 @@ func TestKickBanSayActions(t *testing.T) {
 	}
 	if err := SayAction("testinst", []string{"hi"}); err != nil {
 		t.Fatalf("SayAction error: %v", err)
+	}
+	if err := ShutdownAction("testinst", nil); err != nil {
+		t.Fatalf("ShutdownAction error: %v", err)
 	}
 }

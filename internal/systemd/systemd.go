@@ -54,6 +54,15 @@ func (s *Systemd) Status(unit string) (string, error) {
 	return string(output), err
 }
 
+// IsActive reports whether the given systemd unit is currently active
+// (running). Used to poll a unit's state while waiting for a graceful
+// shutdown to complete.
+func (s *Systemd) IsActive(unit string) bool {
+	cmd := exec.Command("systemctl", "is-active", unit)
+	output, _ := cmd.Output()
+	return strings.TrimSpace(string(output)) == "active"
+}
+
 func (s *Systemd) Reload() error {
 	return s.run("daemon-reload", "")
 }

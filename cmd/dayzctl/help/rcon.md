@@ -9,7 +9,9 @@ Commands:
   kick <id> [reason]     Kick a player by id
   ban <id> <minutes>     Ban a player by id for minutes
   say <message>          Send chat message to instance
+  shutdown               Request a graceful server shutdown (saves state, then exits)
 
 Examples:
   dayzctl rcon myserver players
   dayzctl rcon myserver send "status"
+  dayzctl rcon myserver shutdown
