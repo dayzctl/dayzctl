@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/dayzctl/dayzctl/cmd/dayzctl/commands/shared"
 	"github.com/dayzctl/dayzctl/internal/config"
@@ -153,6 +154,49 @@ func forEachInstance(instanceName string, action func(*config.Instance, int) err
 // processSendForInstance sends a command via RCON and prints the response.
 func processSendForInstance(inst *config.Instance, cmd string, clientFactory func(int, string) Client, totalInstances int) error {
 	client := clientFactory(inst.RCON.Port, inst.RCON.Password)
+	// If the operator sent a shutdown command, treat it like the higher-level
+	// graceful shutdown flow: send the shutdown, wait for the unit to exit,
+	// and then call systemd stop to clear any pending restart jobs.
+	cmdTrim := strings.TrimSpace(cmd)
+	lower := strings.ToLower(cmdTrim)
+	if lower == "#shutdown" || lower == "shutdown" {
+		_, err := client.Shutdown()
+		if err != nil {
+			if totalInstances > 1 {
+				fmt.Printf("RCON shutdown failed for instance %s: %v\n", inst.Name, err)
+				return nil
+			}
+			return err
+		}
+		logger.Info("Requested graceful shutdown", "instance", inst.Name)
+
+		sysd := newSystemd()
+		unit := "dayz@" + inst.Name
+		// Wait up to 60s for the instance to exit on its own, polling every 2s.
+		deadline := time.Now().Add(60 * time.Second)
+		for time.Now().Before(deadline) {
+			if !sysd.IsActive(unit) {
+				if err := sysd.Stop(unit); err != nil {
+					logger.Warn("Failed to stop unit after graceful exit", "name", inst.Name, "error", err)
+				} else {
+					logger.Info("Instance stopped gracefully", "name", inst.Name)
+				}
+				return nil
+			}
+			time.Sleep(2 * time.Second)
+		}
+
+		logger.Warn("Graceful shutdown timed out, forcing stop", "name", inst.Name)
+		if err := sysd.Stop(unit); err != nil {
+			if totalInstances > 1 {
+				fmt.Printf("RCON send failed to stop instance %s: %v\n", inst.Name, err)
+				return nil
+			}
+			return err
+		}
+		return nil
+	}
+
 	resp, err := client.Send(cmd)
 	if err != nil {
 		if totalInstances > 1 {
