@@ -72,13 +72,8 @@ func SaveConfig() error {
 		return fmt.Errorf("failed to marshal config: %w", err)
 	}
 
-	// Prefer writing back to the exact file the config was loaded from
-	// when available. Fall back to the previous behavior (base/config/config.yaml)
-	// or the default path when not set.
 	configPath := config.DefaultConfigPath()
-	if Config.LoadedPath != "" {
-		configPath = Config.LoadedPath
-	} else if Config.Paths.Base != "" {
+	if Config.Paths.Base != "" {
 		configPath = Config.Paths.Base + "/config/config.yaml"
 	}
 

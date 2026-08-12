@@ -29,10 +29,6 @@ type ServerConfig struct {
 	Updates      Updates       `yaml:"updates"`
 	Healthcheck  Healthcheck   `yaml:"healthcheck"`
 	State        State         `yaml:"state"`
-	// LoadedPath stores the path the configuration was loaded from.
-	// It is not serialized to YAML and is used to ensure Save writes
-	// back to the original file that was read by the process.
-	LoadedPath string `yaml:"-"`
 }
 
 // Server represents server-wide settings
@@ -329,10 +325,6 @@ func Load(path string) (*ServerConfig, error) {
 	}
 
 	cfg.SetDefaults()
-
-	// remember where we loaded the config from so callers can save back
-	// to the same location later
-	cfg.LoadedPath = path
 
 	if err := cfg.Validate(); err != nil {
 		return nil, fmt.Errorf("config validation failed: %w", err)
