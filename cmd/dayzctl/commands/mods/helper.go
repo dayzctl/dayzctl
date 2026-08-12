@@ -163,6 +163,18 @@ func runRemoveMods(instanceName string, modIDs []string, deleteFiles bool) error
 			return err
 		}
 
+		// Update server config and apply changes so systemd units reflect the
+		// removed mods immediately (keeps behavior consistent with add/finalize).
+		for _, instance := range instances {
+			if err := shared.UpdateServerConfig(instance); err != nil {
+				fmt.Printf("Failed to update server config for instance %s: %v\n", instance.Name, err)
+			}
+		}
+
+		if err := shared.ApplyConfig(); err != nil {
+			fmt.Printf("Failed to apply config changes: %v\n", err)
+		}
+
 		return nil
 	})
 	return nil
