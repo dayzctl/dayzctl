@@ -219,7 +219,10 @@ install_dayzctl() {
     CURL_EXIT=$?
 
     if [ "$CURL_EXIT" -ne 0 ]; then
-        ERROR_MSG=$(cat "$TMP_ERROR" 2>/dev/null || echo "curl failed with exit $CURL_EXIT")
+        ERROR_MSG="curl failed with exit $CURL_EXIT"
+        if [ -s "$TMP_ERROR" ]; then
+            ERROR_MSG=$(cat "$TMP_ERROR" 2>/dev/null || echo "$ERROR_MSG")
+        fi
         rm -f "$TMP_RESPONSE" "$TMP_ERROR"
         error "curl failed: $ERROR_MSG"
     fi
@@ -251,7 +254,10 @@ install_dayzctl() {
         error "GitHub API returned HTTP $HTTP_CODE. Check network connectivity and repository access."
     fi
     
-    RELEASE_JSON=$(cat "$TMP_RESPONSE")
+    RELEASE_JSON=""
+    if [ -s "$TMP_RESPONSE" ]; then
+        RELEASE_JSON=$(cat "$TMP_RESPONSE" 2>/dev/null || true)
+    fi
     rm -f "$TMP_RESPONSE" "$TMP_ERROR"
     
     if [ -z "$RELEASE_JSON" ]; then
