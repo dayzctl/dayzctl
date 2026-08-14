@@ -38,7 +38,7 @@ NC='\033[0m'
 
 log() { echo -e "${GREEN}[install]${NC} $*" || true; }
 warn() { echo -e "${YELLOW}[install] WARNING:${NC} $*" >&2 || true; }
-error() { echo -e "${RED}[install] ERROR:${NC} $*" >&2 || exit 1; }
+error() { echo -e "${RED}[install] ERROR:${NC} $*" >&2; exit 1; }
 
 # ============================================================================
 # Check root privileges
