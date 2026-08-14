@@ -231,10 +231,25 @@ func printTimers(sysd *systemd.Systemd) error {
 // printSingleStatus prints the full systemd status for a single instance unit.
 func printSingleStatus(sysd *systemd.Systemd, inst *config.Instance) error {
 	status, err := sysd.Status("dayz@" + inst.Name)
-	if err != nil {
-		return err
+	// Always print whatever output we got from systemd to help diagnosis.
+	if status != "" {
+		fmt.Println(status)
 	}
-	fmt.Println(status)
+
+	if err != nil {
+		// Provide a human-friendly message rather than bubbling up the raw
+		// exec error (which prints as `exit status N`). Include the
+		// systemd output if available for context.
+		if status == "" {
+			fmt.Printf("Failed to query unit status: %v\n", err)
+		} else {
+			fmt.Printf("Note: systemctl returned an error: %v\n", err)
+		}
+		// Do not return error to avoid showing an unfriendly `Error:` line
+		// to the user; we already printed useful info above.
+		return nil
+	}
+
 	return nil
 }
 
