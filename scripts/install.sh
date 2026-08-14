@@ -227,11 +227,27 @@ install_dayzctl() {
     log "HTTP status code: $HTTP_CODE"
 
     if [ "$HTTP_CODE" != "200" ]; then
-        ERROR_MSG=$(cat "$TMP_ERROR" 2>/dev/null || echo "HTTP $HTTP_CODE")
-        RESPONSE=$(cat "$TMP_RESPONSE" 2>/dev/null | head -20)
+        # Read error/response only if files exist and are non-empty to avoid
+        # noisy 'cat: No such file or directory' messages when curl failed
+        # or returned nothing.
+        ERROR_MSG="HTTP $HTTP_CODE"
+        if [ -s "$TMP_ERROR" ]; then
+            ERROR_MSG=$(cat "$TMP_ERROR" 2>/dev/null || echo "$ERROR_MSG")
+        fi
+
+        RESPONSE=""
+        if [ -s "$TMP_RESPONSE" ]; then
+            RESPONSE=$(head -20 "$TMP_RESPONSE" 2>/dev/null || true)
+        fi
+
         rm -f "$TMP_RESPONSE" "$TMP_ERROR"
-        log "HTTP error details: $ERROR_MSG"
-        log "Response preview: $RESPONSE"
+
+        if [ -n "$ERROR_MSG" ]; then
+            log "HTTP error details: $ERROR_MSG"
+        fi
+        if [ -n "$RESPONSE" ]; then
+            log "Response preview: $RESPONSE"
+        fi
         error "GitHub API returned HTTP $HTTP_CODE. Check network connectivity and repository access."
     fi
     
