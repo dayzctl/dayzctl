@@ -219,10 +219,7 @@ install_dayzctl() {
     CURL_EXIT=$?
 
     if [ "$CURL_EXIT" -ne 0 ]; then
-        ERROR_MSG="curl failed with exit $CURL_EXIT"
-        if [ -s "$TMP_ERROR" ]; then
-            ERROR_MSG=$(cat "$TMP_ERROR" 2>/dev/null || echo "$ERROR_MSG")
-        fi
+        ERROR_MSG=$(cat "$TMP_ERROR" 2>/dev/null || echo "curl failed with exit $CURL_EXIT")
         rm -f "$TMP_RESPONSE" "$TMP_ERROR"
         error "curl failed: $ERROR_MSG"
     fi
@@ -230,34 +227,15 @@ install_dayzctl() {
     log "HTTP status code: $HTTP_CODE"
 
     if [ "$HTTP_CODE" != "200" ]; then
-        # Read error/response only if files exist and are non-empty to avoid
-        # noisy 'cat: No such file or directory' messages when curl failed
-        # or returned nothing.
-        ERROR_MSG="HTTP $HTTP_CODE"
-        if [ -s "$TMP_ERROR" ]; then
-            ERROR_MSG=$(cat "$TMP_ERROR" 2>/dev/null || echo "$ERROR_MSG")
-        fi
-
-        RESPONSE=""
-        if [ -s "$TMP_RESPONSE" ]; then
-            RESPONSE=$(head -20 "$TMP_RESPONSE" 2>/dev/null || true)
-        fi
-
+        ERROR_MSG=$(cat "$TMP_ERROR" 2>/dev/null || echo "HTTP $HTTP_CODE")
+        RESPONSE=$(cat "$TMP_RESPONSE" 2>/dev/null | head -20)
         rm -f "$TMP_RESPONSE" "$TMP_ERROR"
-
-        if [ -n "$ERROR_MSG" ]; then
-            log "HTTP error details: $ERROR_MSG"
-        fi
-        if [ -n "$RESPONSE" ]; then
-            log "Response preview: $RESPONSE"
-        fi
+        log "HTTP error details: $ERROR_MSG"
+        log "Response preview: $RESPONSE"
         error "GitHub API returned HTTP $HTTP_CODE. Check network connectivity and repository access."
     fi
     
-    RELEASE_JSON=""
-    if [ -s "$TMP_RESPONSE" ]; then
-        RELEASE_JSON=$(cat "$TMP_RESPONSE" 2>/dev/null || true)
-    fi
+    RELEASE_JSON=$(cat "$TMP_RESPONSE")
     rm -f "$TMP_RESPONSE" "$TMP_ERROR"
     
     if [ -z "$RELEASE_JSON" ]; then
