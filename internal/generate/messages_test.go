@@ -17,8 +17,8 @@ func TestGenerateMessagesWritesExpectedXML(t *testing.T) {
 		Name:     "myserver",
 		Template: "dayzOffline.chernarusplus",
 		ShutdownMessages: []config.ShutdownMessage{
-			{Deadline: 1800, Text: "Restart in 30 minutes"},
-			{Deadline: 3540, Text: "Restarting now!", Shutdown: true},
+			{Deadline: 30, Text: "Restart in 30 minutes"},
+			{Deadline: 59, Text: "Restarting now!", Shutdown: true},
 		},
 	}
 
@@ -65,8 +65,23 @@ func TestGenerateMessagesSkipsInstancesWithoutMessages(t *testing.T) {
 	}
 
 	path := filepath.Join(cfg.GetInstallDir(), "mpmissions", inst.Template, "db", "messages.xml")
-	if _, err := os.Stat(path); !os.IsNotExist(err) {
-		t.Fatalf("expected no messages.xml to be written, but found one at %s", path)
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("expected messages.xml at %s: %v", path, err)
+	}
+	content := string(data)
+	if !strings.Contains(content, "<messages>") {
+		t.Fatalf("expected messages.xml to contain <messages>, got:\n%s", content)
+	}
+	// Ensure there are no real <message> elements outside the commented examples.
+	// Find end of comment block and ensure no <message> appears after it.
+	endComment := strings.Index(content, "-->")
+	if endComment == -1 {
+		t.Fatalf("expected template to include commented examples, got:\n%s", content)
+	}
+	after := content[endComment+3:]
+	if strings.Contains(after, "<message>") {
+		t.Fatalf("expected no <message> entries after comment block for empty shutdown_messages, got:\n%s", after)
 	}
 }
 

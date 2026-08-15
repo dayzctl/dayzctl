@@ -140,9 +140,10 @@ type ModRef struct {
 // then exit) once Deadline is reached - this is the server's own "gentle"
 // shutdown mechanism, distinct from killing the process externally.
 type ShutdownMessage struct {
-	// Deadline is the number of seconds after server start at which this
+	// Deadline is the number of minutes after server start at which this
 	// message fires (DayZ schedules these relative to server uptime, not
-	// wall-clock time).
+	// wall-clock time). The generator converts minutes to seconds in the
+	// written db/messages.xml that DayZ consumes.
 	Deadline int `yaml:"deadline"`
 	// Text is the message broadcast to all connected players.
 	Text string `yaml:"text"`

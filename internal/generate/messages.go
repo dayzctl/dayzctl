@@ -2,32 +2,30 @@ package generate
 
 import (
 	"bytes"
-	"encoding/xml"
+	_ "embed"
 	"fmt"
 	"os"
 	"path/filepath"
+	"text/template"
 
 	"github.com/dayzctl/dayzctl/internal/config"
 	"github.com/dayzctl/dayzctl/internal/logger"
 )
 
-// messagesFile is the root <messages> element of a mission's db/messages.xml.
-type messagesFile struct {
-	XMLName  xml.Name       `xml:"messages"`
-	Messages []messageEntry `xml:"message"`
-}
+//go:embed templates/messages.xml.tmpl
+var messagesTmpl string
 
-// messageEntry is a single <message> entry. Deadline is seconds after
-// server start; Shutdown is 1/0 to trigger a graceful shutdown once the
-// deadline is reached; PlayerCount is the minimum online players required
-// to show the message; Repeat is the repeat interval in seconds (0 = once).
+// messagesFile is the root <messages> element of a mission's db/messages.xml.
+// messageEntry is a single <message> entry used to render the template.
+// Note: config values for Deadline and Repeat are expressed in minutes; the
+// generator converts them to seconds in the output that DayZ expects.
 type messageEntry struct {
-	ID          int    `xml:"id"`
-	Deadline    int    `xml:"deadline"`
-	Repeat      int    `xml:"repeat"`
-	PlayerCount int    `xml:"playerCount"`
-	Shutdown    int    `xml:"shutdown"`
-	Text        string `xml:"text"`
+	ID          int
+	Deadline    int // seconds
+	Repeat      int // seconds
+	PlayerCount int
+	Shutdown    int
+	Text        string
 }
 
 // GenerateMessages writes db/messages.xml for each given instance that has
@@ -38,9 +36,6 @@ type messageEntry struct {
 func GenerateMessages(cfg *config.ServerConfig, instances []*config.Instance) error {
 	installDir := cfg.GetInstallDir()
 	for _, instance := range instances {
-		if len(instance.ShutdownMessages) == 0 {
-			continue
-		}
 		if err := generateInstanceMessages(installDir, instance); err != nil {
 			return fmt.Errorf("failed to generate messages.xml for %s: %w", instance.Name, err)
 		}
@@ -51,28 +46,24 @@ func GenerateMessages(cfg *config.ServerConfig, instances []*config.Instance) er
 // generateInstanceMessages writes messages.xml for a single instance.
 func generateInstanceMessages(installDir string, instance *config.Instance) error {
 	if instance.Template == "" {
-		return fmt.Errorf("instance %s has shutdown_messages configured but no mission 'template' is set", instance.Name)
+		return fmt.Errorf("instance %s has no mission 'template' set", instance.Name)
 	}
 
-	doc := messagesFile{}
+	// Build template data. Convert minutes -> seconds.
+	var msgs []messageEntry
 	for i, m := range instance.ShutdownMessages {
 		shutdown := 0
 		if m.Shutdown {
 			shutdown = 1
 		}
-		doc.Messages = append(doc.Messages, messageEntry{
+		msgs = append(msgs, messageEntry{
 			ID:          i,
-			Deadline:    m.Deadline,
-			Repeat:      m.Repeat,
+			Deadline:    m.Deadline * 60,
+			Repeat:      m.Repeat * 60,
 			PlayerCount: m.PlayerCount,
 			Shutdown:    shutdown,
 			Text:        m.Text,
 		})
-	}
-
-	out, err := xml.MarshalIndent(doc, "", "    ")
-	if err != nil {
-		return fmt.Errorf("failed to marshal messages.xml: %w", err)
 	}
 
 	dbDir := filepath.Join(installDir, "mpmissions", instance.Template, "db")
@@ -81,12 +72,21 @@ func generateInstanceMessages(installDir string, instance *config.Instance) erro
 	}
 
 	path := filepath.Join(dbDir, "messages.xml")
-	content := append([]byte(xml.Header), out...)
-	content = append(content, '\n')
 
-	// Ensure file uses Unix LF line endings. Some tools or editors may
-	// introduce CRLF; normalize to LF to avoid issues on Linux where
-	// DayZ expects Unix-style files.
+	// Parse and execute embedded template.
+	tmpl, err := template.New("messages").Parse(messagesTmpl)
+	if err != nil {
+		return fmt.Errorf("failed to parse messages template: %w", err)
+	}
+
+	var buf bytes.Buffer
+	data := struct{ Messages []messageEntry }{Messages: msgs}
+	if err := tmpl.Execute(&buf, data); err != nil {
+		return fmt.Errorf("failed to execute messages template: %w", err)
+	}
+
+	content := buf.Bytes()
+	// Ensure file uses Unix LF line endings.
 	content = bytes.ReplaceAll(content, []byte("\r\n"), []byte("\n"))
 	if err := os.WriteFile(path, content, 0644); err != nil {
 		return fmt.Errorf("failed to write messages.xml: %w", err)
