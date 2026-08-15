@@ -1,6 +1,7 @@
 package generate
 
 import (
+	"bytes"
 	"encoding/xml"
 	"fmt"
 	"os"
@@ -82,6 +83,11 @@ func generateInstanceMessages(installDir string, instance *config.Instance) erro
 	path := filepath.Join(dbDir, "messages.xml")
 	content := append([]byte(xml.Header), out...)
 	content = append(content, '\n')
+
+	// Ensure file uses Unix LF line endings. Some tools or editors may
+	// introduce CRLF; normalize to LF to avoid issues on Linux where
+	// DayZ expects Unix-style files.
+	content = bytes.ReplaceAll(content, []byte("\r\n"), []byte("\n"))
 	if err := os.WriteFile(path, content, 0644); err != nil {
 		return fmt.Errorf("failed to write messages.xml: %w", err)
 	}
