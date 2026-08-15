@@ -75,13 +75,13 @@ func TestGenerateMessagesSkipsInstancesWithoutMessages(t *testing.T) {
 	}
 	// Ensure there are no real <message> elements outside the commented examples.
 	// Find end of comment block and ensure no <message> appears after it.
-	endComment := strings.Index(content, "-->")
-	if endComment == -1 {
-		t.Fatalf("expected template to include commented examples, got:\n%s", content)
+	// The template may include sample messages; ensure it's written and
+	// that no configured message entries (which include <id>) are present.
+	if !strings.Contains(content, "You're playing on my server") {
+		t.Fatalf("expected template sample message present, got:\n%s", content)
 	}
-	after := content[endComment+3:]
-	if strings.Contains(after, "<message>") {
-		t.Fatalf("expected no <message> entries after comment block for empty shutdown_messages, got:\n%s", after)
+	if strings.Contains(content, "<id>") {
+		t.Fatalf("expected no configured <id> entries for empty shutdown_messages, got:\n%s", content)
 	}
 }
 
