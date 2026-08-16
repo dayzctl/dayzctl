@@ -20,7 +20,7 @@ ExecStart={{ .ServerDir }}/DayZServer \
   -netLog \
   -freezecheck \
   -filePatching
-Restart=on-failure
+Restart=always
 RestartSec=10
 LimitNOFILE=4096
 SuccessExitStatus=255
