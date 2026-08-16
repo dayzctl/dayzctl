@@ -18,11 +18,11 @@ var messagesTmpl string
 // messagesFile is the root <messages> element of a mission's db/messages.xml.
 // messageEntry is a single <message> entry used to render the template.
 // Note: config values for Deadline and Repeat are expressed in minutes; the
-// generator converts them to seconds in the output that DayZ expects.
+// generator writes them as minutes in the produced db/messages.xml.
 type messageEntry struct {
 	ID          int
-	Deadline    int // seconds
-	Repeat      int // seconds
+	Deadline    int // minutes
+	Repeat      int // minutes
 	PlayerCount int
 	Shutdown    int
 	Text        string
@@ -49,7 +49,7 @@ func generateInstanceMessages(installDir string, instance *config.Instance) erro
 		return fmt.Errorf("instance %s has no mission 'template' set", instance.Name)
 	}
 
-	// Build template data. Convert minutes -> seconds.
+	// Build template data. Keep values in minutes (no conversion).
 	var msgs []messageEntry
 	for i, m := range instance.ShutdownMessages {
 		shutdown := 0
@@ -58,8 +58,8 @@ func generateInstanceMessages(installDir string, instance *config.Instance) erro
 		}
 		msgs = append(msgs, messageEntry{
 			ID:          i,
-			Deadline:    m.Deadline * 60,
-			Repeat:      m.Repeat * 60,
+			Deadline:    m.Deadline,
+			Repeat:      m.Repeat,
 			PlayerCount: m.PlayerCount,
 			Shutdown:    shutdown,
 			Text:        m.Text,

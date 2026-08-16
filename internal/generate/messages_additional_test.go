@@ -31,11 +31,11 @@ func TestMinutesAreConvertedToSeconds(t *testing.T) {
 		t.Fatalf("expected messages.xml at %s: %v", path, err)
 	}
 	content := string(data)
-	if !strings.Contains(content, "<deadline>120</deadline>") {
-		t.Fatalf("expected deadline 120 seconds, got:\n%s", content)
+	if !strings.Contains(content, "<deadline>2</deadline>") {
+		t.Fatalf("expected deadline 2 minutes, got:\n%s", content)
 	}
-	if !strings.Contains(content, "<repeat>900</repeat>") {
-		t.Fatalf("expected repeat 900 seconds, got:\n%s", content)
+	if !strings.Contains(content, "<repeat>15</repeat>") {
+		t.Fatalf("expected repeat 15 minutes, got:\n%s", content)
 	}
 }
 

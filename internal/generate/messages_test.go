@@ -36,11 +36,11 @@ func TestGenerateMessagesWritesExpectedXML(t *testing.T) {
 	for _, want := range []string{
 		"<messages>",
 		"<id>0</id>",
-		"<deadline>1800</deadline>",
+		"<deadline>30</deadline>",
 		"<shutdown>0</shutdown>",
 		"Restart in 30 minutes",
 		"<id>1</id>",
-		"<deadline>3540</deadline>",
+		"<deadline>59</deadline>",
 		"<shutdown>1</shutdown>",
 		"Restarting now!",
 	} {
