@@ -18,14 +18,10 @@ var beserverTemplate string
 
 // GenerateAll generates all server config files
 func GenerateAll(cfg *config.ServerConfig) error {
-	if err := GenerateServerConfig(cfg, serverDZTemplate); err != nil {
-		return fmt.Errorf("failed to generate server configs: %w", err)
-	}
-
-	if err := GenerateBattlEyeConfig(cfg, beserverTemplate); err != nil {
-		return fmt.Errorf("failed to generate battleye configs: %w", err)
-	}
-
+	// Generate messages first because messages generation may create
+	// per-instance mission copies and update instance.Template. Server
+	// configs should be generated after that so they reference the
+	// per-instance mission folders.
 	enabled := cfg.GetEnabledInstances()
 	instances := make([]*config.Instance, len(enabled))
 	for i := range enabled {
@@ -35,11 +31,27 @@ func GenerateAll(cfg *config.ServerConfig) error {
 		return fmt.Errorf("failed to generate shutdown messages: %w", err)
 	}
 
+	if err := GenerateServerConfig(cfg, serverDZTemplate); err != nil {
+		return fmt.Errorf("failed to generate server configs: %w", err)
+	}
+
+	if err := GenerateBattlEyeConfig(cfg, beserverTemplate); err != nil {
+		return fmt.Errorf("failed to generate battleye configs: %w", err)
+	}
+
 	return nil
 }
 
 // GenerateForInstances generates server and battleye configs for a specific set of instances
 func GenerateForInstances(cfg *config.ServerConfig, instances []*config.Instance) error {
+
+	// Generate messages first so any per-instance mission copies are created
+	// and cfg.Instances.Template fields are updated before rendering
+	// server/battleye configs.
+	if err := GenerateMessages(cfg, instances); err != nil {
+		return fmt.Errorf("failed to generate shutdown messages: %w", err)
+	}
+
 	// Server configs
 	tmplServer, err := template.New("serverDZ").Parse(serverDZTemplate)
 	if err != nil {
@@ -72,10 +84,6 @@ func GenerateForInstances(cfg *config.ServerConfig, instances []*config.Instance
 		if err := generateInstanceBattlEye(installDir, *instance, data, tmplBE); err != nil {
 			return fmt.Errorf("failed to generate battleye config for %s: %w", instance.Name, err)
 		}
-	}
-
-	if err := GenerateMessages(cfg, instances); err != nil {
-		return fmt.Errorf("failed to generate shutdown messages: %w", err)
 	}
 
 	return nil
