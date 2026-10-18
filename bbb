@@ -1,0 +1,16 @@
+06:00.0 VGA compatible controller [0300]: NVIDIA Corporation GP107GL [Quadro P1000] [10de:1cb1] (rev a1)
+        Subsystem: NVIDIA Corporation Device [10de:11bc]
+        Kernel driver in use: vfio-pci
+        Kernel modules: nvidiafb, nouveau, nvidia_drm, nvidia
+06:00.1 Audio device [0403]: NVIDIA Corporation GP107GL High Definition Audio Controller [10de:0fb9] (rev a1)
+        Subsystem: NVIDIA Corporation Device [10de:11bc]
+        Kernel driver in use: vfio-pci
+        Kernel modules: snd_hda_intel
+0a:00.0 VGA compatible controller [0300]: NVIDIA Corporation GP107 [GeForce GTX 1050] [10de:1c81] (rev a1)
+        Subsystem: Micro-Star International Co., Ltd. [MSI] Device [1462:8c97]
+        Kernel driver in use: nvidia
+        Kernel modules: nvidiafb, nouveau, nvidia_drm, nvidia
+0a:00.1 Audio device [0403]: NVIDIA Corporation GP107GL High Definition Audio Controller [10de:0fb9] (rev a1)
+        Subsystem: Micro-Star International Co., Ltd. [MSI] Device [1462:8c97]
+        Kernel driver in use: vfio-pci
+        Kernel modules: snd_hda_intel

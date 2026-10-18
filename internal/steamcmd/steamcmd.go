@@ -257,13 +257,21 @@ func (s *SteamCmd) linkMod(modID string) error {
 	return nil
 }
 
-// InteractiveLogin performs an interactive Steam login
+// InteractiveLogin performs an interactive Steam login. SteamCMD must be able
+// to read the password and, when Steam Guard is enabled, the authenticator or
+// email code from the terminal, so stdin is attached for the duration of the
+// command.
 func (s *SteamCmd) InteractiveLogin() error {
+	if !stdinIsTerminal() {
+		return fmt.Errorf("steam-login requires an interactive terminal so the Steam password and Steam Guard code can be entered; run it directly in a shell (for SSH use 'ssh -t')")
+	}
 	logger.Info("Starting interactive Steam login", "user", s.User)
-	_, err := s.runWithLogin(s.User, false, "+quit")
+	logger.Info("Enter your Steam password when prompted; if Steam Guard is enabled, enter the Steam Guard code when asked")
+	_, err := s.runWithLoginOpts(s.User, false, true, "+quit")
 	if err != nil {
 		return fmt.Errorf("interactive login failed: %w", err)
 	}
+	logger.Info("Steam login successful; credentials cached for the dayz user")
 	return nil
 }
 
@@ -279,9 +287,15 @@ func (s *SteamCmd) cmdArgsWithLogin(login string, extra ...string) []string {
 
 // runWithLogin runs steamcmd with a login and returns output if requested.
 func (s *SteamCmd) runWithLogin(login string, captureOutput bool, extra ...string) (string, error) {
+	return s.runWithLoginOpts(login, captureOutput, false, extra...)
+}
+
+// runWithLoginOpts runs steamcmd with a login, optionally attaching stdin so
+// the command can prompt for credentials.
+func (s *SteamCmd) runWithLoginOpts(login string, captureOutput, attachStdin bool, extra ...string) (string, error) {
 	args := s.cmdArgsWithLogin(login, extra...)
 	cmdStr := fmt.Sprintf("%s %s", s.SteamCmdPath, strings.Join(args, " "))
-	return s.runSteamCmdInternal(cmdStr, captureOutput, false)
+	return s.runSteamCmdInternal(cmdStr, captureOutput, attachStdin)
 }
 
 // runSteamCmdInternal is a centralized helper to execute steamcmd commands
