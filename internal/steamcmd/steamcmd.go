@@ -12,6 +12,8 @@ import (
 	"sync"
 	"time"
 
+	"golang.org/x/term"
+
 	"github.com/dayzctl/dayzctl/internal/logger"
 	"github.com/dayzctl/dayzctl/internal/utils"
 )
@@ -46,8 +48,6 @@ func New(user, installDir, steamCmdPath, workshopDir string) *SteamCmd {
 		WorkshopDir:  workshop,
 	}
 }
-
-// note: command execution is handled by runSteamCmdInternal and runWithLogin
 
 // GetBuildID retrieves the current build ID from Steam
 func (s *SteamCmd) GetBuildID() (string, error) {
@@ -117,8 +117,6 @@ func (s *SteamCmd) NeedsUpdateWithLatest(latestBuildID string) (bool, error) {
 	return needsUpdate, nil
 }
 
-// build ID file cache removed: always fetch live build ID from Steam
-
 // NeedsUpdate checks if the server needs an update
 func (s *SteamCmd) NeedsUpdate() (bool, error) {
 	logger.Info("Checking for updates...")
@@ -153,7 +151,12 @@ func (s *SteamCmd) Update() error {
 	}
 
 	logger.Info("Starting server update...")
-	_, err := s.runWithLogin(s.User, false,
+	// When an interactive terminal is attached (manual run), let steamcmd
+	// prompt for the password and Steam Guard code. In non-interactive or
+	// output-captured runs (systemd timers, the installer), stdin stays
+	// detached and cached credentials are used.
+	attachStdin := stdinIsTerminal() && stdoutIsTerminal()
+	_, err := s.runWithLoginOpts(s.User, false, attachStdin,
 		"+force_install_dir", s.InstallDir,
 		"+app_update", "223350", "validate",
 		"+quit",
@@ -161,6 +164,9 @@ func (s *SteamCmd) Update() error {
 
 	s.lastAttempt = time.Now()
 	if err != nil {
+		if !attachStdin {
+			return fmt.Errorf("update failed: %w (Steam login may be missing or expired; run 'dayzctl steam-login' as root)", err)
+		}
 		return fmt.Errorf("update failed: %w", err)
 	}
 
@@ -200,6 +206,9 @@ func (s *SteamCmd) DownloadMod(modID string) error {
 	if err != nil {
 		if strings.Contains(output, "Rate Limit Exceeded") {
 			return ErrRateLimited
+		}
+		if isLoginError(output) {
+			return fmt.Errorf("mod download failed: %w (Steam login is missing or expired; run 'dayzctl steam-login' as root)\nOutput: %s", err, output)
 		}
 		return fmt.Errorf("mod download failed: %w\nOutput: %s", err, output)
 	}
@@ -275,6 +284,18 @@ func (s *SteamCmd) InteractiveLogin() error {
 	return nil
 }
 
+// stdinIsTerminal reports whether stdin is a terminal, which is required for
+// interactive credential and Steam Guard code entry.
+func stdinIsTerminal() bool {
+	return term.IsTerminal(int(os.Stdin.Fd()))
+}
+
+// stdoutIsTerminal reports whether stdout is a terminal. Interactive prompts
+// are only enabled when their output is visible rather than captured.
+func stdoutIsTerminal() bool {
+	return term.IsTerminal(int(os.Stdout.Fd()))
+}
+
 // cmdArgsWithLogin builds the steamcmd argument list with forced platform and
 // a login. Extra args are appended after the login arguments.
 func (s *SteamCmd) cmdArgsWithLogin(login string, extra ...string) []string {
@@ -338,7 +359,14 @@ func (s *SteamCmd) isRateLimited() bool {
 	return time.Since(s.lastAttempt) < 5*time.Minute
 }
 
-// build ID file cache removed: always fetch live build ID from Steam
+// isLoginError reports whether steamcmd output indicates that the account
+// credentials are missing, invalid, or protected by Steam Guard.
+func isLoginError(output string) bool {
+	lower := strings.ToLower(output)
+	return strings.Contains(lower, "invalid password") ||
+		strings.Contains(lower, "steam guard") ||
+		strings.Contains(lower, "account logon denied")
+}
 
 // IsRateLimitError checks if an error is a rate limit error
 func IsRateLimitError(err error) bool {

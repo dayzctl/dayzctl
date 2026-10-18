@@ -407,14 +407,22 @@ main() {
         error "dayzctl apply failed - see output above"
     }
     log "Configuration applied successfully"
-    log "Configuration applied successfully"
+
+    log ""
+    log "Steam login is required to download the DayZ server and mods."
+    if [ -t 0 ]; then
+        log "Enter your Steam password and, if Steam Guard is enabled, the Steam Guard code when prompted."
+        /usr/local/bin/dayzctl steam-login || error "dayzctl steam-login failed - see output above"
+    else
+        warn "No interactive terminal attached; skipping Steam login."
+        warn "Run 'dayzctl steam-login' as root before 'dayzctl update' if Steam reports 'Invalid Password'."
+    fi
 
     log "Downloading/updating DayZ server (this may take a while)..."
     UPDATE_OUT=$(/usr/local/bin/dayzctl update 2>&1) || {
         echo "$UPDATE_OUT" >&2
         error "dayzctl update failed - see output above"
     }
-    log "DayZ server downloaded/updated successfully"
     log "DayZ server downloaded/updated successfully"
 
     log ""

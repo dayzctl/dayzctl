@@ -345,8 +345,7 @@ func UpdateAction() error {
 	return nil
 }
 
-// updateOrchestrator performs the update flow previously in UpdateAction
-// but broken out to improve readability and testability.
+// updateOrchestrator performs the server update flow.
 func updateOrchestrator() error {
 	// Acquire lock
 	l, err := acquireUpdateLock()
