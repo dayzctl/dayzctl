@@ -10,22 +10,6 @@ exit) once the deadline is reached - this is the server's built-in
 "gentle" shutdown mechanism. See 'shutdown_messages' in the config file
 for details.
 
-Server passwords:
-  'server.password' and 'server.password_admin' are written to every
-  generated serverDZ-<instance>.cfg as 'password' and 'passwordAdmin'.
-  Both can be overridden per instance with the same keys inside the
-  instance block:
-
-    server:
-      password: "joinme"
-      password_admin: "adminsecret"
-
-    instances:
-      - name: myserver
-        port: 2302
-        enabled: true
-        password_admin: "anotherAdminSecret"   # optional override
-
 Usage:
   dayzctl apply
   dayzctl apply <instance>

@@ -1,16 +1,11 @@
 package config
 
 import (
-	"bytes"
-	"errors"
 	"fmt"
-	"io"
 	"os"
 	"path/filepath"
 
 	"gopkg.in/yaml.v3"
-
-	"github.com/dayzctl/dayzctl/internal/logger"
 )
 
 // DefaultConfigPath returns the default path to the config file
@@ -118,21 +113,13 @@ type Paths struct {
 
 // Instance represents a server instance
 type Instance struct {
-	Name           string `yaml:"name"`
-	InstanceID     int    `yaml:"instanceId"`
-	Port           int    `yaml:"port"`
-	SteamQueryPort int    `yaml:"steam_query_port"`
-	Template       string `yaml:"template"`
-	Hostname       string `yaml:"hostname"`
-	MaxPlayers     int    `yaml:"max_players"`
-	// Password optionally overrides the server-wide join password
-	// (server.password) for this instance only. Empty means "use the
-	// server-wide value".
-	Password string `yaml:"password"`
-	// PasswordAdmin optionally overrides the server-wide admin password
-	// (server.password_admin) for this instance only. Empty means "use the
-	// server-wide value".
-	PasswordAdmin    string            `yaml:"password_admin"`
+	Name             string            `yaml:"name"`
+	InstanceID       int               `yaml:"instanceId"`
+	Port             int               `yaml:"port"`
+	SteamQueryPort   int               `yaml:"steam_query_port"`
+	Template         string            `yaml:"template"`
+	Hostname         string            `yaml:"hostname"`
+	MaxPlayers       int               `yaml:"max_players"`
 	Enabled          bool              `yaml:"enabled"`
 	RCON             RCON              `yaml:"rcon"`
 	Mods             []ModRef          `yaml:"mods"`
@@ -308,25 +295,6 @@ func (c *ServerConfig) GetInstanceByName(name string) (*Instance, error) {
 	return nil, fmt.Errorf("instance not found: %s", name)
 }
 
-// PasswordFor returns the join password to write into inst's serverDZ.cfg:
-// the instance-level override when set, otherwise server.password.
-func (c *ServerConfig) PasswordFor(inst Instance) string {
-	if inst.Password != "" {
-		return inst.Password
-	}
-	return c.Server.Password
-}
-
-// PasswordAdminFor returns the admin password to write into inst's
-// serverDZ.cfg: the instance-level override when set, otherwise
-// server.password_admin.
-func (c *ServerConfig) PasswordAdminFor(inst Instance) string {
-	if inst.PasswordAdmin != "" {
-		return inst.PasswordAdmin
-	}
-	return c.Server.PasswordAdmin
-}
-
 // HasInstance checks if an instance exists
 func (c *ServerConfig) HasInstance(name string) bool {
 	for _, inst := range c.Instances {
@@ -341,16 +309,6 @@ func (c *ServerConfig) HasInstance(name string) bool {
 // LOAD FUNCTION
 // ============================================================================
 
-// decodeStrictConfig decodes data into cfg, failing when the YAML contains
-// keys that do not map to a config field. This is used to detect typos and
-// misplaced settings (for example 'passwordAdmin' instead of
-// 'password_admin') instead of silently dropping them.
-func decodeStrictConfig(data []byte, cfg *ServerConfig) error {
-	dec := yaml.NewDecoder(bytes.NewReader(data))
-	dec.KnownFields(true)
-	return dec.Decode(cfg)
-}
-
 // Load loads the configuration from a file
 func Load(path string) (*ServerConfig, error) {
 	if _, err := os.Stat(path); os.IsNotExist(err) {
@@ -363,18 +321,8 @@ func Load(path string) (*ServerConfig, error) {
 	}
 
 	var cfg ServerConfig
-	if err := decodeStrictConfig(data, &cfg); err != nil {
-		// A misspelled or misplaced key (for example 'passwordAdmin' instead
-		// of 'password_admin') is silently dropped by a lenient decode, which
-		// makes settings look like they are ignored. Warn loudly, then still
-		// load the config so the remaining (valid) settings keep working.
-		if !errors.Is(err, io.EOF) {
-			logger.Warn("Config contains unknown fields; they are ignored", "error", err)
-			cfg = ServerConfig{}
-			if err := yaml.Unmarshal(data, &cfg); err != nil {
-				return nil, fmt.Errorf("failed to parse config YAML: %w", err)
-			}
-		}
+	if err := yaml.Unmarshal(data, &cfg); err != nil {
+		return nil, fmt.Errorf("failed to parse config YAML: %w", err)
 	}
 
 	cfg.SetDefaults()

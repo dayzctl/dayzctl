@@ -15,11 +15,6 @@ instances:
     template: dayzOffline.chernarusplus
     hostname: "DayZ Server"
     max_players: 60
-    # Optional: override the server-wide join/admin password for this
-    # instance only. When omitted, 'server.password' and
-    # 'server.password_admin' are used.
-    # password: "joinme"
-    # password_admin: "adminsecret"
     enabled: true
     rcon:
       enabled: true
@@ -63,9 +58,3 @@ healthcheck:
 server:
   max_players: 60
   battleye: 1
-  # Join password (written as 'password' in serverDZ-<instance>.cfg).
-  # Leave empty for a public server.
-  password: ""
-  # Admin password (written as 'passwordAdmin'). Required to log in as admin
-  # in game with #login. Can be overridden per instance (see below).
-  password_admin: ""
