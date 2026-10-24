@@ -134,20 +134,29 @@ func runJournalctl(args []string) error {
 		return fmt.Errorf("failed to start journalctl: %w", err)
 	}
 
-	waitCh := make(chan error, 1)
-	go func() { waitCh <- cmd.Wait() }()
+	// done is closed once journalctl has been reaped; waitErr is written
+	// before the close, so reads after <-done are properly synchronized.
+	done := make(chan struct{})
+	var waitErr error
+	go func() {
+		defer close(done)
+		waitErr = cmd.Wait()
+	}()
 
 	select {
-	case err := <-waitCh:
-		return journalctlResult(err)
+	case <-done:
+		return journalctlResult(waitErr)
 	case <-sigCh:
+		// Give journalctl a grace period to exit on its own, then kill it if
+		// the terminal signal did not reach it (e.g. when it is not running
+		// in the same process group).
 		select {
-		case <-waitCh:
+		case <-done:
 		case <-time.After(journalctlGracePeriod):
 			if cmd.Process != nil {
 				_ = cmd.Process.Kill()
 			}
-			<-waitCh
+			<-done
 		}
 		return nil
 	}
@@ -162,7 +171,9 @@ func journalctlResult(err error) error {
 
 	var exitErr *exec.ExitError
 	if errors.As(err, &exitErr) {
-		if exitErr.ProcessState != nil && exitErr.ProcessState.ExitCode() == -1 {
+		// ProcessState is embedded in ExitError, but it can be nil, so check
+		// it before calling the promoted ExitCode method.
+		if exitErr.ProcessState != nil && exitErr.ExitCode() == -1 {
 			return nil
 		}
 		if strings.Contains(err.Error(), "signal:") {
