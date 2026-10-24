@@ -169,8 +169,12 @@ func isHelpInvocation() bool {
 	}
 	// `logs` parses its own tail-style flags, so urfave/cli never sees its
 	// help flag. Recognize it here so help works without root or a config.
+	// A bare `dayzctl logs` also prints help instead of querying the journal.
 	if firstArg == "logs" {
 		rest := os.Args[2:]
+		if len(rest) == 0 {
+			return true
+		}
 		if len(rest) == 1 && rest[0] == "help" {
 			return true
 		}

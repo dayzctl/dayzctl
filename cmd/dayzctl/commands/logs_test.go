@@ -14,9 +14,14 @@ func TestParseLogArgs(t *testing.T) {
 		want LogOptions
 	}{
 		{
-			name: "no args defaults to all instances",
-			args: nil,
-			want: LogOptions{Lines: DefaultLogLines},
+			name: "explicit all",
+			args: []string{"all"},
+			want: LogOptions{Lines: DefaultLogLines, Instances: []string{"all"}},
+		},
+		{
+			name: "options only default to all instances",
+			args: []string{"-f"},
+			want: LogOptions{Lines: DefaultLogLines, Follow: true},
 		},
 		{
 			name: "instance only",
@@ -127,9 +132,16 @@ func TestParseLogArgsErrors(t *testing.T) {
 }
 
 func TestParseLogArgsHelp(t *testing.T) {
-	for _, arg := range []string{"-h", "--help", "help"} {
-		if _, err := ParseLogArgs([]string{arg}); err != ErrHelpRequested {
-			t.Fatalf("ParseLogArgs([%q]) = %v, want ErrHelpRequested", arg, err)
+	cases := [][]string{
+		nil,
+		{},
+		{"-h"},
+		{"--help"},
+		{"help"},
+	}
+	for _, args := range cases {
+		if _, err := ParseLogArgs(args); err != ErrHelpRequested {
+			t.Fatalf("ParseLogArgs(%v) = %v, want ErrHelpRequested", args, err)
 		}
 	}
 }

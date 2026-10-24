@@ -64,6 +64,7 @@ func TestIsHelpInvocationForLogs(t *testing.T) {
 	t.Cleanup(func() { os.Args = oldArgs })
 
 	helpCases := [][]string{
+		{"dayzctl", "logs"},
 		{"dayzctl", "logs", "--help"},
 		{"dayzctl", "logs", "nasdara", "-h"},
 		{"dayzctl", "logs", "help"},

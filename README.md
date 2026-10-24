@@ -96,14 +96,17 @@ This ensures a single source-of-truth for long-form command documentation and co
 `dayzctl logs` wraps `journalctl -u dayz@<instance>.service` and accepts tail-style options:
 
 ```bash
-dayzctl logs nasdara            # last 100 entries
-dayzctl logs nasdara -f         # follow new entries
-dayzctl logs nasdara -200f      # last 200 entries, then follow
-dayzctl logs -n all nasdara     # entire journal for the unit
+dayzctl logs                     # print command help
+dayzctl logs nasdara             # last 100 entries
+dayzctl logs nasdara -f          # follow new entries
+dayzctl logs nasdara -200f       # last 200 entries, then follow
+dayzctl logs -n all nasdara      # entire journal for the unit
+dayzctl logs -n all all          # entire journal for every enabled instance
 dayzctl logs --since "1 hour ago" -f all
 ```
 
-If no instance is given, logs for all enabled instances are shown.
+With no arguments the command prints its help; use `all` to show the logs of
+every enabled instance.
 
 ## Gentle shutdowns and scheduled restarts
 

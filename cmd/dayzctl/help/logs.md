@@ -3,8 +3,9 @@ Show server log output from journald for one or more instances.
 Usage:
   dayzctl logs [options] [instance|all]
 
-If no instance is given (or "all" is used), the logs for every enabled
-instance are shown. Each instance maps to its systemd unit dayz@<name>.service.
+Running `dayzctl logs` with no arguments prints this help. Pass an instance
+name, or "all" to show the logs of every enabled instance. Each instance
+maps to its systemd unit dayz@<name>.service.
 
 Options:
   -f, --follow        Keep streaming new log entries (like tail -f)
@@ -19,4 +20,5 @@ Examples:
   dayzctl logs nasdara -f
   dayzctl logs nasdara -200f
   dayzctl logs -n all nasdara
+  dayzctl logs -n all all
   dayzctl logs --since "1 hour ago" -f all

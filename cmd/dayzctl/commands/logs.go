@@ -178,11 +178,17 @@ func journalctlResult(err error) error {
 //	-f, --follow             stream new entries
 //	-200f, -fn 50            tail-style combinations
 //	--since/--until <when>   journalctl time filters
-//	[instance...]            instances to show (default: all)
+//	[instance...]            instances to show (use "all" for every instance)
 //
-// It returns ErrHelpRequested when -h/--help/help is present.
+// It returns ErrHelpRequested when no arguments are given (bare `dayzctl
+// logs` prints help, like the other top-level commands) or when
+// -h/--help/help is present.
 func ParseLogArgs(args []string) (LogOptions, error) {
 	opts := LogOptions{Lines: DefaultLogLines}
+
+	if len(args) == 0 {
+		return opts, ErrHelpRequested
+	}
 
 	for i := 0; i < len(args); i++ {
 		arg := args[i]
