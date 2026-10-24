@@ -67,6 +67,7 @@ Top-level commands (run `dayzctl <command> --help` for extended embedded help):
 - `stop` — Stop a server instance or all instances
 - `restart` — Restart a server instance or all instances
 - `status` — Show status of server instance(s)
+- `logs` — Show (and follow) server logs from journald
 - `apply` — Apply configuration and generate systemd units
 - `update` — Update DayZ server and sync mods
 - `validate-config` — Validate the configuration file
@@ -89,6 +90,20 @@ Example: show embedded help for `mods`:
 All extended, user-facing help is stored in `cmd/dayzctl/help/*.md` and embedded into the binary at compile-time using Go's `embed`.
 
 This ensures a single source-of-truth for long-form command documentation and consistent formatting across platforms.
+
+## Viewing logs
+
+`dayzctl logs` wraps `journalctl -u dayz@<instance>.service` and accepts tail-style options:
+
+```bash
+dayzctl logs nasdara            # last 100 entries
+dayzctl logs nasdara -f         # follow new entries
+dayzctl logs nasdara -200f      # last 200 entries, then follow
+dayzctl logs -n all nasdara     # entire journal for the unit
+dayzctl logs --since "1 hour ago" -f all
+```
+
+If no instance is given, logs for all enabled instances are shown.
 
 ## Gentle shutdowns and scheduled restarts
 

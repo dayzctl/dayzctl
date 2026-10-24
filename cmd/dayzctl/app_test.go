@@ -58,3 +58,25 @@ instances:
 		t.Fatalf("mods instance-first list failed: %v", err)
 	}
 }
+
+func TestIsHelpInvocationForLogs(t *testing.T) {
+	oldArgs := os.Args
+	t.Cleanup(func() { os.Args = oldArgs })
+
+	helpCases := [][]string{
+		{"dayzctl", "logs", "--help"},
+		{"dayzctl", "logs", "nasdara", "-h"},
+		{"dayzctl", "logs", "help"},
+	}
+	for _, args := range helpCases {
+		os.Args = args
+		if !isHelpInvocation() {
+			t.Fatalf("isHelpInvocation() = false for %v, want true", args)
+		}
+	}
+
+	os.Args = []string{"dayzctl", "logs", "nasdara", "-f"}
+	if isHelpInvocation() {
+		t.Fatalf("isHelpInvocation() = true for a log query, want false")
+	}
+}

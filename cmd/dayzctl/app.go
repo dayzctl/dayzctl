@@ -164,7 +164,23 @@ func isHelpInvocation() bool {
 	if len(os.Args) > 1 {
 		firstArg = os.Args[1]
 	}
-	return firstArg == "" || firstArg == "-h" || firstArg == "--help" || firstArg == "help" || firstArg == "version"
+	if firstArg == "" || firstArg == "-h" || firstArg == "--help" || firstArg == "help" || firstArg == "version" {
+		return true
+	}
+	// `logs` parses its own tail-style flags, so urfave/cli never sees its
+	// help flag. Recognize it here so help works without root or a config.
+	if firstArg == "logs" {
+		rest := os.Args[2:]
+		if len(rest) == 1 && rest[0] == "help" {
+			return true
+		}
+		for _, a := range rest {
+			if a == "-h" || a == "--help" {
+				return true
+			}
+		}
+	}
+	return false
 }
 
 // enforceRoot verifies we are running as root unless tests opt out.
@@ -281,6 +297,28 @@ func buildCommands() []*cli.Command {
 			Action: func(c *cli.Context) error {
 				arg := c.Args().Get(0)
 				return commands.StatusAction(arg)
+			},
+		},
+		{
+			Name:  "logs",
+			Usage: "Show (and follow) server logs from journald",
+			// Tail-style options such as -f, -n 200 and -200f are parsed by
+			// the action itself, so the CLI must not reject unknown flags.
+			SkipFlagParsing: true,
+			Description:     "",
+			ArgsUsage:       "[instance|all]",
+			Action: func(c *cli.Context) error {
+				opts, err := commands.ParseLogArgs(c.Args().Slice())
+				if err == commands.ErrHelpRequested {
+					return showHelpSafe(c, "logs")
+				}
+				shared.RunCommand(func() error {
+					if err != nil {
+						return err
+					}
+					return commands.LogsAction(opts)
+				})
+				return nil
 			},
 		},
 		{
