@@ -77,6 +77,11 @@ func TestPlayersAndSendActions(t *testing.T) {
 	if !strings.Contains(out, "PlayerOne") {
 		t.Fatalf("PlayersAction output missing player: %s", out)
 	}
+	for _, heading := range []string{"ID", "IP", "PORT", "PING", "GUID", "NAME"} {
+		if !strings.Contains(out, heading) {
+			t.Fatalf("PlayersAction output missing heading %q: %s", heading, out)
+		}
+	}
 
 	out2 := captureStdout(func() {
 		if err := SendAction("testinst", []string{"say", "hello"}); err != nil {

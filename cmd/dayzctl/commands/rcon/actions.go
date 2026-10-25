@@ -2,8 +2,10 @@ package rcon
 
 import (
 	"fmt"
+	"os"
 	"strconv"
 	"strings"
+	"text/tabwriter"
 	"time"
 
 	"github.com/dayzctl/dayzctl/cmd/dayzctl/commands/shared"
@@ -102,9 +104,12 @@ func processPlayersForInstance(inst *config.Instance, clientFactory func(int, st
 		fmt.Println("No players connected")
 		return nil
 	}
+	tw := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
+	fmt.Fprintln(tw, "ID\tIP\tPORT\tPING\tGUID\tNAME")
 	for _, p := range players {
-		fmt.Printf("%d %s %s %s %s %s\n", p.ID, p.IP, p.Port, p.Ping, p.GUID, p.Name)
+		fmt.Fprintf(tw, "%d\t%s\t%s\t%s\t%s\t%s\n", p.ID, p.IP, p.Port, p.Ping, p.GUID, p.Name)
 	}
+	_ = tw.Flush()
 	return nil
 }
 
