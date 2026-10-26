@@ -55,6 +55,9 @@ func (c *ServerConfig) SetDefaults() {
 	setIntDefault(&c.Server.LogAverageFps, 1)
 	setIntDefault(&c.Server.LogMemory, 1)
 	setIntDefault(&c.Server.LogPlayers, 1)
+	// Log item placement and build actions to the admin log by default.
+	setIntDefault(&c.Server.AdminLogPlacement, 1)
+	setIntDefault(&c.Server.AdminLogBuildActions, 1)
 	setIntDefault(&c.Server.DefaultVisibility, 1375)
 	setIntDefault(&c.Server.DefaultObjectViewDistance, 1375)
 	setIntDefault(&c.Server.ShotValidation, 1)
