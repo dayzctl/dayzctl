@@ -1,12 +1,16 @@
 package config
 
 import (
+	"crypto/sha256"
+	"crypto/subtle"
+	"encoding/hex"
 	"fmt"
 	"os"
 	"path/filepath"
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 
 	"gopkg.in/yaml.v3"
 )
@@ -217,11 +221,58 @@ type State struct {
 // Web configures the embedded web UI and log analysis API.
 //
 // The server only reads logs; it never writes to the DayZ install. Bind to
-// 127.0.0.1 unless you put an authenticating reverse proxy in front of it.
+// 127.0.0.1 unless you enable auth or put an authenticating reverse proxy in
+// front of it.
 type Web struct {
-	Enabled bool   `yaml:"enabled"`
-	Address string `yaml:"address,omitempty"`
-	Port    int    `yaml:"port,omitempty"`
+	Enabled bool    `yaml:"enabled"`
+	Address string  `yaml:"address,omitempty"`
+	Port    int     `yaml:"port,omitempty"`
+	Auth    WebAuth `yaml:"auth,omitempty"`
+}
+
+// WebAuth is the login switch for the web UI and its JSON API.
+//
+// Off by default. When enabled, every request needs a session cookie obtained
+// by posting the username and password to /login; either a plain password or a
+// SHA-256 hex digest (password_hash) can be configured.
+type WebAuth struct {
+	Enabled      bool   `yaml:"enabled"`
+	Username     string `yaml:"username,omitempty"`
+	Password     string `yaml:"password,omitempty"`
+	PasswordHash string `yaml:"password_hash,omitempty"`
+	SessionHours int    `yaml:"session_hours,omitempty"`
+}
+
+// Active reports whether a login is actually required. A half-configured block
+// (enabled without credentials) is rejected during validation, so this only
+// answers "is there something to protect with".
+func (a WebAuth) Active() bool {
+	return a.Enabled && a.Username != "" && (a.Password != "" || a.PasswordHash != "")
+}
+
+// SessionDuration is how long a login stays valid.
+func (a WebAuth) SessionDuration() time.Duration {
+	hours := a.SessionHours
+	if hours <= 0 {
+		hours = 12
+	}
+	return time.Duration(hours) * time.Hour
+}
+
+// CheckCredentials reports whether user/password may sign in.
+func (a WebAuth) CheckCredentials(user, password string) bool {
+	if !a.Active() {
+		return true
+	}
+	if subtle.ConstantTimeCompare([]byte(user), []byte(a.Username)) != 1 {
+		return false
+	}
+	if a.PasswordHash != "" {
+		sum := sha256.Sum256([]byte(password))
+		want := strings.ToLower(strings.TrimPrefix(strings.TrimSpace(a.PasswordHash), "sha256:"))
+		return subtle.ConstantTimeCompare([]byte(hex.EncodeToString(sum[:])), []byte(want)) == 1
+	}
+	return subtle.ConstantTimeCompare([]byte(password), []byte(a.Password)) == 1
 }
 
 // ============================================================================

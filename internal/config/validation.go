@@ -1,6 +1,9 @@
 package config
 
-import "fmt"
+import (
+	"fmt"
+	"strings"
+)
 
 // Validate checks if the configuration is valid
 func (c *ServerConfig) Validate() error {
@@ -76,6 +79,30 @@ func validateWeb(c *ServerConfig) error {
 	}
 	if c.Web.Address == "" {
 		return fmt.Errorf("web.address is required when web is enabled")
+	}
+	if err := validateWebAuth(c.Web.Auth); err != nil {
+		return err
+	}
+	return nil
+}
+
+// validateWebAuth refuses a login switch that cannot work: enabled without a
+// username, or without either a password or a password hash.
+func validateWebAuth(a WebAuth) error {
+	if !a.Enabled {
+		return nil
+	}
+	if a.Username == "" {
+		return fmt.Errorf("web.auth.username is required when web.auth.enabled is true")
+	}
+	if a.Password == "" && a.PasswordHash == "" {
+		return fmt.Errorf("web.auth needs a password or a password_hash when enabled")
+	}
+	if a.Password != "" && a.PasswordHash != "" {
+		return fmt.Errorf("set either web.auth.password or web.auth.password_hash, not both")
+	}
+	if h := strings.ToLower(strings.TrimPrefix(strings.TrimSpace(a.PasswordHash), "sha256:")); a.PasswordHash != "" && len(h) != 64 {
+		return fmt.Errorf("web.auth.password_hash must be a SHA-256 hex digest (64 characters)")
 	}
 	return nil
 }

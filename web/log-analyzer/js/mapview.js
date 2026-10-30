@@ -216,6 +216,13 @@ export function renderMap(canvas, report, state) {
   // period, since they cannot be placed inside a narrower one.
   const hasWindow = Number.isFinite(state.windowFrom) && Number.isFinite(state.windowTo);
   const inWindow = (at) => !hasWindow || (at !== null && at !== undefined && at >= state.windowFrom && at <= state.windowTo);
+
+  // ── player scope ────────────────────────────────────────
+  // With players ticked, every layer is built from them alone: heat, kills,
+  // bases, last positions and jumps as well as the trails.
+  const picked = state.selectedKeys?.length ? new Set(state.selectedKeys) : null;
+  const involves = (...keys) => !picked || keys.some((k) => k && picked.has(k));
+
   const lastSampled = (p) => {
     if (!hasWindow) return p.lastKnownPos;
     for (let i = p.positions.length - 1; i >= 0; i--) {
@@ -237,8 +244,11 @@ export function renderMap(canvas, report, state) {
       if (grid[idx] > max) max = grid[idx];
     };
 
-    for (const p of adm.players) for (const s of p.positions) if (inWindow(s.at)) addPoint(s.x, s.y);
-    for (const b of adm.builds) if (b.pos && inWindow(b.at)) addPoint(b.pos.x, b.pos.y);
+    for (const p of adm.players) {
+      if (!involves(p.key)) continue;
+      for (const s of p.positions) if (inWindow(s.at)) addPoint(s.x, s.y);
+    }
+    for (const b of adm.builds) if (b.pos && inWindow(b.at) && involves(b.playerKey)) addPoint(b.pos.x, b.pos.y);
 
     if (max > 0) {
       const cw = cssWidth / HEAT_COLS;
@@ -259,7 +269,7 @@ export function renderMap(canvas, report, state) {
   if (layers.builds) {
     ctx.fillStyle = 'rgba(90, 200, 220, 0.85)';
     for (const b of adm.builds) {
-      if (!b.pos || !inWindow(b.at)) continue;
+      if (!b.pos || !inWindow(b.at) || !involves(b.playerKey)) continue;
       const x = px(b.pos.x);
       const y = py(b.pos.y);
       ctx.fillRect(x - 2.5, y - 2.5, 5, 5);
@@ -270,6 +280,7 @@ export function renderMap(canvas, report, state) {
   if (layers.connects) {
     ctx.fillStyle = 'rgba(120, 190, 120, 0.55)';
     for (const p of adm.players) {
+      if (!involves(p.key)) continue;
       const spot = lastSampled(p);
       if (!spot) continue;
       ctx.beginPath();
@@ -303,7 +314,8 @@ export function renderMap(canvas, report, state) {
   // ── kills (shot lines) ───────────────────────────────────
   if (layers.kills) {
     for (const k of adm.kills) {
-      if (!k.pos || !inWindow(k.at)) continue;
+      // A kill is shown when either side of it is in the selection.
+      if (!k.pos || !inWindow(k.at) || !involves(k.killerKey, k.victimKey)) continue;
       const vx = px(k.pos.x);
       const vy = py(k.pos.y);
 
@@ -329,7 +341,7 @@ export function renderMap(canvas, report, state) {
   // ── suspicious jumps ─────────────────────────────────────
   if (layers.jumps) {
     for (const s of adm.suspicious) {
-      if (s.type !== 'teleport' || !s.from || !s.to || !inWindow(s.at)) continue;
+      if (s.type !== 'teleport' || !s.from || !s.to || !inWindow(s.at) || !involves(s.playerKey)) continue;
       ctx.strokeStyle = 'rgba(217, 165, 59, 0.75)';
       ctx.setLineDash([4, 4]);
       ctx.lineWidth = 1.4;

@@ -144,6 +144,29 @@ To run it as a service, set `web.enabled: true` (and optionally
 `dayz-web.service`. See `web/log-analyzer/README.md` for the API, the analysis
 tabs and how to extend the RPT rule set.
 
+### Login switch
+
+The UI is open by default, which is only safe while it listens on loopback. To
+require a sign-in, enable `web.auth`:
+
+```yaml
+web:
+  enabled: true
+  address: 0.0.0.0        # safe now that a login is required
+  port: 8081
+  auth:
+    enabled: true
+    username: "admin"
+    password: "change-me"         # or: password_hash: "<sha256 hex>"
+    session_hours: 12             # default 12
+```
+
+`printf %s 'change-me' | sha256sum` produces the value for `password_hash`, so
+the file does not have to hold a plain password. With the switch on, the UI
+serves a sign-in page at `/login`, every `/api/` call answers `401` without a
+session cookie, and the header grows a *Sign out* button. Sessions live in
+memory, so restarting `dayzctl web` (or the service) signs everyone out.
+
 ## Commands
 
 Top-level commands (run `dayzctl <command> --help` for extended embedded help):

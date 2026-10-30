@@ -35,8 +35,14 @@ cd web/log-analyzer && python3 -m http.server 8765
 ```yaml
 web:
   enabled: true        # `dayzctl apply` writes and enables dayz-web.service
-  address: 127.0.0.1   # loopback unless you have a reverse proxy
+  address: 127.0.0.1   # loopback unless auth is on or a reverse proxy fronts it
   port: 8081
+  auth:                # login switch, off by default
+    enabled: false
+    username: "admin"
+    # password: "change-me"
+    # password_hash: "<sha256 hex>"
+    # session_hours: 12
 ```
 
 `dayzctl apply` generates `/etc/systemd/system/dayz-web.service`, runs
@@ -50,22 +56,25 @@ journalctl -u dayz-web.service -f
 curl -s localhost:8081/api/health
 ```
 
-There is no built-in authentication. Keep the default loopback address, or
-terminate TLS and auth in nginx/Caddy before binding to a public interface.
+Access is open by default, so keep the loopback address unless you turn on the
+login switch (`web.auth.enabled`) or terminate TLS and auth in nginx/Caddy in
+front of it. With auth on, `/login` asks for the configured username and
+password, every `/api/` call needs the session cookie, and the header shows a
+*Sign out* button. Sessions are held in memory and die with the process.
 
 ## API
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/api/health` | service status, version, instance count |
+| `GET` | `/api/health` | service status, version, instance count, `auth: true` when a login is required |
 | `GET` | `/api/instances` | configured instances with log counts and latest mtime |
 | `GET` | `/api/instances/{instance}/logs` | log files in that instance's profiles folder |
 | `GET` | `/api/instances/{instance}/map-image` | the instance's map background, if one is configured (404 otherwise) |
 | `POST` | `/api/instances/{instance}/analyze` | full report; body `{"files": [...]}`, omit to analyse all |
 
 Errors are JSON: `{"error": "..."}` with 404 (unknown instance), 422 (nothing to
-analyse / unreadable file) or 400 (bad body). Responses are gzipped when the
-client accepts it.
+analyse / unreadable file), 400 (bad body) or 401 (login required). Responses
+are gzipped when the client accepts it.
 
 File names are validated against `filepath.Base`, so a request cannot walk out
 of the instance's profiles folder.
@@ -99,10 +108,11 @@ unticked until you select it.
   shift or a single evening can be inspected on its own. An overturned range
   (22:00 → 04:00) is treated as a window across midnight.
 - **Map** — positions with kills, trails, bases, heatmap and position jumps.
-  *Players* is a multi-select list: tick any number of players and only their
-  trails and highlights are drawn (the same set as the Players tab). The
-  *Timeline* window under the toolbar narrows every layer to a from/until span,
-  so a busy day can be cut down to a single fight.
+  *Players* is a multi-select list: tick any number of players and every layer is
+  limited to them — heatmap, kills (either side of the fight), bases, last
+  positions and jumps, not just the trails. The set is shared with the Players
+  tab. The *Timeline* window under the toolbar narrows every layer to a
+  from/until span, so a busy day can be cut down to a single fight.
 
 ## Coordinates
 

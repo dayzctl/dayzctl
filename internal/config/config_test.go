@@ -1,6 +1,8 @@
 package config
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"os"
 	"path/filepath"
 	"strings"
@@ -111,5 +113,60 @@ func TestLoadWarnsAboutTabIndentation(t *testing.T) {
 	}
 	if !strings.Contains(err.Error(), "indented with a tab") {
 		t.Errorf("error should mention tabs, got:\n%s", err.Error())
+	}
+}
+
+func TestWebAuthValidation(t *testing.T) {
+	cases := []struct {
+		name string
+		auth WebAuth
+		want string
+	}{
+		{"off", WebAuth{}, ""},
+		{"password", WebAuth{Enabled: true, Username: "admin", Password: "x"}, ""},
+		{"hash", WebAuth{Enabled: true, Username: "admin", PasswordHash: strings.Repeat("a", 64)}, ""},
+		{"no user", WebAuth{Enabled: true, Password: "x"}, "web.auth.username is required"},
+		{"no secret", WebAuth{Enabled: true, Username: "admin"}, "password or a password_hash"},
+		{"both secrets", WebAuth{Enabled: true, Username: "admin", Password: "x", PasswordHash: strings.Repeat("a", 64)}, "not both"},
+		{"bad hash", WebAuth{Enabled: true, Username: "admin", PasswordHash: "abc"}, "64 characters"},
+	}
+
+	for _, tc := range cases {
+		err := validateWebAuth(tc.auth)
+		if tc.want == "" {
+			if err != nil {
+				t.Errorf("%s: unexpected error %v", tc.name, err)
+			}
+			continue
+		}
+		if err == nil || !strings.Contains(err.Error(), tc.want) {
+			t.Errorf("%s: error = %v, want it to mention %q", tc.name, err, tc.want)
+		}
+	}
+}
+
+func TestWebAuthCheckCredentials(t *testing.T) {
+	a := WebAuth{Enabled: true, Username: "admin", Password: "s3cret"}
+	if !a.CheckCredentials("admin", "s3cret") {
+		t.Error("good credentials rejected")
+	}
+	if a.CheckCredentials("admin", "nope") || a.CheckCredentials("root", "s3cret") {
+		t.Error("bad credentials accepted")
+	}
+
+	sum := sha256.Sum256([]byte("hunter2"))
+	h := WebAuth{Enabled: true, Username: "ops", PasswordHash: "sha256:" + hex.EncodeToString(sum[:])}
+	if !h.CheckCredentials("ops", "hunter2") {
+		t.Error("hash credentials rejected")
+	}
+	if h.CheckCredentials("ops", "hunter3") {
+		t.Error("wrong password accepted against a hash")
+	}
+
+	// A disabled switch lets everything through, which is what the middleware
+	// relies on when auth is off.
+	var off WebAuth
+	if !off.CheckCredentials("", "") {
+		t.Error("disabled auth should not reject")
 	}
 }

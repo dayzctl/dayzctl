@@ -17,9 +17,14 @@
           <p class="tagline">ADM &amp; RPT, read from your server</p>
         </div>
       </div>
-      <p class="privacy-badge" id="server-badge" title="Analysed by dayzctl on this host">
-        <span class="dot" aria-hidden="true"></span> <span id="server-status">connecting…</span>
-      </p>
+      <div class="header-actions">
+        <p class="privacy-badge" id="server-badge" title="Analysed by dayzctl on this host">
+          <span class="dot" aria-hidden="true"></span> <span id="server-status">connecting…</span>
+        </p>
+        <form method="post" action="/logout" id="logout-form" hidden>
+          <button type="submit" class="btn tiny" id="btn-logout">Sign out</button>
+        </form>
+      </div>
     </div>
   </header>
 

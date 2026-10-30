@@ -31,10 +31,12 @@ import (
 
 // Server bundles the HTTP handler with its dependencies.
 type Server struct {
-	cfg     *config.ServerConfig
-	service *logs.Service
-	maps    *gamemap.Store
-	handler http.Handler
+	cfg      *config.ServerConfig
+	service  *logs.Service
+	maps     *gamemap.Store
+	auth     config.WebAuth
+	sessions *sessions
+	handler  http.Handler
 }
 
 // New builds the handler tree for the given configuration.
@@ -44,8 +46,10 @@ func New(cfg *config.ServerConfig) (*Server, error) {
 	}
 
 	s := &Server{
-		cfg:     cfg,
-		service: logs.NewService(cfg.GetInstallDir(), logs.DefaultOptions()),
+		cfg:      cfg,
+		service:  logs.NewService(cfg.GetInstallDir(), logs.DefaultOptions()),
+		auth:     cfg.Web.Auth,
+		sessions: newSessions(cfg.Web.Auth.SessionDuration()),
 	}
 
 	ui, err := fs.Sub(webassets.Assets, "log-analyzer")
@@ -71,9 +75,12 @@ func New(cfg *config.ServerConfig) (*Server, error) {
 	mux.HandleFunc("GET /api/maps/{map}/meta", s.handleMapMeta)
 	mux.HandleFunc("GET /api/maps/{map}/tiles/{z}/{x}/{y}", s.handleMapTile)
 	mux.HandleFunc("POST /api/instances/{instance}/analyze", s.handleAnalyze)
+	mux.HandleFunc("GET /login", s.handleLoginForm)
+	mux.HandleFunc("POST /login", s.handleLogin)
+	mux.HandleFunc("POST /logout", s.handleLogout)
 	mux.Handle("GET /", noCacheHTML(http.FileServerFS(ui)))
 
-	s.handler = withLogging(withGzip(mux))
+	s.handler = withLogging(withGzip(s.requireAuth(mux)))
 	return s, nil
 }
 
@@ -112,6 +119,8 @@ type healthResponse struct {
 	Version   string `json:"version"`
 	Time      string `json:"time"`
 	Instances int    `json:"instances"`
+	// Auth tells the UI to offer a sign-out button.
+	Auth bool `json:"auth,omitempty"`
 }
 
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
@@ -120,6 +129,7 @@ func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 		Version:   version.Version,
 		Time:      time.Now().UTC().Format(time.RFC3339),
 		Instances: len(s.cfg.Instances),
+		Auth:      s.auth.Active(),
 	})
 }
 

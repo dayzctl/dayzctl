@@ -46,6 +46,7 @@ const dom = {
   tabs: document.getElementById('tabs'),
   panels: document.getElementById('panels'),
   serverStatus: document.getElementById('server-status'),
+  logoutForm: document.getElementById('logout-form'),
 };
 
 const state = {
@@ -154,6 +155,8 @@ async function boot() {
     const health = await fetchHealth();
     dom.serverStatus.textContent =
       health.instances === 1 ? `dayzctl ${health.version}` : `dayzctl ${health.version} · ${health.instances} instances`;
+    // The login switch is on, so offer a way out of the session.
+    if (health.auth) dom.logoutForm.hidden = false;
   } catch {
     dom.serverStatus.textContent = 'API unreachable';
   }

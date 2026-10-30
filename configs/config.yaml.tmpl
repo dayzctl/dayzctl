@@ -83,3 +83,13 @@ web:
   enabled: false
   address: 127.0.0.1
   port: 8081
+  # Login switch. Enabled false leaves the UI open, which is only safe on
+  # loopback. Use a password_hash (sha256 of the password, e.g.
+  # `printf %s 'secret' | sha256sum`) instead of a plain password when the
+  # config file can be read by anyone else.
+  auth:
+    enabled: false
+    username: "admin"
+    # password: "change-me"
+    # password_hash: "<64 hex characters>"
+    # session_hours: 12

@@ -26,6 +26,11 @@ async function requestJSON(path, options = {}) {
   }
 
   if (!response.ok) {
+    // The login switch is on and the session ran out: send the browser back to
+    // the sign-in form rather than showing a dead page.
+    if (response.status === 401 && !path.startsWith('/api/health')) {
+      window.location.assign('/login?next=' + encodeURIComponent(window.location.pathname + window.location.search));
+    }
     const message = payload?.error || `${response.status} ${response.statusText}`;
     throw new Error(message);
   }

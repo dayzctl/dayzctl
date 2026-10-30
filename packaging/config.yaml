@@ -31,3 +31,10 @@ web:
   enabled: true
   address: 127.0.0.1
   port: 8081
+  # Login switch: flip enabled to true and set a password (or a sha256
+  # password_hash) to require signing in before the UI and API answer.
+  auth:
+    enabled: false
+    username: "admin"
+    # password: "change-me"
+    # password_hash: "<64 hex characters>"
