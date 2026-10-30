@@ -5,7 +5,7 @@
 
 import { fmtInt, fmtDuration, fmtTime, fmtClock, fmtDistance, fmtBytes, truncate, colorFor } from './format.js';
 import { SEVERITY, SEVERITY_LABEL, SEVERITY_ORDER } from './severity.js';
-import { renderMap, inferWorldSize } from './mapview.js';
+import { renderMap, inferWorldSize, clampView, MAX_MAP_ZOOM } from './mapview.js';
 import { fetchMapMeta } from './api.js';
 
 /** Kill count per weapon, used by the overview card. */
@@ -1100,6 +1100,10 @@ export function renderMapPanel(panel, report, state, relayout) {
     state.mapMetaFailed = false;
     state.mapMetaLoading = false;
     mapState.worldSize = 0;
+    // A different map means a different extent, so start from the whole view.
+    mapState.zoom = 1;
+    mapState.centerX = null;
+    mapState.centerY = null;
     state.actions.setState({});
   };
 
@@ -1147,6 +1151,9 @@ export function renderMapPanel(panel, report, state, relayout) {
     onChange: (e) => {
       mapState.worldSize = Math.max(1000, Number(e.target.value) || 15360);
       view.worldSize = mapState.worldSize;
+      // A new extent invalidates the old centre; keep the zoom, recentre the map.
+      mapState.centerX = null;
+      mapState.centerY = null;
       // Repaint in place so an open player picker is not torn down.
       if (canvas.isConnected) renderMap(canvas, report, view);
     },
@@ -1203,6 +1210,108 @@ export function renderMapPanel(panel, report, state, relayout) {
 
   const canvas = el('canvas', { id: 'map-canvas' });
   const stage = el('div', { class: 'map-stage' }, canvas);
+
+  // ── zoom & pan ───────────────────────────────────────────
+  // Wheel zooms about the pointer, dragging pans, double-click fits the map
+  // again. clampView keeps the zoom at >= 1 (the whole map) and stops panning
+  // from revealing empty space around it.
+  const zoomLabel = el('span', { class: 'map-zoom-value', text: '1.0×' });
+
+  const syncZoomLabel = () => {
+    zoomLabel.textContent = `${(mapState.zoom || 1).toFixed(1)}×`;
+  };
+  syncZoomLabel();
+
+  // `view` is the snapshot the renderer draws, so zoom and pan have to be copied
+  // into it as well, not only into mapState.
+  const applyViewport = () => {
+    view.zoom = mapState.zoom;
+    view.centerX = mapState.centerX;
+    view.centerY = mapState.centerY;
+    repaintMap();
+  };
+
+  // Zooming in past the deepest tile level just stretches pixels, so the
+  // ceiling follows the map's own pyramid (about 4x upscaling at most).
+  const zoomCeiling = () => {
+    const vp = view.viewport;
+    const tileMax = state.mapMeta?.maxZoom;
+    if (!vp) return MAX_MAP_ZOOM;
+    if (!tileMax) return 16; // no imagery: the grid has nothing to resolve
+    const limit = (4 * 2 ** tileMax * 256) / Math.max(1, vp.width);
+    return Math.max(2, Math.min(MAX_MAP_ZOOM, limit));
+  };
+
+  const zoomTo = (nextZoom, anchorX = null, anchorY = null) => {
+    const vp = view.viewport;
+    if (!vp) return;
+    const zoom = Math.min(zoomCeiling(), Math.max(1, nextZoom));
+    const ax = anchorX ?? vp.width / 2;
+    const ay = anchorY ?? vp.height / 2;
+    // World point currently under the anchor stays put while scaling.
+    const worldX = vp.cx + (ax - vp.width / 2) / vp.k;
+    const worldY = vp.cy - (ay - vp.height / 2) / vp.k;
+    const kNext = (vp.width / vp.world) * zoom;
+    const clamped = clampView(
+      vp.world,
+      zoom,
+      vp.width,
+      worldX - (ax - vp.width / 2) / kNext,
+      worldY + (ay - vp.height / 2) / kNext,
+    );
+    mapState.zoom = clamped.zoom;
+    mapState.centerX = clamped.cx;
+    mapState.centerY = clamped.cy;
+    syncZoomLabel();
+    applyViewport();
+  };
+
+  let drag = null;
+  const endDrag = () => {
+    if (!drag) return;
+    drag = null;
+    canvas.classList.remove('dragging');
+  };
+
+  canvas.addEventListener('pointerdown', (event) => {
+    if (event.button !== 0 || !view.viewport) return;
+    drag = { x: event.clientX, y: event.clientY, cx: view.viewport.cx, cy: view.viewport.cy };
+    canvas.setPointerCapture(event.pointerId);
+    canvas.classList.add('dragging');
+  });
+
+  canvas.addEventListener('pointermove', (event) => {
+    if (!drag || !view.viewport) return;
+    const vp = view.viewport;
+    const moved = clampView(
+      vp.world,
+      vp.zoom,
+      vp.width,
+      drag.cx - (event.clientX - drag.x) / vp.k,
+      drag.cy + (event.clientY - drag.y) / vp.k,
+    );
+    mapState.centerX = moved.cx;
+    mapState.centerY = moved.cy;
+    applyViewport();
+  });
+
+  canvas.addEventListener('pointerup', endDrag);
+  canvas.addEventListener('pointercancel', endDrag);
+  canvas.addEventListener('pointerleave', endDrag);
+
+  canvas.addEventListener(
+    'wheel',
+    (event) => {
+      if (!view.viewport) return;
+      event.preventDefault();
+      const rect = canvas.getBoundingClientRect();
+      const factor = Math.exp(-event.deltaY * 0.0015);
+      zoomTo((mapState.zoom || 1) * factor, event.clientX - rect.left, event.clientY - rect.top);
+    },
+    { passive: false },
+  );
+
+  canvas.addEventListener('dblclick', () => zoomTo(1));
 
   // Player picker: any combination of players can be ticked, instead of
   // all-or-one. The set is shared with the Players tab, so ticks made there
@@ -1456,6 +1565,39 @@ export function renderMapPanel(panel, report, state, relayout) {
         el('div', { class: 'field' }, el('label', { text: 'World size (m)' }), worldInput),
         el('div', { class: 'field' }, el('label', { text: 'Players' }), playerSelect),
         el('div', { class: 'field' }, el('label', { text: 'Custom image' }), bgInput),
+        el(
+          'div',
+          { class: 'field' },
+          el('label', { text: 'Zoom' }),
+          el(
+            'div',
+            { class: 'map-zoom' },
+            el('button', {
+              type: 'button',
+              class: 'btn tiny',
+              text: '−',
+              title: 'Zoom out (wheel down)',
+              'aria-label': 'Zoom out',
+              onClick: () => zoomTo((mapState.zoom || 1) / 1.5),
+            }),
+            zoomLabel,
+            el('button', {
+              type: 'button',
+              class: 'btn tiny',
+              text: '+',
+              title: 'Zoom in (wheel up)',
+              'aria-label': 'Zoom in',
+              onClick: () => zoomTo((mapState.zoom || 1) * 1.5),
+            }),
+            el('button', {
+              type: 'button',
+              class: 'btn tiny',
+              text: 'Fit',
+              title: 'Show the whole map (double-click)',
+              onClick: () => zoomTo(1),
+            }),
+          ),
+        ),
       ),
       windowControl,
       el(

@@ -25,6 +25,32 @@ export function inferWorldSize(bounds, fallback = 15360) {
 const HEAT_COLS = 96;
 const HEAT_ROWS = 96;
 
+/** Hard ceiling for the canvas zoom, independent of the tile pyramid. */
+export const MAX_MAP_ZOOM = 64;
+
+/**
+ * Resolves the viewport for a square canvas of `size` CSS pixels.
+ *
+ * `zoom` 1 means the whole map fits (the map can never be zoomed out past its
+ * own size), and the centre is clamped so no empty space can be dragged into
+ * view.
+ *
+ * @returns {{zoom:number, k:number, cx:number, cy:number}} k = CSS px per metre
+ */
+export function clampView(world, zoom, size, cx, cy) {
+  const w = world > 0 ? world : 15360;
+  const z = Math.min(MAX_MAP_ZOOM, Math.max(1, Number(zoom) || 1));
+  const k = (size / w) * z;
+  const half = size / (2 * k);
+  const fits = 2 * half >= w;
+  const axis = (c) => {
+    if (fits) return w / 2;
+    const v = Number.isFinite(c) ? c : w / 2;
+    return Math.min(Math.max(v, half), w - half);
+  };
+  return { zoom: z, k, cx: axis(cx), cy: axis(cy) };
+}
+
 /* ── Tile imagery ──────────────────────────────────────────
  * The map service publishes a {z}/{x}/{y} pyramid: 2^z tiles per side,
  * tile (0,0) at the north-west corner, one tile = 256 px.
@@ -42,27 +68,46 @@ function tileZoom(px, maxZoom, minZoom) {
 }
 
 /**
- * Draws every tile of the chosen zoom level, and repaints once a tile arrives.
+ * Draws the tiles that intersect the viewport at a zoom level matching the
+ * current scale, and repaints once one arrives.
  * @returns {boolean} false when nothing could be drawn yet
  */
 function drawTiles(ctx, view, width, height, onTile) {
   const t = view.tiles;
   if (!t?.url) return false;
 
-  const z = tileZoom(width, t.maxZoom, t.minZoom);
+  const world = view.worldSize || 15360;
+  const k = view.k;
+  // One step finer than "exactly covers the canvas" keeps imagery crisp on
+  // high-density screens; the pyramid itself may run out before the canvas does.
+  const wanted = Math.ceil(Math.log2(Math.max(1, (world * k * 2) / TILE_SIZE)));
+  const z = Math.max(t.minZoom || 1, Math.min(t.maxZoom || 7, wanted));
   const perSide = 2 ** z;
-  const srcSize = perSide * TILE_SIZE; // source pixels covering the world
-  const scale = width / srcSize;
-  let drawn = 0;
+  const wpp = world / perSide; // world metres covered by one tile
+  const span = wpp * k; // its size on the canvas
 
-  for (let ty = 0; ty < perSide; ty++) {
-    for (let tx = 0; tx < perSide; tx++) {
+  // Only the tiles inside the viewport are requested, so panning stays cheap.
+  const halfW = width / (2 * k);
+  const halfH = height / (2 * k);
+  const left = view.cx - halfW;
+  const right = view.cx + halfW;
+  const north = view.cy + halfH;
+  const south = view.cy - halfH;
+  const tx0 = Math.max(0, Math.floor(left / wpp));
+  const tx1 = Math.min(perSide - 1, Math.floor(right / wpp));
+  const ty0 = Math.max(0, Math.floor((world - north) / wpp));
+  const ty1 = Math.min(perSide - 1, Math.floor((world - south) / wpp));
+
+  let drawn = 0;
+  for (let ty = ty0; ty <= ty1; ty++) {
+    for (let tx = tx0; tx <= tx1; tx++) {
       const key = `${t.url}|${z}|${tx}|${ty}`;
       const cached = tileImages.get(key);
 
       if (cached?.ok) {
-        ctx.drawImage(cached.img, tx * TILE_SIZE * scale, ty * TILE_SIZE * scale,
-          TILE_SIZE * scale + 0.6, TILE_SIZE * scale + 0.6);
+        const x = (tx * wpp - view.cx) * k + width / 2;
+        const y = (view.cy - (world - ty * wpp)) * k + height / 2;
+        ctx.drawImage(cached.img, x, y, span + 0.6, span + 0.6);
         drawn++;
         continue;
       }
@@ -155,10 +200,20 @@ export function renderMap(canvas, report, state) {
   ctx.clearRect(0, 0, cssWidth, cssHeight);
 
   const world = state.worldSize || 15360;
-  const px = (x) => (x / world) * cssWidth;
+  // Zoom/pan: zoom 1 fits the whole map, so it cannot be zoomed out further.
+  const vp = clampView(world, state.zoom, cssWidth, state.centerX, state.centerY);
+  const k = vp.k;
+  const x0 = vp.cx - cssWidth / (2 * k); // west edge, world metres
+  const y0 = vp.cy + cssHeight / (2 * k); // north edge
+  const px = (x) => (x - vp.cx) * k + cssWidth / 2;
   // DayZ's second coordinate grows north, so the canvas y axis is inverted:
   // the north edge of the map must end up at the top, like the imagery.
-  const py = (north) => (1 - north / world) * cssHeight;
+  const py = (north) => (vp.cy - north) * k + cssHeight / 2;
+  // Exposed so the pointer handlers can turn pixel deltas into metres, and so
+  // the applied viewport is visible in the DOM for debugging.
+  state.viewport = { ...vp, world, width: cssWidth, height: cssHeight, left: x0, top: y0 };
+  canvas.dataset.zoom = vp.zoom.toFixed(2);
+  canvas.dataset.center = `${Math.round(vp.cx)},${Math.round(vp.cy)}`;
 
   // ── background ───────────────────────────────────────────
   ctx.fillStyle = '#0a0d10';
@@ -170,26 +225,35 @@ export function renderMap(canvas, report, state) {
   if (state.background) {
     ctx.globalAlpha = 0.9;
     try {
-      ctx.drawImage(state.background, 0, 0, cssWidth, cssHeight);
+      // The image covers the whole map, so it scales and shifts with the view.
+      ctx.drawImage(state.background, px(0), py(world), world * k, world * k);
       haveImagery = true;
     } catch {
       /* image not ready yet — grid is drawn next frame */
     }
     ctx.globalAlpha = 1;
-  } else if (layers.tiles !== false && drawTiles(ctx, state, cssWidth, cssHeight, state.onTile)) {
+  } else if (layers.tiles !== false && drawTiles(ctx, { ...state, worldSize: world, k, cx: vp.cx, cy: vp.cy }, cssWidth, cssHeight, state.onTile)) {
     haveImagery = true;
   } else {
-    // Coordinate grid, every 1 km.
+    // Coordinate grid, spaced so lines stay readable at any zoom.
     ctx.strokeStyle = 'rgba(120, 140, 160, 0.12)';
     ctx.lineWidth = 1;
-    const stepKm = world / 15; // ~1 km for 15 km maps
-    for (let v = 0; v <= world; v += stepKm) {
+    let stepM = 1024;
+    while (stepM * k < 55) stepM *= 2;
+    while (stepM * k > 220) stepM /= 2;
+    const first = Math.floor(x0 / stepM) * stepM;
+    for (let v = first; v <= x0 + cssWidth / k + stepM; v += stepM) {
       const gx = px(v);
-      const gy = py(v);
       ctx.beginPath();
       ctx.moveTo(gx, 0);
       ctx.lineTo(gx, cssHeight);
       ctx.stroke();
+    }
+    const topM = y0;
+    const bottomM = y0 - cssHeight / k;
+    const firstY = Math.ceil(bottomM / stepM) * stepM;
+    for (let v = firstY; v <= topM + stepM; v += stepM) {
+      const gy = py(v);
       ctx.beginPath();
       ctx.moveTo(0, gy);
       ctx.lineTo(cssWidth, gy);
@@ -198,9 +262,9 @@ export function renderMap(canvas, report, state) {
 
     ctx.fillStyle = 'rgba(140, 160, 180, 0.35)';
     ctx.font = '10px ui-monospace, monospace';
-    for (let v = 0; v <= world; v += stepKm * 3) {
-      ctx.fillText(`${Math.round(v / 100) / 10}km`, px(v) + 3, 11);
-      ctx.fillText(`${Math.round(v / 100) / 10}km`, 3, py(v) + 11);
+    for (let v = firstY; v <= topM + stepM; v += stepM) {
+      if (v < 0 || v > world) continue;
+      ctx.fillText(`${Math.round(v / 100) / 10}km`, px(0) + 4, py(v) - 4);
     }
   }
   // ── place names ──────────────────────────────────────────
@@ -251,15 +315,19 @@ export function renderMap(canvas, report, state) {
     for (const b of adm.builds) if (b.pos && inWindow(b.at) && involves(b.playerKey)) addPoint(b.pos.x, b.pos.y);
 
     if (max > 0) {
-      const cw = cssWidth / HEAT_COLS;
-      const ch = cssHeight / HEAT_ROWS;
+      const cellW = world / HEAT_COLS;
+      const cellH = world / HEAT_ROWS;
       for (let r = 0; r < HEAT_ROWS; r++) {
         for (let c = 0; c < HEAT_COLS; c++) {
           const v = grid[r * HEAT_COLS + c];
           if (!v) continue;
           const alpha = Math.min(0.72, (v / max) ** 0.55);
           ctx.fillStyle = `rgba(228, 92, 60, ${alpha})`;
-          ctx.fillRect(c * cw, r * ch, cw + 0.6, ch + 0.6);
+          // Cell edges go through px/py so the heatmap zooms and pans with the
+          // rest of the layers instead of staying pinned to the canvas.
+          const gx = px(c * cellW);
+          const gy = py(world - r * cellH);
+          ctx.fillRect(gx, gy, cellW * k + 0.6, cellH * k + 0.6);
         }
       }
     }

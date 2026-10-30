@@ -498,7 +498,19 @@ details.samples pre {
   overflow: hidden;
   background: #0a0d10;
 }
-#map-canvas { display: block; width: 100%; height: auto; cursor: crosshair; }
+#map-canvas { display: block; width: 100%; height: auto; cursor: grab; }
+#map-canvas.dragging { cursor: grabbing; }
+
+/* Zoom buttons and readout under the map toolbar */
+.map-zoom { display: flex; align-items: center; gap: 6px; }
+.map-zoom .btn { padding: 5px 9px; min-width: 30px; }
+.map-zoom-value {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-dim);
+  min-width: 44px;
+  text-align: center;
+}
 
 /* Multi-select player picker in the map toolbar */
 .picker { position: relative; }

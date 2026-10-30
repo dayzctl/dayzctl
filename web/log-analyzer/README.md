@@ -127,6 +127,12 @@ The world size follows the selected map; typing a number overrides it, and
 without map metadata the size is inferred from the ADM positions, rounded up to
 whole kilometres.
 
+The map zooms and pans: the wheel zooms about the pointer, dragging moves the
+view, double-click (or **Fit**) returns to the whole map. Zoom stops at 1× — the
+map can never be zoomed out past its own size — and panning is clamped to the
+map edges, so there is no empty space around it. Zooming in stops where the
+tile pyramid runs out, about 4× upscaling, instead of turning into mush.
+
 ### Map imagery and place names
 
 The Map tab shows satellite tiles plus place names for the selected map, served

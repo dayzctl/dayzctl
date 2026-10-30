@@ -85,6 +85,10 @@ const state = {
   map: {
     // 0 means "use the selected map's own extent".
     worldSize: 0,
+    // Zoom 1 fits the whole map; the view can never be zoomed out past it.
+    zoom: 1,
+    centerX: null,
+    centerY: null,
     background: null,
     backgroundSource: null,
     imageUrl: '',
