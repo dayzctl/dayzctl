@@ -1,7 +1,7 @@
 ## dayzctl configuration installed by the .deb
 ##
-## Map imagery lives in /usr/share/dayzctl/maps (shipped by this package), so
-## the analyzer reads it from disk instead of carrying a copy in the binary.
+## Map imagery is installed to /usr/share/dayzctl/maps, one of the fixed
+## locations dayzctl checks, so nothing needs to be configured for it.
 
 steam:
   username: ""
@@ -9,7 +9,6 @@ steam:
 paths:
   base: "/srv/dayz"
   install_dir: "/srv/dayz/server"
-  maps: "/usr/share/dayzctl/maps"
 
 # One entry per DayZ server. `map` must be a directory name from
 # /usr/share/dayzctl/maps (nasdara, chernarusplus, livonia, …); it defaults to

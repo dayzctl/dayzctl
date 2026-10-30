@@ -72,9 +72,14 @@ func WebAction(opts WebOptions) error {
 		errCh <- httpServer.ListenAndServe()
 	}()
 
+	mapsDir := shared.Config.GetMapsDir()
+	if mapsDir == "" {
+		mapsDir = "embedded"
+	}
 	logger.Info("Web UI listening",
 		"address", listenAddr,
 		"installDir", shared.Config.GetInstallDir(),
+		"mapsDir", mapsDir,
 		"maps", len(server.Maps()))
 	fmt.Printf("dayzctl web listening on http://%s\n", listenAddr)
 	fmt.Println("Press Ctrl+C to stop.")

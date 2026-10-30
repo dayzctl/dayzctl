@@ -1,8 +1,11 @@
-let the server read maps f# Bundled map data
+# Bundled map data
 
 Everything in this directory is generated ahead of time and embedded into the
-`dayzctl` binary with `go:embed`. The web service never downloads map data while
-it runs, so the Map tab works without internet access.
+`dayzctl` binary with `go:embed`. Release packages also ship the same files so a
+server can read them from disk instead: `dayzctl` looks next to its own binary,
+then in `/usr/local/share/dayzctl/maps`, then in `/usr/share/dayzctl/maps` (see
+the root `README.md`). The web service never downloads map data while it runs,
+so the Map tab works without internet access.
 
 46 maps ship here (33 MB): the vanilla terrains plus the community maps
 published on the map host — Chernarus, Livonia, Sakhal, Namalsk, Deer Isle,

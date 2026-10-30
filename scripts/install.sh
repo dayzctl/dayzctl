@@ -381,10 +381,12 @@ create_config() {
 # ============================================================================
 # Install map data for the log analyzer
 # ============================================================================
-# The web UI needs tiles and place names. A source checkout already has them
-# under web/log-analyzer/maps; a release install pulls the maps archive that is
-# published next to the binary. Without it the analyzer still works, it just
-# draws a coordinate grid instead of the terrain.
+# The web UI needs tiles and place names. dayzctl looks for them next to its
+# binary, in /usr/local/share/dayzctl/maps and in /usr/share/dayzctl/maps; this
+# script installs into the middle one. A source checkout already has the data
+# under web/log-analyzer/maps, a release install pulls the maps archive that
+# ships beside the binary. Without it the analyzer still works, it just draws a
+# coordinate grid instead of the terrain.
 install_maps() {
     log "installing map data for the log analyzer"
 
@@ -474,6 +476,13 @@ unpack_maps() {
 # ============================================================================
 configure_maps_path() {
     if [ ! -f "$CONFIG_PATH" ]; then
+        return 0
+    fi
+
+    # /usr/local/share/dayzctl/maps is one of the fixed locations dayzctl
+    # checks on its own, so only a custom MAPS_DIR needs to be written down.
+    if [ "$MAPS_DIR" = "/usr/local/share/dayzctl/maps" ]; then
+        log "map data is in a default location ($MAPS_DIR); no config change needed"
         return 0
     fi
 

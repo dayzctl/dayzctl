@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strings"
 
 	"gopkg.in/yaml.v3"
 )
@@ -254,22 +255,62 @@ func (c *ServerConfig) GetInstallDir() string {
 	return filepath.Join(c.GetBaseDir(), "server")
 }
 
-// GetMapsDir returns the directory holding the log analyzer's map data. It is
-// empty when the configuration does not name one and <install_dir>/maps does
-// not exist, which tells the web server to use the maps it was built with.
+// MapsDirEnv lets a test harness or a wrapper script point at map data without
+// editing the configuration.
+const MapsDirEnv = "DAYZCTL_MAPS_DIR"
+
+// GetMapsDir returns the directory holding the log analyzer's map data.
+//
+// The location is fixed rather than discovered: `paths.maps` when set, then the
+// well-known places below. An empty result means no map directory exists and
+// the web server falls back to the data compiled into the binary.
 func (c *ServerConfig) GetMapsDir() string {
-	if c.Paths.Maps != "" {
-		if filepath.IsAbs(c.Paths.Maps) {
-			return c.Paths.Maps
-		}
-		return filepath.Join(c.GetBaseDir(), c.Paths.Maps)
+	if dir := strings.TrimSpace(os.Getenv(MapsDirEnv)); dir != "" && isDir(dir) {
+		return dir
 	}
 
-	candidate := filepath.Join(c.GetInstallDir(), "maps")
-	if info, err := os.Stat(candidate); err == nil && info.IsDir() {
-		return candidate
+	if c.Paths.Maps != "" {
+		p := c.Paths.Maps
+		if !filepath.IsAbs(p) {
+			p = filepath.Join(c.GetBaseDir(), p)
+		}
+		if isDir(p) {
+			return p
+		}
+	}
+
+	for _, dir := range mapsCandidates() {
+		if isDir(dir) {
+			return dir
+		}
 	}
 	return ""
+}
+
+// mapsCandidates lists the hardcoded map locations, in priority order:
+//
+//   - next to the binary, for a portable/tarball install;
+//   - /usr/local/share/dayzctl/maps, for a locally installed copy;
+//   - /usr/share/dayzctl/maps, where the .deb puts it.
+func mapsCandidates() []string {
+	var dirs []string
+	if exe, err := os.Executable(); err == nil {
+		dirs = append(dirs, filepath.Join(filepath.Dir(exe), "maps"))
+		// Follow symlinks so /usr/local/bin/dayzctl -> /opt/dayzctl/dayzctl
+		// also finds /opt/dayzctl/maps.
+		if resolved, err := filepath.EvalSymlinks(exe); err == nil && resolved != exe {
+			dirs = append(dirs, filepath.Join(filepath.Dir(resolved), "maps"))
+		}
+	}
+	return append(dirs,
+		"/usr/local/share/dayzctl/maps",
+		"/usr/share/dayzctl/maps",
+	)
+}
+
+func isDir(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && info.IsDir()
 }
 
 // GetBackupDir returns the backup directory
