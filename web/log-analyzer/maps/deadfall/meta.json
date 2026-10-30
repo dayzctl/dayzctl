@@ -1,0 +1,237 @@
+{
+  "id": "deadfall",
+  "name": "Deadfall",
+  "size": 10240,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "Jul.6-9",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/deadfall)",
+  "generatedAt": "2026-10-30T12:29:13Z",
+  "names": [
+    {
+      "name": "Tuscarora",
+      "x": 2090.2,
+      "y": 8417.1,
+      "kind": "city"
+    },
+    {
+      "name": "Huron",
+      "x": 6121,
+      "y": 8144.1,
+      "kind": "city"
+    },
+    {
+      "name": "Cayuga",
+      "x": 8806.1,
+      "y": 3655.5,
+      "kind": "city"
+    },
+    {
+      "name": "Erie",
+      "x": 879.3,
+      "y": 8162.6,
+      "kind": "city"
+    },
+    {
+      "name": "Mohawk",
+      "x": 8434.7,
+      "y": 6860.6,
+      "kind": "city"
+    },
+    {
+      "name": "Seneca",
+      "x": 7503.5,
+      "y": 1427.7,
+      "kind": "city"
+    },
+    {
+      "name": "Ontario",
+      "x": 7688.6,
+      "y": 3021.7,
+      "kind": "capital"
+    },
+    {
+      "name": "Onondaga",
+      "x": 6347,
+      "y": 6220.3,
+      "kind": "capital"
+    },
+    {
+      "name": "Oneida",
+      "x": 2675.2,
+      "y": 6859.6,
+      "kind": "capital"
+    },
+    {
+      "name": "Algonquin",
+      "x": 4371.1,
+      "y": 7587.2,
+      "kind": "city"
+    },
+    {
+      "name": "Gas Station",
+      "x": 1396,
+      "y": 7675.5,
+      "kind": "local"
+    },
+    {
+      "name": "West Police Hq",
+      "x": 4085.6,
+      "y": 6981.9,
+      "kind": "village"
+    },
+    {
+      "name": "West Road Block",
+      "x": 5073.9,
+      "y": 6939.9,
+      "kind": "hill"
+    },
+    {
+      "name": "Net Logistics",
+      "x": 5442,
+      "y": 7024.5,
+      "kind": "village"
+    },
+    {
+      "name": "Radio Station",
+      "x": 2748.2,
+      "y": 7483.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Logging Camp",
+      "x": 5329.4,
+      "y": 7716,
+      "kind": "hill"
+    },
+    {
+      "name": "West Training Camp",
+      "x": 3003.1,
+      "y": 7966,
+      "kind": "hill"
+    },
+    {
+      "name": "Wind Farm",
+      "x": 6646.9,
+      "y": 6964.4,
+      "kind": "village"
+    },
+    {
+      "name": "East Road Block",
+      "x": 7692.3,
+      "y": 4903.4,
+      "kind": "hill"
+    },
+    {
+      "name": "Owf Industries",
+      "x": 7267.3,
+      "y": 4261.3,
+      "kind": "village"
+    },
+    {
+      "name": "East Police Hq",
+      "x": 7997.6,
+      "y": 4308.7,
+      "kind": "village"
+    },
+    {
+      "name": "Dave's Diner",
+      "x": 8086.6,
+      "y": 3691.6,
+      "kind": "hill"
+    },
+    {
+      "name": "Brickworks",
+      "x": 8750.9,
+      "y": 4348.8,
+      "kind": "village"
+    },
+    {
+      "name": "The Retreat",
+      "x": 8376.9,
+      "y": 3101,
+      "kind": "hill"
+    },
+    {
+      "name": "The Old House",
+      "x": 8360.2,
+      "y": 8591.6,
+      "kind": "hill"
+    },
+    {
+      "name": "Farmers Market",
+      "x": 8104.6,
+      "y": 3337,
+      "kind": "hill"
+    },
+    {
+      "name": "Gas Station",
+      "x": 7987,
+      "y": 2397.7,
+      "kind": "local"
+    },
+    {
+      "name": "Extraction Facility",
+      "x": 5718.8,
+      "y": 3522.2,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Communications Office",
+      "x": 5228.5,
+      "y": 5187.7,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Passage",
+      "x": 4519,
+      "y": 4333.4,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Incubation Center",
+      "x": 3870.9,
+      "y": 5862.1,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "East Training Camp",
+      "x": 8816.1,
+      "y": 2327.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Stary Kat Drive In",
+      "x": 3875.4,
+      "y": 6782.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Dead Sword Redoubt",
+      "x": 7518.9,
+      "y": 3675.4,
+      "kind": "hill"
+    },
+    {
+      "name": "Garrison Depot",
+      "x": 5887.2,
+      "y": 3964.5,
+      "kind": "local"
+    },
+    {
+      "name": "Apple Orchard",
+      "x": 6785.2,
+      "y": 5732.7,
+      "kind": "hill"
+    },
+    {
+      "name": "Boat Rental",
+      "x": 8408.6,
+      "y": 6184.2,
+      "kind": "namemarine"
+    }
+  ]
+}

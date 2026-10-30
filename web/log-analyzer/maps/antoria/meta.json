@@ -1,0 +1,903 @@
+{
+  "id": "antoria",
+  "name": "Antoria",
+  "size": 20480,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "Jul.12-2",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/antoria)",
+  "generatedAt": "2026-10-30T12:29:07Z",
+  "names": [
+    {
+      "name": "Tilberry",
+      "x": 19165.1,
+      "y": 3648.1,
+      "kind": "village"
+    },
+    {
+      "name": "Eaf",
+      "x": 18185.2,
+      "y": 6581.5,
+      "kind": "city"
+    },
+    {
+      "name": "Hydra",
+      "x": 16325.2,
+      "y": 3514.7,
+      "kind": "village"
+    },
+    {
+      "name": "Waf",
+      "x": 3135.1,
+      "y": 6791.3,
+      "kind": "city"
+    },
+    {
+      "name": "Hydro",
+      "x": 2840.3,
+      "y": 3951.7,
+      "kind": "city"
+    },
+    {
+      "name": "Docks",
+      "x": 3032,
+      "y": 3277.1,
+      "kind": "city"
+    },
+    {
+      "name": "Prison",
+      "x": 1065.6,
+      "y": 2750.9,
+      "kind": "city"
+    },
+    {
+      "name": "Tinside",
+      "x": 5156.8,
+      "y": 1932.4,
+      "kind": "village"
+    },
+    {
+      "name": "Antodam",
+      "x": 7334.5,
+      "y": 2019.7,
+      "kind": "city"
+    },
+    {
+      "name": "Nasper",
+      "x": 9429.5,
+      "y": 2774.5,
+      "kind": "city"
+    },
+    {
+      "name": "Fornhill",
+      "x": 9854.7,
+      "y": 1990.9,
+      "kind": "village"
+    },
+    {
+      "name": "Riker",
+      "x": 12460.3,
+      "y": 1934.9,
+      "kind": "village"
+    },
+    {
+      "name": "Winto",
+      "x": 16560.4,
+      "y": 1056.1,
+      "kind": "village"
+    },
+    {
+      "name": "Midway",
+      "x": 17318.4,
+      "y": 2165.6,
+      "kind": "village"
+    },
+    {
+      "name": "Piper",
+      "x": 18882.4,
+      "y": 4968.2,
+      "kind": "village"
+    },
+    {
+      "name": "Mountor",
+      "x": 15786.6,
+      "y": 854.8,
+      "kind": "village"
+    },
+    {
+      "name": "Straton",
+      "x": 15697.9,
+      "y": 2976.4,
+      "kind": "village"
+    },
+    {
+      "name": "Powlton",
+      "x": 15048,
+      "y": 5996.1,
+      "kind": "city"
+    },
+    {
+      "name": "Loxley",
+      "x": 16025.4,
+      "y": 5034,
+      "kind": "city"
+    },
+    {
+      "name": "Fornley",
+      "x": 14403.8,
+      "y": 3404.6,
+      "kind": "village"
+    },
+    {
+      "name": "Povlovo",
+      "x": 13988.5,
+      "y": 2882.6,
+      "kind": "city"
+    },
+    {
+      "name": "Swampland",
+      "x": 13628.9,
+      "y": 2335.1,
+      "kind": "village"
+    },
+    {
+      "name": "Mervy",
+      "x": 13336.5,
+      "y": 1859.4,
+      "kind": "city"
+    },
+    {
+      "name": "Riker-south",
+      "x": 12668.6,
+      "y": 1336.6,
+      "kind": "city"
+    },
+    {
+      "name": "Scouts",
+      "x": 11718,
+      "y": 3817.5,
+      "kind": "city"
+    },
+    {
+      "name": "Chalkmine",
+      "x": 11991.8,
+      "y": 5720.9,
+      "kind": "city"
+    },
+    {
+      "name": "Rosco",
+      "x": 13551.4,
+      "y": 5829,
+      "kind": "village"
+    },
+    {
+      "name": "Tinsleywatch",
+      "x": 13942.4,
+      "y": 4961.2,
+      "kind": "city"
+    },
+    {
+      "name": "Tinsley",
+      "x": 14346.7,
+      "y": 5479.5,
+      "kind": "city"
+    },
+    {
+      "name": "Tor Docks",
+      "x": 14639.5,
+      "y": 1325.3,
+      "kind": "marine"
+    },
+    {
+      "name": "Dale",
+      "x": 10482.6,
+      "y": 6243.9,
+      "kind": "village"
+    },
+    {
+      "name": "Highfield",
+      "x": 9664.5,
+      "y": 6461.5,
+      "kind": "village"
+    },
+    {
+      "name": "Lowfield",
+      "x": 9888.2,
+      "y": 5780,
+      "kind": "city"
+    },
+    {
+      "name": "Butlen",
+      "x": 12049,
+      "y": 4106.7,
+      "kind": "village"
+    },
+    {
+      "name": "Risehead",
+      "x": 12118.9,
+      "y": 3139.7,
+      "kind": "city"
+    },
+    {
+      "name": "Farmer Margets",
+      "x": 15805.8,
+      "y": 7222.9,
+      "kind": "village"
+    },
+    {
+      "name": "Waterplant",
+      "x": 3915.3,
+      "y": 3012.7,
+      "kind": "village"
+    },
+    {
+      "name": "Upperrosco",
+      "x": 12786.8,
+      "y": 6246,
+      "kind": "city"
+    },
+    {
+      "name": "Marshalls",
+      "x": 11760.4,
+      "y": 6031.2,
+      "kind": "city"
+    },
+    {
+      "name": "Sleeperswatch",
+      "x": 13857.7,
+      "y": 4406.2,
+      "kind": "village"
+    },
+    {
+      "name": "Mannor",
+      "x": 9223.3,
+      "y": 5757.3,
+      "kind": "village"
+    },
+    {
+      "name": "Dorin",
+      "x": 8469.5,
+      "y": 6193.5,
+      "kind": "village"
+    },
+    {
+      "name": "Dorin Farm",
+      "x": 8512.5,
+      "y": 3878.2,
+      "kind": "village"
+    },
+    {
+      "name": "Dorin Castle",
+      "x": 9107.5,
+      "y": 4764.5,
+      "kind": "ruin"
+    },
+    {
+      "name": "Crookes",
+      "x": 5383.4,
+      "y": 6160.4,
+      "kind": "village"
+    },
+    {
+      "name": "Boundry",
+      "x": 6541,
+      "y": 2617,
+      "kind": "village"
+    },
+    {
+      "name": "Foxlane",
+      "x": 5656.5,
+      "y": 2787.2,
+      "kind": "village"
+    },
+    {
+      "name": "Westtorin Police",
+      "x": 7970.4,
+      "y": 4789.1,
+      "kind": "city"
+    },
+    {
+      "name": "Pastybarracks",
+      "x": 5316.1,
+      "y": 3341.7,
+      "kind": "village"
+    },
+    {
+      "name": "Stepcove",
+      "x": 7972.8,
+      "y": 6286.7,
+      "kind": "village"
+    },
+    {
+      "name": "Kyro",
+      "x": 6911.6,
+      "y": 3406,
+      "kind": "village"
+    },
+    {
+      "name": "Low Edge",
+      "x": 4290.9,
+      "y": 4817,
+      "kind": "village"
+    },
+    {
+      "name": "Hilltop",
+      "x": 4195.9,
+      "y": 7634.1,
+      "kind": "hill"
+    },
+    {
+      "name": "Wisewood",
+      "x": 13917.8,
+      "y": 3803.6,
+      "kind": "village"
+    },
+    {
+      "name": "Wds",
+      "x": 1298.7,
+      "y": 6646.5,
+      "kind": "village"
+    },
+    {
+      "name": "Camp Reno",
+      "x": 4439.8,
+      "y": 6609.3,
+      "kind": "camp"
+    },
+    {
+      "name": "Crookescastle",
+      "x": 5749.2,
+      "y": 6373.6,
+      "kind": "ruin"
+    },
+    {
+      "name": "Renon",
+      "x": 6715.1,
+      "y": 6605,
+      "kind": "village"
+    },
+    {
+      "name": "Fenon",
+      "x": 7315.8,
+      "y": 6601.1,
+      "kind": "village"
+    },
+    {
+      "name": "Fishinglake",
+      "x": 9926.3,
+      "y": 5146.3,
+      "kind": "village"
+    },
+    {
+      "name": "Jackson",
+      "x": 12144.5,
+      "y": 4574.9,
+      "kind": "village"
+    },
+    {
+      "name": "Lighthouse",
+      "x": 15141.6,
+      "y": 611.6,
+      "kind": "village"
+    },
+    {
+      "name": "Camp Howard",
+      "x": 12104.9,
+      "y": 1716,
+      "kind": "camp"
+    },
+    {
+      "name": "Tuken",
+      "x": 12112,
+      "y": 1888.6,
+      "kind": "city"
+    },
+    {
+      "name": "Balon",
+      "x": 10938.8,
+      "y": 2215,
+      "kind": "city"
+    },
+    {
+      "name": "Staninton",
+      "x": 7420,
+      "y": 5843.1,
+      "kind": "village"
+    },
+    {
+      "name": "Walkley",
+      "x": 7897.1,
+      "y": 3431.6,
+      "kind": "village"
+    },
+    {
+      "name": "Torin",
+      "x": 8492.3,
+      "y": 5354.7,
+      "kind": "village"
+    },
+    {
+      "name": "Pirary",
+      "x": 8823.6,
+      "y": 6891.4,
+      "kind": "village"
+    },
+    {
+      "name": "Taleback",
+      "x": 8822.6,
+      "y": 6542.5,
+      "kind": "village"
+    },
+    {
+      "name": "Tinner",
+      "x": 4437.3,
+      "y": 6205.9,
+      "kind": "village"
+    },
+    {
+      "name": "Vencil",
+      "x": 14978.7,
+      "y": 3873.6,
+      "kind": "village"
+    },
+    {
+      "name": "Racetrack",
+      "x": 19142.6,
+      "y": 8487.9,
+      "kind": "city"
+    },
+    {
+      "name": "Vladton",
+      "x": 17951.4,
+      "y": 8333.9,
+      "kind": "city"
+    },
+    {
+      "name": "Zootoria",
+      "x": 9770.8,
+      "y": 4451.4,
+      "kind": "city"
+    },
+    {
+      "name": "Flipton",
+      "x": 7632.6,
+      "y": 4068,
+      "kind": "village"
+    },
+    {
+      "name": "Alice Hill",
+      "x": 15022.8,
+      "y": 4103.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Clair's Place",
+      "x": 17170.4,
+      "y": 5928.4,
+      "kind": "hill"
+    },
+    {
+      "name": "Brotovitch",
+      "x": 13121.1,
+      "y": 3502.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Jammer",
+      "x": 18142,
+      "y": 4805.7,
+      "kind": "hill"
+    },
+    {
+      "name": "Western",
+      "x": 16437.4,
+      "y": 4623.7,
+      "kind": "hill"
+    },
+    {
+      "name": "Ruariwalk",
+      "x": 16305,
+      "y": 6276,
+      "kind": "hill"
+    },
+    {
+      "name": "Sheriffwalk",
+      "x": 12324.6,
+      "y": 4469,
+      "kind": "hill"
+    },
+    {
+      "name": "Bundai",
+      "x": 10316.4,
+      "y": 4444.2,
+      "kind": "hill"
+    },
+    {
+      "name": "Past1e",
+      "x": 9318.3,
+      "y": 4072.7,
+      "kind": "hill"
+    },
+    {
+      "name": "Latina",
+      "x": 17083.6,
+      "y": 4285,
+      "kind": "capital"
+    },
+    {
+      "name": "Checkpoint 1",
+      "x": 18984.9,
+      "y": 5629.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Checkpoint 2",
+      "x": 17587.8,
+      "y": 2707.4,
+      "kind": "hill"
+    },
+    {
+      "name": "Checkpoint 3",
+      "x": 15071.7,
+      "y": 1943.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Checkpoint 4",
+      "x": 8079,
+      "y": 2032,
+      "kind": "hill"
+    },
+    {
+      "name": "Checkpoint 5",
+      "x": 4285.8,
+      "y": 4033.6,
+      "kind": "hill"
+    },
+    {
+      "name": "Checkpoint 6",
+      "x": 5326,
+      "y": 6689.7,
+      "kind": "hill"
+    },
+    {
+      "name": "Checkpoint 7",
+      "x": 8583.4,
+      "y": 6412.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Checkpoint 8",
+      "x": 13583.1,
+      "y": 5470.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Checkpoint 9",
+      "x": 14577.2,
+      "y": 5481.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Ruari Barrack",
+      "x": 15632.1,
+      "y": 6258.1,
+      "kind": "hill"
+    },
+    {
+      "name": "Fallstar",
+      "x": 17223.6,
+      "y": 5170.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Latina Railstation",
+      "x": 17424.2,
+      "y": 3306.9,
+      "kind": "railroadstation"
+    },
+    {
+      "name": "Farway",
+      "x": 18270.9,
+      "y": 3089.2,
+      "kind": "hill"
+    },
+    {
+      "name": "Enya",
+      "x": 15582.9,
+      "y": 7958.6,
+      "kind": "hill"
+    },
+    {
+      "name": "Tanny",
+      "x": 15842,
+      "y": 7822.1,
+      "kind": "hill"
+    },
+    {
+      "name": "Torik",
+      "x": 11048.3,
+      "y": 8771.3,
+      "kind": "city"
+    },
+    {
+      "name": "Naf",
+      "x": 9203.5,
+      "y": 9389.8,
+      "kind": "city"
+    },
+    {
+      "name": "Research Facility",
+      "x": 9500.9,
+      "y": 9777.5,
+      "kind": "city"
+    },
+    {
+      "name": "Haven",
+      "x": 9339.1,
+      "y": 10667,
+      "kind": "marine"
+    },
+    {
+      "name": "Ski-resort",
+      "x": 5998,
+      "y": 9129.5,
+      "kind": "local"
+    },
+    {
+      "name": "Devilsarse",
+      "x": 5347.8,
+      "y": 9227.1,
+      "kind": "city"
+    },
+    {
+      "name": "Sas Camp",
+      "x": 2259.7,
+      "y": 8143.9,
+      "kind": "camp"
+    },
+    {
+      "name": "Waterway",
+      "x": 6640.8,
+      "y": 7758.9,
+      "kind": "hill"
+    },
+    {
+      "name": "Sector 12",
+      "x": 16249.3,
+      "y": 16613.9,
+      "kind": "city"
+    },
+    {
+      "name": "Checkpoint 10",
+      "x": 13478.3,
+      "y": 3411.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Foundry",
+      "x": 18837.7,
+      "y": 6770,
+      "kind": "hill"
+    },
+    {
+      "name": "Sjhohn",
+      "x": 12201,
+      "y": 7967.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Lonewatch",
+      "x": 9742.5,
+      "y": 8747.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Tyson Camp",
+      "x": 13952,
+      "y": 1358.7,
+      "kind": "camp"
+    },
+    {
+      "name": "Red Henry",
+      "x": 18647.1,
+      "y": 1878.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Checkpoint 11",
+      "x": 10715.7,
+      "y": 2672.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Prisoncamp",
+      "x": 12245.3,
+      "y": 10035.4,
+      "kind": "camp"
+    },
+    {
+      "name": "Stbern",
+      "x": 6896.3,
+      "y": 5934.6,
+      "kind": "hill"
+    },
+    {
+      "name": "Aloy",
+      "x": 6642.3,
+      "y": 5132.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Checkpoint 12",
+      "x": 10717.8,
+      "y": 6038.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Checkpoint 13",
+      "x": 16693.9,
+      "y": 2378.8,
+      "kind": "hill"
+    },
+    {
+      "name": "St Paul",
+      "x": 10128,
+      "y": 8646,
+      "kind": "hill"
+    },
+    {
+      "name": "Checkpoint 14",
+      "x": 8484.9,
+      "y": 4630.4,
+      "kind": "hill"
+    },
+    {
+      "name": "Elektrovodka's Cabin",
+      "x": 4030.9,
+      "y": 8439.6,
+      "kind": "hill"
+    },
+    {
+      "name": "Owl's Prison",
+      "x": 8825.9,
+      "y": 9707.6,
+      "kind": "hill"
+    },
+    {
+      "name": "Nuketown",
+      "x": 4296.5,
+      "y": 15160,
+      "kind": "capital"
+    },
+    {
+      "name": "Vodka Isle",
+      "x": 3347.1,
+      "y": 1035.7,
+      "kind": "hill"
+    },
+    {
+      "name": "Isle Of Crumpet",
+      "x": 8846.2,
+      "y": 15731.9,
+      "kind": "capital"
+    },
+    {
+      "name": "Skaerheim",
+      "x": 19603.1,
+      "y": 857,
+      "kind": "camp"
+    },
+    {
+      "name": "Klei",
+      "x": 8287,
+      "y": 15254,
+      "kind": "hill"
+    },
+    {
+      "name": "Moon Castle",
+      "x": 8439.6,
+      "y": 15600.8,
+      "kind": "ruin"
+    },
+    {
+      "name": "Quayside",
+      "x": 9110,
+      "y": 15712.9,
+      "kind": "village"
+    },
+    {
+      "name": "Millhouses",
+      "x": 9432.9,
+      "y": 15788.1,
+      "kind": "village"
+    },
+    {
+      "name": "Camp Loch",
+      "x": 9601.5,
+      "y": 15653.7,
+      "kind": "city"
+    },
+    {
+      "name": "Sherness",
+      "x": 17657.4,
+      "y": 1256.8,
+      "kind": "city"
+    },
+    {
+      "name": "Rog",
+      "x": 9161.6,
+      "y": 16190,
+      "kind": "city"
+    },
+    {
+      "name": "Fisherwick",
+      "x": 1600,
+      "y": 12364.2,
+      "kind": "marine"
+    },
+    {
+      "name": "Rookridge",
+      "x": 1185.1,
+      "y": 16840.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Alderwick Complex",
+      "x": 1984.2,
+      "y": 17596.6,
+      "kind": "camp"
+    },
+    {
+      "name": "Northmere",
+      "x": 6654.9,
+      "y": 17726.8,
+      "kind": "village"
+    },
+    {
+      "name": "Tarnley",
+      "x": 8683.9,
+      "y": 19488.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Oakfall",
+      "x": 11933.6,
+      "y": 19125.4,
+      "kind": "village"
+    },
+    {
+      "name": "Ravenshott",
+      "x": 13279.3,
+      "y": 19211,
+      "kind": "city"
+    },
+    {
+      "name": "Ironhaugh Airfield",
+      "x": 14530.1,
+      "y": 18461.1,
+      "kind": "city"
+    },
+    {
+      "name": "Ashenford Facility",
+      "x": 19777.1,
+      "y": 18207.8,
+      "kind": "camp"
+    },
+    {
+      "name": "Sheffer",
+      "x": 2610.3,
+      "y": 18017.2,
+      "kind": "village"
+    },
+    {
+      "name": "Checkpoint 15",
+      "x": 6194.7,
+      "y": 18386.7,
+      "kind": "hill"
+    }
+  ]
+}

@@ -1,0 +1,327 @@
+{
+  "id": "avalon",
+  "name": "Avalon",
+  "size": 20480,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "Apr.9-4",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/avalon)",
+  "generatedAt": "2026-10-30T12:29:09Z",
+  "names": [
+    {
+      "name": "Avalon",
+      "x": 17956,
+      "y": 7605,
+      "kind": "capital"
+    },
+    {
+      "name": "Descanso Bay Resort",
+      "x": 17845,
+      "y": 8203,
+      "kind": "village"
+    },
+    {
+      "name": "Sentinel Ind. Complex",
+      "x": 10160,
+      "y": 9805,
+      "kind": "village"
+    },
+    {
+      "name": "Playa Azul",
+      "x": 17601,
+      "y": 8516,
+      "kind": "village"
+    },
+    {
+      "name": "Bannings Beach",
+      "x": 16291,
+      "y": 9859,
+      "kind": "village"
+    },
+    {
+      "name": "Gallagher Beach",
+      "x": 16654,
+      "y": 9501,
+      "kind": "village"
+    },
+    {
+      "name": "Soledad",
+      "x": 9650,
+      "y": 13400,
+      "kind": "marine"
+    },
+    {
+      "name": "Playa Escondido",
+      "x": 15237,
+      "y": 11118,
+      "kind": "village"
+    },
+    {
+      "name": "Usc Wrigley Institute",
+      "x": 8100,
+      "y": 14918,
+      "kind": "village"
+    },
+    {
+      "name": "Two Harbors",
+      "x": 7000,
+      "y": 14518,
+      "kind": "village"
+    },
+    {
+      "name": "Pebbly Beach",
+      "x": 18965,
+      "y": 7100,
+      "kind": "village"
+    },
+    {
+      "name": "Tierra Del Sol Winery",
+      "x": 10177,
+      "y": 10663,
+      "kind": "village"
+    },
+    {
+      "name": "China Point",
+      "x": 11893,
+      "y": 5879,
+      "kind": "hill"
+    },
+    {
+      "name": "Mount Orizaba",
+      "x": 12174,
+      "y": 9875,
+      "kind": "hill"
+    },
+    {
+      "name": "Blackjack Mountain",
+      "x": 13382,
+      "y": 10749,
+      "kind": "hill"
+    },
+    {
+      "name": "Whales Tail",
+      "x": 8662,
+      "y": 10598,
+      "kind": "hill"
+    },
+    {
+      "name": "Cactus Peak",
+      "x": 9806,
+      "y": 7952,
+      "kind": "hill"
+    },
+    {
+      "name": "Pebbly Beach Quarry",
+      "x": 19178,
+      "y": 5687,
+      "kind": "village"
+    },
+    {
+      "name": "Buffalo Springs Airport",
+      "x": 12435,
+      "y": 11915,
+      "kind": "village"
+    },
+    {
+      "name": "Middle Ranch",
+      "x": 10728,
+      "y": 8448,
+      "kind": "village"
+    },
+    {
+      "name": "Dmnd Security Depot",
+      "x": 16627,
+      "y": 8613,
+      "kind": "militarybase"
+    },
+    {
+      "name": "Dmnd Airfield",
+      "x": 14984,
+      "y": 6067,
+      "kind": "militarybase"
+    },
+    {
+      "name": "Hilltop",
+      "x": 17418,
+      "y": 5814,
+      "kind": "militarybase"
+    },
+    {
+      "name": "Campamento Del Sur",
+      "x": 18660,
+      "y": 4762,
+      "kind": "camp"
+    },
+    {
+      "name": "Sentinel Campground",
+      "x": 8456,
+      "y": 9595,
+      "kind": "camp"
+    },
+    {
+      "name": "Sullivan's Beach",
+      "x": 5615,
+      "y": 16163,
+      "kind": "camp"
+    },
+    {
+      "name": "Playa Chanclito",
+      "x": 6700,
+      "y": 15430,
+      "kind": "camp"
+    },
+    {
+      "name": "Camp Wrigley",
+      "x": 17353,
+      "y": 6669,
+      "kind": "camp"
+    },
+    {
+      "name": "Jade Lake Camp",
+      "x": 10609,
+      "y": 10252,
+      "kind": "camp"
+    },
+    {
+      "name": "Little Harbor Campground",
+      "x": 8798,
+      "y": 10773,
+      "kind": "camp"
+    },
+    {
+      "name": "Baseball Stadium",
+      "x": 17495,
+      "y": 6845,
+      "kind": "local"
+    },
+    {
+      "name": "Checkpoint Alpha",
+      "x": 17600,
+      "y": 7797,
+      "kind": "militarybase"
+    },
+    {
+      "name": "Checkpoint Bravo",
+      "x": 17593,
+      "y": 8052,
+      "kind": "militarybase"
+    },
+    {
+      "name": "Wrigley Reservoir",
+      "x": 16284,
+      "y": 8307,
+      "kind": "marine"
+    },
+    {
+      "name": "Water Treatment",
+      "x": 11557,
+      "y": 13039,
+      "kind": "marine"
+    },
+    {
+      "name": "Little Harbor",
+      "x": 8371,
+      "y": 10520,
+      "kind": "marine"
+    },
+    {
+      "name": "Edison Solar Farm",
+      "x": 9903,
+      "y": 6895,
+      "kind": "marine"
+    },
+    {
+      "name": "West End",
+      "x": 381,
+      "y": 17331,
+      "kind": "marine"
+    },
+    {
+      "name": "Platform Alpha",
+      "x": 4576,
+      "y": 19288,
+      "kind": "marine"
+    },
+    {
+      "name": "Platform Bravo",
+      "x": 10104,
+      "y": 17043,
+      "kind": "marine"
+    },
+    {
+      "name": "Platform Charlie",
+      "x": 5359,
+      "y": 11223,
+      "kind": "marine"
+    },
+    {
+      "name": "Rippers Cove",
+      "x": 10779,
+      "y": 13698,
+      "kind": "marine"
+    },
+    {
+      "name": "Island Salvage",
+      "x": 8961,
+      "y": 13484,
+      "kind": "marine"
+    },
+    {
+      "name": "Sentinel Rock",
+      "x": 7883,
+      "y": 9748,
+      "kind": "marine"
+    },
+    {
+      "name": "Seal Rock",
+      "x": 19456,
+      "y": 5037,
+      "kind": "marine"
+    },
+    {
+      "name": "Descanso Bay",
+      "x": 18105,
+      "y": 8262,
+      "kind": "marine"
+    },
+    {
+      "name": "Avalon Bay",
+      "x": 18240,
+      "y": 7862,
+      "kind": "marine"
+    },
+    {
+      "name": "Lover's Cove",
+      "x": 18502,
+      "y": 7666,
+      "kind": "marine"
+    },
+    {
+      "name": "Silver Canyon Landing",
+      "x": 13213,
+      "y": 6048,
+      "kind": "marine"
+    },
+    {
+      "name": "Blackjack Valley",
+      "x": 13436,
+      "y": 9578,
+      "kind": "marine"
+    },
+    {
+      "name": "Salar Del Sureste",
+      "x": 9916,
+      "y": 6242,
+      "kind": "marine"
+    },
+    {
+      "name": "Bahía De Los Invasores",
+      "x": 14002,
+      "y": 5941,
+      "kind": "marine"
+    }
+  ]
+}

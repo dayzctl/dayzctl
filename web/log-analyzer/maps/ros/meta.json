@@ -1,0 +1,297 @@
+{
+  "id": "ros",
+  "name": "Ros",
+  "size": 20480,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "Jul.28-11",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/ros)",
+  "generatedAt": "2026-10-30T12:32:40Z",
+  "names": [
+    {
+      "name": "��аза ��тдыха (camp)",
+      "x": 1604.2,
+      "y": 1180.7,
+      "kind": "camp"
+    },
+    {
+      "name": "��олхоз (kolhoz)",
+      "x": 2529.5,
+      "y": 2193.1,
+      "kind": "local"
+    },
+    {
+      "name": "��тарая ��репость (the Old Fortress)",
+      "x": 1068.1,
+      "y": 3265.3,
+      "kind": "ruin"
+    },
+    {
+      "name": "��агорное (nagornoe)",
+      "x": 2538.7,
+      "y": 1126.9,
+      "kind": "village"
+    },
+    {
+      "name": "��ладкий ��ерег (gladkiy Bereg)",
+      "x": 3117.1,
+      "y": 1436.3,
+      "kind": "village"
+    },
+    {
+      "name": "��аздолье (razdolye)",
+      "x": 1806.7,
+      "y": 2385.8,
+      "kind": "village"
+    },
+    {
+      "name": "��зёрное (ozernoe)",
+      "x": 1702.8,
+      "y": 2886.1,
+      "kind": "village"
+    },
+    {
+      "name": "��уков (jukov)",
+      "x": 2715.1,
+      "y": 3297.6,
+      "kind": "city"
+    },
+    {
+      "name": "��ерма (farm)",
+      "x": 2623.3,
+      "y": 2830.9,
+      "kind": "vegetationbroadleaf"
+    },
+    {
+      "name": "��орностаев (gornostaev)",
+      "x": 2008.2,
+      "y": 7753.1,
+      "kind": "capital"
+    },
+    {
+      "name": "��апаево (chapaevo)",
+      "x": 1963.5,
+      "y": 6154.4,
+      "kind": "village"
+    },
+    {
+      "name": "��етрово (petrovo)",
+      "x": 3290.4,
+      "y": 6844.7,
+      "kind": "village"
+    },
+    {
+      "name": "��рутое (krutoe)",
+      "x": 3587.9,
+      "y": 8792.5,
+      "kind": "village"
+    },
+    {
+      "name": "��рынки (krynki)",
+      "x": 2341.9,
+      "y": 9676.2,
+      "kind": "village"
+    },
+    {
+      "name": "��агерь ��тдыха (camp)",
+      "x": 602.1,
+      "y": 9692.5,
+      "kind": "camp"
+    },
+    {
+      "name": "��олхоз (kolhoz)",
+      "x": 2324.7,
+      "y": 6018.3,
+      "kind": "local"
+    },
+    {
+      "name": "��ерма (farm)",
+      "x": 2680.9,
+      "y": 6274.4,
+      "kind": "vegetationbroadleaf"
+    },
+    {
+      "name": "��есопилка (sawmill)",
+      "x": 3771,
+      "y": 7176.9,
+      "kind": "industrialsite"
+    },
+    {
+      "name": "��ахта ��мени ��енина (lenin Mine)",
+      "x": 3208.3,
+      "y": 7694.1,
+      "kind": "industrialsite"
+    },
+    {
+      "name": "��рест (cross)",
+      "x": 5197.2,
+      "y": 7970,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "��язино (vyazino)",
+      "x": 6776.5,
+      "y": 11151.5,
+      "kind": "city"
+    },
+    {
+      "name": "��аки (saki)",
+      "x": 6746.2,
+      "y": 10623.9,
+      "kind": "village"
+    },
+    {
+      "name": "��оговое (rogovoe)",
+      "x": 6934.9,
+      "y": 15207.7,
+      "kind": "village"
+    },
+    {
+      "name": "��олмовка (holmovka)",
+      "x": 4489.8,
+      "y": 11979.4,
+      "kind": "village"
+    },
+    {
+      "name": "��есозаготовка (logging)",
+      "x": 5358.7,
+      "y": 10765.6,
+      "kind": "industrialsite"
+    },
+    {
+      "name": "��рактир (the Inn)",
+      "x": 3654.2,
+      "y": 10943.4,
+      "kind": "local"
+    },
+    {
+      "name": "��есозавод (sawmill)",
+      "x": 7243.6,
+      "y": 10525.1,
+      "kind": "industrialsite"
+    },
+    {
+      "name": "��тшельник (hermit)",
+      "x": 8183.8,
+      "y": 11500.8,
+      "kind": "local"
+    },
+    {
+      "name": "��ертвые ��опи (dead Marshes)",
+      "x": 8595.8,
+      "y": 12334.7,
+      "kind": "local"
+    },
+    {
+      "name": "��одник (the Spring)",
+      "x": 1563.3,
+      "y": 9965.7,
+      "kind": "local"
+    },
+    {
+      "name": "��оенная ��аза (military Base)",
+      "x": 7612.7,
+      "y": 13142.5,
+      "kind": "military"
+    },
+    {
+      "name": "��агерь ��тдыха (camp)",
+      "x": 7772.5,
+      "y": 14144.3,
+      "kind": "camp"
+    },
+    {
+      "name": "��ышковичи (myshkovichi)",
+      "x": 8171.6,
+      "y": 10631.9,
+      "kind": "village"
+    },
+    {
+      "name": "��есчанка (peschanka)",
+      "x": 4578.4,
+      "y": 10815.1,
+      "kind": "village"
+    },
+    {
+      "name": "��енинский (leninsky)",
+      "x": 8945.2,
+      "y": 9824.7,
+      "kind": "city"
+    },
+    {
+      "name": "��олхоз (kolhoz)",
+      "x": 9544.5,
+      "y": 12578.8,
+      "kind": "local"
+    },
+    {
+      "name": "��адар (radar)",
+      "x": 11088.8,
+      "y": 11248.2,
+      "kind": "local"
+    },
+    {
+      "name": "��о ��гк (ao Rgk)",
+      "x": 9334.8,
+      "y": 15377.4,
+      "kind": "industrialsite"
+    },
+    {
+      "name": "��ор (bor)",
+      "x": 8544.6,
+      "y": 15417.6,
+      "kind": "village"
+    },
+    {
+      "name": "��адовый (sadovy)",
+      "x": 8265.7,
+      "y": 16083.3,
+      "kind": "village"
+    },
+    {
+      "name": "��агерь ��тдыха (camp)",
+      "x": 6033.7,
+      "y": 12023.4,
+      "kind": "camp"
+    },
+    {
+      "name": "��одгорное (podgornoe)",
+      "x": 8754.3,
+      "y": 17881.4,
+      "kind": "village"
+    },
+    {
+      "name": "��ерма (farm)",
+      "x": 9284.7,
+      "y": 17464.3,
+      "kind": "vegetationbroadleaf"
+    },
+    {
+      "name": "��одгорье (podgorye)",
+      "x": 10176.7,
+      "y": 17574.8,
+      "kind": "city"
+    },
+    {
+      "name": "��оса (kosa)",
+      "x": 8940.4,
+      "y": 8675.8,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "��аяк (lighthouse)",
+      "x": 8140.8,
+      "y": 8320.9,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "��амба (dam)",
+      "x": 11472.2,
+      "y": 9997.3,
+      "kind": "viewpoint"
+    }
+  ]
+}

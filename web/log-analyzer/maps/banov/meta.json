@@ -1,0 +1,837 @@
+{
+  "id": "banov",
+  "name": "Banov",
+  "size": 15360,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "Jun.15",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/banov)",
+  "generatedAt": "2026-10-30T12:37:35Z",
+  "names": [
+    {
+      "name": "Dubnicka",
+      "x": 9282.2,
+      "y": 6562.5,
+      "kind": "village"
+    },
+    {
+      "name": "Dvorec",
+      "x": 3680.8,
+      "y": 609.8,
+      "kind": "village"
+    },
+    {
+      "name": "Jankov Vrsok",
+      "x": 13832.3,
+      "y": 3724.4,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Banovce Nad Bebravou",
+      "x": 6055.7,
+      "y": 1895.1,
+      "kind": "city"
+    },
+    {
+      "name": "Miezgovce",
+      "x": 9901.9,
+      "y": 1650.4,
+      "kind": "village"
+    },
+    {
+      "name": "Snowraven Mills",
+      "x": 6965.2,
+      "y": 4410.5,
+      "kind": "marine"
+    },
+    {
+      "name": "Biskupice",
+      "x": 4906,
+      "y": 440.1,
+      "kind": "village"
+    },
+    {
+      "name": "Red Farm",
+      "x": 5017.8,
+      "y": 199,
+      "kind": "flatareacitysmall"
+    },
+    {
+      "name": "Rhubarbs Rest",
+      "x": 875.3,
+      "y": 803.5,
+      "kind": "marine"
+    },
+    {
+      "name": "Mouse",
+      "x": 1055.1,
+      "y": 264,
+      "kind": "hill"
+    },
+    {
+      "name": "Ruskovce",
+      "x": 1313.8,
+      "y": 4224.8,
+      "kind": "village"
+    },
+    {
+      "name": "Pepelova Military",
+      "x": 313.4,
+      "y": 5908.1,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Horne Ozorovce",
+      "x": 4417.2,
+      "y": 3539.4,
+      "kind": "village"
+    },
+    {
+      "name": "Pixelpirate Pines",
+      "x": 6950.2,
+      "y": 3586.9,
+      "kind": "hill"
+    },
+    {
+      "name": "Hrabice",
+      "x": 1998.4,
+      "y": 11792.1,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Latkovce",
+      "x": 13083.3,
+      "y": 560.9,
+      "kind": "village"
+    },
+    {
+      "name": "Velke Drzkovce",
+      "x": 537.8,
+      "y": 2835.7,
+      "kind": "village"
+    },
+    {
+      "name": "Wolf",
+      "x": 6099.8,
+      "y": 1197.8,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Horne Nastice",
+      "x": 8850.3,
+      "y": 3176.3,
+      "kind": "village"
+    },
+    {
+      "name": "Sliezska Osada",
+      "x": 2287.1,
+      "y": 2162.5,
+      "kind": "village"
+    },
+    {
+      "name": "Prusy",
+      "x": 6184.2,
+      "y": 5374,
+      "kind": "village"
+    },
+    {
+      "name": "Podluzany",
+      "x": 4880.2,
+      "y": 6758.9,
+      "kind": "village"
+    },
+    {
+      "name": "Lutov",
+      "x": 7780.6,
+      "y": 7697.2,
+      "kind": "village"
+    },
+    {
+      "name": "Overgrown Military",
+      "x": 8130.1,
+      "y": 9819.2,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Bobot",
+      "x": 1419.3,
+      "y": 10471.5,
+      "kind": "village"
+    },
+    {
+      "name": "Sissi",
+      "x": 731.4,
+      "y": 11087.7,
+      "kind": "marine"
+    },
+    {
+      "name": "Dolne Motesice",
+      "x": 372.1,
+      "y": 11725.6,
+      "kind": "village"
+    },
+    {
+      "name": "Hornany",
+      "x": 1823.2,
+      "y": 7977.4,
+      "kind": "village"
+    },
+    {
+      "name": "Hotel Delta",
+      "x": 671.9,
+      "y": 7156.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Vlckovo",
+      "x": 2132.6,
+      "y": 6301.4,
+      "kind": "village"
+    },
+    {
+      "name": "Punisherstower",
+      "x": 863.9,
+      "y": 13277.6,
+      "kind": "hill"
+    },
+    {
+      "name": "Slatina Nad Bebravou",
+      "x": 6603.2,
+      "y": 13756.4,
+      "kind": "village"
+    },
+    {
+      "name": "Trebichava",
+      "x": 9124.1,
+      "y": 12311.6,
+      "kind": "village"
+    },
+    {
+      "name": "Military Tisovik",
+      "x": 12038.2,
+      "y": 14935.3,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Zavada Pod Ciernym Vrchom",
+      "x": 13095.5,
+      "y": 12496.6,
+      "kind": "village"
+    },
+    {
+      "name": "Petra",
+      "x": 3535.1,
+      "y": 9928.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Luckys Castle",
+      "x": 8882.5,
+      "y": 13158.1,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Lom Podluzany",
+      "x": 5870.5,
+      "y": 9404.2,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Barok Lom",
+      "x": 5171.9,
+      "y": 10328.1,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Mel",
+      "x": 7366.5,
+      "y": 13715.1,
+      "kind": "hill"
+    },
+    {
+      "name": "Buds Lake",
+      "x": 526.6,
+      "y": 14564,
+      "kind": "local"
+    },
+    {
+      "name": "Catherine Antena",
+      "x": 14635.1,
+      "y": 15056.1,
+      "kind": "hill"
+    },
+    {
+      "name": "Outpost Brana",
+      "x": 6189.3,
+      "y": 2033.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Alica",
+      "x": 4982.9,
+      "y": 4881.2,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Negans Sanctuary",
+      "x": 2023.5,
+      "y": 9470.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Ksinna",
+      "x": 12716.4,
+      "y": 10970.5,
+      "kind": "village"
+    },
+    {
+      "name": "Zitna Radisa",
+      "x": 12152.5,
+      "y": 7008,
+      "kind": "village"
+    },
+    {
+      "name": "Uhrovec",
+      "x": 11778.3,
+      "y": 4110.6,
+      "kind": "village"
+    },
+    {
+      "name": "Timoradza",
+      "x": 4565.5,
+      "y": 10960.1,
+      "kind": "village"
+    },
+    {
+      "name": "Omastina",
+      "x": 14073.3,
+      "y": 6759.1,
+      "kind": "village"
+    },
+    {
+      "name": "Bazilake",
+      "x": 14097.2,
+      "y": 6648.6,
+      "kind": "marine"
+    },
+    {
+      "name": "Liana",
+      "x": 14450,
+      "y": 12678.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Ironhold Keep",
+      "x": 14307.3,
+      "y": 5224.2,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Easthaven",
+      "x": 14503.7,
+      "y": 9666.4,
+      "kind": "hill"
+    },
+    {
+      "name": "Rabbit",
+      "x": 13321.7,
+      "y": 11543.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Radio North Exile",
+      "x": 10878.9,
+      "y": 12654.6,
+      "kind": "hill"
+    },
+    {
+      "name": "Sunshine Place",
+      "x": 13820.3,
+      "y": 9174.5,
+      "kind": "marine"
+    },
+    {
+      "name": "Tower Orion",
+      "x": 13072,
+      "y": 10289,
+      "kind": "hill"
+    },
+    {
+      "name": "M B Barmby",
+      "x": 875.5,
+      "y": 8984.4,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Fort Leroy",
+      "x": 14790.2,
+      "y": 13893.4,
+      "kind": "hill"
+    },
+    {
+      "name": "Trident Industrial",
+      "x": 6448.5,
+      "y": 14991.9,
+      "kind": "hill"
+    },
+    {
+      "name": "Pineland",
+      "x": 7706,
+      "y": 11017.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Svinna",
+      "x": 14637.5,
+      "y": 14459.9,
+      "kind": "village"
+    },
+    {
+      "name": "Overamuse",
+      "x": 13083.7,
+      "y": 12855,
+      "kind": "marine"
+    },
+    {
+      "name": "Gray Matter Camp",
+      "x": 2818.2,
+      "y": 15298.4,
+      "kind": "hill"
+    },
+    {
+      "name": "Cels Fish Pond",
+      "x": 2457.9,
+      "y": 13234.1,
+      "kind": "marine"
+    },
+    {
+      "name": "Therunningmanz Industrial",
+      "x": 153.8,
+      "y": 7976.6,
+      "kind": "hill"
+    },
+    {
+      "name": "Lake Shadow",
+      "x": 4857.9,
+      "y": 9332.4,
+      "kind": "marine"
+    },
+    {
+      "name": "Motesice",
+      "x": 918.8,
+      "y": 13020.4,
+      "kind": "village"
+    },
+    {
+      "name": "Huntsmen Complex",
+      "x": 11857.9,
+      "y": 9039.8,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Cobra",
+      "x": 14892.8,
+      "y": 607.9,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Joshua Camp",
+      "x": 15221.9,
+      "y": 2797.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Hrad Morten",
+      "x": 12492.8,
+      "y": 12450.3,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Green Camp",
+      "x": 1716.4,
+      "y": 808.7,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Fort Mint",
+      "x": 8629.9,
+      "y": 10997.3,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Lean",
+      "x": 9666.8,
+      "y": 3748,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Camp Fortuna",
+      "x": 11931.3,
+      "y": 3231,
+      "kind": "hill"
+    },
+    {
+      "name": "Nove Spoli",
+      "x": 8226.5,
+      "y": 13821.6,
+      "kind": "hill"
+    },
+    {
+      "name": "Skol",
+      "x": 14845.5,
+      "y": 11989.2,
+      "kind": "hill"
+    },
+    {
+      "name": "Leiaria",
+      "x": 6294.3,
+      "y": 12131.7,
+      "kind": "marine"
+    },
+    {
+      "name": "Amos Cave",
+      "x": 8827.2,
+      "y": 14930,
+      "kind": "hill"
+    },
+    {
+      "name": "Victoria Lodge",
+      "x": 8740.1,
+      "y": 1650.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Arrrz Industrial",
+      "x": 1180.8,
+      "y": 10084.4,
+      "kind": "hill"
+    },
+    {
+      "name": "Boesen Lake",
+      "x": 14743.6,
+      "y": 10800,
+      "kind": "hill"
+    },
+    {
+      "name": "Elnavajas Lake",
+      "x": 11467.2,
+      "y": 10764,
+      "kind": "marine"
+    },
+    {
+      "name": "Congregation Lake",
+      "x": 5080.3,
+      "y": 4828.8,
+      "kind": "marine"
+    },
+    {
+      "name": "Joy Lake",
+      "x": 8814.8,
+      "y": 7909,
+      "kind": "marine"
+    },
+    {
+      "name": "Booky",
+      "x": 11882.7,
+      "y": 11309,
+      "kind": "marine"
+    },
+    {
+      "name": "Goofs",
+      "x": 3801.1,
+      "y": 8923.7,
+      "kind": "marine"
+    },
+    {
+      "name": "Diesalotol",
+      "x": 12578.2,
+      "y": 7940.5,
+      "kind": "marine"
+    },
+    {
+      "name": "Eaglesnest",
+      "x": 5470.7,
+      "y": 12936.6,
+      "kind": "marine"
+    },
+    {
+      "name": "Alpha Crest",
+      "x": 14745.8,
+      "y": 6570.6,
+      "kind": "hill"
+    },
+    {
+      "name": "Regimen Armado",
+      "x": 3828.8,
+      "y": 14239.9,
+      "kind": "marine"
+    },
+    {
+      "name": "Koukolai",
+      "x": 1043.1,
+      "y": 13494.5,
+      "kind": "marine"
+    },
+    {
+      "name": "Home Of Prkl",
+      "x": 6351.1,
+      "y": 9677.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Insanity Lake",
+      "x": 5189.1,
+      "y": 10268.7,
+      "kind": "marine"
+    },
+    {
+      "name": "Deg",
+      "x": 11133,
+      "y": 8537.6,
+      "kind": "marine"
+    },
+    {
+      "name": "Lostlake",
+      "x": 11377,
+      "y": 676.2,
+      "kind": "marine"
+    },
+    {
+      "name": "Savaena",
+      "x": 8928.2,
+      "y": 6174.1,
+      "kind": "marine"
+    },
+    {
+      "name": "Astrovill Lake",
+      "x": 6027,
+      "y": 14088.8,
+      "kind": "marine"
+    },
+    {
+      "name": "Parzival",
+      "x": 14840,
+      "y": 14997.6,
+      "kind": "marine"
+    },
+    {
+      "name": "Reservoir",
+      "x": 2594.6,
+      "y": 944,
+      "kind": "marine"
+    },
+    {
+      "name": "Wrecker",
+      "x": 8929.1,
+      "y": 14937.4,
+      "kind": "marine"
+    },
+    {
+      "name": "Archon",
+      "x": 12338.9,
+      "y": 14908.2,
+      "kind": "marine"
+    },
+    {
+      "name": "Arsteinen",
+      "x": 1114.2,
+      "y": 6711.9,
+      "kind": "marine"
+    },
+    {
+      "name": "Lad Ness Monster",
+      "x": 3103.5,
+      "y": 7726,
+      "kind": "marine"
+    },
+    {
+      "name": "Katapan",
+      "x": 5120.6,
+      "y": 8862.8,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Col. Flankz Radar Station",
+      "x": 2763.5,
+      "y": 8772.9,
+      "kind": "hill"
+    },
+    {
+      "name": "Camp Spartan",
+      "x": 1085.4,
+      "y": 6264.7,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Archon X",
+      "x": 3579.1,
+      "y": 12508.5,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Kat's Lake",
+      "x": 9883.6,
+      "y": 10507,
+      "kind": "marine"
+    },
+    {
+      "name": "Maccas",
+      "x": 13154.6,
+      "y": 683,
+      "kind": "marine"
+    },
+    {
+      "name": "Brasil",
+      "x": 14084.1,
+      "y": 2291.1,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Green Mountain",
+      "x": 2476.7,
+      "y": 14058.9,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Nahodne Rabovat",
+      "x": 332.3,
+      "y": 14422,
+      "kind": "hill"
+    },
+    {
+      "name": "Tha Dirty Dogz Rock",
+      "x": 9964.4,
+      "y": 10947.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Bud`s Place",
+      "x": 12804.1,
+      "y": 13489.2,
+      "kind": "hill"
+    },
+    {
+      "name": "Misfit Mercenaries Fob",
+      "x": 13208,
+      "y": 1281.7,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Lazarus",
+      "x": 9493.8,
+      "y": 5972.1,
+      "kind": "hill"
+    },
+    {
+      "name": "Serenity",
+      "x": 13812.4,
+      "y": 8179.2,
+      "kind": "marine"
+    },
+    {
+      "name": "Optimum",
+      "x": 13615.1,
+      "y": 8169.7,
+      "kind": "village"
+    },
+    {
+      "name": "Mcdonaldsinternet",
+      "x": 11069.1,
+      "y": 7120.8,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Faulis Outpost",
+      "x": 9952,
+      "y": 8713.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Haywood Jabologma",
+      "x": 6497.4,
+      "y": 10983.1,
+      "kind": "hill"
+    },
+    {
+      "name": "Forgotten Hiros",
+      "x": 10040.1,
+      "y": 13104.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Candy Hero Lagoon",
+      "x": 5825.3,
+      "y": 11021,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Akhuntsman's Retreat",
+      "x": 10363.2,
+      "y": 7160.7,
+      "kind": "marine"
+    },
+    {
+      "name": "Domain Of Droc",
+      "x": 5624.2,
+      "y": 14521,
+      "kind": "hill"
+    },
+    {
+      "name": "Krasna Ves",
+      "x": 4152.3,
+      "y": 13659.3,
+      "kind": "village"
+    },
+    {
+      "name": "Dezerice",
+      "x": 3045.4,
+      "y": 6224.8,
+      "kind": "village"
+    },
+    {
+      "name": "Prison Doomz",
+      "x": 2307.8,
+      "y": 4886.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Wattwurms Pit",
+      "x": 290,
+      "y": 13702.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Banovland",
+      "x": 7097.4,
+      "y": 12075.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Koukolai Hill",
+      "x": 12154.3,
+      "y": 13784.2,
+      "kind": "hill"
+    },
+    {
+      "name": "Falloutky",
+      "x": 4433.4,
+      "y": 12917.1,
+      "kind": "hill"
+    },
+    {
+      "name": "Zombiex",
+      "x": 4915.4,
+      "y": 7015.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Vybor Farm",
+      "x": 8283.6,
+      "y": 12600,
+      "kind": "hill"
+    }
+  ]
+}

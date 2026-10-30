@@ -31,6 +31,7 @@ const dom = {
   filesTitle: document.getElementById('files-title'),
   filesDir: document.getElementById('files-dir'),
   fileList: document.getElementById('file-list'),
+  fileTypeFilters: document.getElementById('file-type-filters'),
   filesEmpty: document.getElementById('files-empty'),
   refresh: document.getElementById('btn-refresh'),
   back: document.getElementById('btn-back'),
@@ -52,6 +53,8 @@ const state = {
   instance: null,
   files: [],
   selected: new Set(),
+  // "all" or a file type (RPT, ADM): servers rotate hundreds of files.
+  fileTypeFilter: 'all',
 
   activeTab: 'overview',
   problemFilter: 'all',
@@ -196,6 +199,7 @@ async function openInstance(inst) {
   state.instance = inst.name;
   state.files = [];
   state.selected = new Set();
+  state.fileTypeFilter = 'all';
 
   // A map image served for this instance is picked up by the map tab.
   state.mapImageUrl = inst.mapImage || '';
@@ -233,9 +237,50 @@ async function openInstance(inst) {
 }
 
 function renderFileList() {
-  dom.filesEmpty.hidden = state.files.length > 0;
-  dom.fileList.replaceChildren(...state.files.map(fileRow));
-  updateSelectionControls();
+  renderFileTypeFilters();
+
+  const visible = visibleFiles();
+  dom.filesEmpty.hidden = visible.length > 0;
+  dom.filesEmpty.textContent = state.files.length && !visible.length
+    ? `No ${state.fileTypeFilter} files in this profiles folder.`
+    : 'No log files in this profiles folder yet.';
+
+  dom.fileList.replaceChildren(...visible.map(fileRow));
+  updateSelectionControls(visible);
+}
+
+/** Files matching the active type filter. */
+function visibleFiles() {
+  if (state.fileTypeFilter === 'all') return state.files;
+  return state.files.filter((f) => String(f.type).toUpperCase() === state.fileTypeFilter);
+}
+
+function renderFileTypeFilters() {
+  const counts = new Map();
+  for (const f of state.files) {
+    const type = String(f.type).toUpperCase();
+    counts.set(type, (counts.get(type) ?? 0) + 1);
+  }
+
+  const chip = (value, label, count) =>
+    el('button', {
+      type: 'button',
+      class: `filter${state.fileTypeFilter === value ? ' active' : ''}`,
+      text: `${label} (${fmtInt(count)})`,
+      'aria-pressed': state.fileTypeFilter === value ? 'true' : 'false',
+      onClick: () => {
+        state.fileTypeFilter = value;
+        renderFileList();
+      },
+    });
+
+  // Only offer types that exist, so a folder of pure RPT logs has no dead chip.
+  const types = [...counts.keys()].sort((a, b) => (a === 'RPT' ? -1 : b === 'RPT' ? 1 : a.localeCompare(b)));
+  dom.fileTypeFilters.replaceChildren(
+    chip('all', 'All', state.files.length),
+    ...types.map((type) => chip(type, type, counts.get(type))),
+  );
+  dom.fileTypeFilters.hidden = state.files.length === 0;
 }
 
 function fileRow(file) {
@@ -266,16 +311,26 @@ function fileRow(file) {
   );
 }
 
-function updateSelectionControls() {
+function updateSelectionControls(visible = visibleFiles()) {
   const count = state.selected.size;
   dom.analyzeSelected.disabled = count === 0;
   dom.analyzeSelected.textContent = count ? `Analyze selected (${count})` : 'Analyze selected';
-  dom.toggleAll.textContent = count === state.files.length && count > 0 ? 'Select none' : 'Select all';
+
+  const shownSelected = visible.filter((f) => state.selected.has(f.name)).length;
+  dom.toggleAll.textContent =
+    visible.length > 0 && shownSelected === visible.length
+      ? state.fileTypeFilter === 'all' ? 'Select none' : 'Unselect shown'
+      : state.fileTypeFilter === 'all' ? 'Select all' : 'Select shown';
+  dom.toggleAll.disabled = visible.length === 0;
 }
 
 dom.toggleAll.addEventListener('click', () => {
-  const allSelected = state.selected.size === state.files.length && state.files.length > 0;
-  state.selected = allSelected ? new Set() : new Set(state.files.map((f) => f.name));
+  const visible = visibleFiles();
+  const allSelected = visible.length > 0 && visible.every((f) => state.selected.has(f.name));
+  for (const f of visible) {
+    if (allSelected) state.selected.delete(f.name);
+    else state.selected.add(f.name);
+  }
   renderFileList();
 });
 

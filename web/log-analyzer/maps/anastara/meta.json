@@ -1,0 +1,255 @@
+{
+  "id": "anastara",
+  "name": "Anastara",
+  "size": 10240,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "Jan.15-11",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/anastara)",
+  "generatedAt": "2026-10-30T12:29:07Z",
+  "names": [
+    {
+      "name": "Moskov",
+      "x": 7199.8,
+      "y": 6898.5,
+      "kind": "village"
+    },
+    {
+      "name": "Chleby",
+      "x": 8428.3,
+      "y": 4519.4,
+      "kind": "village"
+    },
+    {
+      "name": "Mirny",
+      "x": 7936.7,
+      "y": 4320.9,
+      "kind": "village"
+    },
+    {
+      "name": "Erinsky",
+      "x": 5352.5,
+      "y": 3272.4,
+      "kind": "village"
+    },
+    {
+      "name": "Volgo",
+      "x": 5768.5,
+      "y": 5524.4,
+      "kind": "village"
+    },
+    {
+      "name": "Suvo",
+      "x": 3463.3,
+      "y": 4920.3,
+      "kind": "village"
+    },
+    {
+      "name": "Kazanovka",
+      "x": 1339.6,
+      "y": 6194.8,
+      "kind": "village"
+    },
+    {
+      "name": "Solodnikov Prison",
+      "x": 2391.9,
+      "y": 3952.3,
+      "kind": "village"
+    },
+    {
+      "name": "Voronov",
+      "x": 2102.9,
+      "y": 4466.1,
+      "kind": "village"
+    },
+    {
+      "name": "Gradsky",
+      "x": 1158.7,
+      "y": 4914.6,
+      "kind": "village"
+    },
+    {
+      "name": "Artyom",
+      "x": 1297.6,
+      "y": 3756.4,
+      "kind": "village"
+    },
+    {
+      "name": "Kostel",
+      "x": 1454.3,
+      "y": 2806,
+      "kind": "village"
+    },
+    {
+      "name": "Glazov",
+      "x": 1640.2,
+      "y": 2661,
+      "kind": "village"
+    },
+    {
+      "name": "Ulman",
+      "x": 1698.2,
+      "y": 2829.5,
+      "kind": "village"
+    },
+    {
+      "name": "Strakh",
+      "x": 4042.5,
+      "y": 2239.7,
+      "kind": "village"
+    },
+    {
+      "name": "Kholm",
+      "x": 4611.9,
+      "y": 2588.6,
+      "kind": "village"
+    },
+    {
+      "name": "Kursk",
+      "x": 4007.7,
+      "y": 2936.6,
+      "kind": "village"
+    },
+    {
+      "name": "Narimanov Airfield",
+      "x": 4332.5,
+      "y": 3563.7,
+      "kind": "village"
+    },
+    {
+      "name": "Samara",
+      "x": 5233.4,
+      "y": 2398.6,
+      "kind": "village"
+    },
+    {
+      "name": "Korah",
+      "x": 5948.6,
+      "y": 4419.2,
+      "kind": "village"
+    },
+    {
+      "name": "Temnikov",
+      "x": 7075.5,
+      "y": 2243.4,
+      "kind": "village"
+    },
+    {
+      "name": "Alchnost",
+      "x": 7338.6,
+      "y": 3371.3,
+      "kind": "village"
+    },
+    {
+      "name": "Zernograd",
+      "x": 9241.9,
+      "y": 3796.3,
+      "kind": "village"
+    },
+    {
+      "name": "Vlh",
+      "x": 9408.2,
+      "y": 4030.1,
+      "kind": "village"
+    },
+    {
+      "name": "Sovetsk",
+      "x": 8450.8,
+      "y": 4947.5,
+      "kind": "village"
+    },
+    {
+      "name": "Varna",
+      "x": 6688.2,
+      "y": 5962.1,
+      "kind": "village"
+    },
+    {
+      "name": "Slava",
+      "x": 9158,
+      "y": 5641.4,
+      "kind": "village"
+    },
+    {
+      "name": "Kain",
+      "x": 4113.6,
+      "y": 5917.3,
+      "kind": "village"
+    },
+    {
+      "name": "Kalinkova",
+      "x": 3053.2,
+      "y": 5353.3,
+      "kind": "village"
+    },
+    {
+      "name": "Kharbinsk",
+      "x": 4611.3,
+      "y": 5469,
+      "kind": "village"
+    },
+    {
+      "name": "Odessk",
+      "x": 2765.4,
+      "y": 5867.4,
+      "kind": "village"
+    },
+    {
+      "name": "Belokova",
+      "x": 3830.7,
+      "y": 4412.7,
+      "kind": "village"
+    },
+    {
+      "name": "Lysenko",
+      "x": 9055.5,
+      "y": 4643.6,
+      "kind": "village"
+    },
+    {
+      "name": "Borislav",
+      "x": 2432.5,
+      "y": 2934.3,
+      "kind": "village"
+    },
+    {
+      "name": "Krasnograd",
+      "x": 4164.1,
+      "y": 8590.8,
+      "kind": "village"
+    },
+    {
+      "name": "Zarya",
+      "x": 5812.8,
+      "y": 7531.4,
+      "kind": "village"
+    },
+    {
+      "name": "Druzhba",
+      "x": 2525.4,
+      "y": 7675.2,
+      "kind": "village"
+    },
+    {
+      "name": "Sokolniki",
+      "x": 3359,
+      "y": 6656.8,
+      "kind": "village"
+    },
+    {
+      "name": "Novaya",
+      "x": 2297.7,
+      "y": 6742.5,
+      "kind": "village"
+    },
+    {
+      "name": "Tovarni",
+      "x": 4140.5,
+      "y": 7099.6,
+      "kind": "village"
+    }
+  ]
+}

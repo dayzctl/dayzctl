@@ -1,0 +1,399 @@
+{
+  "id": "chiemsee",
+  "name": "Chiemsee",
+  "size": 10240,
+  "format": "jpg",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "4.0-11",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/chiemsee)",
+  "generatedAt": "2026-10-30T12:29:13Z",
+  "names": [
+    {
+      "name": "Gollenhausen",
+      "x": 9326.2,
+      "y": 8830.7,
+      "kind": "local"
+    },
+    {
+      "name": "Soll",
+      "x": 8417,
+      "y": 9849.8,
+      "kind": "local"
+    },
+    {
+      "name": "Krater",
+      "x": 7263.3,
+      "y": 9619.1,
+      "kind": "local"
+    },
+    {
+      "name": "Obing",
+      "x": 6343.6,
+      "y": 9256.2,
+      "kind": "local"
+    },
+    {
+      "name": "Weitmoosindustrie",
+      "x": 6189.9,
+      "y": 9720.1,
+      "kind": "local"
+    },
+    {
+      "name": "Herreninsel",
+      "x": 6783.2,
+      "y": 3396.3,
+      "kind": "local"
+    },
+    {
+      "name": "Gstadt Industrie",
+      "x": 8214.3,
+      "y": 6325.2,
+      "kind": "local"
+    },
+    {
+      "name": "Gstadt Freizeitpark",
+      "x": 8050.7,
+      "y": 6039.8,
+      "kind": "local"
+    },
+    {
+      "name": "Fraueninsel",
+      "x": 8915.9,
+      "y": 4873.1,
+      "kind": "local"
+    },
+    {
+      "name": "Krautinsel",
+      "x": 8210.5,
+      "y": 4370.8,
+      "kind": "local"
+    },
+    {
+      "name": "Herrnchiemsee",
+      "x": 7066.3,
+      "y": 3508.2,
+      "kind": "local"
+    },
+    {
+      "name": "Mittermuhle",
+      "x": 7132.3,
+      "y": 5379,
+      "kind": "local"
+    },
+    {
+      "name": "Oberleiten",
+      "x": 6419.4,
+      "y": 5937.5,
+      "kind": "local"
+    },
+    {
+      "name": "Breitbrunn",
+      "x": 6941.4,
+      "y": 6487.5,
+      "kind": "local"
+    },
+    {
+      "name": "Eggstatt",
+      "x": 5289.6,
+      "y": 8429.5,
+      "kind": "local"
+    },
+    {
+      "name": "Stein",
+      "x": 4636.6,
+      "y": 7636.2,
+      "kind": "ruin"
+    },
+    {
+      "name": "Chiemsee",
+      "x": 8896,
+      "y": 2431,
+      "kind": "marine"
+    },
+    {
+      "name": "Loiberting",
+      "x": 6638.6,
+      "y": 6942.9,
+      "kind": "local"
+    },
+    {
+      "name": "Aisching",
+      "x": 8254.9,
+      "y": 7225.4,
+      "kind": "local"
+    },
+    {
+      "name": "Hemhof",
+      "x": 3347.1,
+      "y": 8689.8,
+      "kind": "local"
+    },
+    {
+      "name": "Atomkraftwerk",
+      "x": 3052.3,
+      "y": 8411.5,
+      "kind": "local"
+    },
+    {
+      "name": "Bad Endorf",
+      "x": 2286.1,
+      "y": 8740.9,
+      "kind": "local"
+    },
+    {
+      "name": "Burg Teisenham",
+      "x": 2550.4,
+      "y": 9864.8,
+      "kind": "ruin"
+    },
+    {
+      "name": "Jolling",
+      "x": 1120.3,
+      "y": 9485.7,
+      "kind": "local"
+    },
+    {
+      "name": "Pelham",
+      "x": 1916.9,
+      "y": 8267.8,
+      "kind": "local"
+    },
+    {
+      "name": "Milcamp",
+      "x": 2428.5,
+      "y": 7229,
+      "kind": "camp"
+    },
+    {
+      "name": "Nevihof",
+      "x": 5932.9,
+      "y": 7762.6,
+      "kind": "local"
+    },
+    {
+      "name": "Mine",
+      "x": 8765.7,
+      "y": 8759.9,
+      "kind": "local"
+    },
+    {
+      "name": "Mine",
+      "x": 9121.7,
+      "y": 8737.5,
+      "kind": "local"
+    },
+    {
+      "name": "Eschenauer See",
+      "x": 5006.2,
+      "y": 9431.8,
+      "kind": "marine"
+    },
+    {
+      "name": "Hartsee",
+      "x": 2978.1,
+      "y": 7898.4,
+      "kind": "marine"
+    },
+    {
+      "name": "Sagewerk",
+      "x": 4251.8,
+      "y": 6708.5,
+      "kind": "local"
+    },
+    {
+      "name": "Baustelle",
+      "x": 4037.8,
+      "y": 5118.2,
+      "kind": "local"
+    },
+    {
+      "name": "Camp Refugi",
+      "x": 4673.3,
+      "y": 5237.2,
+      "kind": "camp"
+    },
+    {
+      "name": "Hochstatt",
+      "x": 2571.1,
+      "y": 5930.5,
+      "kind": "local"
+    },
+    {
+      "name": "Antwort",
+      "x": 2035.3,
+      "y": 5216.3,
+      "kind": "local"
+    },
+    {
+      "name": "Kleiner Hof",
+      "x": 2319.4,
+      "y": 4618.7,
+      "kind": "local"
+    },
+    {
+      "name": "Alterhof",
+      "x": 2017.9,
+      "y": 4494,
+      "kind": "local"
+    },
+    {
+      "name": "Rimsting",
+      "x": 3248.6,
+      "y": 5337,
+      "kind": "local"
+    },
+    {
+      "name": "Mauerkirchen",
+      "x": 3013,
+      "y": 4260.7,
+      "kind": "local"
+    },
+    {
+      "name": "Groser Hof",
+      "x": 3243.7,
+      "y": 3931.1,
+      "kind": "local"
+    },
+    {
+      "name": "Osternach",
+      "x": 3918.7,
+      "y": 2671.1,
+      "kind": "local"
+    },
+    {
+      "name": "Prienindustrie",
+      "x": 4478.8,
+      "y": 2385.3,
+      "kind": "local"
+    },
+    {
+      "name": "Prien",
+      "x": 4621.7,
+      "y": 1818.8,
+      "kind": "local"
+    },
+    {
+      "name": "Ernstdorf",
+      "x": 4707.3,
+      "y": 988.8,
+      "kind": "local"
+    },
+    {
+      "name": "Serpentinen Str",
+      "x": 3628.7,
+      "y": 634.8,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Tedvalley",
+      "x": 1066.7,
+      "y": 1666.4,
+      "kind": "local"
+    },
+    {
+      "name": "Alm",
+      "x": 1415.3,
+      "y": 1755.1,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Simssee",
+      "x": 1063.8,
+      "y": 1372.5,
+      "kind": "marine"
+    },
+    {
+      "name": "Hofstatter See",
+      "x": 881.3,
+      "y": 2469,
+      "kind": "marine"
+    },
+    {
+      "name": "Rebellen Camp",
+      "x": 998.8,
+      "y": 2373.7,
+      "kind": "camp"
+    },
+    {
+      "name": "Bachham",
+      "x": 1137.6,
+      "y": 2560.4,
+      "kind": "local"
+    },
+    {
+      "name": "Urschalling",
+      "x": 2233.1,
+      "y": 2631,
+      "kind": "local"
+    },
+    {
+      "name": "Schlachtfeld",
+      "x": 3231.1,
+      "y": 1654.4,
+      "kind": "local"
+    },
+    {
+      "name": "Chiemseeoil",
+      "x": 3386.5,
+      "y": 1337.3,
+      "kind": "flatarealocal"
+    },
+    {
+      "name": "Wendelstein",
+      "x": 3394.6,
+      "y": 2422.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Obermaier Hof",
+      "x": 3070.6,
+      "y": 2994,
+      "kind": "local"
+    },
+    {
+      "name": "Untermaier Hof",
+      "x": 2733.6,
+      "y": 3086.1,
+      "kind": "local"
+    },
+    {
+      "name": "Burgensdorf",
+      "x": 1810.3,
+      "y": 3524.8,
+      "kind": "local"
+    },
+    {
+      "name": "Altschwanstein",
+      "x": 3944.3,
+      "y": 1277.8,
+      "kind": "ruin"
+    },
+    {
+      "name": "Kieswerk",
+      "x": 2909.4,
+      "y": 4924.1,
+      "kind": "local"
+    },
+    {
+      "name": "Hub",
+      "x": 2188.5,
+      "y": 540.5,
+      "kind": "local"
+    },
+    {
+      "name": "Barnsee",
+      "x": 1905.7,
+      "y": 323.1,
+      "kind": "marine"
+    },
+    {
+      "name": "Grundloser See",
+      "x": 8969,
+      "y": 8031.5,
+      "kind": "marine"
+    }
+  ]
+}

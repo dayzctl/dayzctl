@@ -1,0 +1,501 @@
+{
+  "id": "yiprit",
+  "name": "Yiprit",
+  "size": 20480,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "Jan.29-14",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/yiprit)",
+  "generatedAt": "2026-10-30T12:34:29Z",
+  "names": [
+    {
+      "name": "Nevizino",
+      "x": 8190,
+      "y": 8130,
+      "kind": "city"
+    },
+    {
+      "name": "Ligan",
+      "x": 9657.4,
+      "y": 7446.1,
+      "kind": "village"
+    },
+    {
+      "name": "Svoski",
+      "x": 14816.4,
+      "y": 7203.2,
+      "kind": "city"
+    },
+    {
+      "name": "Kamezov",
+      "x": 16984.7,
+      "y": 9008.2,
+      "kind": "city"
+    },
+    {
+      "name": "Rovsk",
+      "x": 16682.8,
+      "y": 7913.9,
+      "kind": "city"
+    },
+    {
+      "name": "Gadovo",
+      "x": 17837.8,
+      "y": 14696.4,
+      "kind": "city"
+    },
+    {
+      "name": "Roslavets",
+      "x": 16238.5,
+      "y": 12799.3,
+      "kind": "city"
+    },
+    {
+      "name": "Linsk",
+      "x": 14365.7,
+      "y": 8840,
+      "kind": "city"
+    },
+    {
+      "name": "Severotsk",
+      "x": 16131.3,
+      "y": 8257.2,
+      "kind": "city"
+    },
+    {
+      "name": "Gozovsky",
+      "x": 16665.4,
+      "y": 10807.7,
+      "kind": "city"
+    },
+    {
+      "name": "Kemerga",
+      "x": 16913,
+      "y": 10193.7,
+      "kind": "city"
+    },
+    {
+      "name": "Molsk",
+      "x": 12998.2,
+      "y": 9208,
+      "kind": "city"
+    },
+    {
+      "name": "Lesovropol",
+      "x": 17119.1,
+      "y": 12196.5,
+      "kind": "city"
+    },
+    {
+      "name": "Lipepa",
+      "x": 15391.7,
+      "y": 14121,
+      "kind": "city"
+    },
+    {
+      "name": "Pyatinovsk",
+      "x": 15434.3,
+      "y": 15536.4,
+      "kind": "city"
+    },
+    {
+      "name": "Kutrov",
+      "x": 13874.2,
+      "y": 11896.5,
+      "kind": "city"
+    },
+    {
+      "name": "Lesopol",
+      "x": 12487.9,
+      "y": 14145.8,
+      "kind": "city"
+    },
+    {
+      "name": "Vidnoversk",
+      "x": 12072.3,
+      "y": 13655.9,
+      "kind": "city"
+    },
+    {
+      "name": "Gokhna",
+      "x": 14919.1,
+      "y": 13129.6,
+      "kind": "city"
+    },
+    {
+      "name": "Labitov",
+      "x": 8910.6,
+      "y": 16400.1,
+      "kind": "city"
+    },
+    {
+      "name": "Nadar",
+      "x": 12159.7,
+      "y": 15606.3,
+      "kind": "city"
+    },
+    {
+      "name": "Zlatov",
+      "x": 12307.3,
+      "y": 10628.5,
+      "kind": "city"
+    },
+    {
+      "name": "Rossonyev",
+      "x": 11337,
+      "y": 14925,
+      "kind": "city"
+    },
+    {
+      "name": "Stebirsk",
+      "x": 13746.4,
+      "y": 16372.2,
+      "kind": "city"
+    },
+    {
+      "name": "Prison",
+      "x": 17067.7,
+      "y": 17701.7,
+      "kind": "city"
+    },
+    {
+      "name": "Siblansk Lake",
+      "x": 13969.6,
+      "y": 14774,
+      "kind": "city"
+    },
+    {
+      "name": "Rock Mines",
+      "x": 14493.9,
+      "y": 9693.6,
+      "kind": "city"
+    },
+    {
+      "name": "Yebnek",
+      "x": 9824.9,
+      "y": 16717.1,
+      "kind": "city"
+    },
+    {
+      "name": "Pink C'igar Castle",
+      "x": 15577.4,
+      "y": 11753.2,
+      "kind": "city"
+    },
+    {
+      "name": "Vibnic Castle Ruins",
+      "x": 10781,
+      "y": 13639.4,
+      "kind": "city"
+    },
+    {
+      "name": "Loposk Airfield",
+      "x": 10970.4,
+      "y": 17080.1,
+      "kind": "airport"
+    },
+    {
+      "name": "Camp Yeardme",
+      "x": 16210.7,
+      "y": 16766.7,
+      "kind": "village"
+    },
+    {
+      "name": "Yeardme Military Compound",
+      "x": 16219,
+      "y": 16425.5,
+      "kind": "village"
+    },
+    {
+      "name": "Camp Bylosk",
+      "x": 13474,
+      "y": 9953.6,
+      "kind": "village"
+    },
+    {
+      "name": "District 13",
+      "x": 15722.5,
+      "y": 3358.4,
+      "kind": "city"
+    },
+    {
+      "name": "Limna Nuclear Plant",
+      "x": 11382,
+      "y": 8993.1,
+      "kind": "city"
+    },
+    {
+      "name": "Abandoned Airfield",
+      "x": 10654.7,
+      "y": 8564.6,
+      "kind": "city"
+    },
+    {
+      "name": "Sevebnya",
+      "x": 7926.7,
+      "y": 10250.4,
+      "kind": "city"
+    },
+    {
+      "name": "Korovo Docks",
+      "x": 10415.9,
+      "y": 9948.8,
+      "kind": "city"
+    },
+    {
+      "name": "Korovo",
+      "x": 9456.3,
+      "y": 9536,
+      "kind": "city"
+    },
+    {
+      "name": "Toshov",
+      "x": 7761.3,
+      "y": 11378,
+      "kind": "city"
+    },
+    {
+      "name": "Race Track",
+      "x": 5298.9,
+      "y": 10842,
+      "kind": "city"
+    },
+    {
+      "name": "Myvgrad Farm",
+      "x": 7887,
+      "y": 12832.8,
+      "kind": "city"
+    },
+    {
+      "name": "Kostal",
+      "x": 6845.3,
+      "y": 14356.2,
+      "kind": "city"
+    },
+    {
+      "name": "Training Range",
+      "x": 5467.4,
+      "y": 13872.2,
+      "kind": "city"
+    },
+    {
+      "name": "Myvgrad",
+      "x": 9217.2,
+      "y": 11965.2,
+      "kind": "city"
+    },
+    {
+      "name": "Rock Mines",
+      "x": 6774.8,
+      "y": 12668.3,
+      "kind": "city"
+    },
+    {
+      "name": "Camp Liksin",
+      "x": 8329.7,
+      "y": 12020.4,
+      "kind": "village"
+    },
+    {
+      "name": "Kropograd",
+      "x": 6102.7,
+      "y": 16862.3,
+      "kind": "city"
+    },
+    {
+      "name": "Camp Veli",
+      "x": 5990.1,
+      "y": 16019.4,
+      "kind": "village"
+    },
+    {
+      "name": "Neviski",
+      "x": 4581.7,
+      "y": 15807.9,
+      "kind": "city"
+    },
+    {
+      "name": "Camp Birovo",
+      "x": 3912.5,
+      "y": 16284,
+      "kind": "village"
+    },
+    {
+      "name": "Blacc Castle",
+      "x": 3922.9,
+      "y": 14548.6,
+      "kind": "village"
+    },
+    {
+      "name": "Stalsk",
+      "x": 4631.1,
+      "y": 14590.3,
+      "kind": "city"
+    },
+    {
+      "name": "Stalsk Military Compound",
+      "x": 4929.1,
+      "y": 13794.6,
+      "kind": "village"
+    },
+    {
+      "name": "Volkof",
+      "x": 15970.7,
+      "y": 7483.9,
+      "kind": "village"
+    },
+    {
+      "name": "Sevesta",
+      "x": 4224.3,
+      "y": 12096.5,
+      "kind": "village"
+    },
+    {
+      "name": "Sevesta Communications Camp",
+      "x": 4815.7,
+      "y": 12464,
+      "kind": "village"
+    },
+    {
+      "name": "Blackbird",
+      "x": 5789.9,
+      "y": 3451.8,
+      "kind": "city"
+    },
+    {
+      "name": "Guvo Farm",
+      "x": 6830.1,
+      "y": 4699,
+      "kind": "village"
+    },
+    {
+      "name": "Simos",
+      "x": 2193,
+      "y": 6947.4,
+      "kind": "city"
+    },
+    {
+      "name": "Elivo",
+      "x": 3865,
+      "y": 6737.2,
+      "kind": "city"
+    },
+    {
+      "name": "Elivo Castle",
+      "x": 4137.6,
+      "y": 6099.9,
+      "kind": "village"
+    },
+    {
+      "name": "Durino",
+      "x": 2844.7,
+      "y": 6893,
+      "kind": "village"
+    },
+    {
+      "name": "Kavo",
+      "x": 5385.5,
+      "y": 6030.9,
+      "kind": "village"
+    },
+    {
+      "name": "Camp Turga",
+      "x": 6555.6,
+      "y": 7415.8,
+      "kind": "village"
+    },
+    {
+      "name": "Megrad",
+      "x": 5537.6,
+      "y": 4461.4,
+      "kind": "village"
+    },
+    {
+      "name": "Simos Farm",
+      "x": 2048.2,
+      "y": 6352.9,
+      "kind": "village"
+    },
+    {
+      "name": "Slavkar",
+      "x": 5940.3,
+      "y": 7174.8,
+      "kind": "city"
+    },
+    {
+      "name": "Lyupa",
+      "x": 5899,
+      "y": 8282.7,
+      "kind": "city"
+    },
+    {
+      "name": "Prolma",
+      "x": 5815,
+      "y": 8858.7,
+      "kind": "city"
+    },
+    {
+      "name": "Desnovy",
+      "x": 5023.9,
+      "y": 9544.9,
+      "kind": "city"
+    },
+    {
+      "name": "Karbash",
+      "x": 1838.9,
+      "y": 8860.9,
+      "kind": "city"
+    },
+    {
+      "name": "Nabery Airfield",
+      "x": 3095.8,
+      "y": 9042.6,
+      "kind": "city"
+    },
+    {
+      "name": "Nomnom",
+      "x": 2098.1,
+      "y": 9879.5,
+      "kind": "city"
+    },
+    {
+      "name": "Sovir",
+      "x": 3206,
+      "y": 9739.5,
+      "kind": "city"
+    },
+    {
+      "name": "Nabery Airfield",
+      "x": 1350.5,
+      "y": 11044,
+      "kind": "airport"
+    },
+    {
+      "name": "Stunsk Industrial",
+      "x": 3956.6,
+      "y": 11607,
+      "kind": "city"
+    },
+    {
+      "name": "Stunsk",
+      "x": 2982.6,
+      "y": 11574.2,
+      "kind": "city"
+    },
+    {
+      "name": "Karbash Farm",
+      "x": 1139,
+      "y": 8357.6,
+      "kind": "city"
+    },
+    {
+      "name": "Camp Lorod",
+      "x": 3410,
+      "y": 10318.8,
+      "kind": "city"
+    }
+  ]
+}

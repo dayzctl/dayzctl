@@ -1,0 +1,14 @@
+{
+  "id": "hashima",
+  "name": "Hashima",
+  "size": 5120,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "Jun.8-6",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/hashima)",
+  "generatedAt": "2026-10-30T12:29:45Z",
+  "names": null
+}

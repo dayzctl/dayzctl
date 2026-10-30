@@ -20,14 +20,17 @@ const (
 	coordSpace = 256
 )
 
-// source talks to dayz.xam.nu. It is deliberately polite: a small worker pool
-// and a minimum gap between requests, because the CDN drops bursts.
+// source talks to the community map host. It is deliberately polite: a small
+// worker pool and a minimum gap between requests, because bursts get dropped.
 type source struct {
 	http    *http.Client
 	gate    chan struct{}
 	mu      sync.Mutex
 	lastReq time.Time
 	slots   chan struct{}
+
+	// The site bundle lists every map; it is fetched once per run.
+	bundleCache string
 }
 
 func newSource(workers int) *source {
@@ -86,28 +89,82 @@ func (c *xamConfig) meta(id, rev string) *metaFile {
 // "1.30-11" for nasdara. That mapping only exists inside the site's JavaScript
 // bundle, so it is scraped from there.
 func (s *source) revision(id string) (string, error) {
+	bundle, err := s.bundle(id)
+	if err != nil {
+		return "", err
+	}
+	return versionFor(bundle, id)
+}
+
+// bundle fetches the site's JavaScript payload, which carries the map registry.
+func (s *source) bundle(id string) (string, error) {
+	s.mu.Lock()
+	cached := s.bundleCache
+	s.mu.Unlock()
+	if cached != "" {
+		return cached, nil
+	}
+
 	page, err := s.get(pageHost + "/" + id)
 	if err != nil {
-		return "", fmt.Errorf("cannot reach dayz.xam.nu: %w", err)
+		return "", fmt.Errorf("cannot reach the map host: %w", err)
 	}
 	m := regexp.MustCompile(`src="(/js/bundle[^"]+\.js)"`).FindSubmatch(page)
 	if m == nil {
 		return "", fmt.Errorf("cannot find the site's script bundle on /%s", id)
 	}
-	bundle, err := s.get(pageHost + string(m[1]))
+	raw, err := s.get(pageHost + string(m[1]))
 	if err != nil {
 		return "", fmt.Errorf("cannot fetch the site bundle: %w", err)
 	}
-	return versionFor(string(bundle), id)
+
+	s.mu.Lock()
+	s.bundleCache = string(raw)
+	s.mu.Unlock()
+	return s.bundleCache, nil
+}
+
+// mapIDs lists every map the host publishes, in the order the site declares.
+func (s *source) mapIDs() ([]string, error) {
+	bundle, err := s.bundle("nasdara")
+	if err != nil {
+		return nil, err
+	}
+	return allMapIDs(bundle)
+}
+
+// allMapIDs pulls the ordered ids out of `"chernarusplus":{"v":"1.30","i":0},…`.
+func allMapIDs(bundle string) ([]string, error) {
+	re := regexp.MustCompile(`"([a-z0-9_]+)"\s*:\s*\{\s*"v"\s*:\s*"[^"]+"\s*,\s*"i"\s*:\s*\d+\s*\}`)
+	matches := re.FindAllStringSubmatch(bundle, -1)
+	seen := map[string]bool{}
+	var ids []string
+	for _, m := range matches {
+		if seen[m[1]] {
+			continue
+		}
+		seen[m[1]] = true
+		ids = append(ids, m[1])
+	}
+	if len(ids) == 0 {
+		return nil, fmt.Errorf("the map registry is empty or unreadable")
+	}
+	return ids, nil
 }
 
 // versionFor pulls `"nasdara":{"v":"1.30","i":11}` out of the bundle.
+//
+// The file name is "<version>-<iteration>", except that iteration 0 is dropped
+// on the site: chernarusplus is "1.30.json", nasdara "1.30-11.json".
 func versionFor(bundle, id string) (string, error) {
 	re := regexp.MustCompile(`"` + regexp.QuoteMeta(id) +
 		`"\s*:\s*\{\s*"v"\s*:\s*"([^"]+)"\s*,\s*"i"\s*:\s*(\d+)`)
 	m := re.FindStringSubmatch(bundle)
 	if m == nil {
-		return "", fmt.Errorf("map %q is not published on dayz.xam.nu", id)
+		return "", fmt.Errorf("map %q is not published on the map host", id)
+	}
+	if m[2] == "0" {
+		return m[1], nil
 	}
 	return m[1] + "-" + m[2], nil
 }
@@ -134,12 +191,29 @@ func (s *source) tile(cfg *xamConfig, z, x, y int) ([]byte, error) {
 }
 
 // get performs a rate-limited request with the headers the map host insists on.
+// Transient failures are retried: a full run is a few thousand requests and the
+// CDN does drop connections when it feels crowded.
 func (s *source) get(url string) ([]byte, error) {
+	var lastErr error
+	for attempt := 0; attempt < 3; attempt++ {
+		if attempt > 0 {
+			time.Sleep(time.Duration(attempt) * 2 * time.Second)
+		}
+		data, err := s.getOnce(url)
+		if err == nil {
+			return data, nil
+		}
+		lastErr = err
+	}
+	return nil, lastErr
+}
+
+func (s *source) getOnce(url string) ([]byte, error) {
 	s.slots <- struct{}{}
 	defer func() { <-s.slots }()
 
 	s.gate <- struct{}{}
-	if wait := 120*time.Millisecond - time.Since(s.lastReq); wait > 0 {
+	if wait := 80*time.Millisecond - time.Since(s.lastReq); wait > 0 {
 		time.Sleep(wait)
 	}
 	s.lastReq = time.Now()

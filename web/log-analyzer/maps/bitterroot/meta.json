@@ -1,0 +1,561 @@
+{
+  "id": "bitterroot",
+  "name": "Bitterroot",
+  "size": 12288,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "Jan.11-11",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/bitterroot)",
+  "generatedAt": "2026-10-30T12:29:12Z",
+  "names": [
+    {
+      "name": "Tyler",
+      "x": 10837.6,
+      "y": 1184,
+      "kind": "city"
+    },
+    {
+      "name": "Coleman",
+      "x": 9310.3,
+      "y": 1500.8,
+      "kind": "village"
+    },
+    {
+      "name": "Blairsville",
+      "x": 9711.4,
+      "y": 2417.1,
+      "kind": "village"
+    },
+    {
+      "name": "Darby",
+      "x": 10138.9,
+      "y": 4005.3,
+      "kind": "village"
+    },
+    {
+      "name": "Juno",
+      "x": 8424.3,
+      "y": 3142.8,
+      "kind": "village"
+    },
+    {
+      "name": "Troy",
+      "x": 10724,
+      "y": 2370.1,
+      "kind": "village"
+    },
+    {
+      "name": "Camp Wannastay",
+      "x": 10861.3,
+      "y": 3050.7,
+      "kind": "camp"
+    },
+    {
+      "name": "Winter Park",
+      "x": 8400,
+      "y": 2367,
+      "kind": "village"
+    },
+    {
+      "name": "Ouray",
+      "x": 7712.2,
+      "y": 534.6,
+      "kind": "city"
+    },
+    {
+      "name": "Sefner",
+      "x": 10300.7,
+      "y": 2944.4,
+      "kind": "village"
+    },
+    {
+      "name": "Bennett",
+      "x": 6547.7,
+      "y": 5437.4,
+      "kind": "village"
+    },
+    {
+      "name": "Industrial Park",
+      "x": 6166.3,
+      "y": 4660.6,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Quarry",
+      "x": 5698,
+      "y": 4344.9,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Processing Plant",
+      "x": 8223.6,
+      "y": 4820,
+      "kind": "local"
+    },
+    {
+      "name": "Crystal Lake",
+      "x": 7624.4,
+      "y": 4613.8,
+      "kind": "camp"
+    },
+    {
+      "name": "Wind Farm",
+      "x": 7031.5,
+      "y": 4127.7,
+      "kind": "local"
+    },
+    {
+      "name": "Fairfax",
+      "x": 7837.7,
+      "y": 4120.7,
+      "kind": "village"
+    },
+    {
+      "name": "Riggins",
+      "x": 10651.6,
+      "y": 7115.2,
+      "kind": "village"
+    },
+    {
+      "name": "Silver Springs",
+      "x": 5735.5,
+      "y": 5114.8,
+      "kind": "village"
+    },
+    {
+      "name": "Rolling Hills",
+      "x": 9771.4,
+      "y": 5673.4,
+      "kind": "village"
+    },
+    {
+      "name": "Three Frogs Campgrounds",
+      "x": 11174.6,
+      "y": 8015.9,
+      "kind": "camp"
+    },
+    {
+      "name": "Bear Town",
+      "x": 11422.4,
+      "y": 10277.7,
+      "kind": "village"
+    },
+    {
+      "name": "Fort Simmons",
+      "x": 11974.7,
+      "y": 8930.5,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Juno Barracks",
+      "x": 8747.4,
+      "y": 2822.4,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "International Airport",
+      "x": 8504,
+      "y": 1262.9,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "March Air Force Base",
+      "x": 11061.5,
+      "y": 11389.3,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Jasper",
+      "x": 5855,
+      "y": 415,
+      "kind": "village"
+    },
+    {
+      "name": "Milton",
+      "x": 3937.5,
+      "y": 587.3,
+      "kind": "village"
+    },
+    {
+      "name": "Lake Horn",
+      "x": 1448.1,
+      "y": 849.5,
+      "kind": "namemarine"
+    },
+    {
+      "name": "Hog Horn Camp",
+      "x": 720.5,
+      "y": 588,
+      "kind": "camp"
+    },
+    {
+      "name": "Broken Arrow",
+      "x": 1541.7,
+      "y": 1749.9,
+      "kind": "city"
+    },
+    {
+      "name": "Camp Congregation",
+      "x": 858.5,
+      "y": 2505.2,
+      "kind": "camp"
+    },
+    {
+      "name": "Glasgow Air Force Base",
+      "x": 906,
+      "y": 3898,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Ruby Ridge",
+      "x": 1718.6,
+      "y": 5203.3,
+      "kind": "village"
+    },
+    {
+      "name": "Faith's Gate Compound",
+      "x": 3000,
+      "y": 5735.8,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Aurora",
+      "x": 4939.7,
+      "y": 5321.2,
+      "kind": "village"
+    },
+    {
+      "name": "Camp Virtue",
+      "x": 4136.8,
+      "y": 5636.2,
+      "kind": "camp"
+    },
+    {
+      "name": "Checkpoint West",
+      "x": 830.1,
+      "y": 7588.8,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Camp Telluride",
+      "x": 4031.4,
+      "y": 2350.2,
+      "kind": "camp"
+    },
+    {
+      "name": "Hamilton",
+      "x": 4200.9,
+      "y": 11738,
+      "kind": "village"
+    },
+    {
+      "name": "Buford",
+      "x": 4149.4,
+      "y": 10254.8,
+      "kind": "village"
+    },
+    {
+      "name": "Wounded Heel Campgrounds",
+      "x": 7490,
+      "y": 10549.8,
+      "kind": "camp"
+    },
+    {
+      "name": "Camp Horizons",
+      "x": 6103.5,
+      "y": 10354.3,
+      "kind": "camp"
+    },
+    {
+      "name": "Bishop Air Station",
+      "x": 7239.5,
+      "y": 9511.9,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Hawkins",
+      "x": 9642.4,
+      "y": 10107.2,
+      "kind": "village"
+    },
+    {
+      "name": "John's Pass Campgrounds",
+      "x": 4745.4,
+      "y": 9371,
+      "kind": "camp"
+    },
+    {
+      "name": "Centerville",
+      "x": 5118.4,
+      "y": 6099.7,
+      "kind": "village"
+    },
+    {
+      "name": "Hawkins Nuclear Facility",
+      "x": 9668,
+      "y": 9066.9,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Bitterroot Country Club",
+      "x": 6390.4,
+      "y": 6375.9,
+      "kind": "local"
+    },
+    {
+      "name": "Sawmill",
+      "x": 5583.9,
+      "y": 5787.8,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Kraft Lake",
+      "x": 5999.5,
+      "y": 7277.2,
+      "kind": "namemarine"
+    },
+    {
+      "name": "Black Rock Barracks",
+      "x": 5613.5,
+      "y": 11693.9,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Bitterroot Ski Resort",
+      "x": 4444.9,
+      "y": 10884.2,
+      "kind": "local"
+    },
+    {
+      "name": "Crow Mountain",
+      "x": 2985.1,
+      "y": 2645.1,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Comanche Mountain",
+      "x": 6717.4,
+      "y": 9795.7,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Haven Settlement",
+      "x": 6401.1,
+      "y": 8920.1,
+      "kind": "village"
+    },
+    {
+      "name": "Fishville",
+      "x": 2059.4,
+      "y": 776.5,
+      "kind": "village"
+    },
+    {
+      "name": "Bitterroot Speedway",
+      "x": 9690.7,
+      "y": 7230.9,
+      "kind": "local"
+    },
+    {
+      "name": "Collins",
+      "x": 6775,
+      "y": 11370.5,
+      "kind": "village"
+    },
+    {
+      "name": "Lakeland",
+      "x": 7834.6,
+      "y": 5579.4,
+      "kind": "city"
+    },
+    {
+      "name": "Denton Ranch",
+      "x": 2874,
+      "y": 11421,
+      "kind": "local"
+    },
+    {
+      "name": "Mcclain Ranch",
+      "x": 8064.6,
+      "y": 11737.5,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Jackson Falls",
+      "x": 2953.9,
+      "y": 7529.6,
+      "kind": "citycapital"
+    },
+    {
+      "name": "Camp Bliss",
+      "x": 646.9,
+      "y": 8887.3,
+      "kind": "camp"
+    },
+    {
+      "name": "Dixie Town",
+      "x": 2156.4,
+      "y": 12017.9,
+      "kind": "village"
+    },
+    {
+      "name": "Jackson Falls F.o.b.",
+      "x": 3445.8,
+      "y": 7625.6,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Jackson Falls Qz",
+      "x": 2804.5,
+      "y": 7515.5,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Jim The Baptist Refuge",
+      "x": 1544.4,
+      "y": 9004.5,
+      "kind": "camp"
+    },
+    {
+      "name": "Benedict Castle",
+      "x": 3246.7,
+      "y": 7219.7,
+      "kind": "local"
+    },
+    {
+      "name": "Camp Lookout",
+      "x": 2143.9,
+      "y": 10975.5,
+      "kind": "camp"
+    },
+    {
+      "name": "Fort Hale",
+      "x": 4866.1,
+      "y": 7818.2,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Junction",
+      "x": 6875.6,
+      "y": 1896.3,
+      "kind": "village"
+    },
+    {
+      "name": "Red Lodge",
+      "x": 6386.7,
+      "y": 3207,
+      "kind": "village"
+    },
+    {
+      "name": "Falcon Rock",
+      "x": 1067.8,
+      "y": 10380.3,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Beckham Heights",
+      "x": 11237.9,
+      "y": 4865.4,
+      "kind": "village"
+    },
+    {
+      "name": "Long John Campgrounds",
+      "x": 11164.4,
+      "y": 5876.4,
+      "kind": "camp"
+    },
+    {
+      "name": "Niceville",
+      "x": 3853.4,
+      "y": 4197,
+      "kind": "village"
+    },
+    {
+      "name": "Baylor",
+      "x": 2947.1,
+      "y": 4168.3,
+      "kind": "village"
+    },
+    {
+      "name": "Wood Pines",
+      "x": 4642.4,
+      "y": 3738,
+      "kind": "village"
+    },
+    {
+      "name": "Colter City",
+      "x": 5234.6,
+      "y": 4116.7,
+      "kind": "village"
+    },
+    {
+      "name": "Becker",
+      "x": 1716.8,
+      "y": 8576.8,
+      "kind": "village"
+    },
+    {
+      "name": "Delta 1",
+      "x": 1478.6,
+      "y": 9554.1,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Delta 2",
+      "x": 1900,
+      "y": 9233.3,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Delta 3",
+      "x": 2864.1,
+      "y": 9873.1,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Delta 4",
+      "x": 2999.9,
+      "y": 10373.9,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Delta 5",
+      "x": 1210.6,
+      "y": 11841.9,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Delta 6",
+      "x": 401.7,
+      "y": 11688.1,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Moreno Valley",
+      "x": 1048.5,
+      "y": 9641.9,
+      "kind": "village"
+    },
+    {
+      "name": "Bagdad",
+      "x": 1671.9,
+      "y": 10001.3,
+      "kind": "village"
+    },
+    {
+      "name": "Eagle Mountain",
+      "x": 11402.4,
+      "y": 3849.9,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "University",
+      "x": 3630.1,
+      "y": 7055.2,
+      "kind": "local"
+    }
+  ]
+}

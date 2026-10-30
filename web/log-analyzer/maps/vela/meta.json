@@ -1,0 +1,105 @@
+{
+  "id": "vela",
+  "name": "Vela",
+  "size": 10240,
+  "format": "jpg",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "Dec.29-11",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/vela)",
+  "generatedAt": "2026-10-30T12:33:58Z",
+  "names": [
+    {
+      "name": "Camp Martin",
+      "x": 1670.9,
+      "y": 1934.2,
+      "kind": "local"
+    },
+    {
+      "name": "Cheyenne Mountain Army Station",
+      "x": 1757.4,
+      "y": 3914,
+      "kind": "local"
+    },
+    {
+      "name": "Stonewick",
+      "x": 4252.2,
+      "y": 7656.9,
+      "kind": "village"
+    },
+    {
+      "name": "Pentona",
+      "x": 4116.6,
+      "y": 3889.5,
+      "kind": "capital"
+    },
+    {
+      "name": "Maywood",
+      "x": 2778.2,
+      "y": 4378.9,
+      "kind": "city"
+    },
+    {
+      "name": "Mampri Beach",
+      "x": 3026.1,
+      "y": 2006.2,
+      "kind": "village"
+    },
+    {
+      "name": "Waynesboro",
+      "x": 2436,
+      "y": 2809.9,
+      "kind": "village"
+    },
+    {
+      "name": "Kodiak",
+      "x": 3983,
+      "y": 6478.5,
+      "kind": "village"
+    },
+    {
+      "name": "Great Salt Lagune",
+      "x": 2943.3,
+      "y": 5383.7,
+      "kind": "local"
+    },
+    {
+      "name": "Langdale",
+      "x": 1443.6,
+      "y": 3573.9,
+      "kind": "village"
+    },
+    {
+      "name": "New Rock",
+      "x": 4923.1,
+      "y": 951.5,
+      "kind": "city"
+    },
+    {
+      "name": "Louisville",
+      "x": 4012.8,
+      "y": 3008.4,
+      "kind": "city"
+    },
+    {
+      "name": "Castle Borkna",
+      "x": 1203.7,
+      "y": 1045.2,
+      "kind": "local"
+    },
+    {
+      "name": "Castle Nink",
+      "x": 2824.6,
+      "y": 5773,
+      "kind": "local"
+    },
+    {
+      "name": "N.a.t.o. Sector",
+      "x": 2132.6,
+      "y": 7559.5,
+      "kind": "strongpointarea"
+    }
+  ]
+}

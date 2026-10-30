@@ -1,0 +1,1107 @@
+{
+  "id": "channel",
+  "name": "Channel",
+  "size": 20480,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "Apr.30-4",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/channel)",
+  "generatedAt": "2026-10-30T12:29:13Z",
+  "names": [
+    {
+      "name": "St. Helier",
+      "x": 11550.2,
+      "y": 2444.7,
+      "kind": "capital"
+    },
+    {
+      "name": "Sealand",
+      "x": 11494,
+      "y": 13426.7,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Bouley Bay",
+      "x": 8412,
+      "y": 10056.1,
+      "kind": "city"
+    },
+    {
+      "name": "Sorel Point Ferry Port",
+      "x": 8524.2,
+      "y": 11042.3,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "St Aubin",
+      "x": 6542.5,
+      "y": 3065.4,
+      "kind": "city"
+    },
+    {
+      "name": "La Corbiere",
+      "x": 1733.6,
+      "y": 2462.4,
+      "kind": "village"
+    },
+    {
+      "name": "Les Creux",
+      "x": 3241.7,
+      "y": 1729.5,
+      "kind": "city"
+    },
+    {
+      "name": "St Brelades Bay",
+      "x": 4574.6,
+      "y": 2750.2,
+      "kind": "village"
+    },
+    {
+      "name": "Icart Bay",
+      "x": 5461.5,
+      "y": 2049.5,
+      "kind": "village"
+    },
+    {
+      "name": "Hawkhirst",
+      "x": 5950.9,
+      "y": 1422.4,
+      "kind": "village"
+    },
+    {
+      "name": "Vintner Skegness",
+      "x": 6604.4,
+      "y": 781.6,
+      "kind": "rockarea"
+    },
+    {
+      "name": "St Peters Village",
+      "x": 5306.3,
+      "y": 5954.6,
+      "kind": "city"
+    },
+    {
+      "name": "Jersey Airport",
+      "x": 4724.6,
+      "y": 5081.5,
+      "kind": "airport"
+    },
+    {
+      "name": "Beaumont",
+      "x": 7372.8,
+      "y": 4087.3,
+      "kind": "village"
+    },
+    {
+      "name": "Old Station Bus Depot",
+      "x": 8834.6,
+      "y": 4157.7,
+      "kind": "local"
+    },
+    {
+      "name": "La Ville Emphrie",
+      "x": 9546.2,
+      "y": 5426.6,
+      "kind": "village"
+    },
+    {
+      "name": "Camp Wilderness Bardec",
+      "x": 8964,
+      "y": 5262.1,
+      "kind": "village"
+    },
+    {
+      "name": "Bagot",
+      "x": 12973,
+      "y": 1348,
+      "kind": "village"
+    },
+    {
+      "name": "La Rocque",
+      "x": 16660.7,
+      "y": 846.7,
+      "kind": "village"
+    },
+    {
+      "name": "Fauvic",
+      "x": 16334.2,
+      "y": 2398,
+      "kind": "village"
+    },
+    {
+      "name": "Gorey",
+      "x": 17162.7,
+      "y": 4511.7,
+      "kind": "city"
+    },
+    {
+      "name": "Adventure Towne Fun Park",
+      "x": 16941.9,
+      "y": 4838,
+      "kind": "local"
+    },
+    {
+      "name": "Maufant",
+      "x": 14266.2,
+      "y": 5577.8,
+      "kind": "city"
+    },
+    {
+      "name": "Carrefour Selous",
+      "x": 8165.6,
+      "y": 7552.3,
+      "kind": "village"
+    },
+    {
+      "name": "La Greve De Lecq",
+      "x": 5071.7,
+      "y": 9943.4,
+      "kind": "city"
+    },
+    {
+      "name": "Plemont Point",
+      "x": 3443.2,
+      "y": 10474.9,
+      "kind": "city"
+    },
+    {
+      "name": "La Porte",
+      "x": 573.9,
+      "y": 8865.1,
+      "kind": "village"
+    },
+    {
+      "name": "La Rocco Is",
+      "x": 900.2,
+      "y": 5293.1,
+      "kind": "namemarine"
+    },
+    {
+      "name": "St Saviour",
+      "x": 2700.4,
+      "y": 15616.8,
+      "kind": "city"
+    },
+    {
+      "name": "Prevost",
+      "x": 2296.2,
+      "y": 19147.3,
+      "kind": "village"
+    },
+    {
+      "name": "Reid Harbour Airpark",
+      "x": 5027.4,
+      "y": 17920.9,
+      "kind": "airport"
+    },
+    {
+      "name": "Norwester Seaview",
+      "x": 8222.4,
+      "y": 19775.7,
+      "kind": "village"
+    },
+    {
+      "name": "Les Varendes Mb",
+      "x": 11104.3,
+      "y": 17124.3,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Raf Trewan Sands",
+      "x": 16889,
+      "y": 16256,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Mont Belval Communication Installation",
+      "x": 16122.2,
+      "y": 7564.7,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Mont Saint Mine",
+      "x": 18740.2,
+      "y": 12145.8,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Mont Saint",
+      "x": 17983.3,
+      "y": 9982.8,
+      "kind": "city"
+    },
+    {
+      "name": "Sark",
+      "x": 19423.2,
+      "y": 1517.4,
+      "kind": "namemarine"
+    },
+    {
+      "name": "Les Potirons Metals",
+      "x": 5840.7,
+      "y": 8333.8,
+      "kind": "local"
+    },
+    {
+      "name": "Central Gatehouse",
+      "x": 6506.5,
+      "y": 8544.4,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Knackers Yard",
+      "x": 12170.5,
+      "y": 8081.3,
+      "kind": "local"
+    },
+    {
+      "name": "Le Boulivot",
+      "x": 12861,
+      "y": 4414,
+      "kind": "city"
+    },
+    {
+      "name": "Highstead Chemicals",
+      "x": 11354.1,
+      "y": 5106.6,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Bardec Reservoir",
+      "x": 9169,
+      "y": 6141.5,
+      "kind": "local"
+    },
+    {
+      "name": "Grosnez Lng Field",
+      "x": 1389.4,
+      "y": 9843.6,
+      "kind": "local"
+    },
+    {
+      "name": "La Crabiere Lng Refinery",
+      "x": 2098.2,
+      "y": 7422.9,
+      "kind": "local"
+    },
+    {
+      "name": "Lng Dock",
+      "x": 981,
+      "y": 6840.2,
+      "kind": "local"
+    },
+    {
+      "name": "Lapulente",
+      "x": 2253.2,
+      "y": 3261.8,
+      "kind": "village"
+    },
+    {
+      "name": "Alpha Fob",
+      "x": 7430.5,
+      "y": 5452.5,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "St Ouen",
+      "x": 4170.9,
+      "y": 8101.8,
+      "kind": "city"
+    },
+    {
+      "name": "Dissidents Kiln",
+      "x": 4177.7,
+      "y": 8884.5,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "The Pit",
+      "x": 6500.7,
+      "y": 7099.9,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Parish Geothermal Recapture",
+      "x": 14707.4,
+      "y": 1975,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Bailiffs Crossing Hot Springs",
+      "x": 12298.9,
+      "y": 6955,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Le Puits Mb",
+      "x": 10683.4,
+      "y": 9427.9,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "St Johns Hill Mb",
+      "x": 7930.7,
+      "y": 8153.6,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "St Cyr Mb",
+      "x": 7791.8,
+      "y": 6553.7,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Verdegris Range",
+      "x": 14818.9,
+      "y": 11137.4,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Bouley Bay Shipyard",
+      "x": 9584.5,
+      "y": 10510.7,
+      "kind": "local"
+    },
+    {
+      "name": "Beuvelande Campsite",
+      "x": 9556.8,
+      "y": 8138.2,
+      "kind": "village"
+    },
+    {
+      "name": "Hillside Mb",
+      "x": 9882.5,
+      "y": 8200.6,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Ville Au Bas",
+      "x": 9726.4,
+      "y": 6889.4,
+      "kind": "local"
+    },
+    {
+      "name": "Le Grands Respooling",
+      "x": 13218.1,
+      "y": 2433.5,
+      "kind": "local"
+    },
+    {
+      "name": "Le Mare",
+      "x": 12398.7,
+      "y": 1764.8,
+      "kind": "city"
+    },
+    {
+      "name": "Sundays Song",
+      "x": 14127.8,
+      "y": 996.9,
+      "kind": "village"
+    },
+    {
+      "name": "Seymour Refuge",
+      "x": 15275.4,
+      "y": 1033.4,
+      "kind": "rockarea"
+    },
+    {
+      "name": "St Brelade College",
+      "x": 3643.8,
+      "y": 3280.6,
+      "kind": "local"
+    },
+    {
+      "name": "Arsenal Ruins",
+      "x": 5339.9,
+      "y": 4182.7,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Hafan Y Mor",
+      "x": 10330.6,
+      "y": 12538.2,
+      "kind": "local"
+    },
+    {
+      "name": "Copper Point",
+      "x": 4251.7,
+      "y": 13235.9,
+      "kind": "rockarea"
+    },
+    {
+      "name": "La Valette",
+      "x": 4957.8,
+      "y": 13612,
+      "kind": "village"
+    },
+    {
+      "name": "Moulin Huet Bay",
+      "x": 3059.5,
+      "y": 12972.3,
+      "kind": "village"
+    },
+    {
+      "name": "Transatlantic Meteorological Relay",
+      "x": 1315,
+      "y": 13289.7,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Overstrand Mb",
+      "x": 383.6,
+      "y": 12758.7,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Millaisreserves",
+      "x": 2411,
+      "y": 8894.3,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Millais Depot",
+      "x": 2452.2,
+      "y": 9473.5,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Bailiffs Crossing",
+      "x": 13018.4,
+      "y": 6685,
+      "kind": "village"
+    },
+    {
+      "name": "Old Station",
+      "x": 9306.3,
+      "y": 3973.4,
+      "kind": "village"
+    },
+    {
+      "name": "Parish Field Mb",
+      "x": 13431.9,
+      "y": 3910.7,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Petrichor",
+      "x": 6646.3,
+      "y": 17310.7,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Medevac Heliport",
+      "x": 4901.2,
+      "y": 15094.9,
+      "kind": "local"
+    },
+    {
+      "name": "Tokamak Causeway Rest",
+      "x": 5066.7,
+      "y": 15745.2,
+      "kind": "local"
+    },
+    {
+      "name": "Bailiffs Crest",
+      "x": 11121.6,
+      "y": 7280.8,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Desalination Plant",
+      "x": 2017.4,
+      "y": 2077.8,
+      "kind": "local"
+    },
+    {
+      "name": "Spectacle Rock",
+      "x": 700.2,
+      "y": 2116.1,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Mont Du Petit",
+      "x": 2474.1,
+      "y": 2057,
+      "kind": "village"
+    },
+    {
+      "name": "La Moye",
+      "x": 3181.1,
+      "y": 2336.9,
+      "kind": "village"
+    },
+    {
+      "name": "La Rocco Holiday Centre",
+      "x": 2553.8,
+      "y": 3129.4,
+      "kind": "village"
+    },
+    {
+      "name": "Butlins Minehead",
+      "x": 19012.9,
+      "y": 11243.4,
+      "kind": "village"
+    },
+    {
+      "name": "Marchants Hill",
+      "x": 15373.9,
+      "y": 5620.2,
+      "kind": "village"
+    },
+    {
+      "name": "Dalguise",
+      "x": 15331.9,
+      "y": 4176.4,
+      "kind": "local"
+    },
+    {
+      "name": "Dukeshouse Wood",
+      "x": 7398.2,
+      "y": 7105.8,
+      "kind": "village"
+    },
+    {
+      "name": "Craig Tara",
+      "x": 1140.1,
+      "y": 2330.8,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Ferny Crofts",
+      "x": 4251.3,
+      "y": 4311.2,
+      "kind": "village"
+    },
+    {
+      "name": "Penshurst Place",
+      "x": 4112.4,
+      "y": 6498.5,
+      "kind": "village"
+    },
+    {
+      "name": "Mill On The Brue",
+      "x": 3684.1,
+      "y": 7333.7,
+      "kind": "village"
+    },
+    {
+      "name": "Cuffley Park",
+      "x": 551.2,
+      "y": 10118,
+      "kind": "local"
+    },
+    {
+      "name": "Thriftwood Mb",
+      "x": 963.7,
+      "y": 10662.8,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Bognor Drydock",
+      "x": 19500.6,
+      "y": 2997,
+      "kind": "flatarea"
+    },
+    {
+      "name": "Mont Orgueil Castle",
+      "x": 17523.1,
+      "y": 4507.4,
+      "kind": "rockarea"
+    },
+    {
+      "name": "St Catherine",
+      "x": 17294.3,
+      "y": 7184.8,
+      "kind": "village"
+    },
+    {
+      "name": "Point Break",
+      "x": 3333.3,
+      "y": 11446.1,
+      "kind": "local"
+    },
+    {
+      "name": "Mont Beaucette Mb",
+      "x": 8465,
+      "y": 14159.9,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Falcon On The Water",
+      "x": 9735.5,
+      "y": 13586.8,
+      "kind": "village"
+    },
+    {
+      "name": "Prevost Crest",
+      "x": 2188.6,
+      "y": 19517.2,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Fort Quesnard Ttc",
+      "x": 9236.1,
+      "y": 16780.9,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Little Longleat",
+      "x": 7813.2,
+      "y": 18632.3,
+      "kind": "village"
+    },
+    {
+      "name": "Trewan Sands Control",
+      "x": 13162.4,
+      "y": 18430.6,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Catillon De Haut",
+      "x": 15918.5,
+      "y": 3166.6,
+      "kind": "village"
+    },
+    {
+      "name": "Tourist Centre",
+      "x": 2994.2,
+      "y": 13579.6,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Dolmen",
+      "x": 4496.3,
+      "y": 14306.8,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Havre Des Pas Bathing Pool",
+      "x": 11491.6,
+      "y": 1842.3,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Government House",
+      "x": 9370.9,
+      "y": 18321.7,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Tombette",
+      "x": 8815.8,
+      "y": 17524.3,
+      "kind": "village"
+    },
+    {
+      "name": "Camp Wilderness Sealyham",
+      "x": 926.8,
+      "y": 18723.4,
+      "kind": "village"
+    },
+    {
+      "name": "Ronez Quarry",
+      "x": 6311.8,
+      "y": 9868.6,
+      "kind": "rockarea"
+    },
+    {
+      "name": "The Hermitage Of St Helier",
+      "x": 9819.3,
+      "y": 1585.4,
+      "kind": "rockarea"
+    },
+    {
+      "name": "St Aubins Fort",
+      "x": 7160.2,
+      "y": 2735.6,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Priory Inn",
+      "x": 6797.5,
+      "y": 10668.8,
+      "kind": "village"
+    },
+    {
+      "name": "Gossip Island",
+      "x": 5110.9,
+      "y": 16839.6,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Le Mont Dau Pretre",
+      "x": 11142.1,
+      "y": 3737.3,
+      "kind": "city"
+    },
+    {
+      "name": "Le Haguais Farm",
+      "x": 16140.9,
+      "y": 1438.1,
+      "kind": "local"
+    },
+    {
+      "name": "Green Island Beach Cannery",
+      "x": 13479.3,
+      "y": 399.2,
+      "kind": "local"
+    },
+    {
+      "name": "La Collette Minerals Port",
+      "x": 10808.8,
+      "y": 1453.8,
+      "kind": "flatarea"
+    },
+    {
+      "name": "West Park",
+      "x": 10060.5,
+      "y": 3634.6,
+      "kind": "local"
+    },
+    {
+      "name": "Bellozanne Valley Energy",
+      "x": 10056,
+      "y": 4513,
+      "kind": "local"
+    },
+    {
+      "name": "A9 Checkpoint",
+      "x": 10561.6,
+      "y": 7309.3,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Les Augres",
+      "x": 11390.3,
+      "y": 7529.9,
+      "kind": "village"
+    },
+    {
+      "name": "Coronation Park",
+      "x": 8120.6,
+      "y": 4165.3,
+      "kind": "village"
+    },
+    {
+      "name": "Mont Sohier Mill",
+      "x": 4984.1,
+      "y": 3028.8,
+      "kind": "local"
+    },
+    {
+      "name": "Fallaize Point Mb",
+      "x": 1995.8,
+      "y": 4240.5,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Ossuary Lake Adventure Park",
+      "x": 3081.7,
+      "y": 5037.1,
+      "kind": "village"
+    },
+    {
+      "name": "La Crabiere",
+      "x": 2794,
+      "y": 6760.5,
+      "kind": "village"
+    },
+    {
+      "name": "Le Pinacle Park",
+      "x": 799.9,
+      "y": 9311.7,
+      "kind": "local"
+    },
+    {
+      "name": "Trodez",
+      "x": 2158.9,
+      "y": 11913.6,
+      "kind": "village"
+    },
+    {
+      "name": "Cancale",
+      "x": 1141.9,
+      "y": 12292,
+      "kind": "village"
+    },
+    {
+      "name": "Le Vieux Fort",
+      "x": 855.6,
+      "y": 12477.3,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Grand Greve",
+      "x": 2637.5,
+      "y": 13615.1,
+      "kind": "city"
+    },
+    {
+      "name": "Charles Point",
+      "x": 5492.9,
+      "y": 16904.8,
+      "kind": "village"
+    },
+    {
+      "name": "Constitution Overlook",
+      "x": 8599.5,
+      "y": 18523.7,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Sea Acre",
+      "x": 10855.5,
+      "y": 15664.7,
+      "kind": "local"
+    },
+    {
+      "name": "Trewan Sands Detention Institute",
+      "x": 12997.8,
+      "y": 17903.1,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Southern Cut",
+      "x": 17857.8,
+      "y": 14722.1,
+      "kind": "village"
+    },
+    {
+      "name": "Mont Saint Administrative",
+      "x": 17809.8,
+      "y": 11919,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Red Beach Farmstead",
+      "x": 16194.3,
+      "y": 12070,
+      "kind": "village"
+    },
+    {
+      "name": "Mourier Point Mb",
+      "x": 5104.3,
+      "y": 9326.1,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Trewan Sands Medical",
+      "x": 16372.4,
+      "y": 16800.9,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Mourier Mine",
+      "x": 4817.3,
+      "y": 9373.8,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Breakwater Bay",
+      "x": 15254.2,
+      "y": 8764.6,
+      "kind": "village"
+    },
+    {
+      "name": "La Coupe Detention",
+      "x": 15884.1,
+      "y": 7976.9,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Ferny Crofts Agricultural",
+      "x": 4320.7,
+      "y": 3935.8,
+      "kind": "local"
+    },
+    {
+      "name": "Crossroads Inn",
+      "x": 2594.3,
+      "y": 4278.9,
+      "kind": "local"
+    },
+    {
+      "name": "Rescue Hospital",
+      "x": 7269.3,
+      "y": 9488.4,
+      "kind": "local"
+    },
+    {
+      "name": "Zugang 12",
+      "x": 19644.4,
+      "y": 13998.2,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Stollengruppe Sud",
+      "x": 19472.4,
+      "y": 12906.4,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Le Mont Des Epines",
+      "x": 4728.9,
+      "y": 417.2,
+      "kind": "namemarine"
+    },
+    {
+      "name": "Ossuary Lake",
+      "x": 3006.3,
+      "y": 4787.9,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Bonne Nuit Overlook",
+      "x": 12416.4,
+      "y": 9648.7,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Isle Agois",
+      "x": 11638.5,
+      "y": 10741.9,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Bagatelle Depot",
+      "x": 12501.9,
+      "y": 3149.9,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Lecoleron Battery",
+      "x": 5553.5,
+      "y": 1146.7,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Churchill Estates",
+      "x": 4363.8,
+      "y": 3182.6,
+      "kind": "village"
+    },
+    {
+      "name": "Beauport Camp",
+      "x": 3833.3,
+      "y": 2005,
+      "kind": "village"
+    },
+    {
+      "name": "Fort De Pirou",
+      "x": 958.5,
+      "y": 5768.4,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Trewan Sands Tidal Power",
+      "x": 11791.7,
+      "y": 18651,
+      "kind": "namemarine"
+    },
+    {
+      "name": "Flakturm 6",
+      "x": 9546.9,
+      "y": 17798.5,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Jersey Tunnels Attraction",
+      "x": 7628.7,
+      "y": 5593.6,
+      "kind": "rockarea"
+    },
+    {
+      "name": "La Mauvaise Rue",
+      "x": 12392.7,
+      "y": 3292.1,
+      "kind": "hill"
+    },
+    {
+      "name": "Raf Civilan Quarters",
+      "x": 14295.7,
+      "y": 16677.6,
+      "kind": "village"
+    },
+    {
+      "name": "Camp Helpless",
+      "x": 15455.4,
+      "y": 1129.9,
+      "kind": "village"
+    },
+    {
+      "name": "Panopticon",
+      "x": 4919.3,
+      "y": 13894.9,
+      "kind": "hill"
+    },
+    {
+      "name": "Reid Harbour",
+      "x": 4325.2,
+      "y": 17843.8,
+      "kind": "village"
+    },
+    {
+      "name": "Trinity",
+      "x": 11601.7,
+      "y": 8522.5,
+      "kind": "city"
+    },
+    {
+      "name": "La Rosiere",
+      "x": 737.4,
+      "y": 3091.1,
+      "kind": "village"
+    },
+    {
+      "name": "Shell Beach",
+      "x": 3987.8,
+      "y": 18122.1,
+      "kind": "village"
+    },
+    {
+      "name": "Isabelle View",
+      "x": 5891.1,
+      "y": 7302.7,
+      "kind": "hill"
+    },
+    {
+      "name": "Monkton Defensive Outpost",
+      "x": 12833,
+      "y": 9039.9,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "West Wynford",
+      "x": 10531.7,
+      "y": 5472.5,
+      "kind": "village"
+    },
+    {
+      "name": "Hillfield",
+      "x": 13719.2,
+      "y": 6251.7,
+      "kind": "flatarea"
+    },
+    {
+      "name": "Western Gatehouse",
+      "x": 2267,
+      "y": 10481.8,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Chateau Marquand",
+      "x": 2151.9,
+      "y": 19728.3,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Sterling Point",
+      "x": 19629.1,
+      "y": 10910.9,
+      "kind": "village"
+    }
+  ]
+}

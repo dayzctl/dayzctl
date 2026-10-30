@@ -1,0 +1,333 @@
+{
+  "id": "iztek",
+  "name": "Iztek",
+  "size": 8192,
+  "format": "jpg",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "2.0.4-14",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/iztek)",
+  "generatedAt": "2026-10-30T12:29:47Z",
+  "names": [
+    {
+      "name": "Borisovo",
+      "x": 5323.3,
+      "y": 1113.9,
+      "kind": "city"
+    },
+    {
+      "name": "Pilava",
+      "x": 5363.2,
+      "y": 3297,
+      "kind": "village"
+    },
+    {
+      "name": "Midroc",
+      "x": 5639.5,
+      "y": 2600.2,
+      "kind": "village"
+    },
+    {
+      "name": "Arkada Island",
+      "x": 1128.8,
+      "y": 7093.2,
+      "kind": "capital"
+    },
+    {
+      "name": "Camp Lara",
+      "x": 2975.7,
+      "y": 1399.4,
+      "kind": "camp"
+    },
+    {
+      "name": "Rokki Rok",
+      "x": 2278.6,
+      "y": 3667.8,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Ciano Rok",
+      "x": 2607.4,
+      "y": 4010.9,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Volkovo Islands",
+      "x": 3027.1,
+      "y": 7134.5,
+      "kind": "local"
+    },
+    {
+      "name": "Karosie Airstrip",
+      "x": 3524.7,
+      "y": 5324.7,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "Kezmans Rock",
+      "x": 4460.4,
+      "y": 6206.6,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Nathans Peak",
+      "x": 5496,
+      "y": 4045.1,
+      "kind": "hill"
+    },
+    {
+      "name": "Vizhai Prison",
+      "x": 992.9,
+      "y": 3713.3,
+      "kind": "local"
+    },
+    {
+      "name": "Azak Military Compound",
+      "x": 5466.1,
+      "y": 3845,
+      "kind": "smallmilitary"
+    },
+    {
+      "name": "Mezko Field",
+      "x": 6607.7,
+      "y": 5286.2,
+      "kind": "local"
+    },
+    {
+      "name": "Ozerki",
+      "x": 5798.9,
+      "y": 5748.9,
+      "kind": "village"
+    },
+    {
+      "name": "Drezna",
+      "x": 5281,
+      "y": 5258.3,
+      "kind": "local"
+    },
+    {
+      "name": "Viska",
+      "x": 4077.1,
+      "y": 1460.3,
+      "kind": "village"
+    },
+    {
+      "name": "Arika Bridge",
+      "x": 4776.1,
+      "y": 6543.5,
+      "kind": "local"
+    },
+    {
+      "name": "Goraz",
+      "x": 1217.4,
+      "y": 7265.8,
+      "kind": "smallmilitary"
+    },
+    {
+      "name": "Arkadia Castle",
+      "x": 962.4,
+      "y": 6937.2,
+      "kind": "ruin"
+    },
+    {
+      "name": "Svenzbiya Lake",
+      "x": 5854,
+      "y": 4384.5,
+      "kind": "marine"
+    },
+    {
+      "name": "Senjan River",
+      "x": 4725.6,
+      "y": 3416.6,
+      "kind": "marine"
+    },
+    {
+      "name": "Tana Beach",
+      "x": 5056.3,
+      "y": 646.5,
+      "kind": "marine"
+    },
+    {
+      "name": "Rozkaty",
+      "x": 1273.5,
+      "y": 5116,
+      "kind": "local"
+    },
+    {
+      "name": "Odinokiy Ostrov",
+      "x": 7078.9,
+      "y": 6649,
+      "kind": "local"
+    },
+    {
+      "name": "Azak Port \u0026 Ind.",
+      "x": 6611.3,
+      "y": 3763.6,
+      "kind": "local"
+    },
+    {
+      "name": "Radio Kaz",
+      "x": 6295.4,
+      "y": 3518.9,
+      "kind": "local"
+    },
+    {
+      "name": "Melingrad",
+      "x": 2627.8,
+      "y": 5303.2,
+      "kind": "village"
+    },
+    {
+      "name": "Rozka",
+      "x": 772,
+      "y": 4758.3,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Cp-14",
+      "x": 3114,
+      "y": 2897.2,
+      "kind": "smallmilitary"
+    },
+    {
+      "name": "Camp Hawk",
+      "x": 3263.3,
+      "y": 6973.8,
+      "kind": "camp"
+    },
+    {
+      "name": "Fortuda",
+      "x": 3169.9,
+      "y": 6327.2,
+      "kind": "vegetationfir"
+    },
+    {
+      "name": "Zenigrad",
+      "x": 3392.1,
+      "y": 2230.3,
+      "kind": "local"
+    },
+    {
+      "name": "Podznak",
+      "x": 4569.7,
+      "y": 2560.6,
+      "kind": "local"
+    },
+    {
+      "name": "Spod",
+      "x": 1763.5,
+      "y": 4991.1,
+      "kind": "local"
+    },
+    {
+      "name": "Mt. Iztek",
+      "x": 4858.4,
+      "y": 6053.6,
+      "kind": "capital"
+    },
+    {
+      "name": "Tavaruk",
+      "x": 6811.2,
+      "y": 1509.2,
+      "kind": "city"
+    },
+    {
+      "name": "Selina",
+      "x": 6665.3,
+      "y": 883.2,
+      "kind": "local"
+    },
+    {
+      "name": "Tuva 41",
+      "x": 4201.2,
+      "y": 2339.9,
+      "kind": "smallmilitary"
+    },
+    {
+      "name": "Shipwreck Skora",
+      "x": 6185,
+      "y": 7778.4,
+      "kind": "marine"
+    },
+    {
+      "name": "Azak",
+      "x": 6420,
+      "y": 3687.6,
+      "kind": "capital"
+    },
+    {
+      "name": "Anitova",
+      "x": 3528,
+      "y": 2896.5,
+      "kind": "city"
+    },
+    {
+      "name": "Dashina",
+      "x": 2399,
+      "y": 2184.6,
+      "kind": "local"
+    },
+    {
+      "name": "Cp-81",
+      "x": 5644.1,
+      "y": 6337.9,
+      "kind": "smallmilitary"
+    },
+    {
+      "name": "Belovo",
+      "x": 2766.7,
+      "y": 7014.8,
+      "kind": "local"
+    },
+    {
+      "name": "Camp Senjan",
+      "x": 4392.8,
+      "y": 3172.4,
+      "kind": "camp"
+    },
+    {
+      "name": "Saka",
+      "x": 3976.5,
+      "y": 756.5,
+      "kind": "village"
+    },
+    {
+      "name": "Novinka",
+      "x": 6259.1,
+      "y": 1974.9,
+      "kind": "village"
+    },
+    {
+      "name": "Camp Loisant",
+      "x": 2936.4,
+      "y": 4593,
+      "kind": "camp"
+    },
+    {
+      "name": "Loisant Castle",
+      "x": 2713.8,
+      "y": 4457.4,
+      "kind": "ruin"
+    },
+    {
+      "name": "Old Emenka Airfield",
+      "x": 7219.4,
+      "y": 5254.5,
+      "kind": "local"
+    },
+    {
+      "name": "Tabory",
+      "x": 4768.7,
+      "y": 3112.1,
+      "kind": "village"
+    },
+    {
+      "name": "Radar Base North",
+      "x": 4807.9,
+      "y": 6998.9,
+      "kind": "mediummilitary"
+    }
+  ]
+}

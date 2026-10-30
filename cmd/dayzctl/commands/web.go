@@ -72,7 +72,10 @@ func WebAction(opts WebOptions) error {
 		errCh <- httpServer.ListenAndServe()
 	}()
 
-	logger.Info("Web UI listening", "address", listenAddr, "installDir", shared.Config.GetInstallDir())
+	logger.Info("Web UI listening",
+		"address", listenAddr,
+		"installDir", shared.Config.GetInstallDir(),
+		"maps", len(server.Maps()))
 	fmt.Printf("dayzctl web listening on http://%s\n", listenAddr)
 	fmt.Println("Press Ctrl+C to stop.")
 

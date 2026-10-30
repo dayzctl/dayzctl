@@ -1,0 +1,231 @@
+{
+  "id": "lux",
+  "name": "Lux",
+  "size": 15360,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "May.29-3",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/lux)",
+  "generatedAt": "2026-10-30T12:29:53Z",
+  "names": [
+    {
+      "name": "Khong",
+      "x": 3427,
+      "y": 4620,
+      "kind": "city"
+    },
+    {
+      "name": "Napharat",
+      "x": 4265,
+      "y": 14305,
+      "kind": "city"
+    },
+    {
+      "name": "Tengah",
+      "x": 5320,
+      "y": 4320,
+      "kind": "city"
+    },
+    {
+      "name": "Calclua",
+      "x": 9314,
+      "y": 12951,
+      "kind": "city"
+    },
+    {
+      "name": "Sial",
+      "x": 2107,
+      "y": 6682,
+      "kind": "city"
+    },
+    {
+      "name": "Kham",
+      "x": 4725,
+      "y": 7507,
+      "kind": "village"
+    },
+    {
+      "name": "Pakna",
+      "x": 9064,
+      "y": 8342,
+      "kind": "village"
+    },
+    {
+      "name": "Rocky Island",
+      "x": 11526,
+      "y": 13941,
+      "kind": "marine"
+    },
+    {
+      "name": "Shipwreck",
+      "x": 11296,
+      "y": 4122,
+      "kind": "marine"
+    },
+    {
+      "name": "Shipwreck",
+      "x": 7595,
+      "y": 15074,
+      "kind": "marine"
+    },
+    {
+      "name": "Airfield",
+      "x": 3342,
+      "y": 9726,
+      "kind": "city"
+    },
+    {
+      "name": "Toxico",
+      "x": 6737,
+      "y": 12178,
+      "kind": "village"
+    },
+    {
+      "name": "Phukhea Base",
+      "x": 5542,
+      "y": 11145,
+      "kind": "village"
+    },
+    {
+      "name": "Xaw Island Military",
+      "x": 7096,
+      "y": 5343,
+      "kind": "village"
+    },
+    {
+      "name": "Khu Military",
+      "x": 7386,
+      "y": 10359,
+      "kind": "village"
+    },
+    {
+      "name": "Campus",
+      "x": 7177,
+      "y": 8609,
+      "kind": "village"
+    },
+    {
+      "name": "Rangsiya",
+      "x": 6532,
+      "y": 9000,
+      "kind": "village"
+    },
+    {
+      "name": "Comms",
+      "x": 6166,
+      "y": 13544,
+      "kind": "village"
+    },
+    {
+      "name": "Taosu",
+      "x": 4754,
+      "y": 12720,
+      "kind": "village"
+    },
+    {
+      "name": "Bunker",
+      "x": 8832,
+      "y": 13677,
+      "kind": "city"
+    },
+    {
+      "name": "Naval Base",
+      "x": 2414,
+      "y": 13109,
+      "kind": "village"
+    },
+    {
+      "name": "Sayan Teun",
+      "x": 8280,
+      "y": 6870,
+      "kind": "village"
+    },
+    {
+      "name": "Phun Na",
+      "x": 7875,
+      "y": 4820,
+      "kind": "village"
+    },
+    {
+      "name": "Deep Space Research",
+      "x": 7159,
+      "y": 9468,
+      "kind": "local"
+    },
+    {
+      "name": "Museum",
+      "x": 2983,
+      "y": 7548,
+      "kind": "local"
+    },
+    {
+      "name": "Luxland",
+      "x": 6596,
+      "y": 4996,
+      "kind": "local"
+    },
+    {
+      "name": "Offshore Platform",
+      "x": 11416,
+      "y": 7547,
+      "kind": "local"
+    },
+    {
+      "name": "Offshore Platform",
+      "x": 1064,
+      "y": 4428,
+      "kind": "local"
+    },
+    {
+      "name": "Offshore Platform (military)",
+      "x": 1017,
+      "y": 13888,
+      "kind": "local"
+    },
+    {
+      "name": "Cave",
+      "x": 3893,
+      "y": 5787,
+      "kind": "local"
+    },
+    {
+      "name": "Mount Olawatu",
+      "x": 8000,
+      "y": 11143,
+      "kind": "village"
+    },
+    {
+      "name": "Ruins",
+      "x": 4911,
+      "y": 5895,
+      "kind": "ruin"
+    },
+    {
+      "name": "Ruins",
+      "x": 7287,
+      "y": 7190,
+      "kind": "ruin"
+    },
+    {
+      "name": "Port Aiko",
+      "x": 5296,
+      "y": 14934,
+      "kind": "industrialsite"
+    },
+    {
+      "name": "Wujara Colliery",
+      "x": 7529,
+      "y": 6608,
+      "kind": "industrialsite"
+    },
+    {
+      "name": "Peak Mine",
+      "x": 3347,
+      "y": 11877,
+      "kind": "industrialsite"
+    }
+  ]
+}

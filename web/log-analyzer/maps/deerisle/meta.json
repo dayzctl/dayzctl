@@ -1,0 +1,381 @@
+{
+  "id": "deerisle",
+  "name": "Deer Isle",
+  "size": 16384,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "5.923-12",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/deerisle)",
+  "generatedAt": "2026-10-30T12:29:18Z",
+  "names": [
+    {
+      "name": "Paris Island",
+      "x": 2880.6,
+      "y": 3903.8,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Airfield",
+      "x": 5508,
+      "y": 3555,
+      "kind": "airport"
+    },
+    {
+      "name": "Devils Eye",
+      "x": 6654.2,
+      "y": 3472,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Starks Castle",
+      "x": 5771.4,
+      "y": 2372.2,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Prison",
+      "x": 5470.2,
+      "y": 658,
+      "kind": "local"
+    },
+    {
+      "name": "Kushville",
+      "x": 7533.6,
+      "y": 3910.2,
+      "kind": "village"
+    },
+    {
+      "name": "Milo",
+      "x": 6546,
+      "y": 3922.5,
+      "kind": "village"
+    },
+    {
+      "name": "Sunset Cross",
+      "x": 6580.8,
+      "y": 6382.9,
+      "kind": "village"
+    },
+    {
+      "name": "Asheville",
+      "x": 7311.2,
+      "y": 2607.1,
+      "kind": "village"
+    },
+    {
+      "name": "Warren Cove",
+      "x": 7050.7,
+      "y": 5360.8,
+      "kind": "village"
+    },
+    {
+      "name": "Oceanville",
+      "x": 10258.6,
+      "y": 4880,
+      "kind": "city"
+    },
+    {
+      "name": "Stonington",
+      "x": 6829.4,
+      "y": 1860.7,
+      "kind": "capital"
+    },
+    {
+      "name": "Greenville",
+      "x": 4744.7,
+      "y": 1492.5,
+      "kind": "village"
+    },
+    {
+      "name": "Sandy Bay",
+      "x": 5347.7,
+      "y": 7584.5,
+      "kind": "village"
+    },
+    {
+      "name": "Oldfield",
+      "x": 6114.2,
+      "y": 6921.7,
+      "kind": "village"
+    },
+    {
+      "name": "Sheep Island",
+      "x": 11941.8,
+      "y": 3882.2,
+      "kind": "local"
+    },
+    {
+      "name": "Smallville",
+      "x": 10355,
+      "y": 4360,
+      "kind": "village"
+    },
+    {
+      "name": "Horizon",
+      "x": 4139.5,
+      "y": 15461.3,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Deepwater",
+      "x": 1668.2,
+      "y": 12694.2,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Rogue Wave",
+      "x": 2144.8,
+      "y": 14620.3,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Groots Hill",
+      "x": 7618.3,
+      "y": 4823,
+      "kind": "hill"
+    },
+    {
+      "name": "Pauls View",
+      "x": 9561.8,
+      "y": 3716.4,
+      "kind": "hill"
+    },
+    {
+      "name": "Hazelands",
+      "x": 4538.5,
+      "y": 2693.8,
+      "kind": "city"
+    },
+    {
+      "name": "Stonington Harbor",
+      "x": 6839.3,
+      "y": 1422,
+      "kind": "namemarine"
+    },
+    {
+      "name": "Industrial",
+      "x": 6787,
+      "y": 2376,
+      "kind": "local"
+    },
+    {
+      "name": "Suburbs South",
+      "x": 7206.7,
+      "y": 1492.4,
+      "kind": "local"
+    },
+    {
+      "name": "Suburbs North",
+      "x": 6335.5,
+      "y": 2043.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Camp Eagle",
+      "x": 8778,
+      "y": 3733.3,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Camp Wolf",
+      "x": 5478.8,
+      "y": 1056.6,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Scouts Camp",
+      "x": 4930.4,
+      "y": 2049.2,
+      "kind": "local"
+    },
+    {
+      "name": "Scouts Camp",
+      "x": 8476.9,
+      "y": 5305.4,
+      "kind": "local"
+    },
+    {
+      "name": "Fishers Camp",
+      "x": 10343.4,
+      "y": 5586.7,
+      "kind": "local"
+    },
+    {
+      "name": "Portland",
+      "x": 6100,
+      "y": 14802.4,
+      "kind": "capital"
+    },
+    {
+      "name": "Georgestown",
+      "x": 4716.6,
+      "y": 4469.7,
+      "kind": "village"
+    },
+    {
+      "name": "Westbrook",
+      "x": 3302.8,
+      "y": 6372.3,
+      "kind": "village"
+    },
+    {
+      "name": "Swamp",
+      "x": 3801.9,
+      "y": 9049.3,
+      "kind": "local"
+    },
+    {
+      "name": "Old Town",
+      "x": 1840.6,
+      "y": 9070.6,
+      "kind": "village"
+    },
+    {
+      "name": "Mountainville",
+      "x": 7291,
+      "y": 8511.8,
+      "kind": "village"
+    },
+    {
+      "name": "Camp Bear",
+      "x": 8865.9,
+      "y": 5988.4,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Rcfi",
+      "x": 3732.7,
+      "y": 8813,
+      "kind": "hill"
+    },
+    {
+      "name": "Mine",
+      "x": 11148.5,
+      "y": 2273.5,
+      "kind": "local"
+    },
+    {
+      "name": "Crotch Island",
+      "x": 10812.1,
+      "y": 2584.1,
+      "kind": "local"
+    },
+    {
+      "name": "Area 42",
+      "x": 13379,
+      "y": 9849.6,
+      "kind": "local"
+    },
+    {
+      "name": "Rockenheim Circuit",
+      "x": 10060,
+      "y": 11060.9,
+      "kind": "hill"
+    },
+    {
+      "name": "Waldoboro",
+      "x": 8731,
+      "y": 9163.4,
+      "kind": "city"
+    },
+    {
+      "name": "East Harbor",
+      "x": 11363.6,
+      "y": 10103.4,
+      "kind": "local"
+    },
+    {
+      "name": "Woodworking Industrial",
+      "x": 4447,
+      "y": 12078.1,
+      "kind": "local"
+    },
+    {
+      "name": "Swanville",
+      "x": 5289.3,
+      "y": 12384.2,
+      "kind": "hill"
+    },
+    {
+      "name": "Bayville",
+      "x": 10178.4,
+      "y": 12011.8,
+      "kind": "village"
+    },
+    {
+      "name": "Pear Plantation",
+      "x": 9570.5,
+      "y": 7613.6,
+      "kind": "hill"
+    },
+    {
+      "name": "Montville",
+      "x": 9370.9,
+      "y": 8062.2,
+      "kind": "village"
+    },
+    {
+      "name": "Eastbrook",
+      "x": 10417.4,
+      "y": 7852,
+      "kind": "village"
+    },
+    {
+      "name": "Duskar",
+      "x": 7841.9,
+      "y": 8061.2,
+      "kind": "village"
+    },
+    {
+      "name": "Fairfield",
+      "x": 9978.3,
+      "y": 6825.9,
+      "kind": "village"
+    },
+    {
+      "name": "North Haven",
+      "x": 519.7,
+      "y": 15113.5,
+      "kind": "city"
+    },
+    {
+      "name": "Swansisland",
+      "x": 1120,
+      "y": 15363.1,
+      "kind": "local"
+    },
+    {
+      "name": "Threepwood",
+      "x": 9072.9,
+      "y": 7738.6,
+      "kind": "village"
+    },
+    {
+      "name": "Kmuc",
+      "x": 7226.1,
+      "y": 11625.6,
+      "kind": "local"
+    },
+    {
+      "name": "Baren Fall",
+      "x": 7632.5,
+      "y": 9824,
+      "kind": "hill"
+    },
+    {
+      "name": "Archipelago",
+      "x": 2258.3,
+      "y": 13600,
+      "kind": "namemarine"
+    },
+    {
+      "name": "Powerplant",
+      "x": 4790.5,
+      "y": 7051.9,
+      "kind": "local"
+    }
+  ]
+}

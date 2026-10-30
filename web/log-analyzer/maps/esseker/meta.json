@@ -1,0 +1,177 @@
+{
+  "id": "esseker",
+  "name": "Esseker",
+  "size": 12800,
+  "format": "jpg",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "0.58-26",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/esseker)",
+  "generatedAt": "2026-10-30T12:29:44Z",
+  "names": [
+    {
+      "name": "Posestra",
+      "x": 7785.2,
+      "y": 6881.6,
+      "kind": "village"
+    },
+    {
+      "name": "Esseker Zoo",
+      "x": 8881.9,
+      "y": 5441.9,
+      "kind": "village"
+    },
+    {
+      "name": "Lokve",
+      "x": 10081.2,
+      "y": 10140.6,
+      "kind": "rockarea"
+    },
+    {
+      "name": "In Memoria Titanis",
+      "x": 208067.9,
+      "y": 9511.1,
+      "kind": "village"
+    },
+    {
+      "name": "Kozara Mountains",
+      "x": 10418.3,
+      "y": 6968.1,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Adela Airfield",
+      "x": 10121.3,
+      "y": 4869.6,
+      "kind": "city"
+    },
+    {
+      "name": "Lug",
+      "x": 6190.7,
+      "y": 6895.5,
+      "kind": "village"
+    },
+    {
+      "name": "Novi Grad",
+      "x": 11881.8,
+      "y": 7977.2,
+      "kind": "city"
+    },
+    {
+      "name": "Chardak Resort",
+      "x": 10131.9,
+      "y": 7931.1,
+      "kind": "village"
+    },
+    {
+      "name": "Pilana Sawmill",
+      "x": 9012.9,
+      "y": 7900.4,
+      "kind": "village"
+    },
+    {
+      "name": "Kula",
+      "x": 4878.7,
+      "y": 5095.4,
+      "kind": "village"
+    },
+    {
+      "name": "Borosh",
+      "x": 10194.7,
+      "y": 9758.4,
+      "kind": "village"
+    },
+    {
+      "name": "Neptune Resort",
+      "x": 6433.4,
+      "y": 5525.9,
+      "kind": "village"
+    },
+    {
+      "name": "Tuk",
+      "x": 207144.5,
+      "y": 9327.9,
+      "kind": "city"
+    },
+    {
+      "name": "Gulash",
+      "x": 6431.4,
+      "y": 6136.1,
+      "kind": "village"
+    },
+    {
+      "name": "River Drava",
+      "x": 8838.2,
+      "y": 5078.6,
+      "kind": "marine"
+    },
+    {
+      "name": "Gromada",
+      "x": 9949,
+      "y": 10871.6,
+      "kind": "village"
+    },
+    {
+      "name": "Esseker East",
+      "x": 10812.3,
+      "y": 5416.8,
+      "kind": "village"
+    },
+    {
+      "name": "Esseker City",
+      "x": 9876,
+      "y": 5670.3,
+      "kind": "airport"
+    },
+    {
+      "name": "Gargata",
+      "x": 9601.6,
+      "y": 8527.8,
+      "kind": "village"
+    },
+    {
+      "name": "Esseker West",
+      "x": 8951.7,
+      "y": 5697.6,
+      "kind": "village"
+    },
+    {
+      "name": "Maksimilian Resort",
+      "x": 8358.3,
+      "y": 8624,
+      "kind": "village"
+    },
+    {
+      "name": "Esseker Industrial Zone",
+      "x": 8153.5,
+      "y": 5629,
+      "kind": "village"
+    },
+    {
+      "name": "Pakshu",
+      "x": 4996.5,
+      "y": 8785.3,
+      "kind": "village"
+    },
+    {
+      "name": "Kozara Radar Station",
+      "x": 10946.8,
+      "y": 6571.6,
+      "kind": "village"
+    },
+    {
+      "name": "Kamen Quarry",
+      "x": 11058.1,
+      "y": 9117.7,
+      "kind": "village"
+    },
+    {
+      "name": "Bondstil Military Base",
+      "x": 7674.4,
+      "y": 7599.5,
+      "kind": "village"
+    }
+  ]
+}

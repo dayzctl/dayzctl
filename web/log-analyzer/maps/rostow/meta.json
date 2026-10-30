@@ -1,0 +1,345 @@
+{
+  "id": "rostow",
+  "name": "Rostow",
+  "size": 14336,
+  "format": "jpg",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "1.122-11",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/rostow)",
+  "generatedAt": "2026-10-30T12:32:45Z",
+  "names": [
+    {
+      "name": "Kovrin",
+      "x": 4120.7,
+      "y": 4238.1,
+      "kind": "village"
+    },
+    {
+      "name": "Dworkino",
+      "x": 3724.9,
+      "y": 3143.4,
+      "kind": "village"
+    },
+    {
+      "name": "Klettzk",
+      "x": 1038.2,
+      "y": 3973.1,
+      "kind": "city"
+    },
+    {
+      "name": "Mieva",
+      "x": 4177.7,
+      "y": 6485.6,
+      "kind": "village"
+    },
+    {
+      "name": "Berasino",
+      "x": 3143.9,
+      "y": 9322.6,
+      "kind": "city"
+    },
+    {
+      "name": "Jelsk",
+      "x": 862.7,
+      "y": 8227.4,
+      "kind": "village"
+    },
+    {
+      "name": "Slowin",
+      "x": 1177,
+      "y": 12692,
+      "kind": "village"
+    },
+    {
+      "name": "Babrujsk",
+      "x": 4753.8,
+      "y": 11355.8,
+      "kind": "city"
+    },
+    {
+      "name": "Bychau",
+      "x": 5830.9,
+      "y": 13125,
+      "kind": "village"
+    },
+    {
+      "name": "Orschka",
+      "x": 6813.8,
+      "y": 10877,
+      "kind": "village"
+    },
+    {
+      "name": "Orschka Prison",
+      "x": 7870.2,
+      "y": 4096.3,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Domnowo",
+      "x": 8713.4,
+      "y": 13233,
+      "kind": "village"
+    },
+    {
+      "name": "Domnowo Military Base",
+      "x": 8482.8,
+      "y": 13584.3,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Ostrovez",
+      "x": 9422.6,
+      "y": 10454.3,
+      "kind": "city"
+    },
+    {
+      "name": "Ostrovez Industrial",
+      "x": 9683,
+      "y": 10990.2,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Ostrovezairfield",
+      "x": 10666.3,
+      "y": 10449.4,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Borowoje",
+      "x": 11485.3,
+      "y": 12620.4,
+      "kind": "city"
+    },
+    {
+      "name": "Borowoje Industial",
+      "x": 11998.6,
+      "y": 12632.7,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Rasponi",
+      "x": 9405.3,
+      "y": 8778.2,
+      "kind": "village"
+    },
+    {
+      "name": "Adamowsk",
+      "x": 11612,
+      "y": 8918.6,
+      "kind": "city"
+    },
+    {
+      "name": "Adamowsk Industrial",
+      "x": 11830.1,
+      "y": 8733.5,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Adamowsk Industrial",
+      "x": 11916.7,
+      "y": 8958.5,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Alekssevka",
+      "x": 13929.3,
+      "y": 11115.6,
+      "kind": "village"
+    },
+    {
+      "name": "Rezoni Mine",
+      "x": 10229.2,
+      "y": 5913.1,
+      "kind": "hill"
+    },
+    {
+      "name": "Rezoni",
+      "x": 10009.7,
+      "y": 6760.9,
+      "kind": "village"
+    },
+    {
+      "name": "Gorlowka",
+      "x": 9235.8,
+      "y": 4872.2,
+      "kind": "village"
+    },
+    {
+      "name": "Krupki",
+      "x": 5926.9,
+      "y": 5122.6,
+      "kind": "village"
+    },
+    {
+      "name": "Mieva Airbase",
+      "x": 4337.3,
+      "y": 5608.4,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Old Mine",
+      "x": 1760.3,
+      "y": 2985.1,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Krasnapolle",
+      "x": 8780,
+      "y": 2218.4,
+      "kind": "capital"
+    },
+    {
+      "name": "Prudnoje",
+      "x": 10221.4,
+      "y": 1335.9,
+      "kind": "village"
+    },
+    {
+      "name": "Pavlovka Military Testing Area",
+      "x": 7182.3,
+      "y": 509.7,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Dobrowo",
+      "x": 12802.7,
+      "y": 8383.7,
+      "kind": "village"
+    },
+    {
+      "name": "Dribin",
+      "x": 4905.8,
+      "y": 9282.3,
+      "kind": "village"
+    },
+    {
+      "name": "Kolyzovka",
+      "x": 2770.3,
+      "y": 13201.1,
+      "kind": "village"
+    },
+    {
+      "name": "Olgowka",
+      "x": 13413.7,
+      "y": 7132.3,
+      "kind": "village"
+    },
+    {
+      "name": "Hrodva",
+      "x": 4903,
+      "y": 7384.4,
+      "kind": "village"
+    },
+    {
+      "name": "Orschka Castleruins",
+      "x": 7188.8,
+      "y": 12327.2,
+      "kind": "local"
+    },
+    {
+      "name": "Mieva Castleruins",
+      "x": 2891.3,
+      "y": 5648.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Berasino Industial",
+      "x": 3187.1,
+      "y": 8560.5,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Orlesko",
+      "x": 8091.2,
+      "y": 7649.9,
+      "kind": "village"
+    },
+    {
+      "name": "Sportsfacility",
+      "x": 10599,
+      "y": 6511.6,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Orlesko Radiotower",
+      "x": 7892.7,
+      "y": 7915,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Ostrovez Industrial",
+      "x": 8616,
+      "y": 10240.8,
+      "kind": "local"
+    },
+    {
+      "name": "Purification Plant",
+      "x": 2677.3,
+      "y": 9424.6,
+      "kind": "local"
+    },
+    {
+      "name": "Sawmill",
+      "x": 4615.1,
+      "y": 6608.2,
+      "kind": "local"
+    },
+    {
+      "name": "Industrial",
+      "x": 10082,
+      "y": 13263.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Klettzk Radiotower",
+      "x": 622.3,
+      "y": 2661.8,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Industrial",
+      "x": 5964.3,
+      "y": 3912.6,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Bezodnya",
+      "x": 4335.8,
+      "y": 928.6,
+      "kind": "village"
+    },
+    {
+      "name": "Berasino Militarycamp",
+      "x": 3671.6,
+      "y": 8341.9,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Berasino_militaryoutpost",
+      "x": 4657.2,
+      "y": 8424.2,
+      "kind": "hill"
+    },
+    {
+      "name": "Old Orschka",
+      "x": 5991.1,
+      "y": 10581,
+      "kind": "village"
+    },
+    {
+      "name": "Babrujsk Army Control Point",
+      "x": 5509.3,
+      "y": 10988.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Orschka Army Controlpoint",
+      "x": 7244.1,
+      "y": 11559.9,
+      "kind": "hill"
+    }
+  ]
+}

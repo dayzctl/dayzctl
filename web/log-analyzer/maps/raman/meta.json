@@ -1,0 +1,477 @@
+{
+  "id": "raman",
+  "name": "Raman",
+  "size": 32768,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "Mar.14-11",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/raman)",
+  "generatedAt": "2026-10-30T12:32:21Z",
+  "names": [
+    {
+      "name": "Beshsar",
+      "x": 10624.7,
+      "y": 6416.5,
+      "kind": "village"
+    },
+    {
+      "name": "Kamar",
+      "x": 11293.8,
+      "y": 4828,
+      "kind": "village"
+    },
+    {
+      "name": "Anazar",
+      "x": 10129.4,
+      "y": 8428.9,
+      "kind": "city"
+    },
+    {
+      "name": "Briman Military Base",
+      "x": 7679.4,
+      "y": 9084.3,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Kamlen",
+      "x": 11370.9,
+      "y": 9673.9,
+      "kind": "city"
+    },
+    {
+      "name": "Ishat",
+      "x": 11914.9,
+      "y": 11933.3,
+      "kind": "city"
+    },
+    {
+      "name": "Bulak",
+      "x": 9926.2,
+      "y": 13444,
+      "kind": "city"
+    },
+    {
+      "name": "Turabad",
+      "x": 9237.9,
+      "y": 13774.8,
+      "kind": "city"
+    },
+    {
+      "name": "Shurbazar",
+      "x": 12390.7,
+      "y": 15361,
+      "kind": "village"
+    },
+    {
+      "name": "Sutushar",
+      "x": 12022.8,
+      "y": 15591.7,
+      "kind": "village"
+    },
+    {
+      "name": "Baistan",
+      "x": 12409.7,
+      "y": 15983.1,
+      "kind": "capital"
+    },
+    {
+      "name": "Baistan Industrial",
+      "x": 13162.2,
+      "y": 16329.7,
+      "kind": "local"
+    },
+    {
+      "name": "Kirovo Military Outpost",
+      "x": 11386.2,
+      "y": 16171.7,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Briman Isle",
+      "x": 9506,
+      "y": 10965.7,
+      "kind": "local"
+    },
+    {
+      "name": "Raman Isle",
+      "x": 20427.9,
+      "y": 15906.8,
+      "kind": "local"
+    },
+    {
+      "name": "Quduq",
+      "x": 14219,
+      "y": 15652.5,
+      "kind": "city"
+    },
+    {
+      "name": "Dardak",
+      "x": 14641.3,
+      "y": 15892.9,
+      "kind": "village"
+    },
+    {
+      "name": "Sayguzar",
+      "x": 14978.4,
+      "y": 17452.2,
+      "kind": "village"
+    },
+    {
+      "name": "Dzush Military Outpost",
+      "x": 17107.6,
+      "y": 16868.8,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Zarband",
+      "x": 14895.9,
+      "y": 18320.1,
+      "kind": "city"
+    },
+    {
+      "name": "Ukum",
+      "x": 15351.1,
+      "y": 18711.1,
+      "kind": "village"
+    },
+    {
+      "name": "Janschabad",
+      "x": 16116.5,
+      "y": 19120,
+      "kind": "village"
+    },
+    {
+      "name": "Shakhcha",
+      "x": 17024.4,
+      "y": 19863.7,
+      "kind": "village"
+    },
+    {
+      "name": "Khaudag",
+      "x": 17591,
+      "y": 20137.6,
+      "kind": "village"
+    },
+    {
+      "name": "Saryyak",
+      "x": 18485.1,
+      "y": 20567.5,
+      "kind": "capital"
+    },
+    {
+      "name": "Navak",
+      "x": 19612.6,
+      "y": 21450.1,
+      "kind": "village"
+    },
+    {
+      "name": "Makhasa",
+      "x": 18079.6,
+      "y": 22285.2,
+      "kind": "city"
+    },
+    {
+      "name": "Makhasa Military Trainingscenter",
+      "x": 17190.2,
+      "y": 21889.9,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Ingishka",
+      "x": 25142.5,
+      "y": 26371.9,
+      "kind": "village"
+    },
+    {
+      "name": "Transformer Station",
+      "x": 25339.9,
+      "y": 27585.3,
+      "kind": "local"
+    },
+    {
+      "name": "Dzhalabek",
+      "x": 24497.8,
+      "y": 26804.4,
+      "kind": "village"
+    },
+    {
+      "name": "Naubak",
+      "x": 24537.1,
+      "y": 24715.1,
+      "kind": "city"
+    },
+    {
+      "name": "Charbak",
+      "x": 26679.4,
+      "y": 24838.3,
+      "kind": "capital"
+    },
+    {
+      "name": "Khoshmak Antenna",
+      "x": 22038.9,
+      "y": 19824.5,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Khoshmak Mine",
+      "x": 23593.2,
+      "y": 20182.7,
+      "kind": "local"
+    },
+    {
+      "name": "Gazavat Mine",
+      "x": 17765.9,
+      "y": 14537.8,
+      "kind": "local"
+    },
+    {
+      "name": "Gazavat Old Mine",
+      "x": 19417.2,
+      "y": 16850.9,
+      "kind": "local"
+    },
+    {
+      "name": "Rishtan",
+      "x": 30462,
+      "y": 27300.1,
+      "kind": "city"
+    },
+    {
+      "name": "Altynkan",
+      "x": 30433.8,
+      "y": 26699.9,
+      "kind": "city"
+    },
+    {
+      "name": "Khanabad Military Base",
+      "x": 29215.9,
+      "y": 27028.9,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Khanabad Antenna",
+      "x": 28606.2,
+      "y": 27676.7,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Tazhribakar",
+      "x": 30199.1,
+      "y": 26129.6,
+      "kind": "city"
+    },
+    {
+      "name": "Jarqudun",
+      "x": 29445.5,
+      "y": 25776.2,
+      "kind": "city"
+    },
+    {
+      "name": "Sar-khar",
+      "x": 29723.9,
+      "y": 24195.8,
+      "kind": "city"
+    },
+    {
+      "name": "Chokmazar",
+      "x": 28870.6,
+      "y": 22786,
+      "kind": "village"
+    },
+    {
+      "name": "Bakhrin",
+      "x": 28851.5,
+      "y": 21486.9,
+      "kind": "city"
+    },
+    {
+      "name": "Kerayd",
+      "x": 24672.6,
+      "y": 19901,
+      "kind": "village"
+    },
+    {
+      "name": "Pakhta Radar",
+      "x": 29174.2,
+      "y": 18501.5,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Pagarik",
+      "x": 23705.2,
+      "y": 17494.2,
+      "kind": "village"
+    },
+    {
+      "name": "Qorakamar",
+      "x": 28107.8,
+      "y": 15249.7,
+      "kind": "village"
+    },
+    {
+      "name": "Daukara",
+      "x": 27721.4,
+      "y": 14477.1,
+      "kind": "city"
+    },
+    {
+      "name": "Daukara Military Trainingcenter",
+      "x": 27366.7,
+      "y": 14530.6,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Kochkomar",
+      "x": 27372.7,
+      "y": 13419.9,
+      "kind": "village"
+    },
+    {
+      "name": "Nowdak",
+      "x": 26961.9,
+      "y": 12748,
+      "kind": "city"
+    },
+    {
+      "name": "Bogara Industrial",
+      "x": 26017.5,
+      "y": 12296.2,
+      "kind": "local"
+    },
+    {
+      "name": "Bogara",
+      "x": 24984.1,
+      "y": 11575.4,
+      "kind": "city"
+    },
+    {
+      "name": "Khoyak Island",
+      "x": 26445.8,
+      "y": 10400.2,
+      "kind": "local"
+    },
+    {
+      "name": "Yagmur",
+      "x": 20575.7,
+      "y": 9656,
+      "kind": "village"
+    },
+    {
+      "name": "Oshkon",
+      "x": 17091,
+      "y": 11410.3,
+      "kind": "city"
+    },
+    {
+      "name": "Tutek",
+      "x": 16028.2,
+      "y": 10924,
+      "kind": "village"
+    },
+    {
+      "name": "Buryban",
+      "x": 14959.9,
+      "y": 12302.4,
+      "kind": "village"
+    },
+    {
+      "name": "Rabot",
+      "x": 14294.8,
+      "y": 13125.7,
+      "kind": "village"
+    },
+    {
+      "name": "Raman Airfield",
+      "x": 15184.1,
+      "y": 13877.4,
+      "kind": "airport"
+    },
+    {
+      "name": "Raman Old Airfield",
+      "x": 16503.1,
+      "y": 12649.4,
+      "kind": "airport"
+    },
+    {
+      "name": "Gazavat",
+      "x": 16469.8,
+      "y": 14337.9,
+      "kind": "village"
+    },
+    {
+      "name": "Zair",
+      "x": 13962.7,
+      "y": 15182.8,
+      "kind": "local"
+    },
+    {
+      "name": "Taylak Military Correctioncenter",
+      "x": 15666.5,
+      "y": 8192.8,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Rapkhan",
+      "x": 26427.2,
+      "y": 16950.4,
+      "kind": "city"
+    },
+    {
+      "name": "Sergaliakar",
+      "x": 27198.5,
+      "y": 16924.1,
+      "kind": "city"
+    },
+    {
+      "name": "Sar-khar Industrial",
+      "x": 30319.8,
+      "y": 24947.7,
+      "kind": "local"
+    },
+    {
+      "name": "Sayrak",
+      "x": 25921.8,
+      "y": 24806.7,
+      "kind": "village"
+    },
+    {
+      "name": "Nungan Island",
+      "x": 4877.4,
+      "y": 7688,
+      "kind": "local"
+    },
+    {
+      "name": "Sakarya Island",
+      "x": 1459.8,
+      "y": 6193.7,
+      "kind": "local"
+    },
+    {
+      "name": "Qorakamar Militarybase",
+      "x": 28272.8,
+      "y": 16333.7,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Ingishka Military Base",
+      "x": 24171.1,
+      "y": 26399.5,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Rashid",
+      "x": 27279.3,
+      "y": 16274.4,
+      "kind": "village"
+    },
+    {
+      "name": "Bulak Antenna",
+      "x": 10103.2,
+      "y": 14180.9,
+      "kind": "viewpoint"
+    }
+  ]
+}

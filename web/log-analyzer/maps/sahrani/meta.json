@@ -1,0 +1,939 @@
+{
+  "id": "sahrani",
+  "name": "Sahrani",
+  "size": 20480,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "Jan.23-5",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/sahrani)",
+  "generatedAt": "2026-10-30T12:32:57Z",
+  "names": [
+    {
+      "name": "Rashidah",
+      "x": 9585.8,
+      "y": 11109.2,
+      "kind": "village"
+    },
+    {
+      "name": "Balmopan",
+      "x": 8035.8,
+      "y": 9456.3,
+      "kind": "village"
+    },
+    {
+      "name": "Estrella",
+      "x": 6785.3,
+      "y": 8139.8,
+      "kind": "village"
+    },
+    {
+      "name": "Chantico",
+      "x": 8221.8,
+      "y": 9087.7,
+      "kind": "city"
+    },
+    {
+      "name": "Cedras",
+      "x": 7379.1,
+      "y": 8687.8,
+      "kind": "village"
+    },
+    {
+      "name": "Ambergris",
+      "x": 7669.6,
+      "y": 9181.9,
+      "kind": "village"
+    },
+    {
+      "name": "Ortego",
+      "x": 12355.6,
+      "y": 7095.8,
+      "kind": "city"
+    },
+    {
+      "name": "Cayo",
+      "x": 9324.7,
+      "y": 5982.8,
+      "kind": "city"
+    },
+    {
+      "name": "Iguana",
+      "x": 10730.4,
+      "y": 4828,
+      "kind": "city"
+    },
+    {
+      "name": "Dolores",
+      "x": 11613.6,
+      "y": 6018.9,
+      "kind": "city"
+    },
+    {
+      "name": "Parato",
+      "x": 11367.6,
+      "y": 5290.5,
+      "kind": "village"
+    },
+    {
+      "name": "Tiberia",
+      "x": 9406.5,
+      "y": 5145.5,
+      "kind": "village"
+    },
+    {
+      "name": "Geraldo",
+      "x": 13276.7,
+      "y": 6966.1,
+      "kind": "village"
+    },
+    {
+      "name": "Selva De Cresta",
+      "x": 7475,
+      "y": 16815,
+      "kind": "vegetationfir"
+    },
+    {
+      "name": "Corazol",
+      "x": 13191.7,
+      "y": 8793.9,
+      "kind": "city"
+    },
+    {
+      "name": "Selva De Caza",
+      "x": 9504,
+      "y": 16382.3,
+      "kind": "vegetationfir"
+    },
+    {
+      "name": "Gulan",
+      "x": 8803.7,
+      "y": 7733.6,
+      "kind": "village"
+    },
+    {
+      "name": "Somato",
+      "x": 9199.7,
+      "y": 8273.6,
+      "kind": "village"
+    },
+    {
+      "name": "Bonanza",
+      "x": 11211.5,
+      "y": 8858.1,
+      "kind": "village"
+    },
+    {
+      "name": "Corinto",
+      "x": 11567.7,
+      "y": 9144.1,
+      "kind": "village"
+    },
+    {
+      "name": "Yoro",
+      "x": 9751,
+      "y": 8724,
+      "kind": "village"
+    },
+    {
+      "name": "Pesto",
+      "x": 10179.7,
+      "y": 8432.2,
+      "kind": "village"
+    },
+    {
+      "name": "Assombracao",
+      "x": 13448.6,
+      "y": 15014.4,
+      "kind": "vegetationfir"
+    },
+    {
+      "name": "Paraiso",
+      "x": 10612.3,
+      "y": 9412.9,
+      "kind": "capital"
+    },
+    {
+      "name": "Arcadia",
+      "x": 7600.9,
+      "y": 6435.5,
+      "kind": "village"
+    },
+    {
+      "name": "Mato Grosso",
+      "x": 10044.8,
+      "y": 13709.8,
+      "kind": "vegetationbroadleaf"
+    },
+    {
+      "name": "Masbete",
+      "x": 17231.4,
+      "y": 14339.1,
+      "kind": "city"
+    },
+    {
+      "name": "Pita",
+      "x": 18941,
+      "y": 13888.9,
+      "kind": "village"
+    },
+    {
+      "name": "Bagango",
+      "x": 14240.3,
+      "y": 12534,
+      "kind": "capital"
+    },
+    {
+      "name": "Eponia",
+      "x": 12447.7,
+      "y": 15099,
+      "kind": "city"
+    },
+    {
+      "name": "Everon",
+      "x": 16514.2,
+      "y": 9300.3,
+      "kind": "village"
+    },
+    {
+      "name": "Hunapu",
+      "x": 7737.8,
+      "y": 15755.6,
+      "kind": "village"
+    },
+    {
+      "name": "Pacamac",
+      "x": 9713.5,
+      "y": 14448.7,
+      "kind": "village"
+    },
+    {
+      "name": "Tlaloc",
+      "x": 10857.5,
+      "y": 12628.6,
+      "kind": "village"
+    },
+    {
+      "name": "Obregan",
+      "x": 14520.1,
+      "y": 10877.6,
+      "kind": "city"
+    },
+    {
+      "name": "Carmen",
+      "x": 12436.1,
+      "y": 13303.1,
+      "kind": "village"
+    },
+    {
+      "name": "Ixel",
+      "x": 17480.5,
+      "y": 13564.6,
+      "kind": "village"
+    },
+    {
+      "name": "Mercalillo",
+      "x": 13250,
+      "y": 11292.9,
+      "kind": "city"
+    },
+    {
+      "name": "Modesta",
+      "x": 14372.4,
+      "y": 9428.1,
+      "kind": "village"
+    },
+    {
+      "name": "Boscas",
+      "x": 13169.7,
+      "y": 12714.8,
+      "kind": "vegetationbroadleaf"
+    },
+    {
+      "name": "Mato Virgo",
+      "x": 17011.8,
+      "y": 10153,
+      "kind": "vegetationbroadleaf"
+    },
+    {
+      "name": "Valor",
+      "x": 15343.3,
+      "y": 9896,
+      "kind": "village"
+    },
+    {
+      "name": "Gaula",
+      "x": 14503.5,
+      "y": 8538.8,
+      "kind": "village"
+    },
+    {
+      "name": "Hiccoras",
+      "x": 12021.3,
+      "y": 9317.9,
+      "kind": "vegetationbroadleaf"
+    },
+    {
+      "name": "Mataredo",
+      "x": 10653,
+      "y": 16265,
+      "kind": "village"
+    },
+    {
+      "name": "Benoma",
+      "x": 15383.1,
+      "y": 13768.5,
+      "kind": "village"
+    },
+    {
+      "name": "Tandag",
+      "x": 11856.1,
+      "y": 14418.3,
+      "kind": "village"
+    },
+    {
+      "name": "Sierra Cresta",
+      "x": 7491.8,
+      "y": 16549,
+      "kind": "hill"
+    },
+    {
+      "name": "Monte Acequero",
+      "x": 7380.6,
+      "y": 16028.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Punto Precito",
+      "x": 8776.6,
+      "y": 15871.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Rocaloso",
+      "x": 9143.2,
+      "y": 15417.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Punto Pacamac",
+      "x": 9900.1,
+      "y": 14893.7,
+      "kind": "hill"
+    },
+    {
+      "name": "Bico Do Papageo",
+      "x": 10021,
+      "y": 13428.9,
+      "kind": "hill"
+    },
+    {
+      "name": "Punto Morton",
+      "x": 11107.5,
+      "y": 13381.6,
+      "kind": "hill"
+    },
+    {
+      "name": "Pico De Revolucion",
+      "x": 13118.7,
+      "y": 16529,
+      "kind": "hill"
+    },
+    {
+      "name": "Pico De Perez",
+      "x": 14260.1,
+      "y": 15181.7,
+      "kind": "hill"
+    },
+    {
+      "name": "Monte Liberacion",
+      "x": 15624.3,
+      "y": 11386.1,
+      "kind": "hill"
+    },
+    {
+      "name": "Monte Valor",
+      "x": 16203.4,
+      "y": 10347.2,
+      "kind": "hill"
+    },
+    {
+      "name": "San Esteban",
+      "x": 11430.1,
+      "y": 8584.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Monte Pesto",
+      "x": 10699.6,
+      "y": 8267.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Monte Yorito",
+      "x": 9389.9,
+      "y": 8668.9,
+      "kind": "hill"
+    },
+    {
+      "name": "Playa Riscal",
+      "x": 6499.3,
+      "y": 8134.1,
+      "kind": "marine"
+    },
+    {
+      "name": "Playa De Palomas",
+      "x": 8351,
+      "y": 9717.7,
+      "kind": "local"
+    },
+    {
+      "name": "Abra Da Boca",
+      "x": 11603.3,
+      "y": 10973.6,
+      "kind": "marine"
+    },
+    {
+      "name": "Bahia Corazol",
+      "x": 12736.2,
+      "y": 9377.9,
+      "kind": "marine"
+    },
+    {
+      "name": "Bahia Gatun",
+      "x": 13536.3,
+      "y": 8428,
+      "kind": "marine"
+    },
+    {
+      "name": "Bahia Seca",
+      "x": 13042.7,
+      "y": 6134.3,
+      "kind": "marine"
+    },
+    {
+      "name": "Golfo De Dolores",
+      "x": 11932.8,
+      "y": 5994.6,
+      "kind": "marine"
+    },
+    {
+      "name": "Cala De Iguana",
+      "x": 10875.7,
+      "y": 4618.6,
+      "kind": "marine"
+    },
+    {
+      "name": "Ancon Everone",
+      "x": 16859.4,
+      "y": 9267,
+      "kind": "marine"
+    },
+    {
+      "name": "Ancon De Pita",
+      "x": 19424.1,
+      "y": 13706.5,
+      "kind": "marine"
+    },
+    {
+      "name": "Ancon De Amanitas",
+      "x": 15697.6,
+      "y": 15177.1,
+      "kind": "marine"
+    },
+    {
+      "name": "Porto De Perolas",
+      "x": 10842.6,
+      "y": 16594.6,
+      "kind": "marine"
+    },
+    {
+      "name": "Golfo Valiente",
+      "x": 6464.9,
+      "y": 17140.2,
+      "kind": "marine"
+    },
+    {
+      "name": "Ancon De Hunapu",
+      "x": 7410.7,
+      "y": 15283,
+      "kind": "marine"
+    },
+    {
+      "name": "Estrecho De Trelobada",
+      "x": 7744.5,
+      "y": 14702.4,
+      "kind": "marine"
+    },
+    {
+      "name": "Playa Gyron",
+      "x": 10215.2,
+      "y": 13192.2,
+      "kind": "marine"
+    },
+    {
+      "name": "Cabo Valiente",
+      "x": 6204.3,
+      "y": 17398.8,
+      "kind": "local"
+    },
+    {
+      "name": "Isla De Matey",
+      "x": 5810.7,
+      "y": 16137.8,
+      "kind": "local"
+    },
+    {
+      "name": "Trelobada",
+      "x": 7589.7,
+      "y": 14400.3,
+      "kind": "local"
+    },
+    {
+      "name": "Passo San Andres",
+      "x": 10714.4,
+      "y": 14236.6,
+      "kind": "local"
+    },
+    {
+      "name": "Puntas Occidental",
+      "x": 8958.6,
+      "y": 15608.6,
+      "kind": "local"
+    },
+    {
+      "name": "Cabo Juventudo",
+      "x": 7800.5,
+      "y": 17794.3,
+      "kind": "local"
+    },
+    {
+      "name": "Cabo Indice",
+      "x": 10573.7,
+      "y": 17190.2,
+      "kind": "local"
+    },
+    {
+      "name": "Isla De Victoria",
+      "x": 11206.7,
+      "y": 16884.9,
+      "kind": "local"
+    },
+    {
+      "name": "Isla Des Compadres",
+      "x": 10688.7,
+      "y": 16764.2,
+      "kind": "local"
+    },
+    {
+      "name": "Pesadas",
+      "x": 11663.2,
+      "y": 15366.1,
+      "kind": "local"
+    },
+    {
+      "name": "Passo Epone",
+      "x": 13625.7,
+      "y": 15536.5,
+      "kind": "local"
+    },
+    {
+      "name": "Sierra Masbete",
+      "x": 15113.8,
+      "y": 14709.8,
+      "kind": "local"
+    },
+    {
+      "name": "Terra Marismo",
+      "x": 14038.7,
+      "y": 13908.7,
+      "kind": "local"
+    },
+    {
+      "name": "Valle De Carmen",
+      "x": 13160.4,
+      "y": 13428.4,
+      "kind": "local"
+    },
+    {
+      "name": "Puntas Oriental",
+      "x": 11415.7,
+      "y": 13058.6,
+      "kind": "local"
+    },
+    {
+      "name": "Isla De Libertad",
+      "x": 12521.9,
+      "y": 10925.8,
+      "kind": "local"
+    },
+    {
+      "name": "Isla Verda",
+      "x": 12385.2,
+      "y": 10296.3,
+      "kind": "local"
+    },
+    {
+      "name": "Bajo Valor",
+      "x": 15504.5,
+      "y": 8889.9,
+      "kind": "local"
+    },
+    {
+      "name": "Islas Gatunas",
+      "x": 13952.8,
+      "y": 8009.5,
+      "kind": "local"
+    },
+    {
+      "name": "Sierra De Los Pinos",
+      "x": 16774.3,
+      "y": 11163.3,
+      "kind": "local"
+    },
+    {
+      "name": "Tres Valles",
+      "x": 17695.9,
+      "y": 11920.1,
+      "kind": "local"
+    },
+    {
+      "name": "Sierra Pita",
+      "x": 18357.3,
+      "y": 13220.9,
+      "kind": "local"
+    },
+    {
+      "name": "San Peregrino",
+      "x": 6325.2,
+      "y": 7383.9,
+      "kind": "local"
+    },
+    {
+      "name": "Calheta De Cedras",
+      "x": 7031.6,
+      "y": 8494.9,
+      "kind": "local"
+    },
+    {
+      "name": "Cabo Canino",
+      "x": 7813.1,
+      "y": 9692.5,
+      "kind": "local"
+    },
+    {
+      "name": "Matas",
+      "x": 9771.8,
+      "y": 10650.3,
+      "kind": "local"
+    },
+    {
+      "name": "Valle Azul",
+      "x": 10972.8,
+      "y": 7553.9,
+      "kind": "local"
+    },
+    {
+      "name": "Vallejo",
+      "x": 10260.6,
+      "y": 7084,
+      "kind": "local"
+    },
+    {
+      "name": "Sierra Madre",
+      "x": 11078,
+      "y": 8347.4,
+      "kind": "local"
+    },
+    {
+      "name": "Plato De Cayo",
+      "x": 8702.5,
+      "y": 6070.7,
+      "kind": "local"
+    },
+    {
+      "name": "Terra Acorcha",
+      "x": 10157.6,
+      "y": 5852.5,
+      "kind": "local"
+    },
+    {
+      "name": "Calha De Cayo",
+      "x": 8393.4,
+      "y": 5388.1,
+      "kind": "local"
+    },
+    {
+      "name": "Calheta Seca",
+      "x": 13107.8,
+      "y": 6434.4,
+      "kind": "local"
+    },
+    {
+      "name": "La Corona",
+      "x": 9913,
+      "y": 4931.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Cabo De Fidel",
+      "x": 5676.9,
+      "y": 16462.7,
+      "kind": "local"
+    },
+    {
+      "name": "Bahia San Geraldo",
+      "x": 13578.3,
+      "y": 6865.2,
+      "kind": "marine"
+    },
+    {
+      "name": "Calheta Demiseca",
+      "x": 12382.8,
+      "y": 6243.5,
+      "kind": "local"
+    },
+    {
+      "name": "Cala De Parato",
+      "x": 11500.4,
+      "y": 5120.3,
+      "kind": "marine"
+    },
+    {
+      "name": "Roca Del Dror",
+      "x": 14101,
+      "y": 17032.8,
+      "kind": "local"
+    },
+    {
+      "name": "Passo San Marco",
+      "x": 15061.4,
+      "y": 12392.5,
+      "kind": "local"
+    },
+    {
+      "name": "Punto Argente",
+      "x": 8060.1,
+      "y": 16267.9,
+      "kind": "hill"
+    },
+    {
+      "name": "Cerro Obrego",
+      "x": 14798.5,
+      "y": 10053.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Isla Del Vida",
+      "x": 5221.1,
+      "y": 15942.8,
+      "kind": "local"
+    },
+    {
+      "name": "Isla Del Vassal",
+      "x": 4459.3,
+      "y": 15180.1,
+      "kind": "local"
+    },
+    {
+      "name": "Monte Galassi",
+      "x": 4799.3,
+      "y": 14985.4,
+      "kind": "local"
+    },
+    {
+      "name": "Gola Yennda",
+      "x": 5124.4,
+      "y": 16271.6,
+      "kind": "marine"
+    },
+    {
+      "name": "Cabo Santa Lucia",
+      "x": 12214.7,
+      "y": 18350.2,
+      "kind": "local"
+    },
+    {
+      "name": "Cabo Gavio",
+      "x": 9771.7,
+      "y": 4484.5,
+      "kind": "local"
+    },
+    {
+      "name": "Alcazar",
+      "x": 14726.7,
+      "y": 13979.3,
+      "kind": "local"
+    },
+    {
+      "name": "Passo Paradiso",
+      "x": 10132.7,
+      "y": 15479.7,
+      "kind": "local"
+    },
+    {
+      "name": "Parvulo",
+      "x": 2236.8,
+      "y": 18809.8,
+      "kind": "local"
+    },
+    {
+      "name": "Rocara",
+      "x": 1760.1,
+      "y": 17907.5,
+      "kind": "local"
+    },
+    {
+      "name": "Cimas Dobles",
+      "x": 1621.7,
+      "y": 17136.1,
+      "kind": "local"
+    },
+    {
+      "name": "El Gordo",
+      "x": 16022.8,
+      "y": 4044.6,
+      "kind": "local"
+    },
+    {
+      "name": "Isla Del Zorra",
+      "x": 16485.1,
+      "y": 4664.5,
+      "kind": "local"
+    },
+    {
+      "name": "Isla De Los Tojos",
+      "x": 17623.8,
+      "y": 4797.2,
+      "kind": "local"
+    },
+    {
+      "name": "Monte Asharah",
+      "x": 17982.3,
+      "y": 3163.2,
+      "kind": "local"
+    },
+    {
+      "name": "Gola De Laras",
+      "x": 17143.2,
+      "y": 4461.8,
+      "kind": "marine"
+    },
+    {
+      "name": "Rio Pallido",
+      "x": 17476.9,
+      "y": 18560.6,
+      "kind": "marine"
+    },
+    {
+      "name": "Antigua",
+      "x": 17887.2,
+      "y": 18324.9,
+      "kind": "local"
+    },
+    {
+      "name": "Virgo",
+      "x": 17539.4,
+      "y": 17941.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Vieja",
+      "x": 17413.5,
+      "y": 18075.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Isla De La Caja",
+      "x": 1511.3,
+      "y": 1691.2,
+      "kind": "local"
+    },
+    {
+      "name": "Isla Arimar",
+      "x": 1545,
+      "y": 2296.4,
+      "kind": "local"
+    },
+    {
+      "name": "San Tomas",
+      "x": 9455.6,
+      "y": 3510.2,
+      "kind": "local"
+    },
+    {
+      "name": "Angra Del Caridad",
+      "x": 1930.6,
+      "y": 1990.7,
+      "kind": "marine"
+    },
+    {
+      "name": "Cala Barca",
+      "x": 2843.6,
+      "y": 1880.4,
+      "kind": "marine"
+    },
+    {
+      "name": "Cala Marisca",
+      "x": 2707.1,
+      "y": 3251.2,
+      "kind": "marine"
+    },
+    {
+      "name": "Rahmadi",
+      "x": 2931.1,
+      "y": 2798.6,
+      "kind": "village"
+    },
+    {
+      "name": "Cerra Borra",
+      "x": 3368.5,
+      "y": 2933.1,
+      "kind": "hill"
+    },
+    {
+      "name": "Tapial",
+      "x": 5967.2,
+      "y": 16431.1,
+      "kind": "hill"
+    },
+    {
+      "name": "Bajo Estrecho",
+      "x": 9431.5,
+      "y": 4116.4,
+      "kind": "marine"
+    },
+    {
+      "name": "Isle De Kju",
+      "x": 17355.5,
+      "y": 19312.7,
+      "kind": "local"
+    },
+    {
+      "name": "Isle De Michellero",
+      "x": 16844.1,
+      "y": 19645.2,
+      "kind": "local"
+    },
+    {
+      "name": "Isle De Mapori",
+      "x": 17699.4,
+      "y": 19369.8,
+      "kind": "local"
+    },
+    {
+      "name": "Cabo Base Militar",
+      "x": 12134,
+      "y": 17665.4,
+      "kind": "local"
+    },
+    {
+      "name": "Selva Base Militar",
+      "x": 8161.8,
+      "y": 17005.7,
+      "kind": "local"
+    }
+  ]
+}

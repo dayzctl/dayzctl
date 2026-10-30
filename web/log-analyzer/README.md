@@ -72,6 +72,9 @@ of the instance's profiles folder.
 
 A server keeps months of rotated logs, so the file picker scrolls instead of
 growing the page; the progress bar sits directly above the list it describes.
+The **All / RPT / ADM** chips filter the list by type, and *Select all* acts on
+whatever the filter is showing, so you can analyse every ADM of a week without
+clicking through the RPT files.
 
 ## Tabs
 

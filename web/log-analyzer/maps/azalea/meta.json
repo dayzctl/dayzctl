@@ -1,0 +1,291 @@
+{
+  "id": "azalea",
+  "name": "Azalea",
+  "size": 20480,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "0.3.4-5",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/azalea)",
+  "generatedAt": "2026-10-30T12:29:09Z",
+  "names": [
+    {
+      "name": "Deeptide Quarry",
+      "x": 9375.1,
+      "y": 12964.8,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Whispering Pines",
+      "x": 8456.9,
+      "y": 14727.4,
+      "kind": "local"
+    },
+    {
+      "name": "Echo Fortress",
+      "x": 11752.2,
+      "y": 15427.7,
+      "kind": "namemarine"
+    },
+    {
+      "name": "Lagoon Camp",
+      "x": 10494.5,
+      "y": 14554,
+      "kind": "local"
+    },
+    {
+      "name": "Ci",
+      "x": 8966.9,
+      "y": 16177.4,
+      "kind": "local"
+    },
+    {
+      "name": "Hydra",
+      "x": 10668.4,
+      "y": 12473.1,
+      "kind": "hill"
+    },
+    {
+      "name": "Cedro",
+      "x": 9520.3,
+      "y": 14831.2,
+      "kind": "capital"
+    },
+    {
+      "name": "Croc Island",
+      "x": 10066,
+      "y": 13366.8,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Monte Hotel",
+      "x": 9694.1,
+      "y": 12249.1,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Bunker",
+      "x": 9650.6,
+      "y": 16383.3,
+      "kind": "namemarine"
+    },
+    {
+      "name": "Windfarm",
+      "x": 11687.4,
+      "y": 13906.1,
+      "kind": "namemarine"
+    },
+    {
+      "name": "Pico Station",
+      "x": 12829,
+      "y": 13260.2,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Mira",
+      "x": 11107.9,
+      "y": 16866.8,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Meloa",
+      "x": 11196,
+      "y": 11661.2,
+      "kind": "local"
+    },
+    {
+      "name": "Hilltop",
+      "x": 11321.3,
+      "y": 17172.4,
+      "kind": "hill"
+    },
+    {
+      "name": "Serra",
+      "x": 9725.5,
+      "y": 18311.7,
+      "kind": "village"
+    },
+    {
+      "name": "Fatima",
+      "x": 8712.9,
+      "y": 18107.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Seni Pass",
+      "x": 12055.5,
+      "y": 12143.6,
+      "kind": "hill"
+    },
+    {
+      "name": "Aquade",
+      "x": 7848.7,
+      "y": 9780.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Valeros",
+      "x": 10529.2,
+      "y": 19700.6,
+      "kind": "village"
+    },
+    {
+      "name": "Altura",
+      "x": 8194.3,
+      "y": 12581.9,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Kalles Vineyard",
+      "x": 5845.2,
+      "y": 11816.1,
+      "kind": "hill"
+    },
+    {
+      "name": "Dunas",
+      "x": 12159.8,
+      "y": 18891.7,
+      "kind": "hill"
+    },
+    {
+      "name": "Oceano",
+      "x": 9155,
+      "y": 18795.8,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Delta Research",
+      "x": 8771.4,
+      "y": 15512.1,
+      "kind": "namemarine"
+    },
+    {
+      "name": "Brizo",
+      "x": 9598.2,
+      "y": 13812,
+      "kind": "village"
+    },
+    {
+      "name": "Camp Moody",
+      "x": 12710.2,
+      "y": 11989,
+      "kind": "local"
+    },
+    {
+      "name": "Orca",
+      "x": 6109.1,
+      "y": 14231.7,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Oeste",
+      "x": 4814.4,
+      "y": 14508.2,
+      "kind": "hill"
+    },
+    {
+      "name": "Arauto",
+      "x": 8189,
+      "y": 14930.5,
+      "kind": "village"
+    },
+    {
+      "name": "Atlas Outpost",
+      "x": 8518.7,
+      "y": 18331.4,
+      "kind": "bordercrossing"
+    },
+    {
+      "name": "Aqude",
+      "x": 7795.9,
+      "y": 9767.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Balea",
+      "x": 6462,
+      "y": 11245.8,
+      "kind": "village"
+    },
+    {
+      "name": "Espinho",
+      "x": 10945.8,
+      "y": 14593.9,
+      "kind": "village"
+    },
+    {
+      "name": "Amora",
+      "x": 13383.8,
+      "y": 18355.2,
+      "kind": "village"
+    },
+    {
+      "name": "Brisa",
+      "x": 6112.5,
+      "y": 15206.7,
+      "kind": "village"
+    },
+    {
+      "name": "Porto",
+      "x": 6822.5,
+      "y": 17920,
+      "kind": "city"
+    },
+    {
+      "name": "Fogo Airfield",
+      "x": 14902.5,
+      "y": 9465,
+      "kind": "village"
+    },
+    {
+      "name": "Cedro Bridge",
+      "x": 10253.8,
+      "y": 14022.5,
+      "kind": "village"
+    },
+    {
+      "name": "Sintra Military",
+      "x": 6137.5,
+      "y": 14362.5,
+      "kind": "village"
+    },
+    {
+      "name": "Sintra",
+      "x": 5740,
+      "y": 13348.8,
+      "kind": "city"
+    },
+    {
+      "name": "Pena",
+      "x": 4400,
+      "y": 14850,
+      "kind": "village"
+    },
+    {
+      "name": "Caldera Research",
+      "x": 6278.8,
+      "y": 15735,
+      "kind": "village"
+    },
+    {
+      "name": "Summer Camp",
+      "x": 7774.4,
+      "y": 17241.9,
+      "kind": "village"
+    },
+    {
+      "name": "No Loot Data Available During This Play Test",
+      "x": 10240,
+      "y": 22000,
+      "kind": "information"
+    },
+    {
+      "name": "Markers And Categories Are Estimates And Not Fully Accurate",
+      "x": 10240,
+      "y": 21600,
+      "kind": "information"
+    }
+  ]
+}

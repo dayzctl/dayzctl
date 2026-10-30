@@ -1,0 +1,183 @@
+{
+  "id": "melkart",
+  "name": "Melkart",
+  "size": 20480,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "Dec.30-4",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/melkart)",
+  "generatedAt": "2026-10-30T12:30:33Z",
+  "names": [
+    {
+      "name": "Lascuta",
+      "x": 10769.8,
+      "y": 12061.5,
+      "kind": "village"
+    },
+    {
+      "name": "Ben Alud",
+      "x": 8811.3,
+      "y": 11323.6,
+      "kind": "hill"
+    },
+    {
+      "name": "Astarte",
+      "x": 10204,
+      "y": 12587.5,
+      "kind": "village"
+    },
+    {
+      "name": "Baal Mountain",
+      "x": 6806.7,
+      "y": 7535.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Ebura Camp",
+      "x": 10312.5,
+      "y": 11000,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Gadara Ruins",
+      "x": 11379.2,
+      "y": 7061.4,
+      "kind": "hill"
+    },
+    {
+      "name": "Melkart",
+      "x": 10942,
+      "y": 8454.6,
+      "kind": "city"
+    },
+    {
+      "name": "Onuba",
+      "x": 10896.2,
+      "y": 13632.3,
+      "kind": "village"
+    },
+    {
+      "name": "Sohail",
+      "x": 8537.9,
+      "y": 11026,
+      "kind": "village"
+    },
+    {
+      "name": "Tharsis",
+      "x": 10114,
+      "y": 6185.1,
+      "kind": "village"
+    },
+    {
+      "name": "Gadir Airfield",
+      "x": 9342.7,
+      "y": 8052.9,
+      "kind": "airport"
+    },
+    {
+      "name": "Akra M.b.",
+      "x": 8699.8,
+      "y": 6714,
+      "kind": "hill"
+    },
+    {
+      "name": "Onuba Camp",
+      "x": 10747,
+      "y": 13506.1,
+      "kind": "local"
+    },
+    {
+      "name": "Wadi Lakko",
+      "x": 7949.5,
+      "y": 9515.3,
+      "kind": "village"
+    },
+    {
+      "name": "Garum M.b.",
+      "x": 11709.7,
+      "y": 6564,
+      "kind": "local"
+    },
+    {
+      "name": "Ocuri Camp",
+      "x": 6581.9,
+      "y": 7155.5,
+      "kind": "local"
+    },
+    {
+      "name": "Baelo Camp",
+      "x": 8990.6,
+      "y": 9420.6,
+      "kind": "local"
+    },
+    {
+      "name": "Malaka M.b.",
+      "x": 11393.9,
+      "y": 7515,
+      "kind": "hill"
+    },
+    {
+      "name": "Sidon Hill",
+      "x": 8211.7,
+      "y": 8601.7,
+      "kind": "hill"
+    },
+    {
+      "name": "Kothar Camp",
+      "x": 8489.2,
+      "y": 7448.6,
+      "kind": "local"
+    },
+    {
+      "name": "Nora M.b.",
+      "x": 6880.6,
+      "y": 6773.6,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Eshmuncamp",
+      "x": 7366.7,
+      "y": 8698.5,
+      "kind": "local"
+    },
+    {
+      "name": "Tharsis M.b.",
+      "x": 10205.2,
+      "y": 6291.5,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Nemo Camp",
+      "x": 9147.3,
+      "y": 14091.3,
+      "kind": "local"
+    },
+    {
+      "name": "Kartuba",
+      "x": 8916.9,
+      "y": 12569.1,
+      "kind": "village"
+    },
+    {
+      "name": "Abdera",
+      "x": 8602,
+      "y": 14420.2,
+      "kind": "local"
+    },
+    {
+      "name": "Rusadir",
+      "x": 8036.3,
+      "y": 13747.3,
+      "kind": "local"
+    },
+    {
+      "name": "Ispal Ruins",
+      "x": 9169.9,
+      "y": 12224.2,
+      "kind": "local"
+    }
+  ]
+}

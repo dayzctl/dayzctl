@@ -1,0 +1,375 @@
+{
+  "id": "sakhal",
+  "name": "Sakhal",
+  "size": 15360,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "1.30",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/sakhal)",
+  "generatedAt": "2026-10-30T12:37:27Z",
+  "names": [
+    {
+      "name": "Petropavlovsk-sakhalinsk",
+      "x": 4749,
+      "y": 10695,
+      "kind": "capital"
+    },
+    {
+      "name": "Severomorsk",
+      "x": 9544,
+      "y": 13656,
+      "kind": "city"
+    },
+    {
+      "name": "Aniva",
+      "x": 12895,
+      "y": 7273,
+      "kind": "city"
+    },
+    {
+      "name": "Nogovo",
+      "x": 7814,
+      "y": 7949,
+      "kind": "city"
+    },
+    {
+      "name": "Bolotnoye",
+      "x": 5040,
+      "y": 8667,
+      "kind": "village"
+    },
+    {
+      "name": "Dudino",
+      "x": 6233,
+      "y": 7245,
+      "kind": "village"
+    },
+    {
+      "name": "Tikhoye",
+      "x": 6260,
+      "y": 8669,
+      "kind": "local"
+    },
+    {
+      "name": "Taranaj",
+      "x": 9706,
+      "y": 6584,
+      "kind": "local"
+    },
+    {
+      "name": "Yuzhnoye",
+      "x": 10972,
+      "y": 6323,
+      "kind": "village"
+    },
+    {
+      "name": "Dolinovka",
+      "x": 9831,
+      "y": 9835,
+      "kind": "local"
+    },
+    {
+      "name": "Goryachevo",
+      "x": 8774,
+      "y": 10059,
+      "kind": "local"
+    },
+    {
+      "name": "Yasnaya Polyana",
+      "x": 8116,
+      "y": 9191,
+      "kind": "local"
+    },
+    {
+      "name": "Lesogorovka",
+      "x": 10969,
+      "y": 9695,
+      "kind": "village"
+    },
+    {
+      "name": "Sakhalag",
+      "x": 12163,
+      "y": 9698,
+      "kind": "village"
+    },
+    {
+      "name": "İturup",
+      "x": 10371,
+      "y": 10700,
+      "kind": "local"
+    },
+    {
+      "name": "Vostok",
+      "x": 13910,
+      "y": 8337,
+      "kind": "village"
+    },
+    {
+      "name": "Shumnoye",
+      "x": 14383,
+      "y": 8842,
+      "kind": "village"
+    },
+    {
+      "name": "Baikovo",
+      "x": 14571,
+      "y": 9794,
+      "kind": "village"
+    },
+    {
+      "name": "Matrosovo",
+      "x": 14233,
+      "y": 11586,
+      "kind": "village"
+    },
+    {
+      "name": "Rudnogorsk",
+      "x": 13587,
+      "y": 12152,
+      "kind": "city"
+    },
+    {
+      "name": "Rybnoye",
+      "x": 12471,
+      "y": 12667,
+      "kind": "village"
+    },
+    {
+      "name": "Podgornoe",
+      "x": 10985,
+      "y": 13209,
+      "kind": "village"
+    },
+    {
+      "name": "Orlovo",
+      "x": 10373,
+      "y": 13348,
+      "kind": "village"
+    },
+    {
+      "name": "Tumanovo",
+      "x": 8417,
+      "y": 13646,
+      "kind": "village"
+    },
+    {
+      "name": "Evey",
+      "x": 7954,
+      "y": 13512,
+      "kind": "village"
+    },
+    {
+      "name": "Yasnomorsk",
+      "x": 6951,
+      "y": 13331,
+      "kind": "village"
+    },
+    {
+      "name": "Sovetskoye",
+      "x": 6413,
+      "y": 12783,
+      "kind": "village"
+    },
+    {
+      "name": "Zhupanovo",
+      "x": 5741,
+      "y": 12516,
+      "kind": "village"
+    },
+    {
+      "name": "Vysokoye",
+      "x": 11186.2,
+      "y": 7965.8,
+      "kind": "village"
+    },
+    {
+      "name": "Wolf Peak",
+      "x": 8196,
+      "y": 11668,
+      "kind": "hill"
+    },
+    {
+      "name": "Storozh",
+      "x": 8776,
+      "y": 12791,
+      "kind": "hill"
+    },
+    {
+      "name": "Lonely Volcano",
+      "x": 10029,
+      "y": 12087,
+      "kind": "hill"
+    },
+    {
+      "name": "Ostry",
+      "x": 11546,
+      "y": 11669,
+      "kind": "hill"
+    },
+    {
+      "name": "Tupoy",
+      "x": 11898,
+      "y": 11267,
+      "kind": "hill"
+    },
+    {
+      "name": "Ice Ridge",
+      "x": 10756,
+      "y": 8669,
+      "kind": "hill"
+    },
+    {
+      "name": "Troika",
+      "x": 9016,
+      "y": 9268,
+      "kind": "hill"
+    },
+    {
+      "name": "East Peak",
+      "x": 12835,
+      "y": 9418,
+      "kind": "hill"
+    },
+    {
+      "name": "Zvezdnyy Nikel",
+      "x": 12033,
+      "y": 10323,
+      "kind": "local"
+    },
+    {
+      "name": "Sakhalin Geopp",
+      "x": 8407,
+      "y": 10204,
+      "kind": "local"
+    },
+    {
+      "name": "Tungar",
+      "x": 12630,
+      "y": 14135,
+      "kind": "local"
+    },
+    {
+      "name": "Ushki",
+      "x": 10817,
+      "y": 14631,
+      "kind": "local"
+    },
+    {
+      "name": "Sputnik",
+      "x": 7786,
+      "y": 14802,
+      "kind": "local"
+    },
+    {
+      "name": "Utios",
+      "x": 5453,
+      "y": 14535,
+      "kind": "local"
+    },
+    {
+      "name": "Tochka",
+      "x": 3755,
+      "y": 14402,
+      "kind": "local"
+    },
+    {
+      "name": "Cherepakha",
+      "x": 835,
+      "y": 11285,
+      "kind": "local"
+    },
+    {
+      "name": "Urup",
+      "x": 1537,
+      "y": 891,
+      "kind": "local"
+    },
+    {
+      "name": "Mrak",
+      "x": 8443,
+      "y": 1328,
+      "kind": "local"
+    },
+    {
+      "name": "Solisko",
+      "x": 12653,
+      "y": 2121,
+      "kind": "local"
+    },
+    {
+      "name": "Elizarovo",
+      "x": 13492,
+      "y": 5178,
+      "kind": "local"
+    },
+    {
+      "name": "Slomannyy",
+      "x": 6313,
+      "y": 6454,
+      "kind": "local"
+    },
+    {
+      "name": "Utichiy",
+      "x": 8628,
+      "y": 5146,
+      "kind": "local"
+    },
+    {
+      "name": "Kyetoi",
+      "x": 5755,
+      "y": 2066,
+      "kind": "local"
+    },
+    {
+      "name": "Missile Bay",
+      "x": 4396,
+      "y": 7269,
+      "kind": "marine"
+    },
+    {
+      "name": "Burukan",
+      "x": 2706,
+      "y": 6540,
+      "kind": "city"
+    },
+    {
+      "name": "Shantar",
+      "x": 2278,
+      "y": 3413,
+      "kind": "village"
+    },
+    {
+      "name": "Tugur",
+      "x": 1738,
+      "y": 6131,
+      "kind": "local"
+    },
+    {
+      "name": "Neran",
+      "x": 2666,
+      "y": 9297,
+      "kind": "local"
+    },
+    {
+      "name": "Kekra",
+      "x": 7188,
+      "y": 4235,
+      "kind": "local"
+    },
+    {
+      "name": "Ayan",
+      "x": 1243,
+      "y": 3022,
+      "kind": "local"
+    },
+    {
+      "name": "Black Cape",
+      "x": 5084,
+      "y": 3592,
+      "kind": "local"
+    }
+  ]
+}

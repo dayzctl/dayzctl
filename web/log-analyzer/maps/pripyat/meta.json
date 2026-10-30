@@ -1,0 +1,771 @@
+{
+  "id": "pripyat",
+  "name": "Pripyat",
+  "size": 20480,
+  "format": "jpg",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "0.94a-11",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/pripyat)",
+  "generatedAt": "2026-10-30T12:32:18Z",
+  "names": [
+    {
+      "name": "Chernobyl Military Base",
+      "x": 13445.5,
+      "y": 3287.3,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Chernobyl",
+      "x": 14939.1,
+      "y": 1803.4,
+      "kind": "city"
+    },
+    {
+      "name": "Chernobyl Nuclear Power Plant",
+      "x": 7309.7,
+      "y": 15285,
+      "kind": "capital"
+    },
+    {
+      "name": "Urban Area #5",
+      "x": 3929.7,
+      "y": 17743.9,
+      "kind": "local"
+    },
+    {
+      "name": "Duga Radar Station",
+      "x": 4479,
+      "y": 5967.7,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Pripyat Amusement Park",
+      "x": 4023.8,
+      "y": 17309.4,
+      "kind": "flatareacity"
+    },
+    {
+      "name": "Pripyat",
+      "x": 3855.2,
+      "y": 17176,
+      "kind": "capital"
+    },
+    {
+      "name": "Cooling Towers",
+      "x": 9285.3,
+      "y": 13542,
+      "kind": "flatareacitysmall"
+    },
+    {
+      "name": "Red Forest Military Base",
+      "x": 7445.9,
+      "y": 12263.3,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Druganov Airfield",
+      "x": 16736.4,
+      "y": 11711.7,
+      "kind": "city"
+    },
+    {
+      "name": "Druganov Military Base",
+      "x": 15173.9,
+      "y": 11363.9,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Gringo's Camping Resort",
+      "x": 14723.7,
+      "y": 10347.2,
+      "kind": "local"
+    },
+    {
+      "name": "Vesna",
+      "x": 13593.1,
+      "y": 18679.6,
+      "kind": "village"
+    },
+    {
+      "name": "Limansk",
+      "x": 7316.9,
+      "y": 1136.5,
+      "kind": "city"
+    },
+    {
+      "name": "Yanov Train Station",
+      "x": 4194.9,
+      "y": 15722.9,
+      "kind": "village"
+    },
+    {
+      "name": "Experimental Mink Farm",
+      "x": 9711.2,
+      "y": 13292.3,
+      "kind": "local"
+    },
+    {
+      "name": "Spent Nuclear Fuel Storage #2",
+      "x": 8385.3,
+      "y": 13150.8,
+      "kind": "flatareacitysmall"
+    },
+    {
+      "name": "Chernobyl Npp Substation",
+      "x": 7031.8,
+      "y": 14293.7,
+      "kind": "flatareacitysmall"
+    },
+    {
+      "name": "Urban Area #1",
+      "x": 4721,
+      "y": 16917.2,
+      "kind": "local"
+    },
+    {
+      "name": "Palace Of Culture",
+      "x": 4060,
+      "y": 17149.5,
+      "kind": "local"
+    },
+    {
+      "name": "Kolyshniy Hotel",
+      "x": 4189.3,
+      "y": 17184.2,
+      "kind": "local"
+    },
+    {
+      "name": "Pripyat City Hall",
+      "x": 4265,
+      "y": 17219.8,
+      "kind": "local"
+    },
+    {
+      "name": "Avanhard Stadium",
+      "x": 3982.1,
+      "y": 17588.6,
+      "kind": "local"
+    },
+    {
+      "name": "Chernobyl Radio Station",
+      "x": 14283.2,
+      "y": 1630.3,
+      "kind": "local"
+    },
+    {
+      "name": "Red Forest",
+      "x": 4074.6,
+      "y": 14497.4,
+      "kind": "village"
+    },
+    {
+      "name": "Anomalous Zone",
+      "x": 7333.8,
+      "y": 3220.1,
+      "kind": "local"
+    },
+    {
+      "name": "Southern 100 Rads Bar",
+      "x": 15218.3,
+      "y": 2651.6,
+      "kind": "local"
+    },
+    {
+      "name": "Pripyat Military Base",
+      "x": 2467.6,
+      "y": 16350,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Jupiter",
+      "x": 3070,
+      "y": 16715,
+      "kind": "local"
+    },
+    {
+      "name": "The Brain Scorcher",
+      "x": 5320,
+      "y": 16870,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Rostok",
+      "x": 7111,
+      "y": 8105.7,
+      "kind": "city"
+    },
+    {
+      "name": "Northern 100 Rads Bar",
+      "x": 7277.7,
+      "y": 8164.1,
+      "kind": "local"
+    },
+    {
+      "name": "Lab X18",
+      "x": 19056.8,
+      "y": 18221.4,
+      "kind": "city"
+    },
+    {
+      "name": "Sozinovo",
+      "x": 7549.9,
+      "y": 6814.5,
+      "kind": "village"
+    },
+    {
+      "name": "Sidorovich's Village",
+      "x": 8753.3,
+      "y": 2949.4,
+      "kind": "village"
+    },
+    {
+      "name": "Kryva Hora",
+      "x": 13980.4,
+      "y": 14288.8,
+      "kind": "village"
+    },
+    {
+      "name": "Great Swamps",
+      "x": 17510.3,
+      "y": 2093.9,
+      "kind": "local"
+    },
+    {
+      "name": "Vesna Industrial",
+      "x": 12471,
+      "y": 18605.6,
+      "kind": "village"
+    },
+    {
+      "name": "Leliv",
+      "x": 12349.6,
+      "y": 5815.8,
+      "kind": "village"
+    },
+    {
+      "name": "Kladovyshche",
+      "x": 14484,
+      "y": 11138.1,
+      "kind": "village"
+    },
+    {
+      "name": "Chernobyl' 2",
+      "x": 4963.9,
+      "y": 6127.9,
+      "kind": "flatareacitysmall"
+    },
+    {
+      "name": "Sandy Plateau",
+      "x": 4864.6,
+      "y": 17846.6,
+      "kind": "village"
+    },
+    {
+      "name": "Checkpoint Leliv",
+      "x": 12765.4,
+      "y": 4696.5,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Hlynytsya River",
+      "x": 14103.1,
+      "y": 4914.5,
+      "kind": "namemarine"
+    },
+    {
+      "name": "Starukha River",
+      "x": 15808.1,
+      "y": 4671.7,
+      "kind": "namemarine"
+    },
+    {
+      "name": "Hostrytsya River",
+      "x": 18543.2,
+      "y": 2929.7,
+      "kind": "namemarine"
+    },
+    {
+      "name": "Pripyat River",
+      "x": 17775,
+      "y": 873.3,
+      "kind": "namemarine"
+    },
+    {
+      "name": "Pripyat River",
+      "x": 15362.3,
+      "y": 3855.4,
+      "kind": "namemarine"
+    },
+    {
+      "name": "Pripyat River",
+      "x": 13937.9,
+      "y": 8662.8,
+      "kind": "namemarine"
+    },
+    {
+      "name": "Lab X4",
+      "x": 254.4,
+      "y": 1125.7,
+      "kind": "city"
+    },
+    {
+      "name": "Svynoferma",
+      "x": 2856.8,
+      "y": 4730.9,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Pripyat River",
+      "x": 12235.3,
+      "y": 13877.3,
+      "kind": "namemarine"
+    },
+    {
+      "name": "Pripyat River",
+      "x": 5315.3,
+      "y": 18713.2,
+      "kind": "namemarine"
+    },
+    {
+      "name": "Scythian",
+      "x": 8325.9,
+      "y": 14462.4,
+      "kind": "local"
+    },
+    {
+      "name": "Cooling Ponds",
+      "x": 7220.2,
+      "y": 14880.5,
+      "kind": "local"
+    },
+    {
+      "name": "Chernobyl Npp Unit 2",
+      "x": 7335.2,
+      "y": 15091.2,
+      "kind": "local"
+    },
+    {
+      "name": "Prometheus",
+      "x": 7831.8,
+      "y": 14933.4,
+      "kind": "local"
+    },
+    {
+      "name": "Chernobyl Npp Unit 3",
+      "x": 7054.5,
+      "y": 15115.7,
+      "kind": "local"
+    },
+    {
+      "name": "Central Nuclear",
+      "x": 6934.5,
+      "y": 15220.5,
+      "kind": "local"
+    },
+    {
+      "name": "Power Unit No. 4",
+      "x": 6895.1,
+      "y": 15091.3,
+      "kind": "local"
+    },
+    {
+      "name": "Elephant's Foot",
+      "x": 6987.1,
+      "y": 15145.4,
+      "kind": "local"
+    },
+    {
+      "name": "Stazione Della Centrale Nucleare Di Chernobyl",
+      "x": 7520.1,
+      "y": 15847.1,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Zymovyshche Lake",
+      "x": 13898.3,
+      "y": 18742.6,
+      "kind": "namemarine"
+    },
+    {
+      "name": "Dytyatky",
+      "x": 7546.6,
+      "y": 10141.4,
+      "kind": "village"
+    },
+    {
+      "name": "Radiation Beach",
+      "x": 16201,
+      "y": 2320.1,
+      "kind": "local"
+    },
+    {
+      "name": "Volkhov Aa Complex",
+      "x": 7928,
+      "y": 8575,
+      "kind": "hill"
+    },
+    {
+      "name": "Jagala Army Base",
+      "x": 17143.1,
+      "y": 14704.4,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Stari Sokoly",
+      "x": 1506.1,
+      "y": 3292.6,
+      "kind": "village"
+    },
+    {
+      "name": "Red Forest South",
+      "x": 6228.3,
+      "y": 12296.3,
+      "kind": "village"
+    },
+    {
+      "name": "Hubyn",
+      "x": 9084.4,
+      "y": 5170,
+      "kind": "village"
+    },
+    {
+      "name": "\"buryakivka Vehicle Graveyard",
+      "x": 7718.7,
+      "y": 12989.6,
+      "kind": "hill"
+    },
+    {
+      "name": "Kovshylivka",
+      "x": 3637.1,
+      "y": 7381.8,
+      "kind": "village"
+    },
+    {
+      "name": "Luhovyky",
+      "x": 2206.9,
+      "y": 14550.6,
+      "kind": "village"
+    },
+    {
+      "name": "Kolyshniy Obchyslyuvaynyy Tsentr",
+      "x": 4193.2,
+      "y": 5667.4,
+      "kind": "hill"
+    },
+    {
+      "name": "Zamoshnya",
+      "x": 9814.4,
+      "y": 2454.6,
+      "kind": "village"
+    },
+    {
+      "name": "Novi Sokoly",
+      "x": 761.1,
+      "y": 1738.7,
+      "kind": "village"
+    },
+    {
+      "name": "Shevchenkove",
+      "x": 9588.5,
+      "y": 3612.4,
+      "kind": "village"
+    },
+    {
+      "name": "Selyshche Zalissya",
+      "x": 4899.9,
+      "y": 2747.6,
+      "kind": "village"
+    },
+    {
+      "name": "Refugee Camp",
+      "x": 18168.7,
+      "y": 6648.3,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Krasne",
+      "x": 3760.7,
+      "y": 8820.4,
+      "kind": "village"
+    },
+    {
+      "name": "Pylyava",
+      "x": 10785.1,
+      "y": 7053.9,
+      "kind": "village"
+    },
+    {
+      "name": "Laput'ky Army Base",
+      "x": 18014.1,
+      "y": 3847.9,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Laput'ky",
+      "x": 16915.9,
+      "y": 4204.4,
+      "kind": "village"
+    },
+    {
+      "name": "Stara Markivka",
+      "x": 11722.9,
+      "y": 18346.4,
+      "kind": "village"
+    },
+    {
+      "name": "Oriyana",
+      "x": 9328.9,
+      "y": 16593.8,
+      "kind": "village"
+    },
+    {
+      "name": "Bunker 536",
+      "x": 5545.3,
+      "y": 8549.5,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Vasylkiv Air Base",
+      "x": 2128.6,
+      "y": 13467.5,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Cheremoshna",
+      "x": 1544.7,
+      "y": 18520.2,
+      "kind": "village"
+    },
+    {
+      "name": "Ruined Village",
+      "x": 6538.9,
+      "y": 3360.1,
+      "kind": "village"
+    },
+    {
+      "name": "Romanivka",
+      "x": 16115.9,
+      "y": 3940.9,
+      "kind": "village"
+    },
+    {
+      "name": "Hdzyen",
+      "x": 14295.4,
+      "y": 8806.5,
+      "kind": "village"
+    },
+    {
+      "name": "Kirovo",
+      "x": 13136.7,
+      "y": 11526,
+      "kind": "village"
+    },
+    {
+      "name": "Berezki",
+      "x": 12703.4,
+      "y": 12812.5,
+      "kind": "village"
+    },
+    {
+      "name": "Golubovka",
+      "x": 11793,
+      "y": 16975.3,
+      "kind": "village"
+    },
+    {
+      "name": "Krasnoe",
+      "x": 1510.5,
+      "y": 19750.5,
+      "kind": "village"
+    },
+    {
+      "name": "Fedorivka",
+      "x": 2654.2,
+      "y": 19646.4,
+      "kind": "village"
+    },
+    {
+      "name": "Radynka",
+      "x": 3494.1,
+      "y": 19567.3,
+      "kind": "village"
+    },
+    {
+      "name": "Sukholuchchya",
+      "x": 5473.2,
+      "y": 18228.6,
+      "kind": "village"
+    },
+    {
+      "name": "Dubova",
+      "x": 11546.1,
+      "y": 15653.1,
+      "kind": "village"
+    },
+    {
+      "name": "Sokoly Industrial",
+      "x": 2877.5,
+      "y": 2422.4,
+      "kind": "village"
+    },
+    {
+      "name": "Horodeshchyna",
+      "x": 8051,
+      "y": 7768.1,
+      "kind": "hill"
+    },
+    {
+      "name": "Maksymovychi",
+      "x": 4875.5,
+      "y": 11652,
+      "kind": "local"
+    },
+    {
+      "name": "Leliv Industrial",
+      "x": 11760.1,
+      "y": 5214.9,
+      "kind": "village"
+    },
+    {
+      "name": "Leliv Farms",
+      "x": 13007.4,
+      "y": 5086.4,
+      "kind": "village"
+    },
+    {
+      "name": "Chernobyl Industrial",
+      "x": 13861.1,
+      "y": 3421.1,
+      "kind": "village"
+    },
+    {
+      "name": "Roundabout",
+      "x": 11195.2,
+      "y": 2440.9,
+      "kind": "local"
+    },
+    {
+      "name": "Potoky",
+      "x": 12001.8,
+      "y": 2553,
+      "kind": "village"
+    },
+    {
+      "name": "Zirka Industrial Complex",
+      "x": 11255.1,
+      "y": 6088.6,
+      "kind": "local"
+    },
+    {
+      "name": "Strakholissya Castle",
+      "x": 12580.4,
+      "y": 7228.5,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Dovlyady",
+      "x": 11299.7,
+      "y": 13964.3,
+      "kind": "village"
+    },
+    {
+      "name": "Savichi",
+      "x": 12670.6,
+      "y": 9578.6,
+      "kind": "village"
+    },
+    {
+      "name": "Belaya Soroka",
+      "x": 13777.4,
+      "y": 7517.2,
+      "kind": "village"
+    },
+    {
+      "name": "Karpylivka",
+      "x": 7069.5,
+      "y": 10916.1,
+      "kind": "village"
+    },
+    {
+      "name": "Bohdany",
+      "x": 8665.2,
+      "y": 9485.1,
+      "kind": "village"
+    },
+    {
+      "name": "Cheremoshna Industrial",
+      "x": 1645.2,
+      "y": 19405.9,
+      "kind": "village"
+    },
+    {
+      "name": "Zoryn",
+      "x": 13352.3,
+      "y": 9228.2,
+      "kind": "village"
+    },
+    {
+      "name": "Chernobyl Canteen No. 19",
+      "x": 8268.9,
+      "y": 14753.2,
+      "kind": "local"
+    },
+    {
+      "name": "Isf-1 (interim Spent Fuel Storage)",
+      "x": 6821,
+      "y": 15477.2,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Portovi Krany",
+      "x": 6424.4,
+      "y": 17460.3,
+      "kind": "local"
+    },
+    {
+      "name": "Kafe Olympyya",
+      "x": 4667.7,
+      "y": 17315.3,
+      "kind": "local"
+    },
+    {
+      "name": "Centrale Elettrica Di Yaniv (pripya't)",
+      "x": 3025.8,
+      "y": 15676.6,
+      "kind": "village"
+    },
+    {
+      "name": "Kopachi",
+      "x": 8429.4,
+      "y": 11438.2,
+      "kind": "village"
+    },
+    {
+      "name": "Buda Vovchkivs'ka",
+      "x": 9542.6,
+      "y": 11054.4,
+      "kind": "village"
+    },
+    {
+      "name": "Lab X12",
+      "x": 17277.4,
+      "y": 13629.8,
+      "kind": "city"
+    },
+    {
+      "name": "Kryva Hora Military Camp",
+      "x": 14189.3,
+      "y": 15213.3,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "X12 Underground Materials Depot",
+      "x": 17722.4,
+      "y": 12726.8,
+      "kind": "strongpointarea"
+    }
+  ]
+}

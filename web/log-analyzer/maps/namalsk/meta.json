@@ -1,0 +1,327 @@
+{
+  "id": "namalsk",
+  "name": "Namalsk",
+  "size": 12800,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "Apr.8-4",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/namalsk)",
+  "generatedAt": "2026-10-30T12:30:49Z",
+  "names": [
+    {
+      "name": "Vorkuta",
+      "x": 7063.4,
+      "y": 11145.2,
+      "kind": "city"
+    },
+    {
+      "name": "Jalovisko",
+      "x": 8422.3,
+      "y": 10730.9,
+      "kind": "village"
+    },
+    {
+      "name": "Lubjansk",
+      "x": 4566.5,
+      "y": 11150,
+      "kind": "village"
+    },
+    {
+      "name": "Nemsk",
+      "x": 9110.7,
+      "y": 10160.7,
+      "kind": "village"
+    },
+    {
+      "name": "Norinsk",
+      "x": 4065.1,
+      "y": 7540.4,
+      "kind": "village"
+    },
+    {
+      "name": "Brensk",
+      "x": 4396.1,
+      "y": 4727.5,
+      "kind": "village"
+    },
+    {
+      "name": "Tara Harbor",
+      "x": 7830.7,
+      "y": 7513.8,
+      "kind": "village"
+    },
+    {
+      "name": "Sebjan",
+      "x": 5284.9,
+      "y": 8624.8,
+      "kind": "village"
+    },
+    {
+      "name": "Alakit",
+      "x": 5886.7,
+      "y": 10792.9,
+      "kind": "local"
+    },
+    {
+      "name": "Norinsk Pass",
+      "x": 4558.2,
+      "y": 7216.8,
+      "kind": "local"
+    },
+    {
+      "name": "Warehouses",
+      "x": 4705.2,
+      "y": 8892.8,
+      "kind": "local"
+    },
+    {
+      "name": "Sibirskiy-2119",
+      "x": 3940.2,
+      "y": 10300.2,
+      "kind": "local"
+    },
+    {
+      "name": "Phoenix",
+      "x": 11911.7,
+      "y": 7517.3,
+      "kind": "local"
+    },
+    {
+      "name": "Skat-12",
+      "x": 11944.6,
+      "y": 12008.3,
+      "kind": "local"
+    },
+    {
+      "name": "Tf Bering Outpost",
+      "x": 1267.4,
+      "y": 11808.5,
+      "kind": "local"
+    },
+    {
+      "name": "Bk-t12",
+      "x": 4109.3,
+      "y": 9230.4,
+      "kind": "local"
+    },
+    {
+      "name": "Bk-t08",
+      "x": 4002.2,
+      "y": 9967.9,
+      "kind": "local"
+    },
+    {
+      "name": "Bk-t07",
+      "x": 4439.5,
+      "y": 10708.6,
+      "kind": "local"
+    },
+    {
+      "name": "Bk-m06",
+      "x": 4895,
+      "y": 10850.6,
+      "kind": "local"
+    },
+    {
+      "name": "Bk-l16",
+      "x": 6065.7,
+      "y": 6722.6,
+      "kind": "local"
+    },
+    {
+      "name": "Bk-l01",
+      "x": 4209.9,
+      "y": 6724.4,
+      "kind": "local"
+    },
+    {
+      "name": "Athena Research Institute",
+      "x": 4173,
+      "y": 7941.5,
+      "kind": "local"
+    },
+    {
+      "name": "Athena-1",
+      "x": 3800.4,
+      "y": 8231.4,
+      "kind": "local"
+    },
+    {
+      "name": "Athena-2",
+      "x": 5070.8,
+      "y": 6686,
+      "kind": "local"
+    },
+    {
+      "name": "Bk-l02",
+      "x": 3487.4,
+      "y": 6668.1,
+      "kind": "local"
+    },
+    {
+      "name": "Sebjan Valley",
+      "x": 5502.3,
+      "y": 8887.4,
+      "kind": "local"
+    },
+    {
+      "name": "Sebjan Dam",
+      "x": 5822.7,
+      "y": 9806.5,
+      "kind": "local"
+    },
+    {
+      "name": "Sebjan Uranium Mine",
+      "x": 4879.2,
+      "y": 7867.4,
+      "kind": "local"
+    },
+    {
+      "name": "Refugee Camp",
+      "x": 7328,
+      "y": 10575.2,
+      "kind": "local"
+    },
+    {
+      "name": "Refugee Camp",
+      "x": 5093.9,
+      "y": 9014.8,
+      "kind": "local"
+    },
+    {
+      "name": "C-130j Mohawk",
+      "x": 3191.7,
+      "y": 7536.4,
+      "kind": "local"
+    },
+    {
+      "name": "Airfield",
+      "x": 6198,
+      "y": 9334.1,
+      "kind": "local"
+    },
+    {
+      "name": "Factory",
+      "x": 6535.4,
+      "y": 9227.6,
+      "kind": "local"
+    },
+    {
+      "name": "Factory",
+      "x": 5898.9,
+      "y": 8695.8,
+      "kind": "local"
+    },
+    {
+      "name": "Factory",
+      "x": 7701.4,
+      "y": 8699,
+      "kind": "local"
+    },
+    {
+      "name": "Sawmill",
+      "x": 7052.7,
+      "y": 5717.7,
+      "kind": "local"
+    },
+    {
+      "name": "Hospital",
+      "x": 7341.3,
+      "y": 7918.7,
+      "kind": "local"
+    },
+    {
+      "name": "Brensk Bridge",
+      "x": 5033.8,
+      "y": 6069.3,
+      "kind": "local"
+    },
+    {
+      "name": "Tara Bridge",
+      "x": 6441.3,
+      "y": 5811.3,
+      "kind": "local"
+    },
+    {
+      "name": "Tara Strait",
+      "x": 6328.3,
+      "y": 8130.5,
+      "kind": "marine"
+    },
+    {
+      "name": "Brensk Bay",
+      "x": 5200.7,
+      "y": 5374.3,
+      "kind": "marine"
+    },
+    {
+      "name": "Seraja Bay",
+      "x": 3407.4,
+      "y": 5570.7,
+      "kind": "marine"
+    },
+    {
+      "name": "Lubjansk Bay",
+      "x": 5117.4,
+      "y": 10255.9,
+      "kind": "marine"
+    },
+    {
+      "name": "Nemsk Bay",
+      "x": 8013.8,
+      "y": 9685.1,
+      "kind": "marine"
+    },
+    {
+      "name": "Sebjan Reservoir",
+      "x": 6081.7,
+      "y": 10067.6,
+      "kind": "marine"
+    },
+    {
+      "name": "Sebjan Marsh",
+      "x": 6950.1,
+      "y": 9960.8,
+      "kind": "marine"
+    },
+    {
+      "name": "Brensk Marsh",
+      "x": 5979.5,
+      "y": 5679.4,
+      "kind": "marine"
+    },
+    {
+      "name": "Bubson's Iceberg",
+      "x": 455.5,
+      "y": 5852.4,
+      "kind": "marine"
+    },
+    {
+      "name": "Tara",
+      "x": 7300.2,
+      "y": 7010.1,
+      "kind": "hill"
+    },
+    {
+      "name": "Nitija",
+      "x": 5267.1,
+      "y": 7199.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Seraja",
+      "x": 4191.9,
+      "y": 6607.4,
+      "kind": "hill"
+    },
+    {
+      "name": "Ledjanaja",
+      "x": 2995,
+      "y": 6481.6,
+      "kind": "hill"
+    }
+  ]
+}

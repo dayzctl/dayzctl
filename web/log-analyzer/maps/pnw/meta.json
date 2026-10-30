@@ -1,0 +1,369 @@
+{
+  "id": "pnw",
+  "name": "Pnw",
+  "size": 10240,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "2.0-13",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/pnw)",
+  "generatedAt": "2026-10-30T12:31:58Z",
+  "names": [
+    {
+      "name": "Ocean Shores",
+      "x": 1552.6,
+      "y": 1042.8,
+      "kind": "capital"
+    },
+    {
+      "name": "Clallam Bay",
+      "x": 509.4,
+      "y": 3421,
+      "kind": "village"
+    },
+    {
+      "name": "La Push",
+      "x": 4293,
+      "y": 807,
+      "kind": "village"
+    },
+    {
+      "name": "Marrowstone Island",
+      "x": 9255,
+      "y": 6827,
+      "kind": "village"
+    },
+    {
+      "name": "Ferry Dock",
+      "x": 5550,
+      "y": 552,
+      "kind": "local"
+    },
+    {
+      "name": "Mcneil Island",
+      "x": 9223,
+      "y": 4751,
+      "kind": "village"
+    },
+    {
+      "name": "Chinook",
+      "x": 6942,
+      "y": 632,
+      "kind": "village"
+    },
+    {
+      "name": "Indian Island",
+      "x": 8262,
+      "y": 8150,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Trench 94",
+      "x": 2833,
+      "y": 9216,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Fob Alpha",
+      "x": 228,
+      "y": 4969,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Manhattan Project Reactor B",
+      "x": 1892,
+      "y": 8874,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Vagabond Army Airfield",
+      "x": 3522,
+      "y": 7982,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "National Guard Facility",
+      "x": 9138,
+      "y": 3401,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Lumber Mill",
+      "x": 353,
+      "y": 5674,
+      "kind": "village"
+    },
+    {
+      "name": "Point No Point",
+      "x": 9013,
+      "y": 6236,
+      "kind": "village"
+    },
+    {
+      "name": "Hurricane Ridge",
+      "x": 3753,
+      "y": 3057,
+      "kind": "village"
+    },
+    {
+      "name": "Bussy Farms",
+      "x": 1787,
+      "y": 5124,
+      "kind": "village"
+    },
+    {
+      "name": "Rising Ridge Estates",
+      "x": 3753,
+      "y": 6975,
+      "kind": "village"
+    },
+    {
+      "name": "Quail Ridge G.c.",
+      "x": 387,
+      "y": 8434,
+      "kind": "village"
+    },
+    {
+      "name": "Sweetwater",
+      "x": 4573,
+      "y": 9270,
+      "kind": "village"
+    },
+    {
+      "name": "Harvard",
+      "x": 6237,
+      "y": 8219,
+      "kind": "village"
+    },
+    {
+      "name": "Police Academy",
+      "x": 5360,
+      "y": 2322,
+      "kind": "village"
+    },
+    {
+      "name": "Point Monroe",
+      "x": 8452,
+      "y": 856,
+      "kind": "village"
+    },
+    {
+      "name": "Hope Island",
+      "x": 9439,
+      "y": 880,
+      "kind": "village"
+    },
+    {
+      "name": "Orting",
+      "x": 5247,
+      "y": 5172,
+      "kind": "village"
+    },
+    {
+      "name": "Fort Flagler",
+      "x": 9470,
+      "y": 9818,
+      "kind": "camp"
+    },
+    {
+      "name": "Basecamp Alpha",
+      "x": 1984,
+      "y": 3718,
+      "kind": "camp"
+    },
+    {
+      "name": "Church Camp",
+      "x": 8045,
+      "y": 6412,
+      "kind": "camp"
+    },
+    {
+      "name": "Basecamp Bravo",
+      "x": 3668,
+      "y": 4909,
+      "kind": "camp"
+    },
+    {
+      "name": "Basecamp Charlie",
+      "x": 2634,
+      "y": 2476,
+      "kind": "camp"
+    },
+    {
+      "name": "Junkyard",
+      "x": 3366,
+      "y": 6177,
+      "kind": "local"
+    },
+    {
+      "name": "Windfarm",
+      "x": 7379,
+      "y": 5291,
+      "kind": "local"
+    },
+    {
+      "name": "Trailer Park",
+      "x": 5072,
+      "y": 3946,
+      "kind": "local"
+    },
+    {
+      "name": "Drive In Theater",
+      "x": 3112,
+      "y": 6468,
+      "kind": "local"
+    },
+    {
+      "name": "Dabbington",
+      "x": 8310,
+      "y": 2998,
+      "kind": "local"
+    },
+    {
+      "name": "Possession Beach",
+      "x": 9359,
+      "y": 2694,
+      "kind": "local"
+    },
+    {
+      "name": "Nordland",
+      "x": 9572,
+      "y": 8067,
+      "kind": "local"
+    },
+    {
+      "name": "Sunland",
+      "x": 6027,
+      "y": 9469,
+      "kind": "local"
+    },
+    {
+      "name": "Black Lake Campground",
+      "x": 6901,
+      "y": 3650,
+      "kind": "camp"
+    },
+    {
+      "name": "Pedro's Hideaway",
+      "x": 6509,
+      "y": 7184,
+      "kind": "camp"
+    },
+    {
+      "name": "Port",
+      "x": 8068,
+      "y": 8936,
+      "kind": "local"
+    },
+    {
+      "name": "Factory",
+      "x": 8670,
+      "y": 8930,
+      "kind": "local"
+    },
+    {
+      "name": "Protection Island",
+      "x": 9628,
+      "y": 1814,
+      "kind": "local"
+    },
+    {
+      "name": "Dirtfish Rally School",
+      "x": 7428,
+      "y": 4260,
+      "kind": "local"
+    },
+    {
+      "name": "Mcmicken Island",
+      "x": 9735,
+      "y": 2605,
+      "kind": "local"
+    },
+    {
+      "name": "Manchester Naval Depot",
+      "x": 3307,
+      "y": 1123,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Gig Harbor Airfield",
+      "x": 6803,
+      "y": 1750,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Pond",
+      "x": 1221.5,
+      "y": 963.9,
+      "kind": "marine"
+    },
+    {
+      "name": "Pond",
+      "x": 1572,
+      "y": 1104,
+      "kind": "marine"
+    },
+    {
+      "name": "Pond",
+      "x": 689,
+      "y": 3699,
+      "kind": "marine"
+    },
+    {
+      "name": "Pond",
+      "x": 2324,
+      "y": 5255,
+      "kind": "marine"
+    },
+    {
+      "name": "Wetlands",
+      "x": 578,
+      "y": 6297,
+      "kind": "marine"
+    },
+    {
+      "name": "Pond",
+      "x": 928,
+      "y": 7007,
+      "kind": "marine"
+    },
+    {
+      "name": "Pond",
+      "x": 3928,
+      "y": 7277,
+      "kind": "marine"
+    },
+    {
+      "name": "Pond",
+      "x": 6434,
+      "y": 8453,
+      "kind": "marine"
+    },
+    {
+      "name": "Pond",
+      "x": 7329,
+      "y": 3259,
+      "kind": "marine"
+    },
+    {
+      "name": "Ponds",
+      "x": 3234,
+      "y": 2817,
+      "kind": "marine"
+    },
+    {
+      "name": "Pond",
+      "x": 3021,
+      "y": 3343,
+      "kind": "marine"
+    },
+    {
+      "name": "Mt Olympus",
+      "x": 2720,
+      "y": 3363,
+      "kind": "hill"
+    }
+  ]
+}

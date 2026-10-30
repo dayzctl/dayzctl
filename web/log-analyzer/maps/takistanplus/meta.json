@@ -1,0 +1,417 @@
+{
+  "id": "takistanplus",
+  "name": "Takistanplus",
+  "size": 12800,
+  "format": "jpg",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "1.0631-11",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/takistanplus)",
+  "generatedAt": "2026-10-30T12:33:38Z",
+  "names": [
+    {
+      "name": "Laschkar_radarbase",
+      "x": 11243.1,
+      "y": 9108.9,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Rasman Airbase",
+      "x": 5755,
+      "y": 11372.9,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Loymanara Airbase",
+      "x": 8059.4,
+      "y": 1856,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Feeruzabad Radiotower",
+      "x": 4116,
+      "y": 6754.1,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Feeruzabad Militarybase",
+      "x": 5151.2,
+      "y": 6077,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Feeruzabad Fob",
+      "x": 5247.1,
+      "y": 5796.9,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Rustaq Military Base",
+      "x": 2632.2,
+      "y": 5100.1,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Garmsar Military Base",
+      "x": 10422.5,
+      "y": 6434.4,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Farakkah",
+      "x": 8861.3,
+      "y": 5271.5,
+      "kind": "city"
+    },
+    {
+      "name": "Azzablah",
+      "x": 11856.1,
+      "y": 2612.1,
+      "kind": "city"
+    },
+    {
+      "name": "Azzablah Outpost",
+      "x": 11874.1,
+      "y": 2543.7,
+      "kind": "city"
+    },
+    {
+      "name": "Loymanara Refinery",
+      "x": 7115.1,
+      "y": 1025.4,
+      "kind": "local"
+    },
+    {
+      "name": "Behbaman",
+      "x": 6083,
+      "y": 1144.4,
+      "kind": "city"
+    },
+    {
+      "name": "Dhimran",
+      "x": 3606.7,
+      "y": 8544.9,
+      "kind": "city"
+    },
+    {
+      "name": "Al Falludiyah",
+      "x": 1496.4,
+      "y": 3602.8,
+      "kind": "city"
+    },
+    {
+      "name": "Zayda",
+      "x": 141.6,
+      "y": 2795.6,
+      "kind": "city"
+    },
+    {
+      "name": "Al Hamiqqah",
+      "x": 1563.4,
+      "y": 5721.3,
+      "kind": "city"
+    },
+    {
+      "name": "El Thoubaroh",
+      "x": 2039.7,
+      "y": 7659.6,
+      "kind": "city"
+    },
+    {
+      "name": "Marastar",
+      "x": 4146,
+      "y": 11758.8,
+      "kind": "city"
+    },
+    {
+      "name": "Al Babair",
+      "x": 10477.1,
+      "y": 11086.9,
+      "kind": "city"
+    },
+    {
+      "name": "Marmamsiyah",
+      "x": 12328.3,
+      "y": 10408.8,
+      "kind": "city"
+    },
+    {
+      "name": "Hammaqiyah",
+      "x": 11502.9,
+      "y": 8238.3,
+      "kind": "city"
+    },
+    {
+      "name": "Al Hajasra",
+      "x": 11152,
+      "y": 7636.8,
+      "kind": "city"
+    },
+    {
+      "name": "Qaikkah",
+      "x": 10200.4,
+      "y": 2350.7,
+      "kind": "city"
+    },
+    {
+      "name": "Chaman",
+      "x": 876,
+      "y": 3099.1,
+      "kind": "city"
+    },
+    {
+      "name": "Ad Dawi",
+      "x": 3238.3,
+      "y": 3636.3,
+      "kind": "city"
+    },
+    {
+      "name": "Qarma",
+      "x": 6792.4,
+      "y": 6089.2,
+      "kind": "city"
+    },
+    {
+      "name": "Al Falqas",
+      "x": 4217.3,
+      "y": 10747.8,
+      "kind": "city"
+    },
+    {
+      "name": "Al-falqas Oil Fields",
+      "x": 3650.6,
+      "y": 11103.3,
+      "kind": "local"
+    },
+    {
+      "name": "Gospandi",
+      "x": 3933.1,
+      "y": 9373.1,
+      "kind": "city"
+    },
+    {
+      "name": "Bastam",
+      "x": 5622.7,
+      "y": 8899.4,
+      "kind": "city"
+    },
+    {
+      "name": "Karachinar",
+      "x": 12333.8,
+      "y": 11110.6,
+      "kind": "city"
+    },
+    {
+      "name": "Jalelam",
+      "x": 6832.7,
+      "y": 12294.1,
+      "kind": "city"
+    },
+    {
+      "name": "Mahahwit",
+      "x": 5670.3,
+      "y": 9935.6,
+      "kind": "city"
+    },
+    {
+      "name": "Garmarud",
+      "x": 9149.9,
+      "y": 6716.4,
+      "kind": "city"
+    },
+    {
+      "name": "Dodr",
+      "x": 5035.9,
+      "y": 5428,
+      "kind": "city"
+    },
+    {
+      "name": "Nagara",
+      "x": 3057,
+      "y": 9808,
+      "kind": "city"
+    },
+    {
+      "name": "Falar",
+      "x": 6063.8,
+      "y": 7257,
+      "kind": "city"
+    },
+    {
+      "name": "Anar",
+      "x": 6030.7,
+      "y": 5659.4,
+      "kind": "city"
+    },
+    {
+      "name": "Chakchak",
+      "x": 4375.9,
+      "y": 754.7,
+      "kind": "city"
+    },
+    {
+      "name": "Sakhee",
+      "x": 3589,
+      "y": 4284.5,
+      "kind": "city"
+    },
+    {
+      "name": "Loymanara",
+      "x": 8622,
+      "y": 2454.2,
+      "kind": "city"
+    },
+    {
+      "name": "Jilavur",
+      "x": 2537.2,
+      "y": 5026.5,
+      "kind": "city"
+    },
+    {
+      "name": "Imarat",
+      "x": 8238.4,
+      "y": 7847.2,
+      "kind": "city"
+    },
+    {
+      "name": "Kakaru",
+      "x": 5313.5,
+      "y": 4740.7,
+      "kind": "city"
+    },
+    {
+      "name": "Landay",
+      "x": 1950.9,
+      "y": 349.7,
+      "kind": "city"
+    },
+    {
+      "name": "Sultansafee",
+      "x": 6578.7,
+      "y": 1955.2,
+      "kind": "city"
+    },
+    {
+      "name": "Band-e Kirmiz",
+      "x": 3531.6,
+      "y": 6884.1,
+      "kind": "hill"
+    },
+    {
+      "name": "Silsila-ye Siah Kuh",
+      "x": 4812.8,
+      "y": 2556,
+      "kind": "hill"
+    },
+    {
+      "name": "Reegshur Valley",
+      "x": 4246.1,
+      "y": 5568.1,
+      "kind": "local"
+    },
+    {
+      "name": "Lalezar Valley",
+      "x": 4401.8,
+      "y": 9763.1,
+      "kind": "local"
+    },
+    {
+      "name": "Darre-ye Sabz",
+      "x": 8587.9,
+      "y": 3204.2,
+      "kind": "hill"
+    },
+    {
+      "name": "Dawlatsah Valley",
+      "x": 7532.3,
+      "y": 8283.1,
+      "kind": "local"
+    },
+    {
+      "name": "Zabo Valley",
+      "x": 2774.3,
+      "y": 8016.5,
+      "kind": "local"
+    },
+    {
+      "name": "Dawlatsah Valley",
+      "x": 10104.3,
+      "y": 6651.8,
+      "kind": "local"
+    },
+    {
+      "name": "Adinaqla",
+      "x": 7392.7,
+      "y": 1701.8,
+      "kind": "city"
+    },
+    {
+      "name": "Hachaman",
+      "x": 9152.5,
+      "y": 9741.9,
+      "kind": "city"
+    },
+    {
+      "name": "Feeruzabad",
+      "x": 5364.5,
+      "y": 6197.9,
+      "kind": "city"
+    },
+    {
+      "name": "Rasman",
+      "x": 6244.3,
+      "y": 11217.3,
+      "kind": "city"
+    },
+    {
+      "name": "Nur",
+      "x": 1824.6,
+      "y": 11879.7,
+      "kind": "city"
+    },
+    {
+      "name": "Zavarak",
+      "x": 9857.9,
+      "y": 11491.7,
+      "kind": "city"
+    },
+    {
+      "name": "Zarandaj",
+      "x": 8541.8,
+      "y": 3816.9,
+      "kind": "city"
+    },
+    {
+      "name": "Jaglangir",
+      "x": 4891.4,
+      "y": 10594.5,
+      "kind": "city"
+    },
+    {
+      "name": "Garmsar",
+      "x": 10794.7,
+      "y": 6345.3,
+      "kind": "city"
+    },
+    {
+      "name": "Al Nadaya",
+      "x": 6743,
+      "y": 4855.1,
+      "kind": "city"
+    },
+    {
+      "name": "Al Bahludiyah",
+      "x": 7427.3,
+      "y": 9352.7,
+      "kind": "city"
+    },
+    {
+      "name": "Mahjur",
+      "x": 9602.3,
+      "y": 5664.2,
+      "kind": "city"
+    }
+  ]
+}

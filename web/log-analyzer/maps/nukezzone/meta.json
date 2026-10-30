@@ -1,0 +1,837 @@
+{
+  "id": "nukezzone",
+  "name": "Nukezzone",
+  "size": 15360,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "Jul.24-11",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/nukezzone)",
+  "generatedAt": "2026-10-30T12:31:20Z",
+  "names": [
+    {
+      "name": "Nukez Airfeild",
+      "x": 6828.3,
+      "y": 8986.3,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "Doom",
+      "x": 477.1,
+      "y": 6938.5,
+      "kind": "flatareacity"
+    },
+    {
+      "name": "Snow Milly",
+      "x": 1588.3,
+      "y": 15005.3,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "Wax Milly",
+      "x": 14495.3,
+      "y": 505,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "Grey",
+      "x": 9310.1,
+      "y": 5530.4,
+      "kind": "flatareacitysmall"
+    },
+    {
+      "name": "Vaughn",
+      "x": 15214.1,
+      "y": 11969.1,
+      "kind": "village"
+    },
+    {
+      "name": "Camp Sweat",
+      "x": 15158.7,
+      "y": 11196.7,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Nukez Park",
+      "x": 11246.2,
+      "y": 11128.7,
+      "kind": "flatarea"
+    },
+    {
+      "name": "Nukez Castle",
+      "x": 3030.2,
+      "y": 6223.3,
+      "kind": "smallmilitary"
+    },
+    {
+      "name": "Prison Of Dalton",
+      "x": 9583.4,
+      "y": 8184.5,
+      "kind": "strongpointarea"
+    },
+    {
+      "name": "Camp Mcgregor",
+      "x": 13948.8,
+      "y": 6502,
+      "kind": "local"
+    },
+    {
+      "name": "Camp Grim",
+      "x": 120.8,
+      "y": 4461.8,
+      "kind": "local"
+    },
+    {
+      "name": "Ridgebury Industrial",
+      "x": 290.2,
+      "y": 5402.1,
+      "kind": "local"
+    },
+    {
+      "name": "Trents Crossing",
+      "x": 13239,
+      "y": 5507.8,
+      "kind": "village"
+    },
+    {
+      "name": "Joeys Industrial",
+      "x": 14997.4,
+      "y": 11627.5,
+      "kind": "flatarea"
+    },
+    {
+      "name": "Freakville",
+      "x": 4133.2,
+      "y": 6630.9,
+      "kind": "capital"
+    },
+    {
+      "name": "Frankies Farms",
+      "x": 12902.3,
+      "y": 12432.6,
+      "kind": "vegetationbroadleaf"
+    },
+    {
+      "name": "Heartland Farms",
+      "x": 7087.4,
+      "y": 383.7,
+      "kind": "vegetationbroadleaf"
+    },
+    {
+      "name": "Declans Military Compound",
+      "x": 12026.8,
+      "y": 14953.2,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "Mels Place",
+      "x": 9238.4,
+      "y": 503.1,
+      "kind": "city"
+    },
+    {
+      "name": "Covid Retreat Center",
+      "x": 4845.6,
+      "y": 6533.9,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "The Mines",
+      "x": 7088.4,
+      "y": 11048.7,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Defiants Military Compound",
+      "x": 584.4,
+      "y": 13446.5,
+      "kind": "smallmilitary"
+    },
+    {
+      "name": "The Mill",
+      "x": 4204.9,
+      "y": 8344.2,
+      "kind": "flatarea"
+    },
+    {
+      "name": "Scotts Military Check Point",
+      "x": 5095.2,
+      "y": 3161.5,
+      "kind": "smallmilitary"
+    },
+    {
+      "name": "Section Eight",
+      "x": 6533.9,
+      "y": 71.6,
+      "kind": "village"
+    },
+    {
+      "name": "Dexters Tents",
+      "x": 8320.1,
+      "y": 7252.3,
+      "kind": "smallmilitary"
+    },
+    {
+      "name": "Hauns Industrial",
+      "x": 4020.1,
+      "y": 940.3,
+      "kind": "local"
+    },
+    {
+      "name": "Broanan Castle",
+      "x": 13383.8,
+      "y": 3576.7,
+      "kind": "rockarea"
+    },
+    {
+      "name": "West Tents",
+      "x": 89.9,
+      "y": 8535.3,
+      "kind": "smallmilitary"
+    },
+    {
+      "name": "Atlas",
+      "x": 15074.8,
+      "y": 2817.9,
+      "kind": "village"
+    },
+    {
+      "name": "Drew",
+      "x": 5857.2,
+      "y": 105.9,
+      "kind": "village"
+    },
+    {
+      "name": "The Cove",
+      "x": 6396.1,
+      "y": 14514.1,
+      "kind": "hill"
+    },
+    {
+      "name": "Al Bahah",
+      "x": 11236,
+      "y": 15302.3,
+      "kind": "village"
+    },
+    {
+      "name": "Wrecks Salvage Yard",
+      "x": 9680.2,
+      "y": 325.9,
+      "kind": "flatarea"
+    },
+    {
+      "name": "Polk Tents",
+      "x": 8856.3,
+      "y": 3497.1,
+      "kind": "smallmilitary"
+    },
+    {
+      "name": "Ghosts Projects",
+      "x": 10568.9,
+      "y": 3181.6,
+      "kind": "flatareacity"
+    },
+    {
+      "name": "Bills Farm",
+      "x": 15204.6,
+      "y": 5613.3,
+      "kind": "vegetationvineyard"
+    },
+    {
+      "name": "East Tents",
+      "x": 15281.6,
+      "y": 4839.5,
+      "kind": "smallmilitary"
+    },
+    {
+      "name": "East Milly",
+      "x": 15285.8,
+      "y": 5147.6,
+      "kind": "mediummilitary"
+    },
+    {
+      "name": "Zinng",
+      "x": 1316.8,
+      "y": 4969,
+      "kind": "village"
+    },
+    {
+      "name": "Sebastian City",
+      "x": 10708.8,
+      "y": 12424.7,
+      "kind": "city"
+    },
+    {
+      "name": "Sebastian Milly",
+      "x": 10625.5,
+      "y": 12387.1,
+      "kind": "mediummilitary"
+    },
+    {
+      "name": "Soaring Tents",
+      "x": 2965.8,
+      "y": 8519.7,
+      "kind": "smallmilitary"
+    },
+    {
+      "name": "Sidd Tents",
+      "x": 7937.1,
+      "y": 14468.3,
+      "kind": "smallmilitary"
+    },
+    {
+      "name": "Rainie Military Holding Facility",
+      "x": 2241.9,
+      "y": 4895.1,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "Shahad",
+      "x": 11831.1,
+      "y": 15045.4,
+      "kind": "village"
+    },
+    {
+      "name": "Ajyad Fortress",
+      "x": 14050.8,
+      "y": 12215.6,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Old Grove",
+      "x": 10180.2,
+      "y": 6517.3,
+      "kind": "village"
+    },
+    {
+      "name": "Flint Industrial",
+      "x": 1851,
+      "y": 11054.2,
+      "kind": "hill"
+    },
+    {
+      "name": "Kinser",
+      "x": 680.1,
+      "y": 11617.7,
+      "kind": "hill"
+    },
+    {
+      "name": "Thor_industrial",
+      "x": 349.3,
+      "y": 9616.2,
+      "kind": "local"
+    },
+    {
+      "name": "Sheldon",
+      "x": 1814.7,
+      "y": 9551.2,
+      "kind": "village"
+    },
+    {
+      "name": "Clifton",
+      "x": 377.9,
+      "y": 14327.5,
+      "kind": "village"
+    },
+    {
+      "name": "Moreal",
+      "x": 3688.2,
+      "y": 14925.9,
+      "kind": "flatareacitysmall"
+    },
+    {
+      "name": "Village Of Finch",
+      "x": 3695.2,
+      "y": 3920,
+      "kind": "village"
+    },
+    {
+      "name": "Camp_boo",
+      "x": 14503.3,
+      "y": 4288.4,
+      "kind": "smallmilitary"
+    },
+    {
+      "name": "Bizon Milly",
+      "x": 5727.8,
+      "y": 4355.8,
+      "kind": "mediummilitary"
+    },
+    {
+      "name": "Snow Farms",
+      "x": 3707.1,
+      "y": 15313.8,
+      "kind": "vegetationbroadleaf"
+    },
+    {
+      "name": "Snow Tents",
+      "x": 2813.2,
+      "y": 15332.1,
+      "kind": "smallmilitary"
+    },
+    {
+      "name": "Allington",
+      "x": 13662.7,
+      "y": 4927.9,
+      "kind": "village"
+    },
+    {
+      "name": "Maliks Airport",
+      "x": 11175.9,
+      "y": 13546.6,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "Western Industrial",
+      "x": 649.3,
+      "y": 4985.6,
+      "kind": "flatarea"
+    },
+    {
+      "name": "Matts Place",
+      "x": 2027.3,
+      "y": 5497.5,
+      "kind": "village"
+    },
+    {
+      "name": "Mac Milly",
+      "x": 14836.3,
+      "y": 10994.9,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "Abu Dhabi",
+      "x": 12519.6,
+      "y": 11211.5,
+      "kind": "flatareacity"
+    },
+    {
+      "name": "Dhurma",
+      "x": 9988.9,
+      "y": 11974.6,
+      "kind": "village"
+    },
+    {
+      "name": "Dhahran",
+      "x": 10197.2,
+      "y": 13832.8,
+      "kind": "village"
+    },
+    {
+      "name": "Riyadh Millitary",
+      "x": 7760.9,
+      "y": 12501.1,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "Dammam",
+      "x": 7491.9,
+      "y": 14410.2,
+      "kind": "village"
+    },
+    {
+      "name": "Bisha",
+      "x": 11163,
+      "y": 15029,
+      "kind": "village"
+    },
+    {
+      "name": "Buraydah Med",
+      "x": 10729.2,
+      "y": 14957.6,
+      "kind": "village"
+    },
+    {
+      "name": "Dahaban Mobile Park",
+      "x": 10339,
+      "y": 15167,
+      "kind": "hill"
+    },
+    {
+      "name": "Duba Industrial",
+      "x": 9354.4,
+      "y": 15274.7,
+      "kind": "hill"
+    },
+    {
+      "name": "Habaala",
+      "x": 9180.2,
+      "y": 13145.3,
+      "kind": "village"
+    },
+    {
+      "name": "Min Industrial",
+      "x": 3758.2,
+      "y": 5199.3,
+      "kind": "local"
+    },
+    {
+      "name": "South Thor Industrial",
+      "x": 154.8,
+      "y": 9249.4,
+      "kind": "local"
+    },
+    {
+      "name": "Snowmountain",
+      "x": 2147.4,
+      "y": 13184.7,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "Nukez_resort",
+      "x": 5807.5,
+      "y": 11897.1,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Nukez Power Plant",
+      "x": 13567.6,
+      "y": 10516.7,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Ara Industries",
+      "x": 8555.8,
+      "y": 9954.2,
+      "kind": "flatarea"
+    },
+    {
+      "name": "Ara",
+      "x": 8566.5,
+      "y": 10251.8,
+      "kind": "village"
+    },
+    {
+      "name": "Najd",
+      "x": 8823.9,
+      "y": 10968,
+      "kind": "city"
+    },
+    {
+      "name": "Rocky Island",
+      "x": 1785.2,
+      "y": 1271.2,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "Nukez Rig",
+      "x": 15027.1,
+      "y": 8628.5,
+      "kind": "mediummilitary"
+    },
+    {
+      "name": "Paradise",
+      "x": 15262.2,
+      "y": 1263.1,
+      "kind": "vegetationbroadleaf"
+    },
+    {
+      "name": "Redo Rig",
+      "x": 15068.5,
+      "y": 14457.8,
+      "kind": "mediummilitary"
+    },
+    {
+      "name": "Bodie",
+      "x": 11229.4,
+      "y": 14548.3,
+      "kind": "vegetationpalm"
+    },
+    {
+      "name": "Zulfi",
+      "x": 10069.1,
+      "y": 11040.7,
+      "kind": "village"
+    },
+    {
+      "name": "Badr",
+      "x": 9310.9,
+      "y": 14524.6,
+      "kind": "hill"
+    },
+    {
+      "name": "The Point",
+      "x": 9581.7,
+      "y": 2599.1,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "South Village",
+      "x": 4044.1,
+      "y": 285.2,
+      "kind": "village"
+    },
+    {
+      "name": "Nukez Speedway",
+      "x": 14510,
+      "y": 1534.7,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "Ck Milly",
+      "x": 11009.4,
+      "y": 4084.4,
+      "kind": "mediummilitary"
+    },
+    {
+      "name": "Jungle Mountain",
+      "x": 11535.9,
+      "y": 486.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Frost",
+      "x": 1352.8,
+      "y": 14183.6,
+      "kind": "village"
+    },
+    {
+      "name": "Chill Ville",
+      "x": 2195.5,
+      "y": 13948.8,
+      "kind": "village"
+    },
+    {
+      "name": "Crystal Crest",
+      "x": 60.5,
+      "y": 15304.8,
+      "kind": "local"
+    },
+    {
+      "name": "Nukez Ski Lodge",
+      "x": 929.1,
+      "y": 13735.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Fishermen_cove",
+      "x": 436.3,
+      "y": 1990.1,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Octavia",
+      "x": 8611,
+      "y": 7033.8,
+      "kind": "village"
+    },
+    {
+      "name": "Zinn Industrial",
+      "x": 8251.4,
+      "y": 8574.2,
+      "kind": "flatarea"
+    },
+    {
+      "name": "Camp Zen",
+      "x": 9061.4,
+      "y": 15149.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Seaside Nuclear Plant",
+      "x": 14100.3,
+      "y": 8367.9,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "Mistic",
+      "x": 10979.6,
+      "y": 9274.4,
+      "kind": "flatareacity"
+    },
+    {
+      "name": "Potsville",
+      "x": 10775.6,
+      "y": 5046,
+      "kind": "village"
+    },
+    {
+      "name": "Polk Valley",
+      "x": 8884.2,
+      "y": 3105.1,
+      "kind": "village"
+    },
+    {
+      "name": "Eldridge Apartments",
+      "x": 2299.6,
+      "y": 7588.5,
+      "kind": "village"
+    },
+    {
+      "name": "Buck Mountain",
+      "x": 2844.8,
+      "y": 7642.3,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "Nukez Penitentiary",
+      "x": 3908.6,
+      "y": 9337.8,
+      "kind": "mediummilitary"
+    },
+    {
+      "name": "Nukez Maximum Security Facility",
+      "x": 5369.1,
+      "y": 14581.6,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "Camp George",
+      "x": 3938.5,
+      "y": 1286,
+      "kind": "hill"
+    },
+    {
+      "name": "Old Mills",
+      "x": 5550.8,
+      "y": 1326.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Myiah Park",
+      "x": 6744.3,
+      "y": 1341.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Fort. Riley",
+      "x": 6444.4,
+      "y": 1354.6,
+      "kind": "mediummilitary"
+    },
+    {
+      "name": "Area Unknown",
+      "x": 13330.9,
+      "y": 15201.8,
+      "kind": "smallmilitary"
+    },
+    {
+      "name": "Fort Myers",
+      "x": 14194.4,
+      "y": 15139,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "Shallow Crossing",
+      "x": 13775.1,
+      "y": 15166.4,
+      "kind": "rockarea"
+    },
+    {
+      "name": "Freak Industries",
+      "x": 3234.5,
+      "y": 6980.3,
+      "kind": "flatarea"
+    },
+    {
+      "name": "Docs Farms",
+      "x": 1812.6,
+      "y": 6992.4,
+      "kind": "vegetationfir"
+    },
+    {
+      "name": "Shaw Industries",
+      "x": 5046.5,
+      "y": 8113.5,
+      "kind": "hill"
+    },
+    {
+      "name": "Freakville Farms",
+      "x": 3446,
+      "y": 6882.4,
+      "kind": "vegetationbroadleaf"
+    },
+    {
+      "name": "Cerro Gordo",
+      "x": 7035.5,
+      "y": 7796.8,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "Fort Wilson Military",
+      "x": 4290.6,
+      "y": 8771.4,
+      "kind": "mediummilitary"
+    },
+    {
+      "name": "Hollow Valley",
+      "x": 1671.9,
+      "y": 8897.3,
+      "kind": "hill"
+    },
+    {
+      "name": "The Railyard",
+      "x": 130.2,
+      "y": 8798,
+      "kind": "local"
+    },
+    {
+      "name": "Sunny",
+      "x": 5331.9,
+      "y": 8134.8,
+      "kind": "village"
+    },
+    {
+      "name": "Rikers Pier",
+      "x": 163.4,
+      "y": 5991.3,
+      "kind": "namemarine"
+    },
+    {
+      "name": "Cs Checkpoint",
+      "x": 14006.5,
+      "y": 7784,
+      "kind": "smallmilitary"
+    },
+    {
+      "name": "North Harbor",
+      "x": 10165.6,
+      "y": 4283.2,
+      "kind": "capital"
+    },
+    {
+      "name": "East Harbor",
+      "x": 9744.4,
+      "y": 3603.9,
+      "kind": "capital"
+    },
+    {
+      "name": "Redo Milly",
+      "x": 5418.9,
+      "y": 11158.4,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "Nukez Dam",
+      "x": 14969.1,
+      "y": 3803.7,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "Nems Milly",
+      "x": 4710.1,
+      "y": 334.2,
+      "kind": "smallmilitary"
+    },
+    {
+      "name": "The Elderswamps",
+      "x": 15083.6,
+      "y": 6778.6,
+      "kind": "bigmilitary"
+    },
+    {
+      "name": "West Elderswamps",
+      "x": 14451.2,
+      "y": 7013.6,
+      "kind": "smallmilitary"
+    },
+    {
+      "name": "Trents Circuit",
+      "x": 12736.7,
+      "y": 4759.1,
+      "kind": "citycenter"
+    }
+  ]
+}

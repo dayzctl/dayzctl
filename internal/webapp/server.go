@@ -67,6 +67,7 @@ func New(cfg *config.ServerConfig) (*Server, error) {
 	mux.HandleFunc("GET /api/instances", s.handleInstances)
 	mux.HandleFunc("GET /api/instances/{instance}/logs", s.handleLogs)
 	mux.HandleFunc("GET /api/instances/{instance}/map-image", s.handleMapImage)
+	mux.HandleFunc("GET /api/maps", s.handleMaps)
 	mux.HandleFunc("GET /api/maps/{map}/meta", s.handleMapMeta)
 	mux.HandleFunc("GET /api/maps/{map}/tiles/{z}/{x}/{y}", s.handleMapTile)
 	mux.HandleFunc("POST /api/instances/{instance}/analyze", s.handleAnalyze)
@@ -86,6 +87,9 @@ func (s *Server) Handler() http.Handler { return s.handler }
 
 // Service exposes the log analysis service (used by tests and the CLI).
 func (s *Server) Service() *logs.Service { return s.service }
+
+// Maps lists the map ids bundled with this binary.
+func (s *Server) Maps() []string { return s.maps.IDs() }
 
 // ---------------------------------------------------------------------------
 // Handlers
@@ -356,6 +360,35 @@ func mapIDFor(inst *config.Instance) string {
 		return id
 	}
 	return strings.ToLower(strings.TrimSpace(inst.Name))
+}
+
+// handleMaps lists the maps bundled with this binary.
+func (s *Server) handleMaps(w http.ResponseWriter, r *http.Request) {
+	type summary struct {
+		ID      string  `json:"id"`
+		Name    string  `json:"name"`
+		Size    float64 `json:"size"`
+		Names   int     `json:"names"`
+		MaxZoom int     `json:"maxZoom"`
+	}
+
+	maps := make([]summary, 0, 16)
+	for _, id := range s.maps.IDs() {
+		meta, err := s.maps.Meta(id)
+		if err != nil {
+			continue
+		}
+		maps = append(maps, summary{
+			ID:      meta.ID,
+			Name:    meta.Name,
+			Size:    meta.Size,
+			Names:   len(meta.Names),
+			MaxZoom: meta.MaxZoom,
+		})
+	}
+
+	w.Header().Set("Cache-Control", "max-age=3600")
+	writeJSON(w, http.StatusOK, map[string]any{"maps": maps})
 }
 
 // handleMapMeta returns the map's extent, tile limits and place names.

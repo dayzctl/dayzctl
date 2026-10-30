@@ -1,0 +1,423 @@
+{
+  "id": "siberia",
+  "name": "Siberia",
+  "size": 14047,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "May.13",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/siberia)",
+  "generatedAt": "2026-10-30T12:37:55Z",
+  "names": [
+    {
+      "name": "Korkino South Port",
+      "x": 4506.5,
+      "y": 8352,
+      "kind": "city"
+    },
+    {
+      "name": "Kalachevo",
+      "x": 10979.8,
+      "y": 7521.8,
+      "kind": "city"
+    },
+    {
+      "name": "Korkino",
+      "x": 5486.3,
+      "y": 10326.2,
+      "kind": "city"
+    },
+    {
+      "name": "Korkino Junkyard",
+      "x": 4768.6,
+      "y": 9732.1,
+      "kind": "city"
+    },
+    {
+      "name": "Gunner Castle",
+      "x": 9032.8,
+      "y": 5721.6,
+      "kind": "city"
+    },
+    {
+      "name": "Eva Castle",
+      "x": 6982.8,
+      "y": 5710.4,
+      "kind": "city"
+    },
+    {
+      "name": "Korkinsky South Reach",
+      "x": 8516.6,
+      "y": 9727.8,
+      "kind": "city"
+    },
+    {
+      "name": "Hell",
+      "x": 12765.5,
+      "y": 1319.9,
+      "kind": "city"
+    },
+    {
+      "name": "Korkino Islands",
+      "x": 6115.1,
+      "y": 11623.3,
+      "kind": "city"
+    },
+    {
+      "name": "Zmira Research Island",
+      "x": 13133.1,
+      "y": 13134.2,
+      "kind": "city"
+    },
+    {
+      "name": "South Ukhanov District",
+      "x": 10612.9,
+      "y": 9346.8,
+      "kind": "city"
+    },
+    {
+      "name": "Chelyabinsk Icelake",
+      "x": 5141.7,
+      "y": 4806.3,
+      "kind": "city"
+    },
+    {
+      "name": "Chelyabinsk Military",
+      "x": 5326.4,
+      "y": 7007.6,
+      "kind": "city"
+    },
+    {
+      "name": "Chelyabinsk",
+      "x": 3665.7,
+      "y": 5653,
+      "kind": "city"
+    },
+    {
+      "name": "North Ukhanov",
+      "x": 9144.2,
+      "y": 10341.9,
+      "kind": "city"
+    },
+    {
+      "name": "Korkinsky",
+      "x": 7781,
+      "y": 10573.4,
+      "kind": "city"
+    },
+    {
+      "name": "Lukoil",
+      "x": 4409.5,
+      "y": 3431.6,
+      "kind": "city"
+    },
+    {
+      "name": "Lukoil Industrial",
+      "x": 5177.5,
+      "y": 3028.3,
+      "kind": "city"
+    },
+    {
+      "name": "Kopeysk",
+      "x": 9526.9,
+      "y": 3883.1,
+      "kind": "city"
+    },
+    {
+      "name": "Kopeysk Industrial",
+      "x": 8752.6,
+      "y": 3784.8,
+      "kind": "city"
+    },
+    {
+      "name": "Kalachevo Airport",
+      "x": 10849.4,
+      "y": 5195,
+      "kind": "city"
+    },
+    {
+      "name": "Ukhanov Industrial",
+      "x": 9400.3,
+      "y": 9539.9,
+      "kind": "city"
+    },
+    {
+      "name": "Kopeysk Military",
+      "x": 8471.1,
+      "y": 4519.1,
+      "kind": "city"
+    },
+    {
+      "name": "Lukoil Military",
+      "x": 6696.4,
+      "y": 3043.8,
+      "kind": "city"
+    },
+    {
+      "name": "Korkinsky Pit",
+      "x": 6409.9,
+      "y": 9358.6,
+      "kind": "city"
+    },
+    {
+      "name": "Korkinsky Military",
+      "x": 7805.5,
+      "y": 10378.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Korkino Military",
+      "x": 5660.1,
+      "y": 9990.3,
+      "kind": "city"
+    },
+    {
+      "name": "Lukoil Freakshow",
+      "x": 7990.2,
+      "y": 2717.5,
+      "kind": "city"
+    },
+    {
+      "name": "Research Facility",
+      "x": 10363.2,
+      "y": 8285.9,
+      "kind": "city"
+    },
+    {
+      "name": "Chelyabinsk Airport",
+      "x": 7866,
+      "y": 7581.8,
+      "kind": "city"
+    },
+    {
+      "name": "Chelyabinsk Ural Mountain Base",
+      "x": 7944.7,
+      "y": 6571,
+      "kind": "city"
+    },
+    {
+      "name": "Abandonned Industrial",
+      "x": 6302.1,
+      "y": 4189.6,
+      "kind": "city"
+    },
+    {
+      "name": "Survivor Camp",
+      "x": 6124.6,
+      "y": 4769.8,
+      "kind": "city"
+    },
+    {
+      "name": "Korkinsky Barn",
+      "x": 6276.5,
+      "y": 8064.6,
+      "kind": "city"
+    },
+    {
+      "name": "Chelyabinsk Village Settlement",
+      "x": 6138,
+      "y": 7194.7,
+      "kind": "city"
+    },
+    {
+      "name": "Chelya Field Barn",
+      "x": 4804.2,
+      "y": 6156.2,
+      "kind": "city"
+    },
+    {
+      "name": "Icy Village",
+      "x": 5118.5,
+      "y": 5564.5,
+      "kind": "city"
+    },
+    {
+      "name": "Survivor Refuge",
+      "x": 5640.8,
+      "y": 5318,
+      "kind": "city"
+    },
+    {
+      "name": "Ural Mountain Abandonned Village",
+      "x": 6651.8,
+      "y": 5371.7,
+      "kind": "city"
+    },
+    {
+      "name": "Snowy Airport",
+      "x": 6987.4,
+      "y": 4996.9,
+      "kind": "city"
+    },
+    {
+      "name": "Unknown Cave",
+      "x": 6968.6,
+      "y": 4265.1,
+      "kind": "city"
+    },
+    {
+      "name": "Survivor Camp",
+      "x": 8931.9,
+      "y": 5228.6,
+      "kind": "village"
+    },
+    {
+      "name": "The Chalet",
+      "x": 9617.3,
+      "y": 5795,
+      "kind": "city"
+    },
+    {
+      "name": "Kalachevo Ranger Camp",
+      "x": 9920.6,
+      "y": 5918.5,
+      "kind": "city"
+    },
+    {
+      "name": "Ukhanov Military Base",
+      "x": 8978.3,
+      "y": 8661.1,
+      "kind": "city"
+    },
+    {
+      "name": "Chelyabinsk Outskirts",
+      "x": 6021.3,
+      "y": 4645.4,
+      "kind": "city"
+    },
+    {
+      "name": "Lukoil Camp",
+      "x": 5968.6,
+      "y": 3365.4,
+      "kind": "city"
+    },
+    {
+      "name": "Lukoil Lake",
+      "x": 7694.7,
+      "y": 3276.2,
+      "kind": "city"
+    },
+    {
+      "name": "Chelyabinsk Terminal",
+      "x": 4416.1,
+      "y": 4264.6,
+      "kind": "city"
+    },
+    {
+      "name": "Kholod Lake",
+      "x": 9815.4,
+      "y": 6479.8,
+      "kind": "city"
+    },
+    {
+      "name": "Kalachevo Laboratory",
+      "x": 9930.9,
+      "y": 6719.6,
+      "kind": "city"
+    },
+    {
+      "name": "Kalachevo Resort",
+      "x": 10593.2,
+      "y": 7024.9,
+      "kind": "city"
+    },
+    {
+      "name": "Kalachevo Frontier Camp",
+      "x": 9736.7,
+      "y": 7710.4,
+      "kind": "city"
+    },
+    {
+      "name": "Lake Morozov",
+      "x": 9912.1,
+      "y": 8058.1,
+      "kind": "city"
+    },
+    {
+      "name": "Kalachevo Rural",
+      "x": 10825.3,
+      "y": 6630.6,
+      "kind": "city"
+    },
+    {
+      "name": "Kalachevo Border",
+      "x": 10857.3,
+      "y": 6105.4,
+      "kind": "city"
+    },
+    {
+      "name": "Kalachevo Taiga Camp",
+      "x": 10373.9,
+      "y": 5956.4,
+      "kind": "city"
+    },
+    {
+      "name": "Frostpeak Camp",
+      "x": 6236.5,
+      "y": 4962.8,
+      "kind": "city"
+    },
+    {
+      "name": "Redrock Camp",
+      "x": 9497.5,
+      "y": 4665.2,
+      "kind": "city"
+    },
+    {
+      "name": "Frostwood Barn",
+      "x": 9939.7,
+      "y": 9045.3,
+      "kind": "city"
+    },
+    {
+      "name": "Old Ukanov Barn",
+      "x": 9571.2,
+      "y": 8608.3,
+      "kind": "city"
+    },
+    {
+      "name": "Vostok Island",
+      "x": 1949.9,
+      "y": 1917.5,
+      "kind": "city"
+    },
+    {
+      "name": "Severny Island",
+      "x": 2538.8,
+      "y": 10513.5,
+      "kind": "city"
+    },
+    {
+      "name": "Anomaly Site H-01",
+      "x": 2774.2,
+      "y": 11581.9,
+      "kind": "city"
+    },
+    {
+      "name": "Military Facility H-02",
+      "x": 7844.3,
+      "y": 6847.8,
+      "kind": "city"
+    },
+    {
+      "name": "Containment Hatch H-03",
+      "x": 8366.6,
+      "y": 6730.9,
+      "kind": "city"
+    },
+    {
+      "name": "Anomaly Cave",
+      "x": 10590.3,
+      "y": 4457.6,
+      "kind": "city"
+    },
+    {
+      "name": "Foxy Hideout",
+      "x": 6753.7,
+      "y": 7471.9,
+      "kind": "city"
+    }
+  ]
+}

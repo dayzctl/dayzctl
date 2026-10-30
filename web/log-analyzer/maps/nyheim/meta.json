@@ -1,0 +1,471 @@
+{
+  "id": "nyheim",
+  "name": "Nyheim",
+  "size": 15360,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "Apr.25-4",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/nyheim)",
+  "generatedAt": "2026-10-30T12:31:23Z",
+  "names": [
+    {
+      "name": "Nyheim New City",
+      "x": 3169.7,
+      "y": 2105.9,
+      "kind": "capital"
+    },
+    {
+      "name": "Nyheim Industrial",
+      "x": 3246.8,
+      "y": 2311.8,
+      "kind": "city"
+    },
+    {
+      "name": "Nyhavn",
+      "x": 3784.7,
+      "y": 2028.7,
+      "kind": "marine"
+    },
+    {
+      "name": "Nyheim Prison",
+      "x": 2700,
+      "y": 2073.9,
+      "kind": "village"
+    },
+    {
+      "name": "Nyheim Old City",
+      "x": 2692.1,
+      "y": 2390.4,
+      "kind": "city"
+    },
+    {
+      "name": "Destroyed City",
+      "x": 2333.3,
+      "y": 2474.6,
+      "kind": "city"
+    },
+    {
+      "name": "Nyheim Commercial District",
+      "x": 1754.9,
+      "y": 2560.8,
+      "kind": "capital"
+    },
+    {
+      "name": "Rodal",
+      "x": 4505.2,
+      "y": 439.4,
+      "kind": "city"
+    },
+    {
+      "name": "Nyheimfjorden",
+      "x": 4359.4,
+      "y": 1986,
+      "kind": "marine"
+    },
+    {
+      "name": "Snohaug",
+      "x": 229.1,
+      "y": 4422.9,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Northern Military Training Area",
+      "x": 296.6,
+      "y": 4020.8,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Northern Resort",
+      "x": 914.2,
+      "y": 3473.4,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Nyheim Holiday Resort",
+      "x": 3046.3,
+      "y": 1891.9,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Kraftverk",
+      "x": 4416.4,
+      "y": 3932.9,
+      "kind": "village"
+    },
+    {
+      "name": "Lilleby",
+      "x": 4201.1,
+      "y": 4049.4,
+      "kind": "city"
+    },
+    {
+      "name": "Nyheim Electrical Facility",
+      "x": 4353.6,
+      "y": 2546.6,
+      "kind": "local"
+    },
+    {
+      "name": "Odin",
+      "x": 4713.9,
+      "y": 1816.5,
+      "kind": "city"
+    },
+    {
+      "name": "Flytoppen",
+      "x": 2269.3,
+      "y": 726.8,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Nyelva",
+      "x": 453.2,
+      "y": 3162,
+      "kind": "marine"
+    },
+    {
+      "name": "Dalen",
+      "x": 1230.9,
+      "y": 4171.4,
+      "kind": "city"
+    },
+    {
+      "name": "Piggen",
+      "x": 1334.5,
+      "y": 5075.8,
+      "kind": "viewpoint"
+    },
+    {
+      "name": "Vestby",
+      "x": 485,
+      "y": 503.6,
+      "kind": "city"
+    },
+    {
+      "name": "Sorbu",
+      "x": 3026.4,
+      "y": 366.1,
+      "kind": "city"
+    },
+    {
+      "name": "Kebabnino",
+      "x": 6894.1,
+      "y": 1249.9,
+      "kind": "local"
+    },
+    {
+      "name": "Utkjaer",
+      "x": 167.3,
+      "y": 7636.6,
+      "kind": "city"
+    },
+    {
+      "name": "Oya",
+      "x": 7279.2,
+      "y": 8163.3,
+      "kind": "city"
+    },
+    {
+      "name": "Nordsundet",
+      "x": 4106.4,
+      "y": 6931.4,
+      "kind": "local"
+    },
+    {
+      "name": "Utkanten",
+      "x": 200,
+      "y": 6696.7,
+      "kind": "city"
+    },
+    {
+      "name": "Ulvetind",
+      "x": 420.8,
+      "y": 1042.9,
+      "kind": "city"
+    },
+    {
+      "name": "Ostby",
+      "x": 6353.4,
+      "y": 2062.6,
+      "kind": "city"
+    },
+    {
+      "name": "Halvoya",
+      "x": 6899,
+      "y": 6535.8,
+      "kind": "city"
+    },
+    {
+      "name": "Hofsoy",
+      "x": 7808.9,
+      "y": 811.3,
+      "kind": "city"
+    },
+    {
+      "name": "Olderoya",
+      "x": 6942.5,
+      "y": 376,
+      "kind": "village"
+    },
+    {
+      "name": "Thor's Hammer",
+      "x": 6884.3,
+      "y": 2669.3,
+      "kind": "local"
+    },
+    {
+      "name": "Nyvoll",
+      "x": 4592.8,
+      "y": 4738.8,
+      "kind": "capital"
+    },
+    {
+      "name": "Gruve",
+      "x": 5428.4,
+      "y": 5157.3,
+      "kind": "local"
+    },
+    {
+      "name": "Elde",
+      "x": 5873.7,
+      "y": 5252.9,
+      "kind": "city"
+    },
+    {
+      "name": "Evenes",
+      "x": 2546.4,
+      "y": 8316.9,
+      "kind": "city"
+    },
+    {
+      "name": "Kjerstad",
+      "x": 2125,
+      "y": 8074.4,
+      "kind": "city"
+    },
+    {
+      "name": "Brorstad",
+      "x": 6570.4,
+      "y": 5454.8,
+      "kind": "city"
+    },
+    {
+      "name": "Sydalen",
+      "x": 7896.9,
+      "y": 4695.2,
+      "kind": "village"
+    },
+    {
+      "name": "Valberg",
+      "x": 7626.6,
+      "y": 5772.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Rostad",
+      "x": 6613.9,
+      "y": 4276.9,
+      "kind": "city"
+    },
+    {
+      "name": "Refugee Arrival Center",
+      "x": 3582.3,
+      "y": 5619.7,
+      "kind": "village"
+    },
+    {
+      "name": "Nyheim Lufthavn",
+      "x": 1869.7,
+      "y": 1313.9,
+      "kind": "local"
+    },
+    {
+      "name": "Nyheim Militaer Flyplass",
+      "x": 1889.5,
+      "y": 883.2,
+      "kind": "local"
+    },
+    {
+      "name": "Storvik",
+      "x": 4680.8,
+      "y": 6562.5,
+      "kind": "city"
+    },
+    {
+      "name": "Lithaugen",
+      "x": 4773.8,
+      "y": 6270.4,
+      "kind": "city"
+    },
+    {
+      "name": "Stoa",
+      "x": 4019.8,
+      "y": 6186.4,
+      "kind": "village"
+    },
+    {
+      "name": "Bruem",
+      "x": 6220.1,
+      "y": 7255.8,
+      "kind": "city"
+    },
+    {
+      "name": "Fresvik",
+      "x": 1440.6,
+      "y": 6197.5,
+      "kind": "village"
+    },
+    {
+      "name": "Steine",
+      "x": 3034,
+      "y": 5152.6,
+      "kind": "village"
+    },
+    {
+      "name": "Dyrdal",
+      "x": 2157.6,
+      "y": 6071.7,
+      "kind": "city"
+    },
+    {
+      "name": "Bredden",
+      "x": 1498.6,
+      "y": 7227.1,
+      "kind": "local"
+    },
+    {
+      "name": "Undredal",
+      "x": 2245.5,
+      "y": 7065.4,
+      "kind": "village"
+    },
+    {
+      "name": "Leveld",
+      "x": 2593.7,
+      "y": 7226.4,
+      "kind": "village"
+    },
+    {
+      "name": "Opheim",
+      "x": 2319,
+      "y": 7734.1,
+      "kind": "village"
+    },
+    {
+      "name": "Moane",
+      "x": 7542.8,
+      "y": 3147.6,
+      "kind": "hill"
+    },
+    {
+      "name": "Hegge",
+      "x": 8239.3,
+      "y": 3078.7,
+      "kind": "village"
+    },
+    {
+      "name": "Grimsbu",
+      "x": 1909.4,
+      "y": 2950.5,
+      "kind": "village"
+    },
+    {
+      "name": "Piggen Gruve",
+      "x": 2248.6,
+      "y": 4640.4,
+      "kind": "local"
+    },
+    {
+      "name": "Brydal",
+      "x": 4592.5,
+      "y": 3173.9,
+      "kind": "village"
+    },
+    {
+      "name": "Koppang",
+      "x": 5705.8,
+      "y": 4615.6,
+      "kind": "village"
+    },
+    {
+      "name": "Kloster",
+      "x": 5568.3,
+      "y": 4167.6,
+      "kind": "local"
+    },
+    {
+      "name": "Slott",
+      "x": 5464.2,
+      "y": 2166.9,
+      "kind": "village"
+    },
+    {
+      "name": "Larvik",
+      "x": 285.4,
+      "y": 5509.1,
+      "kind": "city"
+    },
+    {
+      "name": "Gammelheim",
+      "x": 7747,
+      "y": 6584.2,
+      "kind": "local"
+    },
+    {
+      "name": "Holand",
+      "x": 4812.9,
+      "y": 7715.3,
+      "kind": "village"
+    },
+    {
+      "name": "Bangsund",
+      "x": 4459.5,
+      "y": 7415.6,
+      "kind": "village"
+    },
+    {
+      "name": "Helvete",
+      "x": 15149.4,
+      "y": 15276.1,
+      "kind": "city"
+    },
+    {
+      "name": "Lauvsnes",
+      "x": 5766.4,
+      "y": 772.2,
+      "kind": "village"
+    },
+    {
+      "name": "Ledang",
+      "x": 2636.2,
+      "y": 1312.7,
+      "kind": "village"
+    },
+    {
+      "name": "Holt",
+      "x": 3626.8,
+      "y": 1256,
+      "kind": "village"
+    },
+    {
+      "name": "Vikan",
+      "x": 7840.3,
+      "y": 2940.6,
+      "kind": "city"
+    },
+    {
+      "name": "Hylla",
+      "x": 4841.8,
+      "y": 5417.3,
+      "kind": "village"
+    },
+    {
+      "name": "Fjellhytta",
+      "x": 1098.3,
+      "y": 1880.9,
+      "kind": "village"
+    }
+  ]
+}

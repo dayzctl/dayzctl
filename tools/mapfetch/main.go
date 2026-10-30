@@ -7,6 +7,7 @@
 // update.
 //
 //	go run ./tools/mapfetch -map nasdara -zooms 3,4
+//	go run ./tools/mapfetch -all -zooms 3
 //
 // Tiles are cached in the output directory, so an interrupted run resumes and a
 // second run only fetches what is missing.
@@ -16,16 +17,21 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
+	"sync"
 )
 
 func main() {
 	var (
-		mapID   = flag.String("map", "nasdara", "map id as used on dayz.xam.nu (nasdara, chernarusplus, livonia, …)")
-		zooms   = flag.String("zooms", "3,4", "comma-separated zoom levels to download (0-7)")
+		mapID   = flag.String("map", "", "map id as used on the map host (nasdara, chernarusplus, livonia, …)")
+		all     = flag.Bool("all", false, "fetch every map the host publishes")
+		list    = flag.Bool("list", false, "print the published map ids and exit")
+		zooms   = flag.String("zooms", "3", "comma-separated zoom levels to download (0-7)")
 		out     = flag.String("out", "web/log-analyzer/maps", "output directory")
 		force   = flag.Bool("force", false, "re-download tiles that already exist")
-		workers = flag.Int("workers", 2, "parallel tile downloads (keep this low: the CDN drops bursts)")
+		workers = flag.Int("workers", 2, "parallel requests inside one map")
+		par     = flag.Int("parallel", 3, "maps fetched concurrently")
 	)
 	flag.Parse()
 
@@ -34,38 +40,97 @@ func main() {
 		fail(err)
 	}
 
-	if err := run(*mapID, levels, *out, *force, *workers); err != nil {
-		fail(err)
+	src := newSource(*workers)
+
+	if *list || *all {
+		ids, err := src.mapIDs()
+		if err != nil {
+			fail(err)
+		}
+		if *list {
+			for _, id := range ids {
+				fmt.Println(id)
+			}
+			return
+		}
+		fail(fetchAll(src, ids, levels, *out, *force, *par))
+		return
 	}
+
+	if *mapID == "" {
+		fail(fmt.Errorf("nothing to do: pass -map <id>, -all, or -list"))
+	}
+	fail(fetchOne(src, *mapID, levels, *out, *force))
 }
 
-func run(mapID string, zooms []int, out string, force bool, workers int) error {
-	src := newSource(workers)
+// fetchAll downloads every published map, skipping the ones already complete.
+// Maps are fetched a few at a time: a single stream is latency-bound and a full
+// run would otherwise take close to an hour.
+func fetchAll(src *source, ids []string, zooms []int, out string, force bool, parallel int) error {
+	if parallel < 1 {
+		parallel = 1
+	}
+	fmt.Printf("fetching %d maps (zoom %v, %d at a time)\n", len(ids), zooms, parallel)
 
-	fmt.Printf("resolving %s on dayz.xam.nu…\n", mapID)
+	var (
+		mu     sync.Mutex
+		failed []string
+		done   int
+		sem    = make(chan struct{}, parallel)
+		wg     sync.WaitGroup
+	)
+
+	for _, id := range ids {
+		wg.Add(1)
+		sem <- struct{}{}
+		go func(id string) {
+			defer wg.Done()
+			defer func() { <-sem }()
+
+			if err := fetchOne(src, id, zooms, out, force); err != nil {
+				fmt.Fprintf(os.Stderr, "  skipping %s: %v\n", id, err)
+				mu.Lock()
+				failed = append(failed, id)
+				mu.Unlock()
+				return
+			}
+
+			mu.Lock()
+			done++
+			fmt.Printf("  [%d/%d] %s done\n", done, len(ids), id)
+			mu.Unlock()
+		}(id)
+	}
+	wg.Wait()
+
+	if len(failed) > 0 {
+		return fmt.Errorf("%d map(s) failed: %s", len(failed), strings.Join(failed, ", "))
+	}
+	fmt.Printf("\nall %d maps written to %s\n", len(ids), out)
+	return nil
+}
+
+func fetchOne(src *source, mapID string, zooms []int, out string, force bool) error {
 	rev, err := src.revision(mapID)
 	if err != nil {
 		return err
 	}
-	fmt.Printf("  version %s\n", rev)
 
 	cfg, err := src.config(mapID, rev)
 	if err != nil {
 		return err
 	}
 	meta := cfg.meta(mapID, rev)
-	fmt.Printf("  world %s m, %d place names, tiles %s/%s\n",
-		fmtNum(meta.Size), len(meta.Names), cfg.Info.TileSet, cfg.Info.TileVer)
+	fmt.Printf("  version %s · world %s m · %d place names\n", rev, fmtNum(meta.Size), len(meta.Names))
 
 	dir := out + "/" + mapID
 	if err := os.MkdirAll(dir, 0o755); err != nil {
 		return err
 	}
 
-	total := 0
+	total, skipped := 0, 0
 	for _, z := range zooms {
 		n := 1 << z
-		fetched, skipped := 0, 0
 		for y := 0; y < n; y++ {
 			for x := 0; x < n; x++ {
 				path := fmt.Sprintf("%s/%d/%d/%d.%s", dir, z, x, y, meta.Format)
@@ -80,20 +145,49 @@ func run(mapID string, zooms []int, out string, force bool, workers int) error {
 				if err := writeFile(path, data); err != nil {
 					return err
 				}
-				fetched++
+				total++
 			}
 		}
-		total += fetched
-		fmt.Printf("  zoom %d: %d tiles fetched, %d already present (%dx%d)\n", z, fetched, skipped, n, n)
 	}
 
-	meta.MinZoom, meta.MaxZoom = zooms[0], zooms[len(zooms)-1]
+	// The zoom range reflects what is actually on disk, so a map fetched at
+	// several zoom levels over separate runs keeps every level it has.
+	minZoom, maxZoom, ok := detectZooms(dir)
+	if !ok {
+		return fmt.Errorf("no tiles were written")
+	}
+	meta.MinZoom, meta.MaxZoom = minZoom, maxZoom
+
 	if err := writeMeta(dir+"/meta.json", meta); err != nil {
 		return err
 	}
-
-	fmt.Printf("wrote %s/meta.json and %d new tiles\n", dir, total)
+	fmt.Printf("  zoom %d-%d · %d new tiles, %d already present\n", minZoom, maxZoom, total, skipped)
 	return nil
+}
+
+// detectZooms returns the lowest and highest zoom level present on disk.
+func detectZooms(dir string) (minZoom, maxZoom int, ok bool) {
+	entries, err := os.ReadDir(dir)
+	if err != nil {
+		return 0, 0, false
+	}
+	minZoom, maxZoom = 99, -1
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		z, err := strconv.Atoi(e.Name())
+		if err != nil {
+			continue
+		}
+		if z < minZoom {
+			minZoom = z
+		}
+		if z > maxZoom {
+			maxZoom = z
+		}
+	}
+	return minZoom, maxZoom, maxZoom >= 0
 }
 
 func parseZooms(raw string) ([]int, error) {
@@ -119,6 +213,9 @@ func parseZooms(raw string) ([]int, error) {
 }
 
 func fail(err error) {
+	if err == nil {
+		return
+	}
 	fmt.Fprintf(os.Stderr, "mapfetch: %v\n", err)
 	os.Exit(1)
 }

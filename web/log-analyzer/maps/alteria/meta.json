@@ -1,0 +1,213 @@
+{
+  "id": "alteria",
+  "name": "Alteria",
+  "size": 8192,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "May.3-5",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/alteria)",
+  "generatedAt": "2026-10-30T12:29:06Z",
+  "names": [
+    {
+      "name": "Deadmens Rock",
+      "x": 1502.6,
+      "y": 6404.9,
+      "kind": "hill"
+    },
+    {
+      "name": "Toxiczone",
+      "x": 7528.7,
+      "y": 6804.7,
+      "kind": "hill"
+    },
+    {
+      "name": "Cassandra",
+      "x": 4404.7,
+      "y": 7615.1,
+      "kind": "city"
+    },
+    {
+      "name": "Roblido",
+      "x": 2581.1,
+      "y": 5841.9,
+      "kind": "city"
+    },
+    {
+      "name": "Ares",
+      "x": 2140.1,
+      "y": 2994.5,
+      "kind": "city"
+    },
+    {
+      "name": "Kefka",
+      "x": 6654.7,
+      "y": 3668.8,
+      "kind": "city"
+    },
+    {
+      "name": "Airfield",
+      "x": 6874.4,
+      "y": 2035.8,
+      "kind": "airport"
+    },
+    {
+      "name": "Radiostation",
+      "x": 5541.1,
+      "y": 4096.6,
+      "kind": "local"
+    },
+    {
+      "name": "South Harbour",
+      "x": 1969.5,
+      "y": 422,
+      "kind": "local"
+    },
+    {
+      "name": "Reservoir",
+      "x": 2089.3,
+      "y": 1105.3,
+      "kind": "local"
+    },
+    {
+      "name": "Mine",
+      "x": 3011,
+      "y": 1226.6,
+      "kind": "local"
+    },
+    {
+      "name": "Mt. Lapithas",
+      "x": 5442.1,
+      "y": 4031,
+      "kind": "hill"
+    },
+    {
+      "name": "Old Castle",
+      "x": 3454.4,
+      "y": 5287.3,
+      "kind": "local"
+    },
+    {
+      "name": "Weatherstation",
+      "x": 2263.5,
+      "y": 6326.3,
+      "kind": "hill"
+    },
+    {
+      "name": "Fort Yuma",
+      "x": 1794.6,
+      "y": 6518.9,
+      "kind": "local"
+    },
+    {
+      "name": "Apple Orchard",
+      "x": 4736.7,
+      "y": 1398,
+      "kind": "local"
+    },
+    {
+      "name": "Military Transmitting Station",
+      "x": 6328.2,
+      "y": 980.8,
+      "kind": "local"
+    },
+    {
+      "name": "Mt. Helikon",
+      "x": 6617.9,
+      "y": 4738.6,
+      "kind": "hill"
+    },
+    {
+      "name": "Fort Miden",
+      "x": 1654.7,
+      "y": 2618.4,
+      "kind": "local"
+    },
+    {
+      "name": "Marshes",
+      "x": 7011,
+      "y": 3227,
+      "kind": "hill"
+    },
+    {
+      "name": "Fishers Island",
+      "x": 4876.7,
+      "y": 2304.4,
+      "kind": "local"
+    },
+    {
+      "name": "Fort Eagle",
+      "x": 6492,
+      "y": 6812.8,
+      "kind": "local"
+    },
+    {
+      "name": "Towns",
+      "x": 4088,
+      "y": 4636,
+      "kind": "city"
+    },
+    {
+      "name": "Industrial",
+      "x": 2773,
+      "y": 4378,
+      "kind": "city"
+    },
+    {
+      "name": "Fisher's Camp",
+      "x": 5186,
+      "y": 5408,
+      "kind": "local"
+    },
+    {
+      "name": "Military Base",
+      "x": 6933.5,
+      "y": 6826.5,
+      "kind": "local"
+    },
+    {
+      "name": "Holiday Park",
+      "x": 1556,
+      "y": 4208,
+      "kind": "local"
+    },
+    {
+      "name": "Harbor",
+      "x": 775,
+      "y": 3475,
+      "kind": "local"
+    },
+    {
+      "name": "Summer Camp",
+      "x": 4315,
+      "y": 2626,
+      "kind": "local"
+    },
+    {
+      "name": "Town",
+      "x": 5999.5,
+      "y": 5144.5,
+      "kind": "local"
+    },
+    {
+      "name": "Town",
+      "x": 3669.5,
+      "y": 6523,
+      "kind": "local"
+    },
+    {
+      "name": "Town",
+      "x": 4031.5,
+      "y": 1703,
+      "kind": "local"
+    },
+    {
+      "name": "Mt. Lapithas",
+      "x": 4313,
+      "y": 6250,
+      "kind": "namehill"
+    }
+  ]
+}

@@ -1,0 +1,261 @@
+{
+  "id": "valning",
+  "name": "Valning",
+  "size": 10240,
+  "format": "jpg",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 3,
+  "source": "dayz.xam.nu",
+  "version": "Nov.26-14",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/valning)",
+  "generatedAt": "2026-10-30T12:33:48Z",
+  "names": [
+    {
+      "name": "Blinka",
+      "x": 2420,
+      "y": 5630,
+      "kind": "village"
+    },
+    {
+      "name": "Vezga",
+      "x": 3950,
+      "y": 4760,
+      "kind": "village"
+    },
+    {
+      "name": "Winaud Castle",
+      "x": 4220,
+      "y": 3587,
+      "kind": "village"
+    },
+    {
+      "name": "Gresovia",
+      "x": 3400,
+      "y": 3650,
+      "kind": "village"
+    },
+    {
+      "name": "Kreozky",
+      "x": 2930,
+      "y": 2900,
+      "kind": "city"
+    },
+    {
+      "name": "Loebek",
+      "x": 2780,
+      "y": 1670,
+      "kind": "village"
+    },
+    {
+      "name": "Seroe",
+      "x": 3460,
+      "y": 1500,
+      "kind": "village"
+    },
+    {
+      "name": "Airforce Base",
+      "x": 3000,
+      "y": 700,
+      "kind": "village"
+    },
+    {
+      "name": "Bunker Trail",
+      "x": 5000,
+      "y": 400,
+      "kind": "village"
+    },
+    {
+      "name": "Oshkey Radio",
+      "x": 7020,
+      "y": 1420,
+      "kind": "city"
+    },
+    {
+      "name": "Vezerovsky",
+      "x": 6900,
+      "y": 2700,
+      "kind": "city"
+    },
+    {
+      "name": "Tervia",
+      "x": 5220,
+      "y": 3500,
+      "kind": "village"
+    },
+    {
+      "name": "Eshkoe",
+      "x": 6100,
+      "y": 3800,
+      "kind": "village"
+    },
+    {
+      "name": "Ehskoe Military",
+      "x": 6185,
+      "y": 4185,
+      "kind": "village"
+    },
+    {
+      "name": "Guerstling",
+      "x": 5470,
+      "y": 5230,
+      "kind": "city"
+    },
+    {
+      "name": "Otha Island",
+      "x": 3586,
+      "y": 5786,
+      "kind": "village"
+    },
+    {
+      "name": "Kerl",
+      "x": 4560,
+      "y": 6480,
+      "kind": "village"
+    },
+    {
+      "name": "Paulaner",
+      "x": 4100,
+      "y": 6900,
+      "kind": "village"
+    },
+    {
+      "name": "Kalemka",
+      "x": 6000,
+      "y": 7300,
+      "kind": "city"
+    },
+    {
+      "name": "Famka",
+      "x": 7370,
+      "y": 5680,
+      "kind": "village"
+    },
+    {
+      "name": "Jagger Vault",
+      "x": 8100,
+      "y": 5700,
+      "kind": "village"
+    },
+    {
+      "name": "Smokinki",
+      "x": 8250,
+      "y": 4875,
+      "kind": "village"
+    },
+    {
+      "name": "Vishky Mountain",
+      "x": 7840,
+      "y": 4363,
+      "kind": "village"
+    },
+    {
+      "name": "Vauderning",
+      "x": 6676,
+      "y": 4430,
+      "kind": "village"
+    },
+    {
+      "name": "Hansking",
+      "x": 7800,
+      "y": 1670,
+      "kind": "city"
+    },
+    {
+      "name": "Kaelka",
+      "x": 8348,
+      "y": 636,
+      "kind": "village"
+    },
+    {
+      "name": "Clear Military",
+      "x": 8840,
+      "y": 1330,
+      "kind": "village"
+    },
+    {
+      "name": "Blackwater Castle",
+      "x": 8250,
+      "y": 1815,
+      "kind": "village"
+    },
+    {
+      "name": "Fersen Prison",
+      "x": 2838,
+      "y": 7350,
+      "kind": "village"
+    },
+    {
+      "name": "Shauninka",
+      "x": 3255,
+      "y": 8109,
+      "kind": "village"
+    },
+    {
+      "name": "Noradeshko",
+      "x": 3800,
+      "y": 7900,
+      "kind": "village"
+    },
+    {
+      "name": "Kemen Airstrip",
+      "x": 4000,
+      "y": 8800,
+      "kind": "village"
+    },
+    {
+      "name": "Growlerz Town",
+      "x": 5470,
+      "y": 8890,
+      "kind": "village"
+    },
+    {
+      "name": "Rezc Military",
+      "x": 6213,
+      "y": 9160,
+      "kind": "village"
+    },
+    {
+      "name": "Polana",
+      "x": 6630,
+      "y": 9870,
+      "kind": "village"
+    },
+    {
+      "name": "Bizcka",
+      "x": 7470,
+      "y": 9882,
+      "kind": "village"
+    },
+    {
+      "name": "Ferinki",
+      "x": 4000,
+      "y": 9840,
+      "kind": "village"
+    },
+    {
+      "name": "Ferinki Radio Military",
+      "x": 4690,
+      "y": 9780,
+      "kind": "village"
+    },
+    {
+      "name": "Reshka",
+      "x": 4983,
+      "y": 9130,
+      "kind": "village"
+    },
+    {
+      "name": "Seni Island",
+      "x": 3000,
+      "y": 9711,
+      "kind": "village"
+    },
+    {
+      "name": "Thief Hideout",
+      "x": 9030,
+      "y": 3265,
+      "kind": "village"
+    }
+  ]
+}
