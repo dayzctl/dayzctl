@@ -107,15 +107,24 @@ served by `dayzctl` itself:
 
 The map is chosen with `instances[].map` and **defaults to the instance name**,
 so an instance called `nasdara` shows Nasdara with no configuration at all.
-Any map published on [dayz.xam.nu](https://dayz.xam.nu) works —
-`chernarusplus`, `livonia`, `sakhal`, `namalsk`, `deerisle`, …
+Only maps bundled with the binary are offered.
 
-The first time a map is opened, the service resolves its version, downloads the
-place names and proxies the tiles the browser asks for. Everything is cached
-under `<install_dir>/cache/maps/<map>/`, so a later view is instant and works
-without internet access. Fetching is rate limited to stay polite to the CDN.
-Map imagery © [dayz.xam.nu](https://dayz.xam.nu); nothing is redistributed with
-dayzctl.
+**Nothing is downloaded at runtime.** Map data is generated ahead of time and
+committed under `web/log-analyzer/maps/<map>/`, then embedded into the binary —
+so the service works with no internet access and never depends on a third-party
+host being up. To refresh a map (or add another one), regenerate the files:
+
+```sh
+go run ./tools/mapfetch -map nasdara -zooms 3,4      # ~5.6 MB, 320 tiles
+go run ./tools/mapfetch -map chernarusplus -zooms 3,4
+```
+
+The generator resolves the map's version, converts its place names to DayZ
+world metres and writes `meta.json` plus the tiles. It skips tiles that already
+exist, so an interrupted run resumes; pass `-force` to re-download. Commit the
+result and rebuild — `go:embed` picks the files up automatically.
+
+Map imagery © [dayz.xam.nu](https://dayz.xam.nu).
 
 To use your own picture instead, set `instances[].map_image` (relative to
 `paths.install_dir`, an absolute path, or an `http(s)://` URL the service

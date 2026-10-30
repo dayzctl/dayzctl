@@ -33,7 +33,7 @@ import (
 type Server struct {
 	cfg     *config.ServerConfig
 	service *logs.Service
-	maps    *gamemap.Client
+	maps    *gamemap.Store
 	handler http.Handler
 }
 
@@ -46,8 +46,21 @@ func New(cfg *config.ServerConfig) (*Server, error) {
 	s := &Server{
 		cfg:     cfg,
 		service: logs.NewService(cfg.GetInstallDir(), logs.DefaultOptions()),
-		maps:    gamemap.New(filepath.Join(cfg.GetInstallDir(), "cache", "maps")),
 	}
+
+	ui, err := fs.Sub(webassets.Assets, "log-analyzer")
+	if err != nil {
+		return nil, err
+	}
+
+	// Map imagery is generated ahead of time by tools/mapfetch and embedded, so
+	// the service never talks to the map host at runtime. A tree built without
+	// generated maps simply has no imagery.
+	mapsFS, err := fs.Sub(webassets.Assets, "log-analyzer/maps")
+	if err != nil {
+		mapsFS = emptyFS{}
+	}
+	s.maps = gamemap.New(mapsFS)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", s.handleHealth)
@@ -57,16 +70,16 @@ func New(cfg *config.ServerConfig) (*Server, error) {
 	mux.HandleFunc("GET /api/maps/{map}/meta", s.handleMapMeta)
 	mux.HandleFunc("GET /api/maps/{map}/tiles/{z}/{x}/{y}", s.handleMapTile)
 	mux.HandleFunc("POST /api/instances/{instance}/analyze", s.handleAnalyze)
-
-	ui, err := fs.Sub(webassets.Assets, "log-analyzer")
-	if err != nil {
-		return nil, err
-	}
 	mux.Handle("GET /", noCacheHTML(http.FileServerFS(ui)))
 
 	s.handler = withLogging(withGzip(mux))
 	return s, nil
 }
+
+// emptyFS stands in for the map tree when no map has been generated yet.
+type emptyFS struct{}
+
+func (emptyFS) Open(string) (fs.File, error) { return nil, fs.ErrNotExist }
 
 // Handler returns the root http.Handler.
 func (s *Server) Handler() http.Handler { return s.handler }
@@ -128,7 +141,10 @@ func (s *Server) handleInstances(w http.ResponseWriter, r *http.Request) {
 		if s.mapImageAvailable(inst) {
 			view.MapImage = "/api/instances/" + url.PathEscape(inst.Name) + "/map-image"
 		}
-		view.Map = mapIDFor(inst)
+		// Only advertise a map that is actually bundled with this binary.
+		if id := mapIDFor(inst); s.maps.Has(id) {
+			view.Map = id
+		}
 		views = append(views, view)
 	}
 
@@ -344,31 +360,31 @@ func mapIDFor(inst *config.Instance) string {
 
 // handleMapMeta returns the map's extent, tile limits and place names.
 func (s *Server) handleMapMeta(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("map")
-	meta, err := s.maps.Meta(r.Context(), id)
+	meta, err := s.maps.Meta(r.PathValue("map"))
 	if err != nil {
 		writeError(w, http.StatusNotFound, err.Error())
 		return
 	}
 
-	// Names are static per map version, so they may be cached by the browser.
+	// The data is embedded in the binary, so it only changes with an upgrade.
 	w.Header().Set("Cache-Control", "max-age=3600")
 	writeJSON(w, http.StatusOK, map[string]any{
 		"id":          meta.ID,
+		"name":        meta.Name,
 		"size":        meta.Size,
+		"minZoom":     meta.MinZoom,
 		"maxZoom":     meta.MaxZoom,
-		"tileSize":    256,
+		"tileSize":    meta.TileSize,
 		"source":      meta.Source,
 		"version":     meta.Version,
 		"names":       meta.Names,
 		"tileUrl":     "/api/maps/" + url.PathEscape(meta.ID) + "/tiles/{z}/{x}/{y}",
-		"attribution": "Map imagery © dayz.xam.nu",
+		"attribution": meta.Attribution,
 	})
 }
 
-// handleMapTile proxies one pyramid tile, caching it on disk.
+// handleMapTile serves one pyramid tile from the embedded map data.
 func (s *Server) handleMapTile(w http.ResponseWriter, r *http.Request) {
-	id := r.PathValue("map")
 	z, errZ := strconv.Atoi(r.PathValue("z"))
 	x, errX := strconv.Atoi(r.PathValue("x"))
 	y, errY := strconv.Atoi(r.PathValue("y"))
@@ -377,14 +393,13 @@ func (s *Server) handleMapTile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	data, contentType, err := s.maps.Tile(r.Context(), id, z, x, y)
+	data, contentType, err := s.maps.Tile(r.PathValue("map"), z, x, y)
 	if err != nil {
 		writeError(w, http.StatusNotFound, err.Error())
 		return
 	}
 
 	w.Header().Set("Content-Type", contentType)
-	// Cached tiles never change for a given map build.
 	w.Header().Set("Cache-Control", "public, max-age=604800, immutable")
 	_, _ = w.Write(data)
 }

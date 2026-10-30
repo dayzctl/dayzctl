@@ -49,9 +49,9 @@ const tileImages = new Map(); // "url|z|x|y" → { img, state }
  * Zoom level to request for a canvas of `px` CSS pixels. One step finer than
  * "exactly covers the canvas" keeps the imagery crisp on retina screens.
  */
-function tileZoom(px, maxZoom) {
+function tileZoom(px, maxZoom, minZoom) {
   const wanted = Math.ceil(Math.log2(Math.max(1, (px * 2) / TILE_SIZE)));
-  return Math.max(1, Math.min(maxZoom || 7, wanted));
+  return Math.max(minZoom || 1, Math.min(maxZoom || 7, wanted));
 }
 
 /**
@@ -62,7 +62,7 @@ function drawTiles(ctx, view, width, height, onTile) {
   const t = view.tiles;
   if (!t?.url) return false;
 
-  const z = tileZoom(width, t.maxZoom);
+  const z = tileZoom(width, t.maxZoom, t.minZoom);
   const perSide = 2 ** z;
   const srcSize = perSide * TILE_SIZE; // source pixels covering the world
   const scale = width / srcSize;

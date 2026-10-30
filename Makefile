@@ -70,6 +70,11 @@ deps: ## Download and tidy dependencies
 	@echo "$(GREEN)Downloading dependencies...$(NC)"
 	$(GOMOD) download
 	$(GOTIDY)
+.PHONY: maps
+maps: ## (Re)generate the bundled map imagery, e.g. make maps MAP=nasdara ZOOMS=3,4
+	@echo "$(GREEN)Fetching map $(or $(MAP),nasdara)...$(NC)"
+	go run ./tools/mapfetch -map $(or $(MAP),nasdara) -zooms $(or $(ZOOMS),3,4)
+	@echo "$(GREEN)Done - commit web/log-analyzer/maps and rebuild$(NC)"
 
 .PHONY: test
 test: ## Run tests

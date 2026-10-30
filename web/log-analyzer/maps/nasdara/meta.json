@@ -1,0 +1,951 @@
+{
+  "id": "nasdara",
+  "name": "Nasdara",
+  "size": 16384,
+  "format": "webp",
+  "tileSize": 256,
+  "minZoom": 3,
+  "maxZoom": 4,
+  "source": "dayz.xam.nu",
+  "version": "1.30-11",
+  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/nasdara)",
+  "generatedAt": "2026-10-30T11:53:40Z",
+  "names": [
+    {
+      "name": "Dashtabad",
+      "x": 10655.3,
+      "y": 10792.1,
+      "kind": "city"
+    },
+    {
+      "name": "Kamar Zir",
+      "x": 9432.3,
+      "y": 11924.5,
+      "kind": "city"
+    },
+    {
+      "name": "Shah Yailaq",
+      "x": 10333.5,
+      "y": 8225.9,
+      "kind": "city"
+    },
+    {
+      "name": "Bam-e Sabz",
+      "x": 8739.6,
+      "y": 8571.6,
+      "kind": "city"
+    },
+    {
+      "name": "Pesh Kuh",
+      "x": 3714.2,
+      "y": 10925.5,
+      "kind": "city"
+    },
+    {
+      "name": "Gandomabad",
+      "x": 7871.3,
+      "y": 12477.5,
+      "kind": "city"
+    },
+    {
+      "name": "Khorramabad",
+      "x": 4633.8,
+      "y": 10833.5,
+      "kind": "city"
+    },
+    {
+      "name": "Sabzabad",
+      "x": 6853.5,
+      "y": 7404,
+      "kind": "city"
+    },
+    {
+      "name": "No Abad",
+      "x": 7020.9,
+      "y": 5018.9,
+      "kind": "city"
+    },
+    {
+      "name": "Gard Abad",
+      "x": 11084.3,
+      "y": 7627.8,
+      "kind": "city"
+    },
+    {
+      "name": "Kucha Dar",
+      "x": 4511.5,
+      "y": 10148.5,
+      "kind": "city"
+    },
+    {
+      "name": "Bustanshahr",
+      "x": 7360.5,
+      "y": 5641.8,
+      "kind": "city"
+    },
+    {
+      "name": "Dar-e Ardis",
+      "x": 3435.6,
+      "y": 4933.1,
+      "kind": "city"
+    },
+    {
+      "name": "Okb-754",
+      "x": 6907.7,
+      "y": 10058.5,
+      "kind": "city"
+    },
+    {
+      "name": "Shinkalay",
+      "x": 8386,
+      "y": 10159.5,
+      "kind": "village"
+    },
+    {
+      "name": "Dehqankalay",
+      "x": 9969.1,
+      "y": 10524.5,
+      "kind": "village"
+    },
+    {
+      "name": "Mal Kalay",
+      "x": 9595.6,
+      "y": 8866.6,
+      "kind": "village"
+    },
+    {
+      "name": "Bagh-e Mir",
+      "x": 4729.6,
+      "y": 5598.2,
+      "kind": "village"
+    },
+    {
+      "name": "Tut Dara",
+      "x": 5484.3,
+      "y": 8065.9,
+      "kind": "village"
+    },
+    {
+      "name": "Anar Juy",
+      "x": 5540.3,
+      "y": 9078.8,
+      "kind": "village"
+    },
+    {
+      "name": "Karizak",
+      "x": 3531.4,
+      "y": 12815,
+      "kind": "village"
+    },
+    {
+      "name": "Chashme Sabz",
+      "x": 6649.5,
+      "y": 12778.6,
+      "kind": "village"
+    },
+    {
+      "name": "Gul Zar",
+      "x": 5060.6,
+      "y": 6494.8,
+      "kind": "village"
+    },
+    {
+      "name": "Sabz Pashan",
+      "x": 4570.6,
+      "y": 11723.5,
+      "kind": "village"
+    },
+    {
+      "name": "Kati Golzar",
+      "x": 6212.3,
+      "y": 11817.1,
+      "kind": "village"
+    },
+    {
+      "name": "Tor Dara",
+      "x": 4165,
+      "y": 9323.7,
+      "kind": "village"
+    },
+    {
+      "name": "Mian Deh",
+      "x": 7326.1,
+      "y": 4160.9,
+      "kind": "village"
+    },
+    {
+      "name": "Sar-e Deh",
+      "x": 3005,
+      "y": 6277.1,
+      "kind": "village"
+    },
+    {
+      "name": "Pay-e Kuh",
+      "x": 6311.8,
+      "y": 5731.8,
+      "kind": "village"
+    },
+    {
+      "name": "Bala Kalay",
+      "x": 4475.8,
+      "y": 7606.5,
+      "kind": "village"
+    },
+    {
+      "name": "Payan Kalay",
+      "x": 9327.9,
+      "y": 7527.3,
+      "kind": "village"
+    },
+    {
+      "name": "Qala-e Kuhna",
+      "x": 4491.3,
+      "y": 12228.3,
+      "kind": "village"
+    },
+    {
+      "name": "Pir Kalay",
+      "x": 7668.6,
+      "y": 8668.7,
+      "kind": "village"
+    },
+    {
+      "name": "Bazar-e Kohna",
+      "x": 7971.5,
+      "y": 8008,
+      "kind": "village"
+    },
+    {
+      "name": "Darvazeh-e Gharb",
+      "x": 4914,
+      "y": 13586.3,
+      "kind": "village"
+    },
+    {
+      "name": "Yak Chinar",
+      "x": 5825.4,
+      "y": 9690.3,
+      "kind": "village"
+    },
+    {
+      "name": "Panj Asyab",
+      "x": 5829.5,
+      "y": 13559,
+      "kind": "village"
+    },
+    {
+      "name": "Chahar Tut",
+      "x": 8078.3,
+      "y": 8769.7,
+      "kind": "village"
+    },
+    {
+      "name": "Marz-e Lut",
+      "x": 13779.6,
+      "y": 12761,
+      "kind": "village"
+    },
+    {
+      "name": "Pesh Dasht",
+      "x": 11350.5,
+      "y": 9476,
+      "kind": "village"
+    },
+    {
+      "name": "Dahaneh-e Kavir",
+      "x": 11250.3,
+      "y": 2513.4,
+      "kind": "village"
+    },
+    {
+      "name": "Kariz-e Marz",
+      "x": 10795.3,
+      "y": 8575.9,
+      "kind": "village"
+    },
+    {
+      "name": "Manda Marz",
+      "x": 5368.2,
+      "y": 10614.8,
+      "kind": "village"
+    },
+    {
+      "name": "Bad Asyab",
+      "x": 8575.4,
+      "y": 11396.8,
+      "kind": "village"
+    },
+    {
+      "name": "Suvin Shahr",
+      "x": 5758.9,
+      "y": 12585.7,
+      "kind": "village"
+    },
+    {
+      "name": "Mian Dara",
+      "x": 8870.2,
+      "y": 12492.5,
+      "kind": "village"
+    },
+    {
+      "name": "Dara-e Nur",
+      "x": 10916.5,
+      "y": 13916,
+      "kind": "village"
+    },
+    {
+      "name": "Gul Dara",
+      "x": 7030,
+      "y": 4404.3,
+      "kind": "village"
+    },
+    {
+      "name": "Bagh-e Dara",
+      "x": 9449.9,
+      "y": 3243.4,
+      "kind": "village"
+    },
+    {
+      "name": "Salar Abad",
+      "x": 7923.4,
+      "y": 9610.7,
+      "kind": "village"
+    },
+    {
+      "name": "Tut Mian",
+      "x": 7915.4,
+      "y": 6770.7,
+      "kind": "village"
+    },
+    {
+      "name": "Bar Kalay",
+      "x": 7330.9,
+      "y": 13118.3,
+      "kind": "village"
+    },
+    {
+      "name": "Dost Kalay",
+      "x": 6698.1,
+      "y": 11375,
+      "kind": "village"
+    },
+    {
+      "name": "Shinkay Wadi",
+      "x": 7040.4,
+      "y": 12020.8,
+      "kind": "village"
+    },
+    {
+      "name": "Zir Dara",
+      "x": 10153.8,
+      "y": 12727.6,
+      "kind": "local"
+    },
+    {
+      "name": "Kotal-e Khushk",
+      "x": 4414.1,
+      "y": 14461.2,
+      "kind": "local"
+    },
+    {
+      "name": "Qalat-e Bala",
+      "x": 5460.3,
+      "y": 6111.6,
+      "kind": "ruin"
+    },
+    {
+      "name": "Didban Tapa",
+      "x": 8323.6,
+      "y": 7817,
+      "kind": "ruin"
+    },
+    {
+      "name": "Ak Hisar",
+      "x": 8795.9,
+      "y": 9934.6,
+      "kind": "ruin"
+    },
+    {
+      "name": "Khwakay",
+      "x": 5167.7,
+      "y": 7407.6,
+      "kind": "local"
+    },
+    {
+      "name": "Ghar-e Siyah",
+      "x": 3716.2,
+      "y": 7125.3,
+      "kind": "local"
+    },
+    {
+      "name": "Gharibabad",
+      "x": 12194.5,
+      "y": 2160.1,
+      "kind": "local"
+    },
+    {
+      "name": "Qalat-e Lut",
+      "x": 14848.8,
+      "y": 7812,
+      "kind": "ruin"
+    },
+    {
+      "name": "Didban Ghar",
+      "x": 3140.1,
+      "y": 5493.6,
+      "kind": "local"
+    },
+    {
+      "name": "Chashme No",
+      "x": 6903,
+      "y": 3699.8,
+      "kind": "local"
+    },
+    {
+      "name": "Sabz Juy",
+      "x": 9731.7,
+      "y": 11229.9,
+      "kind": "local"
+    },
+    {
+      "name": "Se Rah",
+      "x": 6269.7,
+      "y": 8199.1,
+      "kind": "local"
+    },
+    {
+      "name": "Dukan Kalay",
+      "x": 10149.7,
+      "y": 9263.4,
+      "kind": "local"
+    },
+    {
+      "name": "Wachakalay",
+      "x": 11219.1,
+      "y": 11753.9,
+      "kind": "local"
+    },
+    {
+      "name": "Wacha Wadi",
+      "x": 12399.2,
+      "y": 12679.6,
+      "kind": "local"
+    },
+    {
+      "name": "Sarkay",
+      "x": 2878.6,
+      "y": 5971.5,
+      "kind": "local"
+    },
+    {
+      "name": "Sard Sarhad",
+      "x": 2982.8,
+      "y": 15752.1,
+      "kind": "local"
+    },
+    {
+      "name": "Sadd-e Marek",
+      "x": 2912.8,
+      "y": 14767.5,
+      "kind": "marine"
+    },
+    {
+      "name": "Tak Tapa",
+      "x": 9282.4,
+      "y": 10167.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Spinkay Tapa",
+      "x": 5511.9,
+      "y": 9664.2,
+      "kind": "hill"
+    },
+    {
+      "name": "Zanu Ghar",
+      "x": 1296.2,
+      "y": 7096,
+      "kind": "hill"
+    },
+    {
+      "name": "Shana Kuh",
+      "x": 5440.2,
+      "y": 2048.6,
+      "kind": "hill"
+    },
+    {
+      "name": "Sar-e Band",
+      "x": 902.9,
+      "y": 597.1,
+      "kind": "hill"
+    },
+    {
+      "name": "Se Khah",
+      "x": 5440.4,
+      "y": 2046.9,
+      "kind": "hill"
+    },
+    {
+      "name": "Kuh-e Shamal",
+      "x": 8719.4,
+      "y": 15159.8,
+      "kind": "hill"
+    },
+    {
+      "name": "Sabz Tapa",
+      "x": 8300.2,
+      "y": 6702.6,
+      "kind": "hill"
+    },
+    {
+      "name": "Loy Tapa",
+      "x": 7016.5,
+      "y": 11796.2,
+      "kind": "hill"
+    },
+    {
+      "name": "Hamoon-e Sarman",
+      "x": 14376.6,
+      "y": 1956.8,
+      "kind": "marine"
+    },
+    {
+      "name": "Dashtabad Airbase",
+      "x": 11974.3,
+      "y": 10680.8,
+      "kind": "village"
+    },
+    {
+      "name": "Bala Hissar",
+      "x": 4760.3,
+      "y": 12014.5,
+      "kind": "ruin"
+    },
+    {
+      "name": "Nazar Gah",
+      "x": 4786.2,
+      "y": 5370.2,
+      "kind": "ruin"
+    },
+    {
+      "name": "Siyah Darya",
+      "x": 7137.9,
+      "y": 5429.2,
+      "kind": "marine"
+    },
+    {
+      "name": "Siyah Darya",
+      "x": 7862.8,
+      "y": 4883,
+      "kind": "marine"
+    },
+    {
+      "name": "Siyah Darya",
+      "x": 8860.3,
+      "y": 5199.5,
+      "kind": "marine"
+    },
+    {
+      "name": "Siyah Darya",
+      "x": 6177.4,
+      "y": 6011,
+      "kind": "marine"
+    },
+    {
+      "name": "Siyah Darya",
+      "x": 5526,
+      "y": 6456.5,
+      "kind": "marine"
+    },
+    {
+      "name": "Siyah Darya",
+      "x": 4526.6,
+      "y": 5262.2,
+      "kind": "marine"
+    },
+    {
+      "name": "Siyah Darya",
+      "x": 2956.2,
+      "y": 4786.6,
+      "kind": "marine"
+    },
+    {
+      "name": "Siyah Darya",
+      "x": 1400,
+      "y": 4479.4,
+      "kind": "marine"
+    },
+    {
+      "name": "Siyah Darya",
+      "x": 9566.6,
+      "y": 4747.8,
+      "kind": "marine"
+    },
+    {
+      "name": "Sefid Darya",
+      "x": 10327.3,
+      "y": 4838.1,
+      "kind": "marine"
+    },
+    {
+      "name": "Sefid Darya",
+      "x": 9776.7,
+      "y": 5925.1,
+      "kind": "marine"
+    },
+    {
+      "name": "Sefid Darya",
+      "x": 9348,
+      "y": 7222.7,
+      "kind": "marine"
+    },
+    {
+      "name": "Sefid Darya",
+      "x": 10196,
+      "y": 7610.6,
+      "kind": "marine"
+    },
+    {
+      "name": "Sefid Darya",
+      "x": 10369.5,
+      "y": 8829.7,
+      "kind": "marine"
+    },
+    {
+      "name": "Sefid Darya",
+      "x": 10626.3,
+      "y": 10126.6,
+      "kind": "marine"
+    },
+    {
+      "name": "Sefid Darya",
+      "x": 10234.8,
+      "y": 11550.3,
+      "kind": "marine"
+    },
+    {
+      "name": "Sefid Darya",
+      "x": 8908.5,
+      "y": 12349.6,
+      "kind": "marine"
+    },
+    {
+      "name": "Sefid-darya",
+      "x": 7570.7,
+      "y": 12343.1,
+      "kind": "marine"
+    },
+    {
+      "name": "Sefid Darya",
+      "x": 6387.1,
+      "y": 13123.2,
+      "kind": "marine"
+    },
+    {
+      "name": "Sefid Darya",
+      "x": 5608,
+      "y": 13434.7,
+      "kind": "marine"
+    },
+    {
+      "name": "Sefid Darya",
+      "x": 4362.4,
+      "y": 13614,
+      "kind": "marine"
+    },
+    {
+      "name": "Dahana",
+      "x": 10214.3,
+      "y": 11801.6,
+      "kind": "village"
+    },
+    {
+      "name": "Ardis Vostok Wreck",
+      "x": 13113,
+      "y": 2748.9,
+      "kind": "local"
+    },
+    {
+      "name": "Nasdara",
+      "x": 9631.9,
+      "y": 4075.3,
+      "kind": "capital"
+    },
+    {
+      "name": "Karkhana District",
+      "x": 9150.4,
+      "y": 4218.9,
+      "kind": "city"
+    },
+    {
+      "name": "Terminal Nas",
+      "x": 10921.3,
+      "y": 3809.6,
+      "kind": "city"
+    },
+    {
+      "name": "Ziarat District",
+      "x": 10132.9,
+      "y": 4163.2,
+      "kind": "city"
+    },
+    {
+      "name": "Jui Bar District",
+      "x": 9189.8,
+      "y": 4711.6,
+      "kind": "city"
+    },
+    {
+      "name": "Registan District",
+      "x": 10683.2,
+      "y": 4679.2,
+      "kind": "city"
+    },
+    {
+      "name": "Helios Solar I",
+      "x": 9550.8,
+      "y": 7243.1,
+      "kind": "local"
+    },
+    {
+      "name": "Helios Solar Ii",
+      "x": 10623.9,
+      "y": 7440,
+      "kind": "local"
+    },
+    {
+      "name": "Helios Solar Iii",
+      "x": 10827.9,
+      "y": 7315.8,
+      "kind": "local"
+    },
+    {
+      "name": "Helios Solar Iv",
+      "x": 11330.8,
+      "y": 4187.7,
+      "kind": "local"
+    },
+    {
+      "name": "Sarman-naft Refinery",
+      "x": 10766.7,
+      "y": 5926.9,
+      "kind": "village"
+    },
+    {
+      "name": "Nasdar-beton Factory",
+      "x": 9706.2,
+      "y": 6563.3,
+      "kind": "village"
+    },
+    {
+      "name": "Rig-e Siyah Terminal",
+      "x": 9917.2,
+      "y": 6082.8,
+      "kind": "local"
+    },
+    {
+      "name": "Nasdar-01 Well",
+      "x": 10041.2,
+      "y": 7259.7,
+      "kind": "local"
+    },
+    {
+      "name": "Deep-dasht 12 Well",
+      "x": 11670.1,
+      "y": 7352.9,
+      "kind": "local"
+    },
+    {
+      "name": "Damaged Oil Fields",
+      "x": 11895.3,
+      "y": 5833.6,
+      "kind": "local"
+    },
+    {
+      "name": "Sarman-naft Filtration Plant",
+      "x": 9084.2,
+      "y": 4480.1,
+      "kind": "local"
+    },
+    {
+      "name": "Nasdar-beton Factory",
+      "x": 8941.4,
+      "y": 3969.5,
+      "kind": "local"
+    },
+    {
+      "name": "Nasdar-beton Quarry",
+      "x": 6424.8,
+      "y": 7834.2,
+      "kind": "local"
+    },
+    {
+      "name": "Marek Barq Hydroelectric Plant",
+      "x": 3663.3,
+      "y": 14218.7,
+      "kind": "local"
+    },
+    {
+      "name": "Ma'bar Ardistan",
+      "x": 3307.1,
+      "y": 4540.6,
+      "kind": "local"
+    },
+    {
+      "name": "Cop Neptune",
+      "x": 12832,
+      "y": 6665.7,
+      "kind": "local"
+    },
+    {
+      "name": "Fob Atlas",
+      "x": 8366.8,
+      "y": 5728.7,
+      "kind": "local"
+    },
+    {
+      "name": "Cop Razorback",
+      "x": 4727.4,
+      "y": 7372.2,
+      "kind": "local"
+    },
+    {
+      "name": "Cop Kestrel",
+      "x": 4278.3,
+      "y": 12982,
+      "kind": "local"
+    },
+    {
+      "name": "Cop Condor",
+      "x": 7746.5,
+      "y": 11848.1,
+      "kind": "local"
+    },
+    {
+      "name": "Bad Asyab Wind Array",
+      "x": 8716.8,
+      "y": 10855.6,
+      "kind": "local"
+    },
+    {
+      "name": "Zun Dara",
+      "x": 4824,
+      "y": 4713.8,
+      "kind": "local"
+    },
+    {
+      "name": "Baza Zenit",
+      "x": 6312.8,
+      "y": 9966.6,
+      "kind": "local"
+    },
+    {
+      "name": "Nii-mirnyy",
+      "x": 6127.3,
+      "y": 9267.9,
+      "kind": "local"
+    },
+    {
+      "name": "Spets-stvol 754",
+      "x": 6616,
+      "y": 10351.3,
+      "kind": "local"
+    },
+    {
+      "name": "Proval-754",
+      "x": 7120.2,
+      "y": 10152.7,
+      "kind": "local"
+    },
+    {
+      "name": "Zulfiqar Missile Base",
+      "x": 2696.3,
+      "y": 9692.7,
+      "kind": "village"
+    },
+    {
+      "name": "Fateh Manzil",
+      "x": 7372.8,
+      "y": 7449.6,
+      "kind": "local"
+    },
+    {
+      "name": "Mel Benazir",
+      "x": 6338.5,
+      "y": 12704.8,
+      "kind": "local"
+    },
+    {
+      "name": "Bait Al-aman",
+      "x": 8586.9,
+      "y": 4783.4,
+      "kind": "local"
+    },
+    {
+      "name": "Deh-e Ramiro",
+      "x": 8668.1,
+      "y": 3750.2,
+      "kind": "local"
+    },
+    {
+      "name": "Nejcheh",
+      "x": 7073,
+      "y": 8150.5,
+      "kind": "local"
+    },
+    {
+      "name": "Chuuya Kalay",
+      "x": 9527.4,
+      "y": 9784.4,
+      "kind": "local"
+    },
+    {
+      "name": "Jakhzar",
+      "x": 14049.2,
+      "y": 13397.2,
+      "kind": "local"
+    },
+    {
+      "name": "Mik Dakharti",
+      "x": 7444.1,
+      "y": 8935.4,
+      "kind": "ruin"
+    },
+    {
+      "name": "M12 Bagh-e Mir",
+      "x": 5191.6,
+      "y": 5421.6,
+      "kind": "local"
+    },
+    {
+      "name": "M12 No Abad",
+      "x": 6902.8,
+      "y": 5067.7,
+      "kind": "local"
+    },
+    {
+      "name": "M12 Nasdara-west",
+      "x": 9149.1,
+      "y": 4110.8,
+      "kind": "local"
+    },
+    {
+      "name": "M12 Nasdara-east",
+      "x": 10829.3,
+      "y": 3215.2,
+      "kind": "local"
+    },
+    {
+      "name": "Fostkova Mehran Tunnel",
+      "x": 5425,
+      "y": 5606.2,
+      "kind": "local"
+    },
+    {
+      "name": "Varzaneh",
+      "x": 13397,
+      "y": 12115.8,
+      "kind": "village"
+    }
+  ]
+}

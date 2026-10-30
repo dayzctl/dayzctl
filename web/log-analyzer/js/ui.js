@@ -914,7 +914,12 @@ export function renderMapPanel(panel, report, state, relayout) {
   const inferred = mapMeta?.size ? mapMeta.size : autoWorld;
   const effectiveWorld = mapState.id === 'auto' ? inferred : (mapState.worldSize || presetWorld);
   const tiles = mapMeta?.tileUrl
-    ? { url: mapMeta.tileUrl, maxZoom: mapMeta.maxZoom || 7, names: mapMeta.names || [] }
+    ? {
+        url: mapMeta.tileUrl,
+        minZoom: mapMeta.minZoom || 1,
+        maxZoom: mapMeta.maxZoom || 7,
+        names: mapMeta.names || [],
+      }
     : null;
   const view = { ...mapState, worldSize: effectiveWorld, tiles };
   // The resize handler repaints with this exact view (world size and tiles are

@@ -31,7 +31,8 @@ instances:
     #
     # Community map used for satellite tiles and place names in the Map tab.
     # Defaults to the instance name, so an instance called "nasdara" needs no
-    # setting. Others: chernarusplus, livonia, sakhal, namalsk, deerisle, …
+    # setting. Only maps bundled with the binary are available; generate more
+    # with: go run ./tools/mapfetch -map chernarusplus -zooms 3,4
     # map: nasdara
     # Optional: scheduled restart warnings + graceful shutdown, written to
     # this instance's mission db/messages.xml. 'deadline' is expressed in
