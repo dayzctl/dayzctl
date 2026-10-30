@@ -469,7 +469,13 @@ func writeError(w http.ResponseWriter, status int, message string) {
 // noCacheHTML stops browsers from serving a stale index.html after an upgrade.
 func noCacheHTML(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		if strings.HasSuffix(r.URL.Path, "/") || strings.HasSuffix(r.URL.Path, ".html") {
+		// The UI files are embedded in the binary, so a new build must not be
+		// shadowed by a cached copy of the previous one.
+		switch {
+		case strings.HasSuffix(r.URL.Path, "/"),
+			strings.HasSuffix(r.URL.Path, ".html"),
+			strings.HasSuffix(r.URL.Path, ".js"),
+			strings.HasSuffix(r.URL.Path, ".css"):
 			w.Header().Set("Cache-Control", "no-cache")
 		}
 		next.ServeHTTP(w, r)
