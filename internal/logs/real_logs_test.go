@@ -222,6 +222,85 @@ func TestRealAdmPositions(t *testing.T) {
 	}
 }
 
+func TestMultiDayAdmFilesUseRealDates(t *testing.T) {
+	// Two rotated ADM files a day apart. Both start near 20:09, so a parser
+	// that compares time-of-day would interleave them and invent movement.
+	dir := t.TempDir()
+	profiles := filepath.Join(dir, "profiles", "srv")
+	if err := os.MkdirAll(profiles, 0o755); err != nil {
+		t.Fatalf("mkdir: %v", err)
+	}
+
+	day1 := `******************************************************************************
+AdminLog started on 2026-10-18 at 20:09:11
+20:09:20 | Player "Bob" (id=a pos=<1000.0, 1000.0, 200.0>) is connected
+20:10:00 | Player "Bob" (id=a pos=<1020.0, 1020.0, 200.0>) is connected
+20:10:30 | Player "Bob" (id=a) has been disconnected
+`
+	day2 := `******************************************************************************
+AdminLog started on 2026-10-19 at 20:09:11
+20:10:05 | Player "Bob" (id=a pos=<12000.0, 12000.0, 200.0>) is connected
+20:11:00 | Player "Bob" (id=a pos=<12010.0, 12010.0, 200.0>) is connected
+20:11:30 | Player "Bob" (id=a) has been disconnected
+`
+
+	if err := os.WriteFile(filepath.Join(profiles, "DayZServer_2026-10-18_20-09-11.ADM"), []byte(day1), 0o644); err != nil {
+		t.Fatalf("write day1: %v", err)
+	}
+	if err := os.WriteFile(filepath.Join(profiles, "DayZServer_2026-10-19_20-09-11.ADM"), []byte(day2), 0o644); err != nil {
+		t.Fatalf("write day2: %v", err)
+	}
+
+	svc := NewService(dir, DefaultOptions())
+	report, err := svc.Analyze("srv", nil)
+	if err != nil {
+		t.Fatalf("Analyze: %v", err)
+	}
+
+	adm := report.Adm
+	if adm == nil {
+		t.Fatal("expected an ADM report")
+	}
+
+	// The two files are ~24 h apart; a time-of-day timeline would report minutes.
+	if adm.Period.Seconds < 80000 {
+		t.Errorf("period = %.0fs, want ~86400s (files are a day apart)", adm.Period.Seconds)
+	}
+
+	// Nothing in this log is impossible movement, and the two sessions must stay
+	// separate rather than merging across the day boundary.
+	for _, s := range adm.Suspicious {
+		if s.Type == "teleport" {
+			t.Errorf("multi-day files produced a false movement flag: %s (%s)", s.Player, s.Detail)
+		}
+	}
+	if len(adm.Players) != 1 {
+		t.Fatalf("players = %d, want 1", len(adm.Players))
+	}
+	if got := len(adm.Players[0].Sessions); got != 2 {
+		t.Errorf("sessions = %d, want 2", got)
+	}
+}
+
+func TestAdmReportBounds(t *testing.T) {
+	svc := NewService(realFixture(t), DefaultOptions())
+	report, err := svc.Analyze("real", nil)
+	if err != nil {
+		t.Fatalf("Analyze: %v", err)
+	}
+
+	bounds := report.Adm.Bounds
+	if bounds == nil {
+		t.Fatal("expected position bounds so the map can scale itself")
+	}
+	if bounds.MaxX <= 0 || bounds.MaxY <= 0 {
+		t.Errorf("bounds = %+v, want positive extents", *bounds)
+	}
+	if bounds.MaxX > maxCoord || bounds.MaxY > maxCoord {
+		t.Errorf("bounds = %+v, want within map limits", *bounds)
+	}
+}
+
 func TestRealRptSeverityAndGrouping(t *testing.T) {
 	parser := NewRptParser()
 	for _, line := range []string{

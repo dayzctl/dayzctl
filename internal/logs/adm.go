@@ -4,6 +4,7 @@ import (
 	"regexp"
 	"strconv"
 	"strings"
+	"time"
 )
 
 // Event is one recognised ADM line.
@@ -58,20 +59,21 @@ var (
 	reChat4 = regexp.MustCompile(`(?i)^\[Chat\]\s*"?([^":]+)"?\s*:\s*(.*)$`)
 	reChat5 = regexp.MustCompile(`(?i)^\(Direct\)\s*"([^"]+)":\s*(.*)$`)
 
-	reKicked  = regexp.MustCompile(`(?i)^Player "([^"]+)"[^"]*(?:has been|was)\s+kicked\b(.*)$`)
-	reBanned  = regexp.MustCompile(`(?i)^Player "([^"]+)"[^"]*(?:has been|was)\s+banned\b(.*)$`)
-	reKill    = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s+killed by Player "([^"]+)"(.*)$`)
-	reKillAny = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s+killed by (.+)$`)
-	reSuicide = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s+(?:committed suicide|bled out|\bdied\b)`)
-	reHit     = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + hpTag + `\s+hit by Player "([^"]+)"(.*)$`)
-	reHitAny  = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + hpTag + `\s+hit by (.+)$`)
-	reBuilt   = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s+built\s+(.+)$`)
-	rePlaced  = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s+(?:placed|deployed|constructed|packed)\s+(.+)$`)
-	reConnect = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s+(?:is\s+)?connected\b(.*)$`)
-	reDisc    = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s+(?:has been\s+|has\s+)?disconnected\b(.*)$`)
-	reAdmin   = regexp.MustCompile(`(?i)^(?:Admin|\[Admin\])\s+([^:]+):\s*(.*)$`)
-	reDead    = regexp.MustCompile(`(?i)^Player "([^"]+)"\s+\(DEAD\)`)
-	rePlayer  = regexp.MustCompile(`(?i)^Player "([^"]+)"`)
+	reKicked        = regexp.MustCompile(`(?i)^Player "([^"]+)"[^"]*(?:has been|was)\s+kicked\b(.*)$`)
+	reBanned        = regexp.MustCompile(`(?i)^Player "([^"]+)"[^"]*(?:has been|was)\s+banned\b(.*)$`)
+	reKill          = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s+killed by Player "([^"]+)"(.*)$`)
+	reKillAny       = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s+killed by (.+)$`)
+	reSuicide       = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s+(?:committed suicide|bled out|\bdied\b)`)
+	reHit           = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + hpTag + `\s+hit by Player "([^"]+)"(.*)$`)
+	reHitAny        = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + hpTag + `\s+hit by (.+)$`)
+	reBuilt         = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s+built\s+(.+)$`)
+	rePlaced        = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s+(?:placed|deployed|constructed|packed)\s+(.+)$`)
+	reConnect       = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s+(?:is\s+)?connected\b(.*)$`)
+	reDisc          = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s+(?:has been\s+|has\s+)?disconnected\b(.*)$`)
+	reAdmin         = regexp.MustCompile(`(?i)^(?:Admin|\[Admin\])\s+([^:]+):\s*(.*)$`)
+	reDead          = regexp.MustCompile(`(?i)^Player "([^"]+)"\s+\(DEAD\)`)
+	rePlayer        = regexp.MustCompile(`(?i)^Player "([^"]+)"`)
+	reAdminLogStart = regexp.MustCompile(`(?i)AdminLog\s+started\s+on\s+(\d{4}-\d{2}-\d{2})`)
 )
 
 // PlayerKey normalises a player name for merging ("Bob" == "bob").
@@ -312,7 +314,16 @@ func (p *AdmParser) Feed(line string) {
 		return
 	}
 	// Banner and file header lines carry no events.
-	if strings.HasPrefix(trimmed, "****") || strings.HasPrefix(trimmed, "AdminLog started") {
+	if strings.HasPrefix(trimmed, "****") {
+		return
+	}
+	// "AdminLog started on 2026-10-26 at 01:20:56" anchors every timestamp in
+	// this file to a real day, which is what makes multi-day ADM files
+	// comparable instead of colliding on time of day.
+	if m := reAdminLogStart.FindStringSubmatch(trimmed); m != nil {
+		if day, err := time.Parse("2006-01-02", m[1]); err == nil {
+			p.clock.SetBase(day)
+		}
 		return
 	}
 
@@ -375,6 +386,13 @@ func (p *AdmParser) Feed(line string) {
 	}
 
 	p.Events = append(p.Events, event)
+}
+
+// SetBaseDate anchors all timestamps of this parser to a calendar day. The
+// service calls it per file, using the date in the file name or header.
+func (p *AdmParser) SetBaseDate(day time.Time) {
+	p.clock.SetBase(day)
+	p.HasDate = true
 }
 
 // Tods returns the observed time-of-day range.

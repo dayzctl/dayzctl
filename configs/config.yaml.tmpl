@@ -22,6 +22,12 @@ instances:
       password: rcon123
     mods: []
     servermods: []
+    # Optional: background image for the log analyzer's Map tab. Relative paths
+    # are resolved against paths.install_dir; absolute paths and http(s) URLs
+    # work too. When unset, dayzctl looks for map.jpg / map.png / <name>.png in
+    # the instance's profiles folder, then <install_dir>/maps, then install_dir.
+    # map_image: "maps/chernarus.jpg"
+    # map_image: "https://example.com/nasdara-map.jpg"
     # Optional: scheduled restart warnings + graceful shutdown, written to
     # this instance's mission db/messages.xml. 'deadline' is expressed in
     # minutes after server start. The generator converts minutes to seconds

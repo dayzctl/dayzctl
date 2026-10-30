@@ -126,6 +126,10 @@ type Instance struct {
 	Mods             []ModRef          `yaml:"mods"`
 	ServerMods       []ModRef          `yaml:"servermods"`
 	ShutdownMessages []ShutdownMessage `yaml:"shutdown_messages"`
+	// MapImage is an optional background image for the log analyzer's map.
+	// Relative paths are resolved against the install directory. When empty,
+	// map.jpg / map.png is picked up from the profiles or install folder.
+	MapImage string `yaml:"map_image,omitempty"`
 }
 
 // ModRef represents a mod reference in the config

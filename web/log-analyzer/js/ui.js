@@ -5,7 +5,7 @@
 
 import { fmtInt, fmtDuration, fmtTime, fmtClock, fmtDistance, fmtBytes, truncate, colorFor } from './format.js';
 import { SEVERITY, SEVERITY_LABEL, SEVERITY_ORDER } from './severity.js';
-import { MAPS, renderMap } from './mapview.js';
+import { MAPS, renderMap, inferWorldSize } from './mapview.js';
 
 /** Kill count per weapon, used by the overview card. */
 function topWeapons(kills, limit = 8) {
@@ -884,31 +884,66 @@ export function renderMapPanel(panel, report, state, relayout) {
     return;
   }
 
+  // "Auto" derives the world size from the analysed positions, so maps we
+  // have no preset for (Nasdara, custom terrains) still scale correctly.
+  const autoWorld = inferWorldSize(adm.bounds);
   const mapState = state.map;
+  const preset = MAPS.find((m) => m.id === mapState.id) ?? MAPS[0];
+  const presetWorld = preset.worldSize > 0 ? preset.worldSize : autoWorld;
+  const effectiveWorld = mapState.id === 'auto' ? autoWorld : (mapState.worldSize || presetWorld);
+  const view = { ...mapState, worldSize: effectiveWorld };
 
   const mapSelect = el(
     'select',
     {
       onChange: (e) => {
-        const map = MAPS.find((m) => m.id === e.target.value);
+        const map = MAPS.find((m) => m.id === e.target.value) ?? MAPS[0];
         mapState.id = map.id;
-        mapState.worldSize = map.worldSize;
-        state.actions.setState({ json: { map: { ...mapState } } });
+        mapState.worldSize = map.id === 'auto' ? autoWorld : (map.worldSize > 0 ? map.worldSize : autoWorld);
+        state.actions.setState({});
       },
     },
-    ...MAPS.map((m) => el('option', { value: m.id, text: `${m.label} (${m.worldSize} m)`, selected: m.id === mapState.id })),
+    ...MAPS.map((m) =>
+      el('option', {
+        value: m.id,
+        text: m.worldSize > 0
+          ? `${m.label} (${fmtInt(m.worldSize)} m)`
+          : m.id === 'auto'
+            ? `${m.label}${adm.bounds ? ` — ${fmtInt(autoWorld)} m` : ' — no positions yet'}`
+            : `${m.label} (size from log) — ${fmtInt(autoWorld)} m`,
+        selected: m.id === mapState.id,
+      }),
+    ),
   );
 
   const worldInput = el('input', {
     type: 'number',
     min: '1000',
     step: '100',
-    value: String(mapState.worldSize),
+    value: String(effectiveWorld),
     onChange: (e) => {
+      mapState.id = 'custom';
       mapState.worldSize = Math.max(1000, Number(e.target.value) || 15360);
-      state.actions.setState({ json: { map: { ...mapState } } });
+      state.actions.setState({});
     },
   });
+
+  // A map image served for this instance is used automatically; the file picker
+  // below is only an override for this browser session.
+  const imageUrl = state.mapImageUrl || '';
+  if (imageUrl && !mapState.background && !mapState.imageFailed && mapState.imageUrl !== imageUrl) {
+    mapState.imageUrl = imageUrl;
+    const img = new Image();
+    img.onload = () => {
+      mapState.background = img;
+      mapState.backgroundSource = 'server';
+      state.actions.setState({});
+    };
+    img.onerror = () => {
+      mapState.imageFailed = true;
+    };
+    img.src = imageUrl;
+  }
 
   const bgInput = el('input', {
     type: 'file',
@@ -919,7 +954,9 @@ export function renderMapPanel(panel, report, state, relayout) {
       const img = new Image();
       img.onload = () => {
         mapState.background = img;
-        state.actions.setState({ json: { map: { ...mapState } } });
+        mapState.backgroundSource = file.name;
+        mapState.imageFailed = false;
+        state.actions.setState({});
       };
       img.src = URL.createObjectURL(file);
     },
@@ -988,7 +1025,9 @@ export function renderMapPanel(panel, report, state, relayout) {
       ),
       el('p', {
         class: 'small faint',
-        text: 'No map imagery is bundled or downloaded. Load your own map image to place the points on terrain. Coordinates are DayZ world metres: x = east, y = north, z = altitude.',
+        text: mapState.background
+          ? `Background: ${mapState.backgroundSource === 'server' ? 'served by dayzctl for this instance' : mapState.backgroundSource || 'loaded image'}. Coordinates are DayZ world metres: x = east, y = north, z = altitude.`
+          : 'Put map.jpg (or map.png) in the instance\u2019s profiles folder, or set instances[].map_image, and it is drawn automatically. Coordinates are DayZ world metres: x = east, y = north, z = altitude.',
       }),
     ),
   );
@@ -996,10 +1035,10 @@ export function renderMapPanel(panel, report, state, relayout) {
   // The canvas is already in the document, so it can be painted immediately.
   // Do not rely on requestAnimationFrame: browsers pause it in background tabs,
   // which would leave the map blank until the next resize.
-  renderMap(canvas, report, mapState);
+  renderMap(canvas, report, view);
   relayout?.();
   setTimeout(() => {
-    if (canvas.isConnected) renderMap(canvas, report, mapState);
+    if (canvas.isConnected) renderMap(canvas, report, view);
   }, 60);
 }
 

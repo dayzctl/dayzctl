@@ -61,10 +61,14 @@ const state = {
   killQuery: '',
   killsSort: 'time',
   suspiciousFilter: 'all',
+  mapImageUrl: '',
   map: {
-    id: 'chernarus',
-    worldSize: 15360,
+    id: 'auto',
+    worldSize: 0,
     background: null,
+    backgroundSource: null,
+    imageUrl: '',
+    imageFailed: false,
     selectedPlayer: null,
     layers: { kills: true, trails: false, builds: true, heat: false, connects: false, jumps: true },
   },
@@ -174,6 +178,15 @@ async function openInstance(inst) {
   state.files = [];
   state.selected = new Set();
 
+  // A map image served for this instance is picked up by the map tab.
+  state.mapImageUrl = inst.mapImage || '';
+  state.map.imageUrl = '';
+  state.map.imageFailed = false;
+  if (state.map.backgroundSource === 'server') {
+    state.map.background = null;
+    state.map.backgroundSource = null;
+  }
+
   dom.connect.hidden = true;
   dom.results.hidden = true;
   dom.files.hidden = false;
@@ -268,6 +281,7 @@ dom.newAnalysis.addEventListener('click', showInstances);
 function showInstances() {
   state.report = null;
   state.instance = null;
+  state.mapImageUrl = '';
   dom.results.hidden = true;
   dom.files.hidden = true;
   dom.connect.hidden = false;

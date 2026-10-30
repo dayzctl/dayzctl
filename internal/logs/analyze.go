@@ -1,9 +1,15 @@
 package logs
 
 import (
+	"regexp"
 	"sort"
 	"time"
 )
+
+// steamID64 matches a real 64-bit Steam account id. The `id=` field in a DayZ
+// ADM is a per-session token in current builds, so only SteamIDs are stable
+// enough to compare across sessions.
+var steamID64 = regexp.MustCompile(`^7656119\d{10}$`)
 
 // Options tunes the heuristics that flag suspicious activity.
 type Options struct {
@@ -153,6 +159,15 @@ type Period struct {
 	HasDate       bool     `json:"hasDate"`
 }
 
+// Bounds is the extent of all recorded positions. It lets the map scale itself
+// for custom maps whose world size we do not know in advance.
+type Bounds struct {
+	MinX float64 `json:"minX"`
+	MaxX float64 `json:"maxX"`
+	MinY float64 `json:"minY"`
+	MaxY float64 `json:"maxY"`
+}
+
 // Totals are the overview counters.
 type Totals struct {
 	Players    int `json:"players"`
@@ -179,6 +194,7 @@ type AdmReport struct {
 	PeakOnline int         `json:"peakOnline"`
 	PeakTod    *float64    `json:"peakTod"`
 	Totals     Totals      `json:"totals"`
+	Bounds     *Bounds     `json:"bounds,omitempty"`
 }
 
 type playerState struct {
@@ -279,15 +295,10 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 	for i := range ordered {
 		ordered[i] = i
 	}
+	// Order by absolute time. Events carry a day-anchored timestamp, so files
+	// from different days interleave correctly instead of by time of day.
 	sort.SliceStable(ordered, func(a, b int) bool {
-		at, bt := events[ordered[a]].Tod, events[ordered[b]].Tod
-		if at == nil {
-			return false
-		}
-		if bt == nil {
-			return true
-		}
-		return *at < *bt
+		return events[ordered[a]].T < events[ordered[b]].T
 	})
 
 	players := make(map[string]*playerState)
@@ -298,7 +309,7 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 	var suspicious []Suspicion
 	idOwners := make(map[string]string)
 
-	var minTod, maxTod float64
+	var minT, maxT float64
 	hasTime := false
 	online, peakOnline := 0, 0
 	var peakTod *float64
@@ -317,45 +328,50 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 		return p
 	}
 
-	noteTod := func(at *float64) {
-		if at == nil {
-			return
-		}
+	noteTime := func(t float64) {
 		if !hasTime {
-			minTod, maxTod = *at, *at
+			minT, maxT = t, t
 			hasTime = true
 			return
 		}
-		if *at < minTod {
-			minTod = *at
+		if t < minT {
+			minT = t
 		}
-		if *at > maxTod {
-			maxTod = *at
+		if t > maxT {
+			maxT = t
 		}
 	}
 
 	for _, idx := range ordered {
 		e := events[idx]
-		at := e.Tod
-		noteTod(at)
+		// `Tod` is only present when the line had a timestamp; `T` is always
+		// usable (continuation lines inherit the previous line's time).
+		if e.Tod != nil {
+			noteTime(e.T)
+		}
+		at := &e.T
 
 		if e.ID != "" && e.PlayerKey != "" {
-			if owner, ok := idOwners[e.ID]; ok && owner != e.PlayerKey {
-				p := getPlayer(e.PlayerKey, e.Player)
-				p.suspicion++
-				ownerName := owner
-				if o, ok := players[owner]; ok {
-					ownerName = o.name
+			// Only a real SteamID identifies a person across sessions; the
+			// `id=` token is expected to change on every join.
+			if steamID64.MatchString(e.ID) {
+				if owner, ok := idOwners[e.ID]; ok && owner != e.PlayerKey {
+					p := getPlayer(e.PlayerKey, e.Player)
+					p.suspicion++
+					ownerName := owner
+					if o, ok := players[owner]; ok {
+						ownerName = o.name
+					}
+					suspicious = append(suspicious, Suspicion{
+						Type:      "shared-id",
+						At:        at,
+						Player:    e.Player,
+						PlayerKey: e.PlayerKey,
+						Detail:    "The same SteamID " + e.ID + ` is also used by "` + ownerName + `"`,
+					})
+				} else {
+					idOwners[e.ID] = e.PlayerKey
 				}
-				suspicious = append(suspicious, Suspicion{
-					Type:      "shared-id",
-					At:        at,
-					Player:    e.Player,
-					PlayerKey: e.PlayerKey,
-					Detail:    "Same player id " + e.ID + ` also used by "` + ownerName + `"`,
-				})
-			} else {
-				idOwners[e.ID] = e.PlayerKey
 			}
 			getPlayer(e.PlayerKey, e.Player).ids[e.ID] = struct{}{}
 		}
@@ -616,14 +632,10 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 		}
 	}
 
-	spansMidnight := hasTime && maxTod < minTod
+	spansMidnight := false
 	periodSeconds := 0.0
-	if hasTime {
-		if spansMidnight {
-			periodSeconds = 86400 - minTod + maxTod
-		} else {
-			periodSeconds = maxTod - minTod
-		}
+	if hasTime && maxT > minT {
+		periodSeconds = maxT - minT
 	}
 
 	// A (DEAD) marker with no cause line still means a death happened.
@@ -651,7 +663,7 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 			if s.End != nil {
 				end = s.End
 			} else if hasTime {
-				end = &maxTod
+				end = &maxT
 			}
 			dur := *end - *s.Start
 			if dur > 0 {
@@ -771,6 +783,28 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 		return list[i].Kills > list[j].Kills
 	})
 
+	var bounds *Bounds
+	for i := range list {
+		for _, sample := range list[i].Positions {
+			if bounds == nil {
+				bounds = &Bounds{MinX: sample.X, MaxX: sample.X, MinY: sample.Y, MaxY: sample.Y}
+				continue
+			}
+			if sample.X < bounds.MinX {
+				bounds.MinX = sample.X
+			}
+			if sample.X > bounds.MaxX {
+				bounds.MaxX = sample.X
+			}
+			if sample.Y < bounds.MinY {
+				bounds.MinY = sample.Y
+			}
+			if sample.Y > bounds.MaxY {
+				bounds.MaxY = sample.Y
+			}
+		}
+	}
+
 	totals.Players = len(list)
 	totals.Kills = len(kills)
 	totals.PvPKills = pvpKills
@@ -790,14 +824,15 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 		Suspicious: nonNilSuspicion(suspicious),
 		Period: Period{
 			HasTime:       hasTime,
-			From:          optionalFloat(hasTime, minTod),
-			To:            optionalFloat(hasTime, maxTod),
+			From:          optionalFloat(hasTime, minT),
+			To:            optionalFloat(hasTime, maxT),
 			Seconds:       periodSeconds,
 			SpansMidnight: spansMidnight,
 		},
 		PeakOnline: peakOnline,
 		PeakTod:    peakTod,
 		Totals:     totals,
+		Bounds:     bounds,
 	}
 }
 

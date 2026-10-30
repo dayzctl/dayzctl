@@ -7,11 +7,16 @@ package webapp
 
 import (
 	"compress/gzip"
+	"context"
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"net/http"
+	"net/url"
+	"os"
+	"path/filepath"
 	"strings"
 	"time"
 
@@ -44,6 +49,7 @@ func New(cfg *config.ServerConfig) (*Server, error) {
 	mux.HandleFunc("GET /api/health", s.handleHealth)
 	mux.HandleFunc("GET /api/instances", s.handleInstances)
 	mux.HandleFunc("GET /api/instances/{instance}/logs", s.handleLogs)
+	mux.HandleFunc("GET /api/instances/{instance}/map-image", s.handleMapImage)
 	mux.HandleFunc("POST /api/instances/{instance}/analyze", s.handleAnalyze)
 
 	ui, err := fs.Sub(webassets.Assets, "log-analyzer")
@@ -89,6 +95,7 @@ type instanceView struct {
 	ProfilesDir string     `json:"profilesDir"`
 	LogFiles    int        `json:"logFiles"`
 	Latest      *time.Time `json:"latest,omitempty"`
+	MapImage    string     `json:"mapImage,omitempty"`
 	Error       string     `json:"error,omitempty"`
 }
 
@@ -110,6 +117,9 @@ func (s *Server) handleInstances(w http.ResponseWriter, r *http.Request) {
 			}
 		} else {
 			view.Error = err.Error()
+		}
+		if s.mapImageAvailable(inst) {
+			view.MapImage = "/api/instances/" + url.PathEscape(inst.Name) + "/map-image"
 		}
 		views = append(views, view)
 	}
@@ -174,12 +184,140 @@ func (s *Server) handleAnalyze(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) instanceExists(name string) bool {
+	return s.findInstance(name) != nil
+}
+
+func (s *Server) findInstance(name string) *config.Instance {
 	for i := range s.cfg.Instances {
 		if s.cfg.Instances[i].Name == name {
-			return true
+			return &s.cfg.Instances[i]
 		}
 	}
-	return false
+	return nil
+}
+
+// mapImageStems lists the file names an admin may use for a map background,
+// e.g. map.png, nasdara.png, nasdara-map.png, map_nasdara.png.
+var mapImageStems = []string{"map", "%s", "%s-map", "map_%s"}
+var mapImageExts = []string{".jpg", ".jpeg", ".png", ".webp"}
+
+// mapImagePath resolves the background image for an instance.
+func (s *Server) mapImagePath(inst *config.Instance) (string, bool) {
+	install := s.cfg.GetInstallDir()
+
+	if inst.MapImage != "" {
+		p := inst.MapImage
+		if !filepath.IsAbs(p) {
+			p = filepath.Join(install, p)
+		}
+		if isRegularFile(p) {
+			return p, true
+		}
+	}
+
+	dirs := []string{
+		s.service.ProfilesDir(inst.Name),
+		filepath.Join(install, "maps"),
+		install,
+	}
+
+	for _, dir := range dirs {
+		for _, stemPattern := range mapImageStems {
+			stem := stemPattern
+			if strings.Contains(stemPattern, "%s") {
+				stem = fmt.Sprintf(stemPattern, inst.Name)
+			}
+			for _, ext := range mapImageExts {
+				if p := filepath.Join(dir, stem+ext); isRegularFile(p) {
+					return p, true
+				}
+			}
+		}
+	}
+	return "", false
+}
+
+func isRegularFile(path string) bool {
+	info, err := os.Stat(path)
+	return err == nil && info.Mode().IsRegular()
+}
+
+// remoteMapImage reports whether instances[].map_image points at an http(s)
+// URL, which the server proxies so the browser keeps a single endpoint and
+// never has to reach a third party itself.
+func remoteMapImage(inst *config.Instance) (string, bool) {
+	raw := strings.TrimSpace(inst.MapImage)
+	u, err := url.Parse(raw)
+	if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
+		return "", false
+	}
+	return u.String(), true
+}
+
+func (s *Server) mapImageAvailable(inst *config.Instance) bool {
+	if _, ok := remoteMapImage(inst); ok {
+		return true
+	}
+	_, ok := s.mapImagePath(inst)
+	return ok
+}
+
+func (s *Server) handleMapImage(w http.ResponseWriter, r *http.Request) {
+	inst := s.findInstance(r.PathValue("instance"))
+	if inst == nil {
+		writeError(w, http.StatusNotFound, "instance not found: "+r.PathValue("instance"))
+		return
+	}
+
+	if src, ok := remoteMapImage(inst); ok {
+		s.proxyMapImage(w, r, src)
+		return
+	}
+
+	path, ok := s.mapImagePath(inst)
+	if !ok {
+		writeError(w, http.StatusNotFound, "no map image for instance "+inst.Name+
+			"; put map.jpg in the profiles folder or set instances[].map_image")
+		return
+	}
+
+	// The image is admin-provided and may be replaced at any time.
+	w.Header().Set("Cache-Control", "no-cache")
+	http.ServeFile(w, r, path)
+}
+
+// proxyMapImage streams a remote map image through the service.
+func (s *Server) proxyMapImage(w http.ResponseWriter, r *http.Request, src string) {
+	ctx, cancel := context.WithTimeout(r.Context(), 15*time.Second)
+	defer cancel()
+
+	req, err := http.NewRequestWithContext(ctx, http.MethodGet, src, nil)
+	if err != nil {
+		writeError(w, http.StatusBadGateway, "bad map_image URL: "+err.Error())
+		return
+	}
+	resp, err := http.DefaultClient.Do(req)
+	if err != nil {
+		writeError(w, http.StatusBadGateway, "cannot fetch map_image: "+err.Error())
+		return
+	}
+	defer resp.Body.Close()
+
+	if resp.StatusCode != http.StatusOK {
+		writeError(w, http.StatusBadGateway, fmt.Sprintf("map_image returned HTTP %d", resp.StatusCode))
+		return
+	}
+
+	contentType := resp.Header.Get("Content-Type")
+	if !strings.HasPrefix(contentType, "image/") {
+		contentType = "image/jpeg"
+	}
+	w.Header().Set("Content-Type", contentType)
+	w.Header().Set("Cache-Control", "max-age=300")
+
+	if _, err := io.Copy(w, io.LimitReader(resp.Body, 64<<20)); err != nil {
+		logger.Debug("Map image proxy stopped early", "instance", r.PathValue("instance"), "error", err)
+	}
 }
 
 // ---------------------------------------------------------------------------

@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
 	"sort"
 	"strings"
 	"sync"
@@ -270,6 +271,11 @@ func (s *Service) analyze(instance string, files []resolvedFile) (*Report, error
 		switch detected {
 		case FileADM:
 			report.Stats.AdmFiles++
+			// Anchor this file to its own day, so a profiles folder holding
+			// several rotated logs merges on a real timeline.
+			if day, ok := baseDateFor(file.name, head); ok {
+				adm.SetBaseDate(day)
+			}
 			before := adm.LineCount
 			for _, line := range head {
 				adm.Feed(line)
@@ -322,6 +328,28 @@ func (s *Service) analyze(instance string, files []resolvedFile) (*Report, error
 	}
 
 	return report, nil
+}
+
+// reDateInName finds the YYYY-MM-DD stamp DayZ puts in log file names, e.g.
+// DayZServer_2026-10-26_01-20-56.ADM.
+var reDateInName = regexp.MustCompile(`(\d{4})-(\d{2})-(\d{2})`)
+
+// baseDateFor works out which calendar day a log file belongs to, from its
+// name or its "AdminLog started on …" header.
+func baseDateFor(name string, head []string) (time.Time, bool) {
+	if m := reDateInName.FindStringSubmatch(name); m != nil {
+		if day, err := time.Parse("2006-01-02", m[1]+"-"+m[2]+"-"+m[3]); err == nil {
+			return day, true
+		}
+	}
+	for _, line := range head {
+		if m := reAdminLogStart.FindStringSubmatch(line); m != nil {
+			if day, err := time.Parse("2006-01-02", m[1]); err == nil {
+				return day, true
+			}
+		}
+	}
+	return time.Time{}, false
 }
 
 // InvalidateCache drops cached reports, e.g. after a log rotation.

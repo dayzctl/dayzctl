@@ -73,6 +73,14 @@ type Clock struct {
 	started   bool
 }
 
+// SetBase anchors the clock to a calendar day, e.g. taken from the
+// "AdminLog started on …" header or the file name.
+func (c *Clock) SetBase(day time.Time) {
+	c.dayOffset = float64(ordinal(day)) * 86400
+	c.lastSecs = -1
+	c.started = true
+}
+
 // Stamp converts a time of day (and optional date) into absolute seconds on
 // this log's own timeline.
 func (c *Clock) Stamp(secs float64, day *time.Time) float64 {

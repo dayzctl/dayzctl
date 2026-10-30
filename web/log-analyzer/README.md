@@ -60,6 +60,7 @@ terminate TLS and auth in nginx/Caddy before binding to a public interface.
 | `GET` | `/api/health` | service status, version, instance count |
 | `GET` | `/api/instances` | configured instances with log counts and latest mtime |
 | `GET` | `/api/instances/{instance}/logs` | log files in that instance's profiles folder |
+| `GET` | `/api/instances/{instance}/map-image` | the instance's map background, if one is configured (404 otherwise) |
 | `POST` | `/api/instances/{instance}/analyze` | full report; body `{"files": [...]}`, omit to analyse all |
 
 Errors are JSON: `{"error": "..."}` with 404 (unknown instance), 422 (nothing to
@@ -86,11 +87,30 @@ of the instance's profiles folder.
 ## Coordinates
 
 DayZ writes `pos=<x, y, z>` as **east, north, altitude**. The map plots `x`
-horizontally and `y` vertically, scaled by the map's world size (15 360 m for
-Chernarus and Livonia, 12 800 m for Sakhal and Namalsk, editable).
+horizontally and `y` vertically, scaled by the map's world size.
 
-No map imagery is bundled — DayZ map artwork is copyrighted. Load your own image
-and the points are drawn on top of it.
+The **Map** selector defaults to *Auto (from log positions)*: the canvas scales
+to the extent actually present in the ADM file, rounded up to whole kilometres,
+so maps without a preset (Nasdara, Deer Isle, custom terrains) still plot
+correctly. Presets for Chernarus/Livonia (15 360 m), Sakhal/Namalsk
+(12 800 m) and Nasdara (15 360 m) are one click away, and *Custom* lets you type
+any world size.
+
+### Map imagery
+
+No map artwork is bundled — DayZ map images are copyrighted. dayzctl serves a
+background from the first file it finds:
+
+1. `instances[].map_image` in the config (relative to `paths.install_dir`, an
+   absolute path, or an `http(s)://` URL that the service proxies),
+2. `<profiles>/map.jpg|png|webp`, `map_<instance>.*`, `<instance>.*`,
+   `<instance>-map.*`,
+3. `<install_dir>/maps/<same names>`,
+4. `<install_dir>/<same names>`.
+
+So `cp nasdara.png /srv/dayz/server/profiles/nasdara/map.png` is enough; the Map
+tab picks it up on the next analysis. Without an image the tab draws a
+kilometre grid, which is still accurate for positions.
 
 ## Suspicious activity is a hint, not proof
 
