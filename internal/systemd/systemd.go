@@ -30,6 +30,9 @@ var pruneTimerTemplate string
 //go:embed templates/instance.service.tmpl
 var instanceServiceTemplate string
 
+//go:embed templates/dayz-web.service.tmpl
+var webServiceTemplate string
+
 type Systemd struct{}
 
 func New() *Systemd {
@@ -185,7 +188,61 @@ func (s *Systemd) GenerateUnits(cfg *config.ServerConfig) error {
 		}
 	}
 
+	if cfg.Web.Enabled {
+		if err := s.writeWebUnit(cfg); err != nil {
+			return err
+		}
+	}
+
 	return nil
+}
+
+// WebData is the template input for dayz-web.service.
+type WebData struct {
+	BinaryPath string
+	Address    string
+	Port       int
+	WorkingDir string
+}
+
+// writeWebUnit writes dayz-web.service when the web UI is enabled.
+func (s *Systemd) writeWebUnit(cfg *config.ServerConfig) error {
+	binaryPath, err := os.Executable()
+	if err != nil {
+		binaryPath = "dayzctl"
+	} else if resolved, evalErr := filepath.EvalSymlinks(binaryPath); evalErr == nil {
+		binaryPath = resolved
+	}
+
+	content, err := renderWebUnit(WebData{
+		BinaryPath: binaryPath,
+		Address:    cfg.Web.Address,
+		Port:       cfg.Web.Port,
+		WorkingDir: cfg.GetBaseDir(),
+	})
+	if err != nil {
+		return err
+	}
+
+	path := "/etc/systemd/system/dayz-web.service"
+	if err := os.WriteFile(path, content, 0644); err != nil {
+		return fmt.Errorf("failed to write dayz-web.service: %w", err)
+	}
+	logger.Debug("Wrote web unit", "path", path, "address", cfg.Web.Address, "port", cfg.Web.Port)
+	return nil
+}
+
+// renderWebUnit renders the dayz-web.service template.
+func renderWebUnit(data WebData) ([]byte, error) {
+	tmpl, err := template.New("web").Parse(webServiceTemplate)
+	if err != nil {
+		return nil, fmt.Errorf("parse dayz-web.service template: %w", err)
+	}
+	var buf bytes.Buffer
+	if err := tmpl.Execute(&buf, data); err != nil {
+		return nil, fmt.Errorf("render dayz-web.service: %w", err)
+	}
+	return buf.Bytes(), nil
 }
 
 func (s *Systemd) run(action, unit string) error {

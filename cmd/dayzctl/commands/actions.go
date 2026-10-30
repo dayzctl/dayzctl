@@ -287,6 +287,10 @@ func applyOrchestrator(target string) error {
 		enableUpdateTimer(sysd)
 	}
 
+	if shared.Config.Web.Enabled {
+		enableWebService(sysd)
+	}
+
 	fmt.Println("Configuration applied successfully")
 	fmt.Println("Services are NOT started/stopped/restarted. Use 'dayzctl start/stop/restart' to control services.")
 	return nil
@@ -334,6 +338,14 @@ func enableUpdateTimer(sysd *systemd.Systemd) {
 	fmt.Println("Enabling update timer...")
 	if err := sysd.Enable("dayz-update.timer"); err != nil {
 		fmt.Printf("Failed to enable update timer: %v\n", err)
+	}
+}
+
+// enableWebService enables the web UI unit generated for web.enabled configs.
+func enableWebService(sysd *systemd.Systemd) {
+	fmt.Println("Enabling web UI service...")
+	if err := sysd.Enable("dayz-web.service"); err != nil {
+		fmt.Printf("Failed to enable web UI service: %v\n", err)
 	}
 }
 

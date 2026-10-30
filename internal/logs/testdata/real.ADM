@@ -1,0 +1,185 @@
+
+
+******************************************************************************
+AdminLog started on 2026-10-26 at 01:20:56
+02:03:34 | Player "Bodden55" (id=76561198145740672 pos=<-340282346638528859811704183484516925440.0, -340282346638528859811704183484516925440.0, -340282346638528859811704183484516925440.0>) has been disconnected
+02:03:56 | Player "Bodden55" (id=76561198145740672 pos=<-340282346638528859811704183484516925440.0, -340282346638528859811704183484516925440.0, -340282346638528859811704183484516925440.0>) has been disconnected
+02:04:05 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs=) is connecting
+02:04:33 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<8626.1, 8633.6, 266.2>) is connected
+02:07:10 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<8490.2, 8579.2, 260.5>)[HP: 98.5375] hit by Infected into LeftLeg(8) for 5.85 damage (MeleeInfected)
+02:07:25 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<8477.2, 8624.6, 258.7>)[HP: 98.3702] hit by Infected into LeftArm(18) for 6.175 damage (MeleeInfected)
+02:09:49 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<8559, 8568.1, 262.4>) placed Barrel<Barrel_Green>
+02:15:07 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<8996.3, 9010.7, 277.6>)[HP: 97.6807] hit by FallDamageHealth
+02:18:02 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<8686.0, 9345.5, 256.9>)[HP: 100] hit by Infected into Torso(1) for 0 damage (Dummy_Light)
+02:18:06 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<8684.0, 9348.8, 256.6>)[HP: 98.5375] hit by Infected into LeftLeg(8) for 5.85 damage (MeleeInfected)
+02:35:12 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<9091.2, 12125.6, 222.4>)[HP: 100] hit by Infected into LeftArm(18) for 0 damage (Dummy_Light)
+02:35:13 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<9093.3, 12124.2, 222.4>)[HP: 100] hit by Infected into RightArm(17) for 0 damage (Dummy_Light)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.0, 8773.0, 253.2>) is unconscious
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 97.5146] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 95.0293] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 92.5439] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 90.0586] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 87.5732] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 85.0878] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 82.6025] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 80.1171] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 77.6318] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 75.1464] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 72.8575] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 70.5686] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 68.2797] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 65.9907] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 63.7018] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 61.4129] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 59.124] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 56.8351] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 54.5462] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 52.2572] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 50.1622] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 48.0672] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 45.9722] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 43.8772] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 41.7822] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 39.6872] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 37.5922] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 35.4972] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 33.4022] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 31.3071] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 29.2121] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 27.3256] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 25.439] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 23.5525] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 21.666] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 19.7794] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 17.8929] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 16.0063] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 14.1198] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 12.2333] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 10.3467] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 8.46017] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 6.78472] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 5.10926] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 3.43381] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 1.75836] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 0.082902] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (DEAD) (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>)[HP: 0] hit by NO DRIVER with TransportHit (Motorbike_02_Red)
+02:42:08 | Player "Bodden55" (DEAD) (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7629.4, 8773.1, 254.3>) killed by NO DRIVER (Motorbike_02_Red)
+02:42:17 | Player "Bodden55" (DEAD) (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7628.4, 8772.2, 253.9>) is choosing to respawn
+02:42:22 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5273.1, 13443.0, 285.3>) is connected
+02:44:11 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5247.5, 13464, 286.3>) performed EmoteSitA with SodaCan_Cola
+02:44:49 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5275.3, 13428.8, 284.7>) performed EmoteSitA
+02:45:04 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5275.2, 13428.9, 284.8>) has been disconnected
+02:45:22 | Player "Bodden55" (id=76561198145740672 pos=<-340282346638528859811704183484516925440.0, -340282346638528859811704183484516925440.0, -340282346638528859811704183484516925440.0>) has been disconnected
+02:50:31 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs=) is connecting
+02:50:52 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5275.2, 13428.9, 284.8>) is connected
+02:52:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5362.4, 13350.6, 272.8>)[HP: 90.8777] hit by FallDamageHealth
+02:52:25 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5428.3, 13312.7, 273.9>) performed EmoteThroat with Pitchfork
+02:52:28 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5428.3, 13312.7, 273.9>) performed EmoteSuicide with Pitchfork
+02:52:38 | Player "Bodden55" (DEAD) (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5428.6, 13312.5, 274.0>) died. Stats> Water: 1167.4 Energy: 885.22 Bleed sources: 1
+02:52:38 | Player "Bodden55" (DEAD) (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5428.6, 13312.5, 274.0>) committed suicide
+02:52:50 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13621.8, 12721.1, 206.1>) is connected
+02:53:02 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13641.7, 12721.3, 208.0>) has been disconnected
+02:53:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs=) is connecting
+02:53:09 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<-340282346638528859811704183484516925440.0, -340282346638528859811704183484516925440.0, -340282346638528859811704183484516925440.0>) has been disconnected
+02:53:57 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs=) is connecting
+02:54:20 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13642.1, 12721.5, 208.1>) is connected
+02:54:42 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13666.5, 12749.8, 209.1>) performed EmoteSuicide with Screwdriver
+02:54:51 | Player "Bodden55" (DEAD) (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13666.5, 12749.8, 209.1>) died. Stats> Water: 989.66 Energy: 790.005 Bleed sources: 1
+02:54:51 | Player "Bodden55" (DEAD) (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13666.5, 12749.8, 209.1>) committed suicide
+02:55:00 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13232.3, 12301.0, 176.7>) is connected
+02:55:40 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13245.9, 12178, 178.0>)[HP: 98.0875] hit by Infected into RightLeg(3) for 7.65 damage (MeleeInfectedLong)
+02:56:08 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13158.6, 12108, 178.6>)[HP: 92.3986] hit by Infected into Torso(1) for 6.5 damage (MeleeInfected)
+02:56:25 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13056.8, 12069.9, 178.0>)[HP: 86.412] hit by Infected into Torso(1) for 6.5 damage (MeleeInfected)
+02:56:29 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13047.1, 12066, 177.9>)[HP: 84.5799] hit by Infected into LeftLeg(8) for 7.65 damage (MeleeInfectedLong)
+02:56:31 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13047.2, 12065.9, 177.9>)[HP: 76.1574] hit by Infected into Torso(1) for 8.5 damage (MeleeInfectedLong)
+02:56:32 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13047.2, 12065.9, 177.9>)[HP: 75.5074] hit by Infected into RightArm(17) for 6.5 damage (MeleeInfected)
+02:56:33 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13047.2, 12065.9, 177.9>)[HP: 73.5949] hit by Infected into RightLeg(3) for 7.65 damage (MeleeInfectedLong)
+02:56:34 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13047.1, 12065.9, 177.9>)[HP: 71.7581] hit by Infected into RightLeg(3) for 7.65 damage (MeleeInfectedLong)
+02:56:35 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13047.1, 12065.9, 177.9>)[HP: 63.2581] hit by Infected into Torso(1) for 8.5 damage (MeleeInfectedLong)
+02:56:40 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13032.9, 12060.6, 177.6>)[HP: 62.7542] hit by Infected into LeftArm(18) for 6.5 damage (MeleeInfected)
+02:56:44 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13008.7, 12053.6, 177.2>)[HP: 62.1745] hit by Infected into RightArm(17) for 6.5 damage (MeleeInfected)
+02:56:45 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13010, 12053.9, 177.2>)[HP: 61.5245] hit by Infected into RightArm(17) for 6.5 damage (MeleeInfected)
+02:56:46 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13009.7, 12053.5, 177.3>)[HP: 60.9431] hit by Infected into LeftArm(18) for 6.5 damage (MeleeInfected)
+02:56:46 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13009.7, 12053.5, 177.3>)[HP: 52.4431] hit by Infected into Torso(1) for 8.5 damage (MeleeInfectedLong)
+02:56:46 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13009.7, 12053.7, 177.3>) is unconscious
+02:56:47 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13009.8, 12054.8, 177.2>)[HP: 45.9431] hit by Infected into Torso(1) for 6.5 damage (MeleeInfected)
+02:56:49 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13009.9, 12054.8, 177.2>) is choosing to respawn
+02:56:49 | Player "Bodden55" (DEAD) (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<13009.9, 12054.8, 177.2>) died. Stats> Water: 941.312 Energy: 749.07 Bleed sources: 1
+02:56:55 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7877.0, 12832.6, 256.9>) is connected
+03:03:34 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<8023.6, 11225.5, 237.7>)[HP: 99.35] hit by Infected into RightArm(17) for 6.5 damage (MeleeInfected)
+03:07:13 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<8172.5, 10318.3, 243.7>)[HP: 100] hit by Infected into Torso(1) for 0 damage (Dummy_Light)
+03:07:14 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<8172.4, 10315.7, 243.8>)[HP: 100] hit by Infected into Torso(1) for 0 damage (Dummy_Light)
+03:33:23 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5578.2, 7254.5, 363.3>) performed EmoteSitA with SCARL
+03:33:39 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5578.2, 7254.4, 363.4>) has been disconnected
+09:34:23 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE=) is connecting
+09:34:48 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<7637.7, 8692.6, 254.7>) is connected
+09:46:54 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<7618.2, 8985.3, 271.2>) packed Large Tent with Hands 
+09:49:58 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<7602.1, 8979.3, 272.2>) performed EmoteSitA
+10:05:27 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<9470.6, 9127.7, 251.0>) performed EmoteSitA
+10:05:43 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<9470.7, 9127.5, 251.1>) has been disconnected
+10:19:07 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE=) is connecting
+10:19:28 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<9470.7, 9127.5, 251.1>) is connected
+10:31:00 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<10242.3, 11188.3, 172.1>) performed EmoteSitA
+10:31:16 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<10242.4, 11188.4, 172.2>) has been disconnected
+11:37:47 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs=) is connecting
+11:38:10 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5578.2, 7254.4, 363.4>) is connected
+11:46:22 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5578.0, 7256.8, 363.0>) performed EmoteSitA
+11:46:38 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5578.2, 7256.7, 363.1>) has been disconnected
+11:46:45 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs=) is connecting
+11:47:03 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5578.2, 7256.7, 363.1>) is connected
+12:02:37 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5577.4, 7254.4, 362.6>) performed EmoteSitA
+12:03:41 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5577.3, 7254.6, 362.6>) performed EmoteSitA with SCARL
+12:03:56 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5577.4, 7254.4, 362.7>) has been disconnected
+12:23:51 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs=) is connecting
+12:24:11 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5577.4, 7254.4, 362.7>) is connected
+12:30:58 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5577.7, 7259.2, 362.6>) performed EmoteSitA with SCARL
+12:31:13 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5577.7, 7259.2, 362.7>) has been disconnected
+12:42:38 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs=) is connecting
+12:42:55 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5577.7, 7259.2, 362.7>) is connected
+12:44:32 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5578.2, 7254.5, 363.3>) performed EmoteSitA with SCARL
+12:44:47 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5578.2, 7254.4, 363.4>) has been disconnected
+13:27:23 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE=) is connecting
+13:28:22 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<10242.4, 11188.4, 172.2>) is connected
+13:30:00 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<10231.9, 11182.4, 172.4>) has been disconnected
+13:30:39 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE=) is connecting
+13:31:02 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<10232.2, 11182.7, 172.4>) is connected
+13:35:53 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs=) is connecting
+13:36:14 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5578.2, 7254.4, 363.4>) is connected
+13:39:01 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<11159.6, 10422.8, 171.9>) performed EmoteSitA
+13:39:16 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<11159.2, 10422.9, 172.0>) has been disconnected
+13:43:12 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5577.3, 7253.8, 363.9>) has been disconnected
+13:43:18 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs=) is connecting
+13:43:36 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<5577.3, 7253.8, 363.9>) is connected
+13:44:12 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE=) is connecting
+13:44:33 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<11159.2, 10422.9, 172.0>) is connected
+14:08:34 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<10624.9, 8182.6, 174.8>) performed EmoteSitA with EpoxyPutty
+14:08:50 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<10625.1, 8182.6, 174.9>) has been disconnected
+14:13:17 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7488.6, 8675.7, 257.9>)[HP: 100] hit by Infected into Torso(1) for 0 damage (Dummy_Light)
+14:13:18 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7487.2, 8675.5, 258.1>)[HP: 97.5775] hit by Infected into Torso(1) for 2.4225 damage (MeleeInfectedLong)
+14:13:21 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7487.0, 8675.5, 258.0>)[HP: 97.6676] hit by Infected into Torso(1) for 0 damage (Dummy_Light)
+14:13:23 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7487.0, 8675.5, 258.0>)[HP: 96.9502] hit by Infected into LeftArm(18) for 8.075 damage (MeleeInfectedLong)
+14:14:43 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7541.8, 8667.8, 258.4>)[HP: 99.3695] hit by FallDamageHealth
+14:17:10 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7606.6, 8777.6, 254.2>)[HP: 100] hit by Infected into LeftArm(18) for 0 damage (Dummy_Light)
+14:17:40 | Player "Autopsy" (id=SU3c2mri1tUyaPOIB2L8hiL6n0c0a3qQSYFIVKrGHa4=) is connecting
+14:18:45 | Player "Autopsy" (id=SU3c2mri1tUyaPOIB2L8hiL6n0c0a3qQSYFIVKrGHa4= pos=<10423.2, 8759.4, 163.4>) is connected
+14:20:02 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7653.9, 8717.1, 254.0>)[HP: 100] hit by Infected into LeftArm(18) for 0 damage (Dummy_Light)
+14:20:07 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7652.8, 8713.6, 254.2>)[HP: 100] hit by Infected into Torso(1) for 0 damage (Dummy_Light)
+14:23:16 | Player "Bodden55" (id=l766Q5yMWTQOvVm1EH7mZCYMNsLUSUil3BjuJYIDhqs= pos=<7607.0, 8695.5, 254.6>)[HP: 98.0875] hit by Infected into RightLeg(3) for 7.65 damage (MeleeSoldierInfected)
+14:27:30 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE=) is connecting
+14:27:33 | Player "Autopsy" (id=SU3c2mri1tUyaPOIB2L8hiL6n0c0a3qQSYFIVKrGHa4= pos=<10450.4, 8357.1, 172.3>)[HP: 100] hit by Infected into RightArm(17) for 0 damage (Dummy_Light)
+14:27:36 | Player "Autopsy" (id=SU3c2mri1tUyaPOIB2L8hiL6n0c0a3qQSYFIVKrGHa4= pos=<10451.9, 8359.1, 172.3>)[HP: 100] hit by Infected into Torso(1) for 0 damage (Dummy_Light)
+14:27:38 | Player "Autopsy" (id=SU3c2mri1tUyaPOIB2L8hiL6n0c0a3qQSYFIVKrGHa4= pos=<10452.5, 8360.9, 172.3>)[HP: 98.1937] hit by Infected into LeftLeg(8) for 7.225 damage (MeleeSoldierInfected)
+14:28:04 | Player "Autopsy" (id=SU3c2mri1tUyaPOIB2L8hiL6n0c0a3qQSYFIVKrGHa4= pos=<10447.2, 8355.5, 172.4>)[HP: 99.0048] hit by Infected into LeftArm(18) for 0 damage (Dummy_Light)
+14:28:09 | Player "Autopsy" (id=SU3c2mri1tUyaPOIB2L8hiL6n0c0a3qQSYFIVKrGHa4= pos=<10449, 8360.2, 172.3>)[HP: 99.0949] hit by Infected into RightLeg(3) for 0 damage (Dummy_Light)
+14:28:16 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<10625.1, 8182.6, 174.9>) is connected
+14:30:14 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<10407.2, 8357.3, 173.2>)[HP: 4.82861] hit by Player "Autopsy" (id=SU3c2mri1tUyaPOIB2L8hiL6n0c0a3qQSYFIVKrGHa4= pos=<10415.7, 8346.7, 172.7>) into Torso(15) for 95.1714 damage (Bullet_556x45) with KA-101 from 13.6119 meters 
+14:30:15 | Player "MatenmePorqueMeMuero" (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<10404.9, 8355.7, 173.2>) is unconscious
+14:30:17 | Player "MatenmePorqueMeMuero" (DEAD) (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<10403.4, 8354.6, 173.2>)[HP: 0] hit by Player "Autopsy" (id=SU3c2mri1tUyaPOIB2L8hiL6n0c0a3qQSYFIVKrGHa4= pos=<10413.7, 8351.7, 172.6>) into Torso(32) for 88.2137 damage (Bullet_556x45) with KA-101 from 10.7674 meters 
+14:30:17 | Player "MatenmePorqueMeMuero" (DEAD) (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<10403.4, 8354.6, 173.2>) killed by Player "Autopsy" (id=SU3c2mri1tUyaPOIB2L8hiL6n0c0a3qQSYFIVKrGHa4= pos=<10413.7, 8351.7, 172.6>) with KA-101 from 10.7674 meters 
+14:30:17 | Player "MatenmePorqueMeMuero" (DEAD) (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<10403.4, 8354.6, 173.2>)[HP: 0] hit by Player "Autopsy" (id=SU3c2mri1tUyaPOIB2L8hiL6n0c0a3qQSYFIVKrGHa4= pos=<10413.7, 8351.7, 172.6>) into Torso(32) for 88.2372 damage (Bullet_556x45) with KA-101 from 10.7674 meters 
+14:30:17 | Player "MatenmePorqueMeMuero" (DEAD) (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<10403.4, 8354.6, 173.2>)[HP: 0] hit by Player "Autopsy" (id=SU3c2mri1tUyaPOIB2L8hiL6n0c0a3qQSYFIVKrGHa4= pos=<10413.7, 8351.7, 172.6>) into Head(0) for 22.044 damage (Bullet_556x45) with KA-101 from 10.7674 meters 
+14:30:22 | Player "MatenmePorqueMeMuero" (DEAD) (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<10403.4, 8354.6, 173.2>)[HP: 0] hit by Player "Autopsy" (id=SU3c2mri1tUyaPOIB2L8hiL6n0c0a3qQSYFIVKrGHa4= pos=<10404.6, 8352.9, 172.6>) into Head(0) for 96.5288 damage (Bullet_556x45) with KA-101 from 2.16196 meters 
+14:30:22 | Player "MatenmePorqueMeMuero" (DEAD) (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<10403.4, 8354.6, 173.2>)[HP: 0] hit by Player "Autopsy" (id=SU3c2mri1tUyaPOIB2L8hiL6n0c0a3qQSYFIVKrGHa4= pos=<10404.6, 8352.9, 172.6>) into Brain(37) for 96.5288 damage (Bullet_556x45) with KA-101 from 2.16196 meters 
+14:30:23 | Player "MatenmePorqueMeMuero" (DEAD) (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<10403.4, 8354.6, 173.2>)[HP: 0] hit by Player "Autopsy" (id=SU3c2mri1tUyaPOIB2L8hiL6n0c0a3qQSYFIVKrGHa4= pos=<10404.6, 8352.9, 172.6>) into Head(0) for 96.5279 damage (Bullet_556x45) with KA-101 from 2.16193 meters 
+14:30:23 | Player "MatenmePorqueMeMuero" (DEAD) (id=q4eViBNNySaVyZnITmTfT6j3KnU6HVdbyvsnKPzV1OE= pos=<10403.4, 8354.6, 173.2>)[HP: 0] hit by Player "Autopsy" (id=SU3c2mri1tUyaPOIB2L8hiL6n0c0a3qQSYFIVKrGHa4= pos=<10404.6, 8352.9, 172.6>) into Brain(37) for 96.5279 damage (Bullet_556x45) with KA-101 from 2.16193 meters 
+14:30:40 | Player "Autopsy" (id=SU3c2mri1tUyaPOIB2L8hiL6n0c0a3qQSYFIVKrGHa4= pos=<10416.1, 8349.5, 172.6>)[HP: 98.1937] hit by Infected into LeftLeg(8) for 7.225 damage (MeleeSoldierInfected)

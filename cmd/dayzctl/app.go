@@ -184,6 +184,14 @@ func isHelpInvocation() bool {
 			}
 		}
 	}
+
+	// Any --help/-h anywhere also skips root and config loading, so
+	// `dayzctl web --help` works on a machine without a config file.
+	for _, a := range os.Args[1:] {
+		if a == "-h" || a == "--help" {
+			return true
+		}
+	}
 	return false
 }
 
@@ -394,6 +402,21 @@ func buildCommands() []*cli.Command {
 			Description: "",
 			ArgsUsage:   "<instance> <command>",
 			Action:      modsCommandHandler,
+		},
+		{
+			Name:  "web",
+			Usage: "Run the web UI and log analysis API",
+			Flags: []cli.Flag{
+				&cli.StringFlag{Name: "addr", Aliases: []string{"a"}, Usage: "Listen `address`", DefaultText: "web.address from config, else 127.0.0.1"},
+				&cli.IntFlag{Name: "port", Aliases: []string{"p"}, Usage: "Listen `port`", DefaultText: "web.port from config, else 8081"},
+			},
+			Description: "",
+			Action: func(c *cli.Context) error {
+				return commands.WebAction(commands.WebOptions{
+					Address: c.String("addr"),
+					Port:    c.Int("port"),
+				})
+			},
 		},
 	}
 }

@@ -1,0 +1,27 @@
+[Unit]
+Description=dayzctl web UI and log analysis API
+Documentation=https://github.com/dayzctl/dayzctl
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+ExecStart={{ .BinaryPath }} web --addr {{ .Address }} --port {{ .Port }}
+WorkingDirectory={{ .WorkingDir }}
+Restart=on-failure
+RestartSec=5s
+StandardOutput=journal
+StandardError=journal
+
+# The service only reads the config and the instances' profiles folders.
+NoNewPrivileges=yes
+PrivateTmp=yes
+ProtectSystem=full
+ProtectHome=read-only
+ProtectKernelTunables=yes
+ProtectControlGroups=yes
+RestrictSUIDSGID=yes
+LockPersonality=yes
+
+[Install]
+WantedBy=multi-user.target

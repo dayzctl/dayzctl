@@ -20,6 +20,10 @@ func (c *ServerConfig) Validate() error {
 		}
 	}
 
+	if err := validateWeb(c); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -58,6 +62,20 @@ func validateInstance(inst Instance) error {
 		if inst.RCON.Password == "" {
 			return fmt.Errorf("instance %s: RCON password is required when RCON is enabled", inst.Name)
 		}
+	}
+	return nil
+}
+
+// validateWeb checks the optional web UI settings.
+func validateWeb(c *ServerConfig) error {
+	if !c.Web.Enabled {
+		return nil
+	}
+	if c.Web.Port < 1 || c.Web.Port > 65535 {
+		return fmt.Errorf("web.port must be between 1 and 65535")
+	}
+	if c.Web.Address == "" {
+		return fmt.Errorf("web.address is required when web is enabled")
 	}
 	return nil
 }

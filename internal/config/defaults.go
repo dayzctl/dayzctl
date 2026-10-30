@@ -61,4 +61,8 @@ func (c *ServerConfig) SetDefaults() {
 	setIntDefault(&c.Server.DefaultVisibility, 1375)
 	setIntDefault(&c.Server.DefaultObjectViewDistance, 1375)
 	setIntDefault(&c.Server.ShotValidation, 1)
+
+	// The web UI is opt-in, and listens on loopback unless configured otherwise.
+	setStrDefault(&c.Web.Address, "127.0.0.1")
+	setIntDefault(&c.Web.Port, 8081)
 }

@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>DayZ Log Analyzer — ADM &amp; RPT</title>
+  <meta name="description" content="Analyze DayZ server ADM and RPT logs entirely in your browser. Errors explained, players, kills, base building and suspicious activity." />
+  <link rel="stylesheet" href="./styles.css" />
+</head>
+<body>
+  <header class="site-header">
+    <div class="wrap header-inner">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">◆</span>
+        <div>
+          <h1>DayZ Log Analyzer</h1>
+          <p class="tagline">ADM &amp; RPT, read from your server</p>
+        </div>
+      </div>
+      <p class="privacy-badge" id="server-badge" title="Analysed by dayzctl on this host">
+        <span class="dot" aria-hidden="true"></span> <span id="server-status">connecting…</span>
+      </p>
+    </div>
+  </header>
+
+  <main class="wrap" id="main">
+
+    <!-- ── Instance picker ────────────────────────────────────── -->
+    <section id="connect" aria-label="Choose an instance">
+      <div class="card">
+        <div class="panel-head">
+          <h2>Instances</h2>
+          <button type="button" class="btn tiny" id="btn-refresh">Refresh</button>
+        </div>
+        <p class="muted small" style="margin-top:-4px">
+          Logs are read by the dayzctl service from each instance's
+          <code>profiles</code> folder. Nothing is uploaded anywhere.
+        </p>
+        <div id="instances" class="instances"></div>
+        <p id="connect-error" class="alert" hidden></p>
+      </div>
+    </section>
+
+    <!-- ── Log selection ──────────────────────────────────────── -->
+    <section id="files" hidden aria-label="Choose logs">
+      <div class="card">
+        <div class="panel-head">
+          <h2 id="files-title">Logs</h2>
+          <button type="button" class="btn tiny" id="btn-back">Back</button>
+        </div>
+        <p id="files-dir" class="small faint"></p>
+
+        <div class="filters">
+          <button type="button" class="btn primary" id="btn-analyze-sel">Analyze selected</button>
+          <button type="button" class="btn" id="btn-toggle-all">Select all</button>
+        </div>
+
+        <div id="file-list" class="file-list"></div>
+        <p id="files-empty" class="empty" hidden>No log files in this profiles folder yet.</p>
+      </div>
+    </section>
+
+    <!-- ── Progress ───────────────────────────────────────────── -->
+    <section id="progress" class="progress" hidden>
+      <div class="progress-head">
+        <span id="progress-label">Analysing…</span>
+      </div>
+      <div class="bar"><div class="bar-fill" id="progress-fill"></div></div>
+    </section>
+
+    <p id="intake-error" class="alert" hidden></p>
+
+    <!-- ── Results ────────────────────────────────────────────── -->
+    <section id="results" hidden>
+      <div class="filebar">
+        <div id="file-chips" class="chips"></div>
+        <button type="button" class="btn" id="btn-new">New analysis</button>
+      </div>
+
+      <nav id="tabs" class="tabs" aria-label="Analysis sections">
+        <button type="button" data-tab="overview" class="tab active">Overview</button>
+        <button type="button" data-tab="problems" class="tab">Problems</button>
+        <button type="button" data-tab="players" class="tab">Players</button>
+        <button type="button" data-tab="kills" class="tab">Kills</button>
+        <button type="button" data-tab="base" class="tab">Base building</button>
+        <button type="button" data-tab="suspicious" class="tab">Suspicious</button>
+        <button type="button" data-tab="timeline" class="tab">Timeline</button>
+        <button type="button" data-tab="map" class="tab">Map</button>
+      </nav>
+
+      <div id="panels">
+        <section class="panel active" data-panel="overview"></section>
+        <section class="panel" data-panel="problems"></section>
+        <section class="panel" data-panel="players"></section>
+        <section class="panel" data-panel="kills"></section>
+        <section class="panel" data-panel="base"></section>
+        <section class="panel" data-panel="suspicious"></section>
+        <section class="panel" data-panel="timeline"></section>
+        <section class="panel" data-panel="map"></section>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer">
+    <div class="wrap">
+      <p>
+        Analysis runs on the server via <code>dayzctl web</code>; the browser only renders the result.
+        <span class="sep">·</span>
+        <a href="./README.md">How it works</a>
+      </p>
+    </div>
+  </footer>
+
+  <script type="module" src="./js/main.js"></script>
+</body>
+</html>

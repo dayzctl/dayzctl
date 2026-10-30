@@ -1,0 +1,31 @@
+ 0:00:00 Dedicated Server
+ 0:00:00 Version 1.25.158757
+ 0:00:02 BattlEye Server: Initialized (v1.247)
+ 0:00:05 Host: 192.168.1.50:2302
+ 0:00:09 Mission ChernarusPlus read.
+17:55:01 Warning: Addon 'ExpansionCore' requires addon 'ExpansionBundle'
+17:55:04 Error: Cannot open object expansion\objects\base_wall.p3d
+17:55:11 Cannot load texture expansion\objects\data\wall_co.paa
+17:55:19 Strange convex component192 in dz\structures\misc\shed.p3d:geometryView
+17:55:19 Strange convex component193 in dz\structures\misc\shed.p3d:geometryView
+17:55:31 Cannot register unknown string STR_EXPANSION_MENU
+17:56:02 Warning Message: Script expansion\scripts\menu.sqf not found
+17:56:14 ErrorMessage: No entry 'config.bin/CfgVehicles/Land_ExpansionSafeZone'
+17:56:20 Class 'ExpansionATMMenu' not found
+17:57:00 Unknown enumeration value 'Ruin' in config CfgVehicles
+17:58:14 SCRIPT       : (E): Error in expression <GetPlayerLevel(player)>
+17:58:14 SCRIPT       : (E):   Error position: <player> player>
+17:58:15 SCRIPT       : (E):   Undefined variable in expression: player
+17:59:00 Player "Kowalski" is connected (id=76561198011223344)
+18:05:41 Player "Mira" is connected (id=76561198055667788)
+18:07:02 Player "Grim" is connected (id=76561198099887766)
+18:11:04 Player "Grim" killed by Player "Kowalski"
+18:20:00 Central economy: Error loading types.xml for mapgroupproto
+18:20:00 Cannot open object dz\gear\containers\wooden_crate.p3d
+18:31:19 Player "Grim" disconnected
+18:40:13 Player "Kowalski" killed by Player "Mira"
+18:40:44 Player "Mira" disconnected
+19:02:11 Player "Ghost" is connected (id=76561198000112233)
+19:10:41 Player "Ghost" disconnected
+19:45:30 Player "Kowalski" disconnected
+19:50:00 Exiting

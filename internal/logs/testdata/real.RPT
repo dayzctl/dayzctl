@@ -1,0 +1,643 @@
+=====================================================================
+== DayZServer
+== /srv/dayz/server/DayZServer /srv/dayz/server/DayZServer -config=/srv/dayz/server/serverDZ-nasdara.cfg -port=2302 -profiles=/srv/dayz/server/profiles/nasdara -BEpath=/srv/dayz/server/battleye-nasdara -mod= -servermod= -cpuCount=2 -adminlog -netLog -freezecheck -filePatching 
+=====================================================================
+Exe timestamp: 2026/10/21 11:43:16
+Current time:  2026/10/26 01:21:02
+Version 1.30.164200.56
+=====================================================================
+
+ 1:21:02 MATERIAL  (E): SMAAEffect area texture not found (system/textures/PP/smaa_area)
+ 1:21:02 MATERIAL  (E): SMAAEffect search texture not found (system/textures/PP/smaa_search)
+ 1:21:02 [Inputs] Loading inputs default "bin/constants.xml"
+ 1:21:02 [Inputs] Loading inputs default "bin/specific.xml"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAGestureSlot01"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAGestureSlot02"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAGestureSlot03"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAGestureSlot04"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAGestureSlot05"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAGestureSlot06"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAGestureSlot07"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAGestureSlot08"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAGestureSlot09"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAGestureSlot10"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAGestureSlot11"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAGestureSlot12"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteGreeting"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteSOS"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteHeart"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteTaunt"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteLyingDown"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteTauntKiss"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmotePoint"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteTauntElbow"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteThumb"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteThumbDown"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteThroat"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteDance"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteSalute"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteTimeout"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteFacepalm"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteClap"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteSilent"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteWatching"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteHold"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteListening"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmotePointSelf"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteLookAtMe"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteTauntThink"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteMove"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteGetDown"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteCome"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteSurrender"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteCampfireSit"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteSitA"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteSitB"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteRPSRandom"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteRPSRock"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteRPSPaper"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteRPSScisors"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteNod"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteShake"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteShrug"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteSuicide"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "EmoteVomit"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAAimLeft"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAAimRight"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAAimUp"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAAimDown"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAGetOver"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAStance"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAStand"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UACrouch"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAProne"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAZeroingUp"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAZeroingDown"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAZoomIn"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAZoomInOptics"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAZoomOutOptics"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAZoomInToggle"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UATurbo"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAPersonView"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UALookAround"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAFire"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAHeavyMeleeAttack"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UADefaultAction"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAAction"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UADropitem"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAThrowitem"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAToggleWeapons"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAUIQuickbarToggle"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UATempRaiseWeapon"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UATempRaiseWeaponGamepad"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAReloadMagazine"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UAPrevActionCategory"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UANextActionCategory"
+ 1:21:02 !!! [Inputs] Attempt to insert input twice "UACarHorn"
+ 1:21:02 [Inputs] Loading inputs cfg "/srv/dayz/server/profiles/nasdara/users/Survivor\Server.core.xml"
+ 1:21:02 [Inputs] Exporting inputs cfg "/srv/dayz/server/profiles/nasdara/users/Survivor\Server.core.xml"
+ 1:21:02 SCRIPT    (W): @"scripts/3_Game/human.c,17": Missing script declaration for method 'HumanInputController.DisableCrouchCameraHorizontalRotation'
+ 1:21:02 SCRIPT    (W): @"scripts/3_Game/human.c,241": Method not linked 'HumanInputController.DisableCrouchCameratHorizontalRotation'
+ 1:21:02 SCRIPT    (W): @"scripts/3_Game/human.c,240": Method not linked 'HumanInputController.DisableErectCameratHorizontalRotation'
+ 1:21:02 SCRIPT    (W): @"scripts/3_Game/human.c,17": Missing script declaration for method 'HumanInputController.DisableErectHorizontalRotation'
+ 1:21:02 ANIMATION (E): Can't load nasdara/Anims/cfg/skeletons.anim.xml
+ 1:21:02 ANIMATION (E): Failed to open file, line 0, column 0
+ 1:21:02 ANIMATION (E): Can't load sakhal/Anims/cfg/skeletons.anim.xml
+ 1:21:02 ANIMATION (E): Failed to open file, line 0, column 0
+ 1:21:03 SCRIPT    (W): @"scripts/4_World/entities/building/underground/entrance/land_underground_entrance.c,149": 'UpdatePathgraphDoorByAnimationSourceName' is obsolete: 1.30: Use UpdatePathgraphEntityState
+ 1:21:04 SCRIPT    (W): @"scripts/4_World/entities/itembase/edible_base/disinfectantspray.c,16": Missing script declaration for method 'RoboclientUtils.GetDefaultRoboRespawn'
+ 1:21:04 SCRIPT    (W): @"scripts/4_World/entities/itembase/edible_base/disinfectantspray.c,16": Missing script declaration for method 'RoboclientUtils.ReadStateMachines'
+ 1:21:04 SCRIPT    (W): @"scripts/4_World/entities/itembase/edible_base/disinfectantspray.c,16": Missing script declaration for method 'RoboclientUtils.GetDefaultRoboRespawnTime'
+ 1:21:04 SCRIPT    (W): @"scripts/4_World/entities/itembase/edible_base/disinfectantspray.c,16": Missing script declaration for method 'RoboclientUtils.GetStateMachines'
+ 1:21:04 SCRIPT    (W): @"scripts/4_World/entities/itembase/edible_base/disinfectantspray.c,16": Missing script declaration for method 'BotStateMachineData.GetActions'
+ 1:21:04 SCRIPT    (W): @"scripts/4_World/entities/itembase/edible_base/disinfectantspray.c,16": Missing script declaration for method 'BotStateMachineData.SetRoboRespawn'
+ 1:21:04 SCRIPT    (W): @"scripts/4_World/entities/itembase/edible_base/disinfectantspray.c,16": Missing script declaration for method 'BotStateMachineData.SetName'
+ 1:21:04 SCRIPT    (W): @"scripts/4_World/entities/itembase/edible_base/disinfectantspray.c,16": Missing script declaration for method 'BotStateMachineData.GetInitialState'
+ 1:21:04 SCRIPT    (W): @"scripts/4_World/entities/itembase/edible_base/disinfectantspray.c,16": Missing script declaration for method 'BotStateMachineData.GetEvents'
+ 1:21:04 SCRIPT    (W): @"scripts/4_World/entities/itembase/edible_base/disinfectantspray.c,16": Missing script declaration for method 'BotStateMachineData.SetRoboRespawnTime'
+ 1:21:04 SCRIPT    (W): @"scripts/4_World/entities/itembase/edible_base/disinfectantspray.c,16": Missing script declaration for method 'BotStateMachineData.GetName'
+ 1:21:04 SCRIPT    (W): @"scripts/4_World/entities/itembase/edible_base/disinfectantspray.c,16": Missing script declaration for method 'BotStateMachineData.GetFromStates'
+ 1:21:04 SCRIPT    (W): @"scripts/4_World/entities/itembase/edible_base/disinfectantspray.c,16": Missing script declaration for method 'BotStateMachineData.GetToStates'
+ 1:21:04 SCRIPT    (W): @"scripts/4_World/entities/itembase/edible_base/disinfectantspray.c,16": Missing script declaration for method 'BotStateMachineData.GetRoboRespawn'
+ 1:21:04 SCRIPT    (W): @"scripts/4_World/entities/itembase/edible_base/disinfectantspray.c,16": Missing script declaration for method 'BotStateMachineData.GetActive'
+ 1:21:04 SCRIPT    (W): @"scripts/4_World/entities/itembase/edible_base/disinfectantspray.c,16": Missing script declaration for method 'BotStateMachineData.GetRoboRespawnTime'
+ 1:21:04 SCRIPT    (W): @"scripts/4_World/entities/itembase/edible_base/disinfectantspray.c,16": Missing script declaration for method 'BotStateMachineData.GetGuards'
+ 1:21:04 WORLD        : Create entity type 'Static'
+ 1:21:04  WORLD        : Create entity type 'All'
+ 1:21:04   GUI       (W): String "STR_DN_UNKNOWN" not found (not in localization table)
+ 1:21:04 WORLD        : Create entity type 'Air'
+ 1:21:04  WORLD        : Create entity type 'Transport'
+ 1:21:04   GUI       (W): String "STR_DN_TRANSPORT" not found (not in localization table)
+ 1:21:04  GUI       (W): String "STR_DN_HELICOPTER" not found (not in localization table)
+ 1:21:04 WORLD        : Create entity type 'Car'
+ 1:21:04  GUI       (W): String "STR_DN_CAR" not found (not in localization table)
+ 1:21:04 WORLD        : Create entity type 'Man'
+ 1:21:04  GUI       (W): String "STR_DN_MAN" not found (not in localization table)
+ 1:21:04 WORLD        : Create entity type 'Boat'
+ 1:21:04  GUI       (W): String "STR_DN_BOAT" not found (not in localization table)
+ 1:21:04 WORLD        : Create entity type 'Motorbike'
+ 1:21:04  GUI       (W): String "STR_DN_MOTORBIKE" not found (not in localization table)
+ 1:21:04 WORLD        : Create entity type 'Animal'
+ 1:21:04  GUI       (W): String "STR_DN_ANIMAL" not found (not in localization table)
+ 1:21:04 WORLD        : Create entity type 'Fortress'
+ 1:21:04  GUI       (W): String "STR_DN_BUNKER" not found (not in localization table)
+ 1:21:04 WORLD        : Create entity type 'M79_Base'
+ 1:21:04  AUDIO        : Loading SoundSet 'IZH18_silencerHomeMade_SoundSet'
+ 1:21:04   AUDIO     (E): Sound set 'IZH18_silencerHomeMade_SoundSet' references missing sound shader 'IZH18_Closure_SoundShader'
+ 1:21:04 WORLD        : Create entity type 'LeeEnfield_Base'
+ 1:21:04  RESOURCES    : GetResourceObject @"{547244D924C753A2}/DZ/anims/anm/player/reloads/LeeEnfield/w_enfield_states.anm"
+ 1:21:04   RESOURCES (E): Failed to open
+ 1:21:07 Hostname of server: "Nasdara - vanilla - Chile"
+ 1:21:19 NETWORK      : Network simulation
+ 1:21:19  Loading landscape 'nasdara'
+ 1:21:19   ENTITY       : Load entity type 'Land_House_1M4_Dam2'
+ 1:21:19    ENTITY    (W): Door 'door1_door_wood' is missing geometry components for selection 'door1_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door1_door_metal' is missing geometry components for selection 'door1_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'door2_door_wood' is missing geometry components for selection 'door2_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door2_door_metal' is missing geometry components for selection 'door2_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'door3_door_wood' is missing geometry components for selection 'door3_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door3_door_metal' is missing geometry components for selection 'door3_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'door4_door_wood' is missing geometry components for selection 'door4_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door4_door_metal' is missing geometry components for selection 'door4_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'door5_door_wood' is missing geometry components for selection 'door5_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door5_door_metal' is missing geometry components for selection 'door5_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_right_wood' is missing geometry components for selection 'window1_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_left_wood' is missing geometry components for selection 'window1_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_right_metal' is missing geometry components for selection 'window1_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_left_metal' is missing geometry components for selection 'window1_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_right_wood' is missing geometry components for selection 'window2_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_left_wood' is missing geometry components for selection 'window2_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_right_metal' is missing geometry components for selection 'window2_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_left_metal' is missing geometry components for selection 'window2_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window3_right_wood' is missing geometry components for selection 'window3_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window3_right_metal' is missing geometry components for selection 'window3_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window4_right_wood' is missing geometry components for selection 'window4_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window4_left_wood' is missing geometry components for selection 'window4_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window4_right_metal' is missing geometry components for selection 'window4_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window4_left_metal' is missing geometry components for selection 'window4_left_metal', check model+config
+ 1:21:19   ENTITY       : Load entity type 'Land_Wall_Gate_Fen3'
+ 1:21:19    ENTITY    (W): Door 'DoorsTwin1' is missing geometry components for selection 'DoorsTwin1', check model+config
+ 1:21:19   ENTITY       : Load entity type 'Land_House_1S2_Dam2'
+ 1:21:19    ENTITY    (W): Door 'door1_door_wood' is missing geometry components for selection 'door1_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door1_door_metal' is missing geometry components for selection 'door1_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'door2_door_wood' is missing geometry components for selection 'door2_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door2_door_metal' is missing geometry components for selection 'door2_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_right_wood' is missing geometry components for selection 'window1_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_left_wood' is missing geometry components for selection 'window1_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_right_metal' is missing geometry components for selection 'window1_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_left_metal' is missing geometry components for selection 'window1_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_right_wood' is missing geometry components for selection 'window2_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_left_wood' is missing geometry components for selection 'window2_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_right_metal' is missing geometry components for selection 'window2_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_left_metal' is missing geometry components for selection 'window2_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window3_right_wood' is missing geometry components for selection 'window3_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window3_left_wood' is missing geometry components for selection 'window3_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window3_right_metal' is missing geometry components for selection 'window3_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window3_left_metal' is missing geometry components for selection 'window3_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window4_right_wood' is missing geometry components for selection 'window4_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window4_left_wood' is missing geometry components for selection 'window4_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window4_right_metal' is missing geometry components for selection 'window4_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window4_left_metal' is missing geometry components for selection 'window4_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window5_right_wood' is missing geometry components for selection 'window5_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window5_left_wood' is missing geometry components for selection 'window5_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window5_right_metal' is missing geometry components for selection 'window5_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window5_left_metal' is missing geometry components for selection 'window5_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window6_right_wood' is missing geometry components for selection 'window6_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window6_right_metal' is missing geometry components for selection 'window6_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window7_right_wood' is missing geometry components for selection 'window7_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window7_right_metal' is missing geometry components for selection 'window7_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window8_right_wood' is missing geometry components for selection 'window8_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window8_right_metal' is missing geometry components for selection 'window8_right_metal', check model+config
+ 1:21:19   ENTITY       : Load entity type 'Land_House_3S1_Dam3'
+ 1:21:19    ENTITY    (W): Door 'door1_door_wood' is missing geometry components for selection 'door1_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door1_door_metal' is missing geometry components for selection 'door1_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'door2_door_wood' is missing geometry components for selection 'door2_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door2_door_metal' is missing geometry components for selection 'door2_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'door3_door_wood' is missing geometry components for selection 'door3_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door3_door_metal' is missing geometry components for selection 'door3_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'door4_door_wood' is missing geometry components for selection 'door4_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door4_door_metal' is missing geometry components for selection 'door4_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_right_wood' is missing geometry components for selection 'window1_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_left_wood' is missing geometry components for selection 'window1_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_right_metal' is missing geometry components for selection 'window1_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_left_metal' is missing geometry components for selection 'window1_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_right_wood' is missing geometry components for selection 'window2_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_left_wood' is missing geometry components for selection 'window2_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_right_metal' is missing geometry components for selection 'window2_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_left_metal' is missing geometry components for selection 'window2_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window3_right_wood' is missing geometry components for selection 'window3_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window3_left_wood' is missing geometry components for selection 'window3_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window3_right_metal' is missing geometry components for selection 'window3_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window3_left_metal' is missing geometry components for selection 'window3_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window4_right_wood' is missing geometry components for selection 'window4_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window4_left_wood' is missing geometry components for selection 'window4_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window4_right_metal' is missing geometry components for selection 'window4_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window4_left_metal' is missing geometry components for selection 'window4_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window5_right_wood' is missing geometry components for selection 'window5_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window5_left_wood' is missing geometry components for selection 'window5_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window5_right_metal' is missing geometry components for selection 'window5_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window5_left_metal' is missing geometry components for selection 'window5_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window6_right_wood' is missing geometry components for selection 'window6_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window6_left_wood' is missing geometry components for selection 'window6_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window6_right_metal' is missing geometry components for selection 'window6_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window6_left_metal' is missing geometry components for selection 'window6_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window7_right_wood' is missing geometry components for selection 'window7_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window7_right_metal' is missing geometry components for selection 'window7_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window8_right_wood' is missing geometry components for selection 'window8_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window8_right_metal' is missing geometry components for selection 'window8_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window9_right_wood' is missing geometry components for selection 'window9_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window9_left_wood' is missing geometry components for selection 'window9_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window9_right_metal' is missing geometry components for selection 'window9_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window9_left_metal' is missing geometry components for selection 'window9_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window10_right_wood' is missing geometry components for selection 'window10_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window10_right_metal' is missing geometry components for selection 'window10_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window11_right_wood' is missing geometry components for selection 'window11_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window11_right_metal' is missing geometry components for selection 'window11_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window12_left_wood' is missing geometry components for selection 'window12_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window12_left_metal' is missing geometry components for selection 'window12_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window13_right_wood' is missing geometry components for selection 'window13_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window13_left_wood' is missing geometry components for selection 'window13_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window13_right_metal' is missing geometry components for selection 'window13_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window13_left_metal' is missing geometry components for selection 'window13_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window14_right_wood' is missing geometry components for selection 'window14_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window14_left_wood' is missing geometry components for selection 'window14_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window14_right_metal' is missing geometry components for selection 'window14_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window14_left_metal' is missing geometry components for selection 'window14_left_metal', check model+config
+ 1:21:19   ENTITY       : Load entity type 'Land_House_1M2'
+ 1:21:19    ENTITY    (W): Door 'door1_door_wood' is missing geometry components for selection 'door1_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door1_door_metal' is missing geometry components for selection 'door1_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'door2_door_wood' is missing geometry components for selection 'door2_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door2_door_metal' is missing geometry components for selection 'door2_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_right_wood' is missing geometry components for selection 'window1_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_right_metal' is missing geometry components for selection 'window1_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_right_wood' is missing geometry components for selection 'window2_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_left_wood' is missing geometry components for selection 'window2_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_right_metal' is missing geometry components for selection 'window2_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_left_metal' is missing geometry components for selection 'window2_left_metal', check model+config
+ 1:21:19   ENTITY       : Load entity type 'Land_House_1M1'
+ 1:21:19    ENTITY    (W): Door 'door1_door_wood' is missing geometry components for selection 'door1_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door1_door_metal' is missing geometry components for selection 'door1_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_right_wood' is missing geometry components for selection 'window1_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_right_metal' is missing geometry components for selection 'window1_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_right_wood' is missing geometry components for selection 'window2_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_right_metal' is missing geometry components for selection 'window2_right_metal', check model+config
+ 1:21:19   ENTITY       : Load entity type 'Land_House_2M2'
+ 1:21:19    ENTITY    (W): Door 'door1_door_wood' is missing geometry components for selection 'door1_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door1_door_metal' is missing geometry components for selection 'door1_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'door2_door_wood' is missing geometry components for selection 'door2_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door2_door_metal' is missing geometry components for selection 'door2_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'door3_door_wood' is missing geometry components for selection 'door3_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door3_door_metal' is missing geometry components for selection 'door3_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'door4_door_wood' is missing geometry components for selection 'door4_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door4_door_metal' is missing geometry components for selection 'door4_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'tandoor1' is missing geometry components for selection 'tandoor1_door', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_right_wood' is missing geometry components for selection 'window1_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_left_wood' is missing geometry components for selection 'window1_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_right_metal' is missing geometry components for selection 'window1_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_left_metal' is missing geometry components for selection 'window1_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_right_wood' is missing geometry components for selection 'window2_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_left_wood' is missing geometry components for selection 'window2_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_right_metal' is missing geometry components for selection 'window2_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_left_metal' is missing geometry components for selection 'window2_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window3_right_wood' is missing geometry components for selection 'window3_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window3_right_metal' is missing geometry components for selection 'window3_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window4_left_wood' is missing geometry components for selection 'window4_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window4_left_metal' is missing geometry components for selection 'window4_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window5_right_wood' is missing geometry components for selection 'window5_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window5_left_wood' is missing geometry components for selection 'window5_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window5_right_metal' is missing geometry components for selection 'window5_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window5_left_metal' is missing geometry components for selection 'window5_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window6_right_wood' is missing geometry components for selection 'window6_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window6_right_metal' is missing geometry components for selection 'window6_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window7_right_wood' is missing geometry components for selection 'window7_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window7_left_wood' is missing geometry components for selection 'window7_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window7_right_metal' is missing geometry components for selection 'window7_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window7_left_metal' is missing geometry components for selection 'window7_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window8_left_wood' is missing geometry components for selection 'window8_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window8_left_metal' is missing geometry components for selection 'window8_left_metal', check model+config
+ 1:21:19   ENTITY       : Load entity type 'Land_Gate_M1'
+ 1:21:19    ENTITY    (W): Door 'DoorsTwin1' is missing geometry components for selection 'DoorsTwin1', check model+config
+ 1:21:19   ENTITY       : Load entity type 'Land_House_1S2'
+ 1:21:19    ENTITY    (W): Door 'door1_door_wood' is missing geometry components for selection 'door1_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door1_door_metal' is missing geometry components for selection 'door1_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'door2_door_wood' is missing geometry components for selection 'door2_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door2_door_metal' is missing geometry components for selection 'door2_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_right_wood' is missing geometry components for selection 'window1_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_left_wood' is missing geometry components for selection 'window1_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_right_metal' is missing geometry components for selection 'window1_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_left_metal' is missing geometry components for selection 'window1_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_right_wood' is missing geometry components for selection 'window2_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_left_wood' is missing geometry components for selection 'window2_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_right_metal' is missing geometry components for selection 'window2_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_left_metal' is missing geometry components for selection 'window2_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window3_right_wood' is missing geometry components for selection 'window3_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window3_right_metal' is missing geometry components for selection 'window3_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window4_right_wood' is missing geometry components for selection 'window4_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window4_left_wood' is missing geometry components for selection 'window4_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window4_right_metal' is missing geometry components for selection 'window4_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window4_left_metal' is missing geometry components for selection 'window4_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window5_right_wood' is missing geometry components for selection 'window5_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window5_left_wood' is missing geometry components for selection 'window5_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window5_right_metal' is missing geometry components for selection 'window5_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window5_left_metal' is missing geometry components for selection 'window5_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window6_right_wood' is missing geometry components for selection 'window6_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window6_left_wood' is missing geometry components for selection 'window6_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window6_right_metal' is missing geometry components for selection 'window6_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window6_left_metal' is missing geometry components for selection 'window6_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window7_right_wood' is missing geometry components for selection 'window7_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window7_left_wood' is missing geometry components for selection 'window7_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window7_right_metal' is missing geometry components for selection 'window7_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window7_left_metal' is missing geometry components for selection 'window7_left_metal', check model+config
+ 1:21:19   ENTITY       : Load entity type 'Land_House_1S1'
+ 1:21:19    ENTITY    (W): Door 'door1_door_wood' is missing geometry components for selection 'door1_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door1_door_metal' is missing geometry components for selection 'door1_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_right_wood' is missing geometry components for selection 'window1_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_left_wood' is missing geometry components for selection 'window1_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_right_metal' is missing geometry components for selection 'window1_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_left_metal' is missing geometry components for selection 'window1_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_right_wood' is missing geometry components for selection 'window2_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_left_wood' is missing geometry components for selection 'window2_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_right_metal' is missing geometry components for selection 'window2_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_left_metal' is missing geometry components for selection 'window2_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window3_right_wood' is missing geometry components for selection 'window3_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window3_left_wood' is missing geometry components for selection 'window3_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window3_right_metal' is missing geometry components for selection 'window3_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window3_left_metal' is missing geometry components for selection 'window3_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window4_right_wood' is missing geometry components for selection 'window4_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window4_right_metal' is missing geometry components for selection 'window4_right_metal', check model+config
+ 1:21:19   ENTITY       : Load entity type 'Land_Wreck_sed01_aban1_white'
+ 1:21:19    ENTITY    (W): Door 'Doors3' is missing geometry components for selection 'Doors3', check model+config
+ 1:21:19   ENTITY       : Load entity type 'Land_HealthCare_Takistan'
+ 1:21:19    ENTITY    (W): Door 'DoorsTwin1' is missing geometry components for selection 'DoorsTwin1', check model+config
+ 1:21:19    ENTITY    (W): Unknown object class 'thing' (dz\structures\furniture\eletrical_appliances\washing_machine\washing_machine.p3d)
+ 1:21:19    ENTITY    (W): Unknown object class 'thing' (dz\structures\furniture\eletrical_appliances\washing_machine\washing_machine.p3d)
+ 1:21:19    ENTITY    (W): Unknown object class 'thing' (dz\structures\furniture\eletrical_appliances\washing_machine\washing_machine.p3d)
+ 1:21:19   ENTITY    (W): Unknown object class 'decal' (dz\structures_takistan\roads\decals\decal_whitemarking_worn_3b.p3d)
+ 1:21:19   ENTITY    (W): Unknown object class 'decal' (dz\structures_takistan\roads\decals\decal_whitemarking_worn_3b.p3d)
+ 1:21:19   ENTITY       : Load entity type 'Land_House_3S2_Dam2'
+ 1:21:19    ENTITY    (W): Door 'door1_door_wood' is missing geometry components for selection 'door1_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door1_door_metal' is missing geometry components for selection 'door1_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'door2_door_wood' is missing geometry components for selection 'door2_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door2_door_metal' is missing geometry components for selection 'door2_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'door3_door_wood' is missing geometry components for selection 'door3_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door3_door_metal' is missing geometry components for selection 'door3_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'door4_door_wood' is missing geometry components for selection 'door4_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door4_door_metal' is missing geometry components for selection 'door4_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'door5_door_wood' is missing geometry components for selection 'door5_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door5_door_metal' is missing geometry components for selection 'door5_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'door6_door_wood' is missing geometry components for selection 'door6_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door6_door_metal' is missing geometry components for selection 'door6_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'door7_door_wood' is missing geometry components for selection 'door7_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door7_door_metal' is missing geometry components for selection 'door7_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'door8_door_wood' is missing geometry components for selection 'door8_door_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'door8_door_metal' is missing geometry components for selection 'door8_door_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_right_wood' is missing geometry components for selection 'window1_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_left_wood' is missing geometry components for selection 'window1_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_right_metal' is missing geometry components for selection 'window1_right_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window1_left_metal' is missing geometry components for selection 'window1_left_metal', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_right_wood' is missing geometry components for selection 'window2_right_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_left_wood' is missing geometry components for selection 'window2_left_wood', check model+config
+ 1:21:19    ENTITY    (W): Door 'window2_right_metal' is missing geometry components for selection 'window2_right_metal', check model+config
+
+21:51:15 Players: 4 in total
+21:51:16 Average server FPS: 502.00 (measured interval: 1 s)
+21:51:16 Used memory: 3548162 KB
+21:51:16 Players: 4 in total
+21:51:17 Average server FPS: 469.53 (measured interval: 1 s)
+21:51:17 Used memory: 3548276 KB
+21:51:17 Players: 4 in total
+21:51:18 Average server FPS: 476.00 (measured interval: 1 s)
+21:51:18 Used memory: 3548230 KB
+21:51:18 Players: 4 in total
+21:51:19 Average server FPS: 494.00 (measured interval: 1 s)
+21:51:19 Used memory: 3548319 KB
+21:51:19 Players: 4 in total
+21:51:20 Average server FPS: 536.00 (measured interval: 1 s)
+21:51:20 Used memory: 3548403 KB
+21:51:20 Players: 4 in total
+21:51:21 Average server FPS: 505.49 (measured interval: 1 s)
+21:51:21 Used memory: 3548500 KB
+21:51:21 Players: 4 in total
+21:51:22 Average server FPS: 594.41 (measured interval: 1 s)
+21:51:22 Used memory: 3548640 KB
+21:51:22 Players: 4 in total
+21:51:23 Average server FPS: 488.51 (measured interval: 1 s)
+21:51:23 Used memory: 3548731 KB
+21:51:23 Players: 4 in total
+21:51:24 Average server FPS: 460.54 (measured interval: 1 s)
+21:51:24 Used memory: 3548810 KB
+21:51:24 Players: 4 in total
+21:51:25 Average server FPS: 515.48 (measured interval: 1 s)
+21:51:25 Used memory: 3548889 KB
+21:51:25 Players: 4 in total
+21:51:26 Average server FPS: 572.85 (measured interval: 1 s)
+21:51:26 Used memory: 3548992 KB
+21:51:26 Players: 4 in total
+21:51:27 Average server FPS: 486.00 (measured interval: 1 s)
+21:51:27 Used memory: 3549093 KB
+21:51:27 Players: 4 in total
+21:51:28 Average server FPS: 469.06 (measured interval: 1 s)
+21:51:28 Used memory: 3549192 KB
+21:51:28 Players: 4 in total
+21:51:29 Average server FPS: 481.52 (measured interval: 1 s)
+21:51:29 Used memory: 3549251 KB
+21:51:29 Players: 4 in total
+21:51:30 Average server FPS: 622.00 (measured interval: 1 s)
+21:51:30 Used memory: 3549311 KB
+21:51:30 Players: 4 in total
+21:51:31 Average server FPS: 561.32 (measured interval: 1 s)
+21:51:31 Used memory: 3549406 KB
+21:51:31 Players: 4 in total
+21:51:32 Average server FPS: 577.42 (measured interval: 1 s)
+21:51:32 Used memory: 3549484 KB
+21:51:32 Players: 4 in total
+21:51:33 Average server FPS: 620.00 (measured interval: 1 s)
+21:51:33 Used memory: 3549579 KB
+21:51:33 Players: 4 in total
+21:51:34 Average server FPS: 617.00 (measured interval: 1 s)
+21:51:34 Used memory: 3549676 KB
+21:51:34 Players: 4 in total
+21:51:35 Average server FPS: 588.00 (measured interval: 1 s)
+21:51:35 Used memory: 3546920 KB
+21:51:35 Players: 4 in total
+21:51:36 Average server FPS: 562.00 (measured interval: 1 s)
+21:51:36 Used memory: 3546955 KB
+21:51:36 Players: 4 in total
+21:51:37 Average server FPS: 618.00 (measured interval: 1 s)
+21:51:37 Used memory: 3547061 KB
+21:51:37 Players: 4 in total
+21:51:38 Average server FPS: 596.40 (measured interval: 1 s)
+21:51:38 Used memory: 3547184 KB
+21:51:38 Players: 4 in total
+21:51:39 Average server FPS: 605.79 (measured interval: 1 s)
+21:51:39 Used memory: 3547276 KB
+21:51:39 Players: 4 in total
+21:51:40 Average server FPS: 606.39 (measured interval: 1 s)
+21:51:40 Used memory: 3547344 KB
+21:51:40 Players: 4 in total
+21:51:41 Average server FPS: 584.00 (measured interval: 1 s)
+21:51:41 Used memory: 3547470 KB
+21:51:41 Players: 4 in total
+21:51:42 Average server FPS: 562.44 (measured interval: 1 s)
+21:51:42 Used memory: 3547814 KB
+21:51:42 Players: 4 in total
+21:51:42 !!! [CE][Point] Removing 5049.708008, 10132.212891 from Land_House_3S1
+21:51:43 Average server FPS: 570.00 (measured interval: 1 s)
+21:51:43 Used memory: 3548484 KB
+21:51:43 Players: 4 in total
+21:51:43 ENTITY    (W): Unknown object class 'thing' (dz\structures_takistan\industrial\containers\container_long_militarygreen.p3d)
+21:51:44 Average server FPS: 601.00 (measured interval: 1 s)
+21:51:44 Used memory: 3548953 KB
+21:51:44 Players: 4 in total
+21:51:44 [CE][Links] found 50708 total links between groups, of 3781
+21:51:44 [CE][SpawnRandomLoot] (StaticPoliceCar) :: Type: Land_Wreck_UAZ_Aban2_Police, lootmin: 3, lootmax: 5, wanted: 4, deloot: 2, containermaxsum: 11
+21:51:44 	!!! (child) Land_Wreck_UAZ_Aban2_Police spawns loot or dispatch but can not be saved because of non-saveable StorageCategory.
+21:51:44 [CE][Links] found 50738 total links between groups, of 3782
+21:51:44 [CE][SpawnRandomLoot] (StaticPoliceCar) :: Type: Land_Wreck_UAZ_Aban2_Police, lootmin: 3, lootmax: 5, wanted: 4, deloot: 2, containermaxsum: 11
+21:51:44 	!!! (child) Land_Wreck_UAZ_Aban2_Police spawns loot or dispatch but can not be saved because of non-saveable StorageCategory.
+21:51:44 [CE][Links] found 50758 total links between groups, of 3783
+21:51:44 [CE][SpawnRandomLoot] (StaticPoliceCar) :: Type: Land_Wreck_UAZ_Aban1_Police, lootmin: 3, lootmax: 5, wanted: 3, deloot: 2, containermaxsum: 10
+21:51:44 	!!! (child) Land_Wreck_UAZ_Aban1_Police spawns loot or dispatch but can not be saved because of non-saveable StorageCategory.
+21:51:45 [CE][Links] found 50774 total links between groups, of 3784
+21:51:45 [CE][SpawnRandomLoot] (StaticPoliceCar) :: Type: Land_Wreck_UAZ_Aban2_Police, lootmin: 3, lootmax: 5, wanted: 3, deloot: 2, containermaxsum: 11
+21:51:45 	!!! (child) Land_Wreck_UAZ_Aban2_Police spawns loot or dispatch but can not be saved because of non-saveable StorageCategory.
+21:51:45 [CE][Links] found 50800 total links between groups, of 3785
+21:51:45 [CE][SpawnRandomLoot] (StaticPoliceCar) :: Type: Land_Wreck_UAZ_Aban2_Police, lootmin: 3, lootmax: 5, wanted: 3, deloot: 2, containermaxsum: 11
+21:51:45 	!!! (child) Land_Wreck_UAZ_Aban2_Police spawns loot or dispatch but can not be saved because of non-saveable StorageCategory.
+21:51:45 Average server FPS: 453.77 (measured interval: 1 s)
+21:51:45 Used memory: 3549869 KB
+21:51:45 Players: 4 in total
+21:51:46 Average server FPS: 482.00 (measured interval: 1 s)
+21:51:46 Used memory: 3564657 KB
+21:51:46 Players: 4 in total
+21:51:47 Average server FPS: 715.00 (measured interval: 1 s)
+21:51:47 Used memory: 3558036 KB
+21:51:47 Players: 4 in total
+21:51:48 Average server FPS: 476.52 (measured interval: 1 s)
+21:51:48 Used memory: 3549971 KB
+21:51:48 Players: 4 in total
+21:51:49 Average server FPS: 451.00 (measured interval: 1 s)
+21:51:49 Used memory: 3550024 KB
+21:51:49 Players: 4 in total
+21:51:50 Average server FPS: 533.00 (measured interval: 1 s)
+
+21:51:04 Players: 5 in total
+21:51:05 [CE][Links] found 256080 total links between groups, of 8527
+21:51:05 [CE][SpawnRandomLoot] (StaticPoliceCar) :: Type: Land_Wreck_UAZ_Aban2_Police, lootmin: 3, lootmax: 5, wanted: 3, deloot: 2, containermaxsum: 11
+21:51:05 	!!! (child) Land_Wreck_UAZ_Aban2_Police spawns loot or dispatch but can not be saved because of non-saveable StorageCategory.
+21:51:05 Average server FPS: 370.63 (measured interval: 1 s)
+21:51:05 Used memory: 3669311 KB
+21:51:05 Players: 5 in total
+21:51:06 Average server FPS: 528.00 (measured interval: 1 s)
+21:51:06 Used memory: 3661254 KB
+21:51:06 Players: 5 in total
+21:51:07 Average server FPS: 434.00 (measured interval: 1 s)
+21:51:07 Used memory: 3661334 KB
+21:51:07 Players: 5 in total
+21:51:08 Average server FPS: 417.58 (measured interval: 1 s)
+21:51:08 Used memory: 3659201 KB
+21:51:08 Players: 5 in total
+21:51:09 Average server FPS: 440.56 (measured interval: 1 s)
+21:51:09 Used memory: 3659301 KB
+21:51:09 Players: 5 in total
+21:51:10 Average server FPS: 598.00 (measured interval: 1 s)
+21:51:10 Used memory: 3659411 KB
+21:51:10 Players: 5 in total
+21:51:11 Average server FPS: 564.00 (measured interval: 1 s)
+21:51:11 Used memory: 3659285 KB
+21:51:11 Players: 5 in total
+21:51:12 Average server FPS: 531.31 (measured interval: 1 s)
+21:51:12 Used memory: 3659152 KB
+21:51:12 Players: 5 in total
+21:51:13 Average server FPS: 476.00 (measured interval: 1 s)
+21:51:13 Used memory: 3658983 KB
+21:51:13 Players: 5 in total
+21:51:14 Average server FPS: 527.94 (measured interval: 1 s)
+21:51:14 Used memory: 3657144 KB
+21:51:14 Players: 5 in total
+21:51:15 Average server FPS: 558.00 (measured interval: 1 s)
+21:51:15 Used memory: 3657240 KB
+21:51:15 Players: 5 in total
+21:51:16 Average server FPS: 526.79 (measured interval: 1 s)
+21:51:16 Used memory: 3657344 KB
+21:51:16 Players: 5 in total
+21:51:17 Average server FPS: 556.00 (measured interval: 1 s)
+21:51:17 Used memory: 3657442 KB
+21:51:17 Players: 5 in total
+21:51:18 Average server FPS: 657.34 (measured interval: 1 s)
+21:51:18 Used memory: 3657548 KB
+21:51:18 Players: 5 in total
+21:51:19 Average server FPS: 429.93 (measured interval: 1 s)
+21:51:19 Used memory: 3658048 KB
+21:51:19 Players: 5 in total
+21:51:20 Average server FPS: 545.00 (measured interval: 1 s)
+21:51:20 Used memory: 3657724 KB
+21:51:20 Players: 5 in total
+21:51:21 Average server FPS: 595.00 (measured interval: 1 s)
+21:51:21 Used memory: 3657826 KB
+21:51:21 Players: 5 in total
+21:51:22 Average server FPS: 540.46 (measured interval: 1 s)
+21:51:22 Used memory: 3657923 KB
+21:51:22 Players: 5 in total
+21:51:23 Average server FPS: 556.44 (measured interval: 1 s)
+21:51:23 Used memory: 3658019 KB
+21:51:23 Players: 5 in total
+21:51:24 Average server FPS: 460.54 (measured interval: 1 s)
+21:51:24 Used memory: 3658135 KB
+21:51:24 Players: 5 in total
+21:51:25 Average server FPS: 492.51 (measured interval: 1 s)
+21:51:25 Used memory: 3658253 KB
+21:51:25 Players: 5 in total
+21:51:26 Average server FPS: 475.05 (measured interval: 1 s)
+21:51:26 Used memory: 3658410 KB
+21:51:26 Players: 5 in total
+21:51:27 Average server FPS: 496.00 (measured interval: 1 s)
+21:51:27 Used memory: 3658535 KB
+21:51:27 Players: 5 in total
+21:51:28 Average server FPS: 542.91 (measured interval: 1 s)
+21:51:28 Used memory: 3658647 KB
+21:51:28 Players: 5 in total
+21:51:29 Average server FPS: 459.54 (measured interval: 1 s)
+21:51:29 Used memory: 3658768 KB
+21:51:29 Players: 5 in total
+21:51:30 Average server FPS: 476.52 (measured interval: 1 s)
+21:51:30 Used memory: 3656536 KB
+21:51:30 Players: 5 in total
+21:51:31 Average server FPS: 564.00 (measured interval: 1 s)
+21:51:31 Used memory: 3656665 KB
+21:51:31 Players: 5 in total
+21:51:32 Average server FPS: 470.53 (measured interval: 1 s)
+21:51:32 Used memory: 3656793 KB
+21:51:32 Players: 5 in total
+21:51:33 Average server FPS: 483.52 (measured interval: 1 s)
+21:51:33 Used memory: 3656924 KB
+21:51:33 Players: 5 in total
+21:51:34 Average server FPS: 434.13 (measured interval: 1 s)
+21:51:34 Used memory: 3657052 KB
+21:51:34 Players: 5 in total
+21:51:35 Average server FPS: 579.42 (measured interval: 1 s)
+21:51:35 Used memory: 3657172 KB
+21:51:35 Players: 5 in total
+21:51:36 Average server FPS: 487.54 (measured interval: 1 s)
+21:51:36 Used memory: 3657288 KB
+21:51:36 Players: 5 in total
+21:51:37 Average server FPS: 421.00 (measured interval: 1 s)
+21:51:37 Used memory: 3657410 KB
+21:51:37 Players: 5 in total
+21:51:38 Average server FPS: 419.00 (measured interval: 1 s)
+21:51:38 Used memory: 3657540 KB
+21:51:38 Players: 5 in total
+21:51:39 Average server FPS: 521.00 (measured interval: 1 s)
+21:51:39 Used memory: 3657664 KB
+21:51:39 Players: 5 in total
+21:51:40 Average server FPS: 495.50 (measured interval: 1 s)
+21:51:40 Used memory: 3657796 KB
+21:51:40 Players: 5 in total
+21:51:41 Average server FPS: 452.64 (measured interval: 1 s)
+21:51:41 Used memory: 3657928 KB
+21:51:41 Players: 5 in total
+21:51:42 Average server FPS: 475.00 (measured interval: 1 s)
+21:51:42 Used memory: 3658053 KB
+21:51:42 Players: 5 in total
+21:51:43 Average server FPS: 587.00 (measured interval: 1 s)
+21:51:43 Used memory: 3658172 KB

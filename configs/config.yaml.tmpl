@@ -62,3 +62,12 @@ server:
   # adminLogBuildActions. Both default to 1 (enabled) when unset.
   # admin_log_placement: 1     # log item/base placement
   # admin_log_build_actions: 1 # log build actions
+
+# Web UI and log analysis API (ADM/RPT).
+# `dayzctl apply` writes and enables dayz-web.service when enabled is true.
+# There is no built-in authentication: keep the loopback address, or put an
+# authenticating reverse proxy in front of it before binding to 0.0.0.0.
+web:
+  enabled: false
+  address: 127.0.0.1
+  port: 8081

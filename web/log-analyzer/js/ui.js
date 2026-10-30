@@ -1,0 +1,1006 @@
+/**
+ * View layer. Pure DOM building — no framework, no innerHTML for log content
+ * (log lines are untrusted text and are always set via textContent).
+ */
+
+import { fmtInt, fmtDuration, fmtTime, fmtClock, fmtDistance, fmtBytes, truncate, colorFor } from './format.js';
+import { SEVERITY, SEVERITY_LABEL, SEVERITY_ORDER } from './severity.js';
+import { MAPS, renderMap } from './mapview.js';
+
+/** Kill count per weapon, used by the overview card. */
+function topWeapons(kills, limit = 8) {
+  const counts = new Map();
+  for (const kill of kills) {
+    const name = kill.weapon || 'unknown';
+    counts.set(name, (counts.get(name) ?? 0) + 1);
+  }
+  return [...counts.entries()].sort((a, b) => b[1] - a[1]).slice(0, limit);
+}
+
+export function el(tag, props = {}, ...children) {
+  const node = document.createElement(tag);
+  for (const [key, value] of Object.entries(props)) {
+    if (value === null || value === undefined || value === false) continue;
+    if (key === 'class') node.className = value;
+    else if (key === 'text') node.textContent = value;
+    else if (key === 'dataset') Object.assign(node.dataset, value);
+    else if (key.startsWith('on') && typeof value === 'function') {
+      node.addEventListener(key.slice(2).toLowerCase(), value);
+    } else node.setAttribute(key, value === true ? '' : value);
+  }
+  for (const child of children.flat(2)) {
+    if (child === null || child === undefined || child === false) continue;
+    node.append(child instanceof Node ? child : document.createTextNode(String(child)));
+  }
+  return node;
+}
+
+export function clear(node) {
+  while (node.firstChild) node.removeChild(node.firstChild);
+}
+
+function kpi(label, value, sub, tone) {
+  return el(
+    'div',
+    { class: `kpi${tone ? ` ${tone}` : ''}` },
+    el('div', { class: 'label', text: label }),
+    el('div', { class: 'value', text: value }),
+    sub ? el('div', { class: 'sub', text: sub }) : null,
+  );
+}
+
+function sevPill(severity) {
+  return el('span', { class: `sev ${severity}`, text: SEVERITY_LABEL[severity] ?? severity });
+}
+
+function table(headers, rows) {
+  const thead = el(
+    'thead',
+    {},
+    el('tr', {}, headers.map((h) => el('th', { class: h.num ? 'num' : undefined, text: h.label }))),
+  );
+  const tbody = el('tbody', {}, rows);
+  return el('div', { class: 'table-wrap' }, el('table', {}, thead, tbody));
+}
+
+function emptyState(text) {
+  return el('div', { class: 'empty', text });
+}
+
+function card(title, ...children) {
+  const body = children.filter(Boolean);
+  return el('div', { class: 'card' }, title ? el('h3', { text: title }) : null, ...body);
+}
+
+/* ── File chips ──────────────────────────────────────────── */
+
+export function renderChips(container, files) {
+  clear(container);
+  for (const f of files) {
+    container.append(
+      el(
+        'div',
+        { class: 'chip', title: f.error ? `${f.name} — ${f.error}` : `${f.name} · ${fmtInt(f.lines)} lines` },
+        el('span', { class: `chip-type ${String(f.type).toLowerCase()}`, text: f.type }),
+        el('span', { class: 'chip-name', text: f.name }),
+        el('span', { class: 'chip-meta', text: f.error ? 'skipped' : `${fmtInt(f.lines)} lines` }),
+      ),
+    );
+  }
+}
+
+/* ── Overview ────────────────────────────────────────────── */
+
+export function renderOverview(panel, report, actions) {
+  clear(panel);
+  const { adm, rpt, files } = report;
+
+  // Problems
+  if (rpt) {
+    const counts = rpt.counts;
+    const kpis = el(
+      'div',
+      { class: 'kpis' },
+      ...SEVERITY_ORDER.map((sev) =>
+        el(
+          'button',
+          {
+            class: 'kpi',
+            style: 'text-align:left;cursor:pointer;font:inherit;color:inherit',
+            onClick: () => actions.goTab('problems', { problemFilter: sev }),
+          },
+          el('div', { class: 'label', text: SEVERITY_LABEL[sev] }),
+          el('div', {
+            class: `value ${counts[sev] ? (sev === SEVERITY.INFO ? '' : 'bad') : ''}`,
+            text: fmtInt(counts[sev]),
+          }),
+          el('div', { class: 'sub', text: counts[sev] === 1 ? 'occurrence' : 'occurrences' }),
+        ),
+      ),
+    );
+
+    const headline =
+      rpt.problemCount === 0
+        ? 'No problems found. Only harmless standard messages.'
+        : `${fmtInt(rpt.problemCount)} message${rpt.problemCount === 1 ? '' : 's'} worth reviewing, in ${fmtInt(rpt.problemGroupCount)} distinct pattern${rpt.problemGroupCount === 1 ? '' : 's'}.`;
+
+    panel.append(card('Problems found', el('p', { class: 'muted small', text: headline }), kpis));
+  } else {
+    panel.append(card('Problems found', emptyState('No RPT loaded — drop an .RPT file to see error analysis.')));
+  }
+
+  // Activity
+  if (adm && adm.totals.players > 0) {
+    const p = adm.period;
+    const periodText = p.hasTime
+      ? `${fmtClock(p.from)} – ${fmtClock(p.to)}`
+      : 'no timestamps';
+    const kpis = el(
+      'div',
+      { class: 'kpis' },
+      kpi('Period', p.hasTime ? fmtDuration(p.seconds) : '—', p.hasTime ? periodText : null),
+      el(
+        'button',
+        { class: 'kpi', style: 'text-align:left;font:inherit;color:inherit;cursor:pointer', onClick: () => actions.goTab('players') },
+        el('div', { class: 'label', text: 'Players' }),
+        el('div', { class: 'value', text: fmtInt(adm.totals.players) }),
+        el('div', { class: 'sub', text: `Most online: ${fmtInt(adm.peakOnline)}` }),
+      ),
+      el(
+        'button',
+        { class: 'kpi', style: 'text-align:left;font:inherit;color:inherit;cursor:pointer', onClick: () => actions.goTab('kills') },
+        el('div', { class: 'label', text: 'Deaths' }),
+        el('div', { class: 'value', text: fmtInt(adm.totals.deaths) }),
+        el('div', { class: 'sub', text: `PvP kills: ${fmtInt(adm.totals.pvpKills)}` }),
+      ),
+      el(
+        'button',
+        {
+          class: `kpi ${adm.totals.suspicious ? 'warn' : ''}`,
+          style: 'text-align:left;font:inherit;color:inherit;cursor:pointer',
+          onClick: () => actions.goTab('suspicious'),
+        },
+        el('div', { class: 'label', text: 'Suspicious events' }),
+        el('div', { class: 'value', text: fmtInt(adm.totals.suspicious) }),
+      ),
+      kpi('Chat messages', fmtInt(adm.totals.chats)),
+      el(
+        'button',
+        { class: 'kpi', style: 'text-align:left;font:inherit;color:inherit;cursor:pointer', onClick: () => actions.goTab('base') },
+        el('div', { class: 'label', text: 'Build actions' }),
+        el('div', { class: 'value', text: fmtInt(adm.totals.builds) }),
+      ),
+    );
+
+    panel.append(
+      card(
+        'Activity (ADM)',
+        p.hasTime ? null : el('p', { class: 'muted small', text: 'The log has no parseable timestamps, so the period is unknown.' }),
+        kpis,
+      ),
+    );
+  } else if (adm) {
+    panel.append(card('Activity (ADM)', emptyState('No player events recognised in the ADM lines.')));
+  } else {
+    panel.append(card('Activity (ADM)', emptyState('No ADM loaded — drop an .ADM file to see players, kills and bases.')));
+  }
+
+  // Log state
+  if (rpt) {
+    const endText =
+      rpt.endState === 'clean'
+        ? 'Clean shutdown marker found at the end of the log.'
+        : rpt.endState === 'crash'
+          ? 'The log contains a crash marker — the process died instead of shutting down.'
+          : 'No shutdown in the log (still running, killed or restarted hard).';
+
+    const rows = [
+      el('div', { class: 'small muted' }, el('strong', { text: 'End of log: ' }), endText),
+      el('div', { class: 'small muted' }, el('strong', { text: 'Origin: ' }), originText(report)),
+      el('div', { class: 'small muted' }, el('strong', { text: 'Mods: ' }), rpt.mods.length ? rpt.mods.join(', ') : 'none detected (vanilla)'),
+    ];
+
+    panel.append(card('Engine log', ...rows));
+  }
+
+  // Leaders
+  if (adm && adm.players.length) {
+    const leaders = adm.players.slice().sort((a, b) => b.kills - a.kills).slice(0, 8);
+    const rows = leaders.map((p) =>
+      el(
+        'tr',
+        {},
+        el('td', {}, el('span', { style: `color:${colorFor(p.name)}`, text: p.name })),
+        el('td', { class: 'num', text: fmtInt(p.kills) }),
+        el('td', { class: 'num', text: fmtInt(p.deaths) }),
+        el('td', { class: 'num', text: p.kd.toFixed(2) }),
+        el('td', { class: 'num', text: fmtDuration(p.playtime) }),
+      ),
+    );
+
+    const weapons = topWeapons(adm.kills, 8)
+      .map(([w, n]) => el('tr', {}, el('td', { text: w }), el('td', { class: 'num', text: fmtInt(n) })))
+      .slice(0, 8);
+
+    panel.append(
+      el(
+        'div',
+        { class: 'card' },
+        el('h3', { text: 'Top players' }),
+        table(
+          [
+            { label: 'Player' },
+            { label: 'Kills', num: true },
+            { label: 'Deaths', num: true },
+            { label: 'K/D', num: true },
+            { label: 'Playtime', num: true },
+          ],
+          rows,
+        ),
+      ),
+      el(
+        'div',
+        { class: 'card' },
+        el('h3', { text: 'Weapons used' }),
+        weapons.length
+          ? table([{ label: 'Weapon' }, { label: 'Kills', num: true }], weapons)
+          : emptyState('No kills recorded.'),
+      ),
+    );
+  }
+
+  // Files
+  const fileRows = files.map((f) =>
+    el(
+      'tr',
+      {},
+      el('td', {}, el('span', { class: `chip-type ${String(f.type).toLowerCase()}`, text: f.type })),
+      el('td', { text: f.name }),
+      el('td', { class: 'num', text: fmtInt(f.lines) }),
+      el('td', { class: 'num', text: fmtBytes(f.bytes) }),
+      el('td', { class: 'faint small', text: f.error ?? '' }),
+    ),
+  );
+
+  panel.append(
+    el(
+      'div',
+      { class: 'card' },
+      el('h3', { text: 'Files' }),
+      table(
+        [{ label: 'Type' }, { label: 'Name' }, { label: 'Lines', num: true }, { label: 'Size', num: true }, { label: 'Note' }],
+        fileRows,
+      ),
+    ),
+  );
+}
+
+function originText(report) {
+  if (!report.rpt) return '—';
+  if (report.rptOrigin === 'server') return 'server RPT (dedicated server output)';
+  if (report.rptOrigin === 'client') return 'game client log — this is your own session, not the server';
+  return 'could not be determined';
+}
+
+/* ── Problems ────────────────────────────────────────────── */
+
+export function renderProblems(panel, report, state) {
+  clear(panel);
+
+  if (!report.rpt) {
+    panel.append(card('', emptyState('No RPT loaded. Drop an .RPT file to analyse engine messages.')));
+    return;
+  }
+
+  const filter = state.problemFilter;
+  const query = state.problemQuery.trim().toLowerCase();
+
+  const chips = el(
+    'div',
+    { class: 'filters' },
+    ...[['all', 'All'], ...SEVERITY_ORDER.map((s) => [s, SEVERITY_LABEL[s]])].map(([value, label]) =>
+      el('button', {
+        class: `filter${filter === value ? ' active' : ''}`,
+        text: value === 'all' ? label : `${label} (${fmtInt(report.rpt.counts[value] ?? 0)})`,
+        onClick: () => state.actions.setState({ problemFilter: value }),
+      }),
+    ),
+    el('input', {
+      type: 'search',
+      placeholder: 'Filter messages …',
+      value: state.problemQuery,
+      class: 'filter',
+      style: 'min-width:200px;border-radius:8px',
+      'data-focus': 'problem-query',
+      onInput: (e) => {
+        state.problemQuery = e.target.value;
+        state.actions.setState({ problemQuery: e.target.value });
+      },
+    }),
+  );
+
+  panel.append(chips);
+
+  const groups = report.rpt.groups.filter((g) => {
+    if (filter !== 'all' && g.severity !== filter) return false;
+    if (!query) return true;
+    return `${g.title} ${g.sample} ${g.category}`.toLowerCase().includes(query);
+  });
+
+  if (!groups.length) {
+    panel.append(card('', emptyState('Nothing matches this filter.')));
+    return;
+  }
+
+  if (report.rpt.overflowGroups > 0) {
+    panel.append(
+      el('p', {
+        class: 'alert',
+        text: `${fmtInt(report.rpt.overflowGroups)} additional rare patterns were collapsed to keep memory bounded.`,
+      }),
+    );
+  }
+
+  for (const g of groups.slice(0, 400)) {
+    const timeRange =
+      g.firstTod === null
+        ? ''
+        : g.firstTod === g.lastTod
+          ? `at ${fmtTime(g.firstTod)}`
+          : `${fmtTime(g.firstTod)} – ${fmtTime(g.lastTod)}`;
+
+    panel.append(
+      el(
+        'div',
+        { class: `problem ${g.severity}` },
+        el(
+          'div',
+          { class: 'problem-head' },
+          el(
+            'div',
+            {},
+            el('div', { class: 'problem-title', text: g.title }),
+            el('div', {
+              class: 'small faint',
+              text: [g.category, `${fmtInt(g.count)}×`, timeRange].filter(Boolean).join(' · '),
+            }),
+          ),
+          el(
+            'div',
+            { style: 'display:flex;gap:6px;align-items:center' },
+            g.vanilla ? el('span', { class: 'tag vanilla', text: 'also vanilla' }) : null,
+            sevPill(g.severity),
+          ),
+        ),
+        el(
+          'div',
+          { class: 'problem-body' },
+          el('p', { text: g.explain }),
+          g.fix ? el('p', { class: 'fix' }, el('strong', { text: 'Fix: ' }), g.fix) : null,
+          g.samples.length
+            ? el(
+                'details',
+                { class: 'samples' },
+                el('summary', { text: `Show ${g.samples.length} example line${g.samples.length === 1 ? '' : 's'}` }),
+                el('pre', { text: g.samples.join('\n') }),
+              )
+            : null,
+        ),
+      ),
+    );
+  }
+}
+
+/* ── Players ─────────────────────────────────────────────── */
+
+export function renderPlayers(panel, report, state) {
+  clear(panel);
+  const adm = report.adm;
+
+  if (!adm || !adm.players.length) {
+    panel.append(card('', emptyState('No players recognised. Is this really an ADM file?')));
+    return;
+  }
+
+  const query = state.playerQuery.trim().toLowerCase();
+  const players = adm.players.filter((p) => !query || p.name.toLowerCase().includes(query));
+
+  panel.append(
+    el(
+      'div',
+      { class: 'filters' },
+      el('input', {
+        type: 'search',
+        placeholder: 'Search players …',
+        value: state.playerQuery,
+        class: 'filter',
+        style: 'min-width:220px;border-radius:8px',
+        'data-focus': 'player-query',
+        onInput: (e) => {
+          state.playerQuery = e.target.value;
+          state.actions.setState({ playerQuery: e.target.value });
+        },
+      }),
+      el('button', {
+        class: 'filter',
+        text: state.selectedPlayer ? 'Clear selection' : 'Select a player below',
+        onClick: () => state.actions.setState({ selectedPlayer: null }),
+      }),
+    ),
+  );
+
+  const rows = players.slice(0, 500).map((p) =>
+    el(
+      'tr',
+      {
+        style: 'cursor:pointer',
+        class: state.selectedPlayer === p.key ? 'selected' : '',
+        onClick: () => state.actions.setState({ selectedPlayer: p.key }),
+      },
+      el('td', {}, el('span', { style: `color:${colorFor(p.name)}`, text: p.name })),
+      el('td', { class: 'num', text: fmtInt(p.connects) }),
+      el('td', { class: 'num', text: fmtDuration(p.playtime) }),
+      el('td', { class: 'num', text: fmtInt(p.kills) }),
+      el('td', { class: 'num', text: fmtInt(p.deaths) }),
+      el('td', { class: 'num', text: p.kd.toFixed(2) }),
+      el('td', { class: 'num', text: fmtInt(p.chats) }),
+      el('td', { class: 'num', text: fmtInt(p.builds) }),
+      el('td', { class: 'num', text: p.suspicion ? fmtInt(p.suspicion) : '' }),
+    ),
+  );
+
+  panel.append(
+    card(
+      `Players (${fmtInt(players.length)})`,
+      table(
+        [
+          { label: 'Player' },
+          { label: 'Sessions', num: true },
+          { label: 'Playtime', num: true },
+          { label: 'Kills', num: true },
+          { label: 'Deaths', num: true },
+          { label: 'K/D', num: true },
+          { label: 'Chat', num: true },
+          { label: 'Builds', num: true },
+          { label: 'Flags', num: true },
+        ],
+        rows,
+      ),
+    ),
+  );
+
+  const selected = state.selectedPlayer ? adm.playerByKey.get(state.selectedPlayer) : null;
+  if (selected) panel.append(playerDetail(report, selected));
+}
+
+function playerDetail(report, p) {
+  const adm = report.adm;
+  const involved = adm.kills.filter((k) => k.killerKey === p.key || k.victimKey === p.key);
+
+  const sessions = p.sessions.slice(-25).map((s) =>
+    el(
+      'tr',
+      {},
+      el('td', { text: s.start === null ? '—' : fmtTime(s.start) }),
+      el('td', { text: s.end === null ? 'still open' : fmtTime(s.end) }),
+      el('td', { class: 'num', text: s.start !== null && s.end !== null ? fmtDuration(s.end - s.start) : '—' }),
+      el('td', { class: 'num', text: fmtInt(s.kills) }),
+      el('td', { class: 'num', text: fmtInt(s.deaths) }),
+    ),
+  );
+
+  const killRows = p.weapons.map((use) =>
+    el('tr', {}, el('td', { text: use.name }), el('td', { class: 'num', text: fmtInt(use.count) })),
+  );
+
+  const flags = adm.suspicious.filter((s) => s.playerKey === p.key).slice(0, 20).map((s) =>
+    el(
+      'tr',
+      {},
+      el('td', { text: s.at === null ? '—' : fmtTime(s.at) }),
+      el('td', { text: s.type }),
+      el('td', { text: s.detail }),
+    ),
+  );
+
+  return el(
+    'div',
+    { class: 'card' },
+    el('h3', { text: p.name }),
+    el(
+      'div',
+      { class: 'kpis', style: 'margin-bottom:14px' },
+      kpi('Playtime', fmtDuration(p.playtime), `${fmtInt(p.connects)} session(s)`),
+      kpi('Kills', fmtInt(p.kills), `${fmtInt(p.hitsDealt)} hits landed`),
+      kpi('Deaths', fmtInt(p.deaths), `${fmtInt(p.pvpDeaths)} PvP · ${fmtInt(p.aiDeaths)} other`),
+      kpi('K/D', p.kd.toFixed(2), null),
+      kpi('Position samples', fmtInt(p.positionCount), p.lastKnownPos ? `last <${p.lastKnownPos.x.toFixed(0)}, ${p.lastKnownPos.y.toFixed(0)}>` : null),
+    ),
+    el('h3', { text: 'Sessions' }),
+    sessions.length
+      ? table(
+          [
+            { label: 'Connected' },
+            { label: 'Disconnected' },
+            { label: 'Duration', num: true },
+            { label: 'Kills', num: true },
+            { label: 'Deaths', num: true },
+          ],
+          sessions,
+        )
+      : emptyState('No sessions recorded.'),
+    el('h3', { text: 'Weapons' }),
+    killRows.length ? table([{ label: 'Weapon' }, { label: 'Kills', num: true }], killRows) : emptyState('No kills.'),
+    el('h3', { text: 'Engagements' }),
+    involved.length
+      ? table(
+          [{ label: 'Time' }, { label: 'Killer' }, { label: 'Victim' }, { label: 'Weapon' }, { label: 'Distance', num: true }],
+          involved.slice(0, 60).map((k) =>
+            el(
+              'tr',
+              {},
+              el('td', { text: k.at === null ? '—' : fmtTime(k.at) }),
+              el('td', { text: k.killer }),
+              el('td', { text: k.victim }),
+              el('td', { text: k.weapon ?? '—' }),
+              el('td', { class: 'num', text: k.distance === null ? '—' : fmtDistance(k.distance) }),
+            ),
+          ),
+        )
+      : emptyState('No kills or deaths.'),
+    flags.length ? el('h3', { text: 'Flags' }) : null,
+    flags.length ? table([{ label: 'Time' }, { label: 'Type' }, { label: 'Detail' }], flags) : null,
+  );
+}
+
+/* ── Kills ───────────────────────────────────────────────── */
+
+export function renderKills(panel, report, state) {
+  clear(panel);
+  const adm = report.adm;
+
+  if (!adm || !adm.kills.length) {
+    panel.append(card('', emptyState('No player-versus-player kills recorded.')));
+    return;
+  }
+
+  const query = state.killQuery.trim().toLowerCase();
+  let kills = adm.kills.filter(
+    (k) => !query || `${k.killer} ${k.victim} ${k.weapon ?? ''}`.toLowerCase().includes(query),
+  );
+
+  if (state.killsSort === 'distance') {
+    kills = kills.slice().sort((a, b) => (b.distance ?? -1) - (a.distance ?? -1));
+  }
+
+  panel.append(
+    el(
+      'div',
+      { class: 'filters' },
+      el('input', {
+        type: 'search',
+        placeholder: 'Search killer, victim or weapon …',
+        value: state.killQuery,
+        class: 'filter',
+        style: 'min-width:240px;border-radius:8px',
+        'data-focus': 'kill-query',
+        onInput: (e) => {
+          state.killQuery = e.target.value;
+          state.actions.setState({ killQuery: e.target.value });
+        },
+      }),
+      ...[
+        ['time', 'Newest first'],
+        ['distance', 'Longest shot'],
+      ].map(([value, label]) =>
+        el('button', {
+          class: `filter${state.killsSort === value ? ' active' : ''}`,
+          text: label,
+          onClick: () => state.actions.setState({ killsSort: value }),
+        }),
+      ),
+    ),
+  );
+
+  const ordered = state.killsSort === 'time' ? kills.slice().reverse() : kills;
+
+  const rows = ordered.slice(0, 500).map((k) =>
+    el(
+      'tr',
+      {},
+      el('td', { text: k.at === null ? '—' : fmtTime(k.at) }),
+      el('td', {}, el('span', { style: `color:${colorFor(k.killer)}`, text: k.killer })),
+      el('td', {}, el('span', { style: `color:${colorFor(k.victim)}`, text: k.victim })),
+      el('td', { text: k.weapon ?? '—' }),
+      el('td', { class: 'num', text: k.distance === null ? '—' : fmtDistance(k.distance) }),
+    ),
+  );
+
+  panel.append(
+    card(
+      `Kills (${fmtInt(kills.length)})`,
+      table(
+        [
+          { label: 'Time' },
+          { label: 'Killer' },
+          { label: 'Victim' },
+          { label: 'Weapon' },
+          { label: 'Distance', num: true },
+        ],
+        rows,
+      ),
+      ordered.length > 500 ? el('p', { class: 'small faint', text: `Showing the first 500 of ${fmtInt(ordered.length)}.` }) : null,
+    ),
+  );
+}
+
+/* ── Base building ───────────────────────────────────────── */
+
+export function renderBase(panel, report) {
+  clear(panel);
+  const adm = report.adm;
+
+  if (!adm || !adm.builds.length) {
+    panel.append(
+      card(
+        '',
+        emptyState(
+          'No build actions recorded. Note that DayZ only writes build lines to the ADM when the server has build logging enabled — a busy server with no build lines usually has logging off, not no bases.',
+        ),
+      ),
+    );
+    return;
+  }
+
+  const byObject = new Map();
+  for (const b of adm.builds) {
+    const key = (b.object || 'unknown').replace(/\s+(?:at|from)\s+<.*$/, '').trim().slice(0, 80);
+    byObject.set(key, (byObject.get(key) ?? 0) + 1);
+  }
+
+  const objectRows = [...byObject.entries()]
+    .sort((a, b) => b[1] - a[1])
+    .slice(0, 20)
+    .map(([name, n]) => el('tr', {}, el('td', { text: name }), el('td', { class: 'num', text: fmtInt(n) })));
+
+  const rows = adm.builds
+    .slice()
+    .reverse()
+    .slice(0, 400)
+    .map((b) =>
+      el(
+        'tr',
+        {},
+        el('td', { text: b.at === null ? '—' : fmtTime(b.at) }),
+        el('td', {}, el('span', { style: `color:${colorFor(b.player)}`, text: b.player })),
+        el('td', { text: truncate(b.object, 90) }),
+        el('td', {
+          class: 'faint small',
+          text: b.pos ? `<${b.pos.x.toFixed(0)}, ${b.pos.y.toFixed(0)}>` : '',
+        }),
+      ),
+    );
+
+  panel.append(
+    card(
+      `Build actions (${fmtInt(adm.builds.length)})`,
+      table([{ label: 'Time' }, { label: 'Player' }, { label: 'Object' }, { label: 'Position' }], rows),
+    ),
+    card('Most built objects', table([{ label: 'Object' }, { label: 'Count', num: true }], objectRows)),
+  );
+}
+
+/* ── Suspicious ──────────────────────────────────────────── */
+
+const SUSPICIOUS_LABEL = {
+  'combat-log': 'Combat logging',
+  teleport: 'Impossible movement',
+  'short-session': 'Very short session',
+  'shared-id': 'Shared player id',
+  kick: 'Kicked',
+  ban: 'Banned',
+};
+
+export function renderSuspicious(panel, report, state) {
+  clear(panel);
+  const adm = report.adm;
+
+  if (!adm || !adm.suspicious.length) {
+    panel.append(
+      card(
+        '',
+        emptyState(
+          'Nothing flagged. Note that a flag is a hint, not proof: disconnects after a fight can be crashes, and position jumps can be server-side teleports by admins.',
+        ),
+      ),
+    );
+    return;
+  }
+
+  const types = [...new Set(adm.suspicious.map((s) => s.type))];
+  const filter = state.suspiciousFilter;
+
+  panel.append(
+    el(
+      'div',
+      { class: 'filters' },
+      el('button', {
+        class: `filter${filter === 'all' ? ' active' : ''}`,
+        text: `All (${fmtInt(adm.suspicious.length)})`,
+        onClick: () => state.actions.setState({ suspiciousFilter: 'all' }),
+      }),
+      ...types.map((t) =>
+        el('button', {
+          class: `filter${filter === t ? ' active' : ''}`,
+          text: `${SUSPICIOUS_LABEL[t] ?? t} (${fmtInt(adm.suspicious.filter((s) => s.type === t).length)})`,
+          onClick: () => state.actions.setState({ suspiciousFilter: t }),
+        }),
+      ),
+    ),
+  );
+
+  const list = adm.suspicious.filter((s) => filter === 'all' || s.type === filter);
+
+  panel.append(
+    card(
+      'Flagged events',
+      table(
+        [{ label: 'Time' }, { label: 'Player' }, { label: 'Type' }, { label: 'Detail' }],
+        list.slice(0, 500).map((s) =>
+          el(
+            'tr',
+            {},
+            el('td', { text: s.at === null ? '—' : fmtTime(s.at) }),
+            el('td', {}, el('span', { style: `color:${colorFor(s.player)}`, text: s.player })),
+            el('td', { text: SUSPICIOUS_LABEL[s.type] ?? s.type }),
+            el('td', { class: 'small muted', text: s.detail }),
+          ),
+        ),
+      ),
+    ),
+  );
+
+  const scored = adm.players.filter((p) => p.suspicion > 0).sort((a, b) => b.suspicion - a.suspicion).slice(0, 15);
+  panel.append(
+    card(
+      'Players to review',
+      scored.length
+        ? table(
+            [{ label: 'Player' }, { label: 'Weight', num: true }, { label: 'Flags', num: true }],
+            scored.map((p) =>
+              el(
+                'tr',
+                {},
+                el('td', {}, el('span', { style: `color:${colorFor(p.name)}`, text: p.name })),
+                el('td', { class: 'num', text: fmtInt(p.suspicion) }),
+                el('td', { class: 'num', text: fmtInt(adm.suspicious.filter((s) => s.playerKey === p.key).length) }),
+              ),
+            ),
+          )
+        : emptyState('No players scored.'),
+      el('p', {
+        class: 'small faint',
+        text: 'Weights: combat log +2, impossible movement +3, shared id +1, very short session +1. Use them to prioritise, never as evidence.',
+      }),
+    ),
+  );
+}
+
+/* ── Timeline ────────────────────────────────────────────── */
+
+export function renderTimeline(panel, report) {
+  clear(panel);
+  const adm = report.adm;
+
+  if (!adm || !adm.events) {
+    panel.append(card('', emptyState('No timestamped ADM events.')));
+    return;
+  }
+
+  const buckets = Array.from({ length: 24 }, () => ({ connects: 0, kills: 0, chats: 0, builds: 0 }));
+  const bucketOf = (tod) => Math.max(0, Math.min(23, Math.floor(tod / 3600)));
+  const bump = (tod, field) => {
+    if (!Number.isFinite(tod)) return;
+    buckets[bucketOf(tod)][field]++;
+  };
+
+  for (const p of adm.players) for (const s of p.sessions) bump(s.start, 'connects');
+  for (const k of adm.kills) bump(k.at, 'kills');
+  for (const c of adm.chats) bump(c.at, 'chats');
+  for (const b of adm.builds) bump(b.at, 'builds');
+
+  const peak = Math.max(1, ...buckets.map((b) => Math.max(b.connects, b.kills, b.chats, b.builds)));
+
+  const chart = el(
+    'div',
+    {
+      style: 'display:flex;align-items:flex-end;gap:4px;height:190px;padding:10px 4px;border:1px solid var(--border-soft);border-radius:8px;background:#0d1116;overflow-x:auto',
+    },
+    ...buckets.map((b, hour) =>
+      el(
+        'div',
+        { style: 'flex:1 0 22px;display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:2px', title: `${String(hour).padStart(2, '0')}:00 — ${b.connects} joins, ${b.kills} kills, ${b.chats} chat, ${b.builds} builds` },
+        el('div', { style: `height:${(b.kills / peak) * 100}%;background:var(--critical);border-radius:2px 2px 0 0;min-height:${b.kills ? 2 : 0}px` }),
+        el('div', { style: `height:${(b.chats / peak) * 100}%;background:var(--info);min-height:${b.chats ? 2 : 0}px` }),
+        el('div', { style: `height:${(b.connects / peak) * 100}%;background:var(--ok);min-height:${b.connects ? 2 : 0}px` }),
+        el('div', { style: `height:${(b.builds / peak) * 100}%;background:#5ac8dc;min-height:${b.builds ? 2 : 0}px` }),
+        el('div', { style: 'font-size:9.5px;color:var(--text-faint);text-align:center;padding-top:2px', text: String(hour).padStart(2, '0') }),
+      ),
+    ),
+  );
+
+  panel.append(
+    card(
+      'Activity by hour',
+      chart,
+      el(
+        'div',
+        { class: 'legend' },
+        el('span', {}, el('i', { style: 'background:var(--critical)' }), 'Kills'),
+        el('span', {}, el('i', { style: 'background:var(--info)' }), 'Chat'),
+        el('span', {}, el('i', { style: 'background:var(--ok)' }), 'Joins'),
+        el('span', {}, el('i', { style: 'background:#5ac8dc' }), 'Builds'),
+      ),
+    ),
+  );
+
+  const hottest = buckets
+    .map((b, hour) => ({ hour, total: b.kills * 3 + b.connects * 2 + b.chats + b.builds }))
+    .sort((a, b) => b.total - a.total)
+    .slice(0, 5)
+    .filter((b) => b.total > 0);
+
+  if (hottest.length) {
+    panel.append(
+      card(
+        'Busiest hours',
+        table(
+          [{ label: 'Hour' }, { label: 'Joins', num: true }, { label: 'Kills', num: true }, { label: 'Chat', num: true }, { label: 'Builds', num: true }],
+          hottest.map(({ hour }) =>
+            el(
+              'tr',
+              {},
+              el('td', { text: `${String(hour).padStart(2, '0')}:00` }),
+              el('td', { class: 'num', text: fmtInt(buckets[hour].connects) }),
+              el('td', { class: 'num', text: fmtInt(buckets[hour].kills) }),
+              el('td', { class: 'num', text: fmtInt(buckets[hour].chats) }),
+              el('td', { class: 'num', text: fmtInt(buckets[hour].builds) }),
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/* ── Map ─────────────────────────────────────────────────── */
+
+export function renderMapPanel(panel, report, state, relayout) {
+  clear(panel);
+  const adm = report.adm;
+
+  if (!adm || !adm.players.length) {
+    panel.append(card('', emptyState('No ADM positions to plot.')));
+    return;
+  }
+
+  const mapState = state.map;
+
+  const mapSelect = el(
+    'select',
+    {
+      onChange: (e) => {
+        const map = MAPS.find((m) => m.id === e.target.value);
+        mapState.id = map.id;
+        mapState.worldSize = map.worldSize;
+        state.actions.setState({ json: { map: { ...mapState } } });
+      },
+    },
+    ...MAPS.map((m) => el('option', { value: m.id, text: `${m.label} (${m.worldSize} m)`, selected: m.id === mapState.id })),
+  );
+
+  const worldInput = el('input', {
+    type: 'number',
+    min: '1000',
+    step: '100',
+    value: String(mapState.worldSize),
+    onChange: (e) => {
+      mapState.worldSize = Math.max(1000, Number(e.target.value) || 15360);
+      state.actions.setState({ json: { map: { ...mapState } } });
+    },
+  });
+
+  const bgInput = el('input', {
+    type: 'file',
+    accept: 'image/*',
+    onChange: (e) => {
+      const file = e.target.files?.[0];
+      if (!file) return;
+      const img = new Image();
+      img.onload = () => {
+        mapState.background = img;
+        state.actions.setState({ json: { map: { ...mapState } } });
+      };
+      img.src = URL.createObjectURL(file);
+    },
+  });
+
+  const playerSelect = el(
+    'select',
+    {
+      onChange: (e) => {
+        mapState.selectedPlayer = e.target.value || null;
+        state.actions.setState({ json: { map: { ...mapState } } });
+      },
+    },
+    el('option', { value: '', text: 'All players (top 12 trails)' }),
+    ...adm.players.slice(0, 300).map((p) =>
+      el('option', { value: p.key, text: p.name, selected: mapState.selectedPlayer === p.key }),
+    ),
+  );
+
+  const layerToggle = (key, label) =>
+    el(
+      'label',
+      { class: 'filter', style: 'display:inline-flex;gap:6px;align-items:center;cursor:pointer' },
+      el('input', {
+        type: 'checkbox',
+        checked: mapState.layers[key],
+        onChange: (e) => {
+          mapState.layers[key] = e.target.checked;
+          state.actions.setState({ json: { map: { ...mapState } } });
+        },
+      }),
+      label,
+    );
+
+  const canvas = el('canvas', { id: 'map-canvas' });
+  const stage = el('div', { class: 'map-stage' }, canvas);
+
+  panel.append(
+    card(
+      'ADM on the map',
+      el(
+        'div',
+        { class: 'map-controls' },
+        el('div', { class: 'field' }, el('label', { text: 'Map' }), mapSelect),
+        el('div', { class: 'field' }, el('label', { text: 'World size (m)' }), worldInput),
+        el('div', { class: 'field' }, el('label', { text: 'Player' }), playerSelect),
+        el('div', { class: 'field' }, el('label', { text: 'Background image' }), bgInput),
+      ),
+      el(
+        'div',
+        { class: 'filters' },
+        layerToggle('kills', 'Kills'),
+        layerToggle('trails', 'Trails'),
+        layerToggle('builds', 'Bases'),
+        layerToggle('heat', 'Heatmap'),
+        layerToggle('connects', 'Last positions'),
+        layerToggle('jumps', 'Position jumps'),
+      ),
+      stage,
+      el(
+        'div',
+        { class: 'legend' },
+        el('span', {}, el('i', { style: 'background:#e5484d' }), 'Kill position'),
+        el('span', {}, el('i', { style: 'background:#5ac8dc' }), 'Build action'),
+        el('span', {}, el('i', { style: 'background:var(--warning)' }), 'Impossible movement'),
+      ),
+      el('p', {
+        class: 'small faint',
+        text: 'No map imagery is bundled or downloaded. Load your own map image to place the points on terrain. Coordinates are DayZ world metres: x = east, y = north, z = altitude.',
+      }),
+    ),
+  );
+
+  // The canvas is already in the document, so it can be painted immediately.
+  // Do not rely on requestAnimationFrame: browsers pause it in background tabs,
+  // which would leave the map blank until the next resize.
+  renderMap(canvas, report, mapState);
+  relayout?.();
+  setTimeout(() => {
+    if (canvas.isConnected) renderMap(canvas, report, mapState);
+  }, 60);
+}
+
+export { SEVERITY };

@@ -57,6 +57,22 @@ Environment variables:
 - `DAYZCTL_SKIP_ROOT=1` — skip the root privilege check (useful in tests)
 - `DAYZCTL_CONFIG` — path to an alternate config file when `DAYZCTL_SKIP_ROOT=1`
 
+## Web UI
+
+`dayzctl web` serves an ADM/RPT log analyzer from the server itself and exposes a
+small JSON API. Parsing happens in Go (`internal/logs`), so the browser only
+renders the report and no log ever leaves the host.
+
+```bash
+sudo dayzctl web                        # http://127.0.0.1:8081
+sudo dayzctl web --addr 0.0.0.0 --port 8081
+```
+
+To run it as a service, set `web.enabled: true` (and optionally
+`web.address`/`web.port`); `dayzctl apply` writes and enables
+`dayz-web.service`. See `web/log-analyzer/README.md` for the API, the analysis
+tabs and how to extend the RPT rule set.
+
 ## Commands
 
 Top-level commands (run `dayzctl <command> --help` for extended embedded help):
@@ -76,6 +92,7 @@ Top-level commands (run `dayzctl <command> --help` for extended embedded help):
 - `steam-login` — Interactive Steam login for workshop operations
 - `version` — Print version information
 - `mods` — Manage mods for an instance (`dayzctl mods <instance> <command>`)
+- `web` — Serve the ADM/RPT log analyzer UI and its JSON API (`dayzctl web`)
 
 Example: show embedded help for `mods`:
 

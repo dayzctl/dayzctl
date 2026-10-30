@@ -29,6 +29,7 @@ type ServerConfig struct {
 	Updates      Updates       `yaml:"updates"`
 	Healthcheck  Healthcheck   `yaml:"healthcheck"`
 	State        State         `yaml:"state"`
+	Web          Web           `yaml:"web"`
 }
 
 // Server represents server-wide settings
@@ -200,6 +201,16 @@ type Healthcheck struct {
 // State represents state configuration
 type State struct {
 	InventoryEnabled bool `yaml:"inventory_enabled"`
+}
+
+// Web configures the embedded web UI and log analysis API.
+//
+// The server only reads logs; it never writes to the DayZ install. Bind to
+// 127.0.0.1 unless you put an authenticating reverse proxy in front of it.
+type Web struct {
+	Enabled bool   `yaml:"enabled"`
+	Address string `yaml:"address,omitempty"`
+	Port    int    `yaml:"port,omitempty"`
 }
 
 // ============================================================================
