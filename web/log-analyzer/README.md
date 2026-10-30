@@ -76,6 +76,11 @@ The **All / RPT / ADM** chips filter the list by type, and *Select all* acts on
 whatever the filter is showing, so you can analyse every ADM of a week without
 clicking through the RPT files.
 
+The picker opens on the **ADM** filter with only the newest file ticked, so a
+fresh analysis starts from the latest events instead of the whole folder. The
+folder falls back to *All* when it holds no ADM, and every other file stays
+unticked until you select it.
+
 ## Tabs
 
 - **Overview** — problem counts by severity, activity KPIs, log origin

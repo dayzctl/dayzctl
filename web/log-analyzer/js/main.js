@@ -53,8 +53,9 @@ const state = {
   instance: null,
   files: [],
   selected: new Set(),
-  // "all" or a file type (RPT, ADM): servers rotate hundreds of files.
-  fileTypeFilter: 'all',
+  // "all" or a file type (RPT, ADM): servers rotate hundreds of files, and the
+  // ADM event log is what the analysis is built on, so that is the default.
+  fileTypeFilter: 'ADM',
 
   activeTab: 'overview',
   problemFilter: 'all',
@@ -206,7 +207,8 @@ async function openInstance(inst) {
   state.instance = inst.name;
   state.files = [];
   state.selected = new Set();
-  state.fileTypeFilter = 'all';
+  // ADM is the default view; openInstance settles it once the folder is read.
+  state.fileTypeFilter = 'ADM';
 
   // A map image served for this instance is picked up by the map tab.
   state.mapImageUrl = inst.mapImage || '';
@@ -247,7 +249,18 @@ async function openInstance(inst) {
   try {
     const { files } = await fetchLogs(inst.name);
     state.files = files;
-    state.selected = new Set(files.map((f) => f.name));
+
+    // Start on the ADM filter (the event log the analysis is built on), and
+    // preselect nothing except the newest file in view, so a fresh analysis
+    // never picks up a whole rotated folder by accident.
+    const hasADM = files.some((f) => String(f.type).toUpperCase() === 'ADM');
+    state.fileTypeFilter = hasADM ? 'ADM' : 'all';
+
+    const newest = visibleFiles().reduce((best, f) => {
+      if (!best) return f;
+      return Date.parse(f.modTime) > Date.parse(best.modTime) ? f : best;
+    }, null);
+    state.selected = new Set(newest ? [newest.name] : []);
     renderFileList();
   } catch (err) {
     dom.fileList.replaceChildren();
