@@ -55,17 +55,17 @@
           <button type="button" class="btn" id="btn-toggle-all">Select all</button>
         </div>
 
-        <div id="file-list" class="file-list"></div>
+        <!-- Progress sits directly above the list it describes. -->
+        <section id="progress" class="progress" hidden>
+          <div class="progress-head">
+            <span id="progress-label">Analysing…</span>
+          </div>
+          <div class="bar"><div class="bar-fill" id="progress-fill"></div></div>
+        </section>
+
+        <div id="file-list" class="file-list" tabindex="0"></div>
         <p id="files-empty" class="empty" hidden>No log files in this profiles folder yet.</p>
       </div>
-    </section>
-
-    <!-- ── Progress ───────────────────────────────────────────── -->
-    <section id="progress" class="progress" hidden>
-      <div class="progress-head">
-        <span id="progress-label">Analysing…</span>
-      </div>
-      <div class="bar"><div class="bar-fill" id="progress-fill"></div></div>
     </section>
 
     <p id="intake-error" class="alert" hidden></p>

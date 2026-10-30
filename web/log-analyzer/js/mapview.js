@@ -278,9 +278,11 @@ export function renderMap(canvas, report, state) {
 
   // ── trails ───────────────────────────────────────────────
   if (layers.trails) {
-    const chosen = state.selectedPlayer
-      ? adm.players.filter((p) => p.key === state.selectedPlayer)
-      : adm.players.slice(0, 12);
+    const chosen = state.selectedKeys?.length
+      ? adm.players.filter((p) => state.selectedKeys.includes(p.key))
+      : state.selectedPlayer
+        ? adm.players.filter((p) => p.key === state.selectedPlayer)
+        : adm.players.slice(0, 12);
 
     chosen.forEach((p, i) => {
       const pts = p.positions.filter((s) => s.at !== null);
@@ -340,14 +342,16 @@ export function renderMap(canvas, report, state) {
   }
 
   // ── selection highlight ──────────────────────────────────
-  if (state.selectedPlayer) {
-    const p = adm.playerByKey.get(state.selectedPlayer);
-    if (p?.lastKnownPos) {
-      ctx.strokeStyle = 'rgba(255,255,255,0.8)';
-      ctx.lineWidth = 1.5;
-      ctx.beginPath();
-      ctx.arc(px(p.lastKnownPos.x), py(p.lastKnownPos.y), 8, 0, Math.PI * 2);
-      ctx.stroke();
-    }
+  const highlighted = state.selectedKeys?.length
+    ? state.selectedKeys
+    : state.selectedPlayer ? [state.selectedPlayer] : [];
+  for (const key of highlighted) {
+    const p = adm.playerByKey.get(key);
+    if (!p?.lastKnownPos) continue;
+    ctx.strokeStyle = 'rgba(255,255,255,0.8)';
+    ctx.lineWidth = 1.5;
+    ctx.beginPath();
+    ctx.arc(px(p.lastKnownPos.x), py(p.lastKnownPos.y), 8, 0, Math.PI * 2);
+    ctx.stroke();
   }
 }

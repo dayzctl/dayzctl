@@ -127,7 +127,23 @@ main { padding: 28px 20px 56px; }
 .instance-card .meta { font-size: 12.5px; color: var(--text-dim); margin-top: 4px; }
 .instance-card .meta.warn { color: var(--warning); }
 
-.file-list { display: flex; flex-direction: column; gap: 6px; margin-top: 4px; }
+.file-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  margin-top: 4px;
+  /* Servers keep months of rotated logs; scroll instead of pushing the page. */
+  max-height: min(58vh, 520px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding-right: 4px;
+  scrollbar-width: thin;
+  scrollbar-color: #2b343d transparent;
+}
+.file-list:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.file-list::-webkit-scrollbar { width: 10px; }
+.file-list::-webkit-scrollbar-track { background: transparent; }
+.file-list::-webkit-scrollbar-thumb { background: #2b343d; border-radius: 999px; }
 
 .file-row {
   display: flex;

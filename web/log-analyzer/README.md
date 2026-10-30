@@ -70,6 +70,9 @@ client accepts it.
 File names are validated against `filepath.Base`, so a request cannot walk out
 of the instance's profiles folder.
 
+A server keeps months of rotated logs, so the file picker scrolls instead of
+growing the page; the progress bar sits directly above the list it describes.
+
 ## Tabs
 
 - **Overview** — problem counts by severity, activity KPIs, log origin
@@ -77,11 +80,16 @@ of the instance's profiles folder.
 - **Problems** — every distinct RPT pattern with an explanation, a concrete fix,
   and an `also vanilla` tag for stock-server noise.
 - **Players** — sessions, playtime, kills, deaths, K/D, chat, builds, flags.
+  Tick several players to compare them: their details stack below the table, and
+  *Show selected only* narrows the list to them. The Map tab can then draw just
+  those players.
 - **Kills** — PvP kills with weapon and distance; sort by time or longest shot.
 - **Base building** — build/place actions with coordinates.
 - **Suspicious** — combat logging, impossible movement, shared ids, short
   sessions, kicks and bans.
-- **Timeline** — activity per hour of day.
+- **Timeline** — activity per hour of day, with a *From*/*to* window so a night
+  shift or a single evening can be inspected on its own. An overturned range
+  (22:00 → 04:00) is treated as a window across midnight.
 - **Map** — positions with kills, trails, bases, heatmap and position jumps.
 
 ## Coordinates

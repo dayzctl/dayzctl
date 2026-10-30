@@ -57,10 +57,15 @@ const state = {
   problemFilter: 'all',
   problemQuery: '',
   playerQuery: '',
-  selectedPlayer: null,
+  // Several players can be inspected at once.
+  selectedPlayers: new Set(),
+  playersOnlySelected: false,
   killQuery: '',
   killsSort: 'time',
   suspiciousFilter: 'all',
+  // Time-of-day window for the timeline ("HH:MM", empty means open-ended).
+  timelineFrom: '',
+  timelineTo: '',
   mapImageUrl: '',
   // Community map (tiles + place names) for the selected instance.
   mapId: '',
@@ -325,10 +330,13 @@ function resetViewState() {
   state.problemFilter = 'all';
   state.problemQuery = '';
   state.playerQuery = '';
-  state.selectedPlayer = null;
+  state.selectedPlayers = new Set();
+  state.playersOnlySelected = false;
   state.killQuery = '';
   state.killsSort = 'time';
   state.suspiciousFilter = 'all';
+  state.timelineFrom = '';
+  state.timelineTo = '';
 }
 
 function showResults() {
@@ -407,7 +415,7 @@ function renderActivePanel() {
       renderSuspicious(panel, report, state);
       break;
     case 'timeline':
-      renderTimeline(panel, report);
+      renderTimeline(panel, report, state);
       break;
     case 'map':
       renderMapPanel(panel, report, state, () => {

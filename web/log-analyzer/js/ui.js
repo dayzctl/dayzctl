@@ -404,7 +404,16 @@ export function renderPlayers(panel, report, state) {
   }
 
   const query = state.playerQuery.trim().toLowerCase();
-  const players = adm.players.filter((p) => !query || p.name.toLowerCase().includes(query));
+  const selected = state.selectedPlayers;
+  const onlySelected = state.playersOnlySelected;
+  const matches = adm.players.filter((p) => !query || p.name.toLowerCase().includes(query));
+  const players = onlySelected ? matches.filter((p) => selected.has(p.key)) : matches;
+
+  const toggle = (key, on) => {
+    if (on) selected.add(key);
+    else selected.delete(key);
+    state.actions.setState({});
+  };
 
   panel.append(
     el(
@@ -423,9 +432,27 @@ export function renderPlayers(panel, report, state) {
         },
       }),
       el('button', {
+        class: `filter${onlySelected ? ' active' : ''}`,
+        text: onlySelected ? `Showing ${fmtInt(selected.size)} selected` : 'Show selected only',
+        onClick: () => state.actions.setState({ playersOnlySelected: !onlySelected }),
+      }),
+      el('button', {
         class: 'filter',
-        text: state.selectedPlayer ? 'Clear selection' : 'Select a player below',
-        onClick: () => state.actions.setState({ selectedPlayer: null }),
+        text: 'Select shown',
+        title: 'Select every player matching the search',
+        onClick: () => {
+          for (const p of matches) selected.add(p.key);
+          state.actions.setState({});
+        },
+      }),
+      el('button', {
+        class: 'filter',
+        text: selected.size ? `Clear selection (${fmtInt(selected.size)})` : 'Clear selection',
+        disabled: selected.size ? undefined : '',
+        onClick: () => {
+          selected.clear();
+          state.actions.setState({});
+        },
       }),
     ),
   );
@@ -434,10 +461,21 @@ export function renderPlayers(panel, report, state) {
     el(
       'tr',
       {
+        class: selected.has(p.key) ? 'selected' : '',
+        onClick: (event) => {
+          // Clicking anywhere on the row toggles it, so several players can be
+          // picked without reaching for the checkbox.
+          if (event.target instanceof HTMLInputElement) return;
+          toggle(p.key, !selected.has(p.key));
+        },
         style: 'cursor:pointer',
-        class: state.selectedPlayer === p.key ? 'selected' : '',
-        onClick: () => state.actions.setState({ selectedPlayer: p.key }),
       },
+      el('td', {}, el('input', {
+        type: 'checkbox',
+        checked: selected.has(p.key) ? true : null,
+        'aria-label': `Select ${p.name}`,
+        onChange: (e) => toggle(p.key, e.target.checked),
+      })),
       el('td', {}, el('span', { style: `color:${colorFor(p.name)}`, text: p.name })),
       el('td', { class: 'num', text: fmtInt(p.connects) }),
       el('td', { class: 'num', text: fmtDuration(p.playtime) }),
@@ -453,25 +491,31 @@ export function renderPlayers(panel, report, state) {
   panel.append(
     card(
       `Players (${fmtInt(players.length)})`,
-      table(
-        [
-          { label: 'Player' },
-          { label: 'Sessions', num: true },
-          { label: 'Playtime', num: true },
-          { label: 'Kills', num: true },
-          { label: 'Deaths', num: true },
-          { label: 'K/D', num: true },
-          { label: 'Chat', num: true },
-          { label: 'Builds', num: true },
-          { label: 'Flags', num: true },
-        ],
-        rows,
-      ),
+      players.length
+        ? table(
+            [
+              { label: '' },
+              { label: 'Player' },
+              { label: 'Sessions', num: true },
+              { label: 'Playtime', num: true },
+              { label: 'Kills', num: true },
+              { label: 'Deaths', num: true },
+              { label: 'K/D', num: true },
+              { label: 'Chat', num: true },
+              { label: 'Builds', num: true },
+              { label: 'Flags', num: true },
+            ],
+            rows,
+          )
+        : emptyState(onlySelected ? 'No selected players match this search.' : 'No players match this search.'),
     ),
   );
 
-  const selected = state.selectedPlayer ? adm.playerByKey.get(state.selectedPlayer) : null;
-  if (selected) panel.append(playerDetail(report, selected));
+  // Details for every selected player, newest selection last.
+  for (const key of selected) {
+    const p = adm.playerByKey.get(key);
+    if (p) panel.append(playerDetail(report, p));
+  }
 }
 
 function playerDetail(report, p) {
@@ -789,7 +833,22 @@ export function renderSuspicious(panel, report, state) {
 
 /* ── Timeline ────────────────────────────────────────────── */
 
-export function renderTimeline(panel, report) {
+/** "HH:MM" → seconds since midnight, or null when the field is empty. */
+function parseClock(value) {
+  const m = /^(\d{1,2}):(\d{2})$/.exec(String(value ?? '').trim());
+  if (!m) return null;
+  const hours = Number(m[1]);
+  const minutes = Number(m[2]);
+  if (hours > 23 || minutes > 59) return null;
+  return hours * 3600 + minutes * 60;
+}
+
+function fmtClockInput(secs) {
+  const s = Math.max(0, Math.min(86340, secs));
+  return `${String(Math.floor(s / 3600)).padStart(2, '0')}:${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}`;
+}
+
+export function renderTimeline(panel, report, state) {
   clear(panel);
   const adm = report.adm;
 
@@ -798,17 +857,113 @@ export function renderTimeline(panel, report) {
     return;
   }
 
+  // Narrow the window: a night shift can be looked at without the whole day.
+  const from = parseClock(state.timelineFrom);
+  const to = parseClock(state.timelineTo);
+  const wrapped = from !== null && to !== null && from > to;
+  const inWindow = (tod) => {
+    if (!Number.isFinite(tod)) return false;
+    if (from === null && to === null) return true;
+    const start = from ?? 0;
+    const end = to ?? 86399;
+    if (start === end) return true;
+    // An overturned range (22:00 → 04:00) is a night window across midnight.
+    return wrapped ? tod >= start || tod <= end : tod >= start && tod <= end;
+  };
+
   const buckets = Array.from({ length: 24 }, () => ({ connects: 0, kills: 0, chats: 0, builds: 0 }));
+  // ADM events carry absolute epoch seconds; the timeline works in the log's
+  // own clock, so reduce to seconds-since-midnight first.
+  const todOf = (t) => {
+    if (!Number.isFinite(t)) return NaN;
+    const r = t % 86400;
+    return r < 0 ? r + 86400 : r;
+  };
   const bucketOf = (tod) => Math.max(0, Math.min(23, Math.floor(tod / 3600)));
-  const bump = (tod, field) => {
-    if (!Number.isFinite(tod)) return;
+  const bump = (at, field) => {
+    const tod = todOf(at);
+    if (!inWindow(tod)) return;
     buckets[bucketOf(tod)][field]++;
   };
 
-  for (const p of adm.players) for (const s of p.sessions) bump(s.start, 'connects');
-  for (const k of adm.kills) bump(k.at, 'kills');
-  for (const c of adm.chats) bump(c.at, 'chats');
-  for (const b of adm.builds) bump(b.at, 'builds');
+  const total = { connects: 0, kills: 0, chats: 0, builds: 0 };
+  const count = (at, field) => {
+    if (!inWindow(todOf(at))) return;
+    total[field]++;
+  };
+
+  for (const p of adm.players) {
+    for (const s of p.sessions) {
+      bump(s.start, 'connects');
+      count(s.start, 'connects');
+    }
+  }
+  for (const k of adm.kills) {
+    bump(k.at, 'kills');
+    count(k.at, 'kills');
+  }
+  for (const c of adm.chats) {
+    bump(c.at, 'chats');
+    count(c.at, 'chats');
+  }
+  for (const b of adm.builds) {
+    bump(b.at, 'builds');
+    count(b.at, 'builds');
+  }
+
+  const windowLabel = from === null && to === null
+    ? 'the whole log'
+    : `${fmtClockInput(from ?? 0)} – ${fmtClockInput(to ?? 86399)}${wrapped ? ' (next day)' : ''}`;
+
+  const rangeControls = el(
+    'div',
+    { class: 'filters', style: 'align-items:center' },
+    el('span', { class: 'small muted', text: 'From' }),
+    el('input', {
+      type: 'time',
+      value: state.timelineFrom,
+      class: 'filter',
+      style: 'border-radius:8px',
+      'aria-label': 'Start of the time window',
+      onChange: (e) => {
+        state.timelineFrom = e.target.value;
+        state.actions.setState({ timelineFrom: e.target.value });
+      },
+    }),
+    el('span', { class: 'small muted', text: 'to' }),
+    el('input', {
+      type: 'time',
+      value: state.timelineTo,
+      class: 'filter',
+      style: 'border-radius:8px',
+      'aria-label': 'End of the time window',
+      onChange: (e) => {
+        state.timelineTo = e.target.value;
+        state.actions.setState({ timelineTo: e.target.value });
+      },
+    }),
+    el('button', {
+      class: 'filter',
+      text: 'Whole day',
+      onClick: () => {
+        state.timelineFrom = '';
+        state.timelineTo = '';
+        state.actions.setState({ timelineFrom: '', timelineTo: '' });
+      },
+    }),
+    ...[['18:00', '23:59', 'Evening'], ['00:00', '06:00', 'Night']].map(([f, t, label]) =>
+      el('button', {
+        class: 'filter',
+        text: label,
+        onClick: () => {
+          state.timelineFrom = f;
+          state.timelineTo = t;
+          state.actions.setState({ timelineFrom: f, timelineTo: t });
+        },
+      }),
+    ),
+    el('span', { class: 'small faint', text: `Showing ${windowLabel}` }),
+  );
 
   const peak = Math.max(1, ...buckets.map((b) => Math.max(b.connects, b.kills, b.chats, b.builds)));
 
@@ -820,7 +975,10 @@ export function renderTimeline(panel, report) {
     ...buckets.map((b, hour) =>
       el(
         'div',
-        { style: 'flex:1 0 22px;display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:2px', title: `${String(hour).padStart(2, '0')}:00 — ${b.connects} joins, ${b.kills} kills, ${b.chats} chat, ${b.builds} builds` },
+        {
+          style: `flex:1 0 22px;display:flex;flex-direction:column;justify-content:flex-end;height:100%;gap:2px;${inWindow(hour * 3600 + 1) ? '' : 'opacity:0.28'}`,
+          title: `${String(hour).padStart(2, '0')}:00 — ${b.connects} joins, ${b.kills} kills, ${b.chats} chat, ${b.builds} builds`,
+        },
         el('div', { style: `height:${(b.kills / peak) * 100}%;background:var(--critical);border-radius:2px 2px 0 0;min-height:${b.kills ? 2 : 0}px` }),
         el('div', { style: `height:${(b.chats / peak) * 100}%;background:var(--info);min-height:${b.chats ? 2 : 0}px` }),
         el('div', { style: `height:${(b.connects / peak) * 100}%;background:var(--ok);min-height:${b.connects ? 2 : 0}px` }),
@@ -833,6 +991,7 @@ export function renderTimeline(panel, report) {
   panel.append(
     card(
       'Activity by hour',
+      rangeControls,
       chart,
       el(
         'div',
@@ -842,6 +1001,10 @@ export function renderTimeline(panel, report) {
         el('span', {}, el('i', { style: 'background:var(--ok)' }), 'Joins'),
         el('span', {}, el('i', { style: 'background:#5ac8dc' }), 'Builds'),
       ),
+      el('p', {
+        class: 'small faint',
+        text: `${fmtInt(total.connects)} joins, ${fmtInt(total.kills)} kills, ${fmtInt(total.chats)} chat messages and ${fmtInt(total.builds)} build actions fall inside this window.`,
+      }),
     ),
   );
 
@@ -876,7 +1039,7 @@ export function renderTimeline(panel, report) {
 
 /* ── Map ─────────────────────────────────────────────────── */
 
-// Hint under the map: explains where the imagery comes from and how to fix it.
+// Hint under the map: explains what is drawn and how to change it.
 function mapHint(mapMeta, mapState, state) {
   const coords = 'Coordinates are DayZ world metres: x = east, y = north, z = altitude.';
   if (mapState.background) {
@@ -886,10 +1049,11 @@ function mapHint(mapMeta, mapState, state) {
     return `Background: ${src}. ${coords}`;
   }
   if (mapMeta?.tileUrl) {
-    return `Imagery and place names from ${mapMeta.source || 'dayz.xam.nu'} (map \u201c${mapMeta.id}\u201d, ${fmtInt(mapMeta.size)} m). ${coords}`;
+    const label = mapMeta.name || mapMeta.id;
+    return `Bundled imagery and place names for ${label} (${fmtInt(mapMeta.size)} m). ${coords}`;
   }
   if (state.mapMetaFailed) {
-    return `No imagery for \u201c${state.mapId || 'this instance'}\u201d \u2014 the map is not published on dayz.xam.nu, or the server has no internet. Set instances[].map and reload, or pick a custom image. ${coords}`;
+    return `No bundled imagery for \u201c${state.mapId || 'this instance'}\u201d. Set instances[].map to a bundled map, or pick a custom image. ${coords}`;
   }
   return `Loading map imagery\u2026 Put map.jpg in the instance\u2019s profiles folder, or set instances[].map_image, to use your own. ${coords}`;
 }
@@ -922,6 +1086,15 @@ export function renderMapPanel(panel, report, state, relayout) {
       }
     : null;
   const view = { ...mapState, worldSize: effectiveWorld, tiles };
+  // Players ticked in the Players tab can be drawn on their own.
+  if (mapState.selectedPlayer === '__selected__') {
+    if (state.selectedPlayers.size) {
+      view.selectedKeys = [...state.selectedPlayers];
+    } else {
+      // The selection was cleared elsewhere; fall back to everyone.
+      mapState.selectedPlayer = null;
+    }
+  }
   // The resize handler repaints with this exact view (world size and tiles are
   // resolved here, not in the raw state).
   state.lastMapView = view;
@@ -1019,6 +1192,13 @@ export function renderMapPanel(panel, report, state, relayout) {
       },
     },
     el('option', { value: '', text: 'All players (top 12 trails)' }),
+    state.selectedPlayers.size
+      ? el('option', {
+          value: '__selected__',
+          text: `Selected players (${fmtInt(state.selectedPlayers.size)})`,
+          selected: mapState.selectedPlayer === '__selected__',
+        })
+      : null,
     ...adm.players.slice(0, 300).map((p) =>
       el('option', { value: p.key, text: p.name, selected: mapState.selectedPlayer === p.key }),
     ),
