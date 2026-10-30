@@ -135,7 +135,7 @@ function positionAt(player, at) {
 /**
  * @param {HTMLCanvasElement} canvas
  * @param {object} report analysis report
- * @param {object} state   { worldSize, layers, tiles, background, selectedPlayer, onTile }
+ * @param {object} state   { worldSize, layers, tiles, background, selectedKeys, onTile }
  */
 export function renderMap(canvas, report, state) {
   const adm = report?.adm;
@@ -266,10 +266,8 @@ export function renderMap(canvas, report, state) {
   // ── trails ───────────────────────────────────────────────
   if (layers.trails) {
     const chosen = state.selectedKeys?.length
-      ? adm.players.filter((p) => state.selectedKeys.includes(p.key))
-      : state.selectedPlayer
-        ? adm.players.filter((p) => p.key === state.selectedPlayer)
-        : adm.players.slice(0, 12);
+      ? adm.players.filter((p) => state.selectedKeys.includes(p.key)).slice(0, 40)
+      : adm.players.slice(0, 12);
 
     chosen.forEach((p, i) => {
       const pts = p.positions.filter((s) => s.at !== null);
@@ -329,9 +327,7 @@ export function renderMap(canvas, report, state) {
   }
 
   // ── selection highlight ──────────────────────────────────
-  const highlighted = state.selectedKeys?.length
-    ? state.selectedKeys
-    : state.selectedPlayer ? [state.selectedPlayer] : [];
+  const highlighted = state.selectedKeys?.length ? state.selectedKeys : [];
   for (const key of highlighted) {
     const p = adm.playerByKey.get(key);
     if (!p?.lastKnownPos) continue;

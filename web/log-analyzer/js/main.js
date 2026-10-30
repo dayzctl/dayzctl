@@ -87,7 +87,6 @@ const state = {
     backgroundSource: null,
     imageUrl: '',
     imageFailed: false,
-    selectedPlayer: null,
     layers: {
       tiles: true,
       names: true,

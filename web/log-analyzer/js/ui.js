@@ -1085,15 +1085,9 @@ export function renderMapPanel(panel, report, state, relayout) {
       }
     : null;
   const view = { ...mapState, worldSize: effectiveWorld, tiles };
-  // Players ticked in the Players tab can be drawn on their own.
-  if (mapState.selectedPlayer === '__selected__') {
-    if (state.selectedPlayers.size) {
-      view.selectedKeys = [...state.selectedPlayers];
-    } else {
-      // The selection was cleared elsewhere; fall back to everyone.
-      mapState.selectedPlayer = null;
-    }
-  }
+  // Players ticked in the Players tab, or in the picker below, are drawn on
+  // their own; with nothing ticked the busiest trails are shown.
+  if (state.selectedPlayers.size) view.selectedKeys = [...state.selectedPlayers];
   // The resize handler repaints with this exact view (world size and tiles are
   // resolved here, not in the raw state).
   state.lastMapView = view;
@@ -1152,7 +1146,9 @@ export function renderMapPanel(panel, report, state, relayout) {
     value: String(effectiveWorld),
     onChange: (e) => {
       mapState.worldSize = Math.max(1000, Number(e.target.value) || 15360);
-      state.actions.setState({});
+      view.worldSize = mapState.worldSize;
+      // Repaint in place so an open player picker is not torn down.
+      if (canvas.isConnected) renderMap(canvas, report, view);
     },
   });
 
@@ -1205,25 +1201,110 @@ export function renderMapPanel(panel, report, state, relayout) {
     },
   });
 
-  const playerSelect = el(
-    'select',
-    {
-      onChange: (e) => {
-        mapState.selectedPlayer = e.target.value || null;
-        state.actions.setState({ json: { map: { ...mapState } } });
-      },
+  const canvas = el('canvas', { id: 'map-canvas' });
+  const stage = el('div', { class: 'map-stage' }, canvas);
+
+  // Player picker: any combination of players can be ticked, instead of
+  // all-or-one. The set is shared with the Players tab, so ticks made there
+  // show up here and vice versa. Ticking repaints the canvas directly rather
+  // than re-rendering the panel, so the popover stays open while picking.
+  const repaintMap = () => {
+    if (canvas.isConnected) renderMap(canvas, report, view);
+  };
+  const chosen = state.selectedPlayers;
+  const summaryText = () =>
+    chosen.size
+      ? `${fmtInt(chosen.size)} of ${fmtInt(adm.players.length)} selected`
+      : 'All players (top 12 trails)';
+  const pickerSummary = el('span', { text: summaryText() });
+
+  const syncSelection = () => {
+    pickerSummary.textContent = summaryText();
+    view.selectedKeys = chosen.size ? [...chosen] : undefined;
+    selectShownBtn.textContent = shownAll() ? 'Unselect shown' : 'Select shown';
+    clearBtn.disabled = chosen.size ? false : true;
+    repaintMap();
+  };
+
+  const pickerList = el('div', { class: 'picker-list' });
+  const pickerSearch = el('input', {
+    type: 'search',
+    placeholder: 'Filter players …',
+    class: 'picker-search',
+    'aria-label': 'Filter the player list',
+    onInput: () => fillPicker(),
+  });
+
+  // Rows matching the current filter; the bulk buttons below act on these.
+  let shown = [];
+  const shownAll = () => shown.length > 0 && shown.every((p) => chosen.has(p.key));
+
+  const selectShownBtn = el('button', {
+    type: 'button',
+    class: 'filter',
+    text: 'Select shown',
+    title: 'Tick or untick every player matching the filter',
+    onClick: () => {
+      const on = shownAll();
+      for (const p of shown) {
+        if (on) chosen.delete(p.key);
+        else chosen.add(p.key);
+      }
+      fillPicker();
+      syncSelection();
     },
-    el('option', { value: '', text: 'All players (top 12 trails)' }),
-    state.selectedPlayers.size
-      ? el('option', {
-          value: '__selected__',
-          text: `Selected players (${fmtInt(state.selectedPlayers.size)})`,
-          selected: mapState.selectedPlayer === '__selected__',
-        })
-      : null,
-    ...adm.players.slice(0, 300).map((p) =>
-      el('option', { value: p.key, text: p.name, selected: mapState.selectedPlayer === p.key }),
-    ),
+  });
+
+  const clearBtn = el('button', {
+    type: 'button',
+    class: 'filter',
+    text: 'Clear',
+    title: 'Go back to the busiest trails',
+    onClick: () => {
+      chosen.clear();
+      fillPicker();
+      syncSelection();
+    },
+  });
+  clearBtn.disabled = !chosen.size;
+
+  function fillPicker() {
+    const query = pickerSearch.value.trim().toLowerCase();
+    const matches = adm.players.filter((p) => !query || p.name.toLowerCase().includes(query));
+    shown = matches.slice(0, 400);
+
+    const rows = shown.map((p) =>
+      el(
+        'label',
+        { class: 'picker-item', title: `${fmtInt(p.connects)} session(s) · ${fmtDuration(p.playtime)}` },
+        el('input', {
+          type: 'checkbox',
+          checked: chosen.has(p.key) ? true : null,
+          onChange: (e) => {
+            if (e.target.checked) chosen.add(p.key);
+            else chosen.delete(p.key);
+            syncSelection();
+          },
+        }),
+        el('span', { style: `color:${colorFor(p.name)}`, text: p.name }),
+      ),
+    );
+
+    selectShownBtn.textContent = shownAll() ? 'Unselect shown' : 'Select shown';
+    clearBtn.disabled = !chosen.size;
+
+    pickerList.replaceChildren(
+      el('div', { class: 'picker-actions' }, selectShownBtn, clearBtn),
+      ...(rows.length ? rows : [el('p', { class: 'small faint', text: 'No player matches this filter.' })]),
+    );
+  }
+  fillPicker();
+
+  const playerSelect = el(
+    'details',
+    { class: 'picker' },
+    el('summary', { title: 'Choose any number of players to draw' }, pickerSummary),
+    el('div', { class: 'picker-panel' }, pickerSearch, pickerList),
   );
 
   const layerToggle = (key, label) =>
@@ -1235,14 +1316,11 @@ export function renderMapPanel(panel, report, state, relayout) {
         checked: mapState.layers[key],
         onChange: (e) => {
           mapState.layers[key] = e.target.checked;
-          state.actions.setState({ json: { map: { ...mapState } } });
+          repaintMap();
         },
       }),
       label,
     );
-
-  const canvas = el('canvas', { id: 'map-canvas' });
-  const stage = el('div', { class: 'map-stage' }, canvas);
 
   // Tiles arrive asynchronously; coalesce repaints so a burst of loads does not
   // redraw the canvas dozens of times.
@@ -1264,7 +1342,7 @@ export function renderMapPanel(panel, report, state, relayout) {
         { class: 'map-controls' },
         el('div', { class: 'field' }, el('label', { text: 'Map' }), mapSelect),
         el('div', { class: 'field' }, el('label', { text: 'World size (m)' }), worldInput),
-        el('div', { class: 'field' }, el('label', { text: 'Player' }), playerSelect),
+        el('div', { class: 'field' }, el('label', { text: 'Players' }), playerSelect),
         el('div', { class: 'field' }, el('label', { text: 'Custom image' }), bgInput),
       ),
       el(
