@@ -94,6 +94,10 @@ clicking through the RPT files.
   shift or a single evening can be inspected on its own. An overturned range
   (22:00 → 04:00) is treated as a window across midnight.
 - **Map** — positions with kills, trails, bases, heatmap and position jumps.
+  *Players* is a multi-select list: tick any number of players and only their
+  trails and highlights are drawn (the same set as the Players tab). The
+  *Timeline* window under the toolbar narrows every layer to a from/until span,
+  so a busy day can be cut down to a single fight.
 
 ## Coordinates
 

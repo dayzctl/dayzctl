@@ -1307,6 +1307,118 @@ export function renderMapPanel(panel, report, state, relayout) {
     el('div', { class: 'picker-panel' }, pickerSearch, pickerList),
   );
 
+  // Timeline window: two thumbs over the analysed period. Everything the map
+  // draws (trails, heat, kills, bases, jumps, last positions) is limited to the
+  // selected span, so a busy day can be narrowed to one fight.
+  const windowControl = (() => {
+    const period = adm.period || {};
+    const canWindow =
+      period.hasTime && Number.isFinite(period.from) && Number.isFinite(period.to) && period.to - period.from >= 120;
+
+    if (!canWindow) {
+      return el(
+        'div',
+        { class: 'map-window' },
+        el('span', { class: 'map-window-label', text: 'Timeline' }),
+        el('span', { class: 'small faint', text: 'no usable timestamps in the log, so the whole file is drawn' }),
+      );
+    }
+
+    const lo = period.from;
+    const hi = period.to;
+    if (!Number.isFinite(mapState.windowFrom) || mapState.windowFrom < lo || mapState.windowFrom > hi) {
+      mapState.windowFrom = lo;
+    }
+    if (!Number.isFinite(mapState.windowTo) || mapState.windowTo < lo || mapState.windowTo > hi) {
+      mapState.windowTo = hi;
+    }
+    if (mapState.windowFrom > mapState.windowTo) mapState.windowFrom = mapState.windowTo;
+
+    // ~720 slider positions regardless of how long the log runs.
+    const step = Math.max(1, Math.round((hi - lo) / 720));
+    const multiDay = hi - lo > 86400;
+    const stamp = (t) => {
+      const d = new Date(Math.round(t) * 1000);
+      const pad = (n) => String(n).padStart(2, '0');
+      const clock = `${pad(d.getUTCHours())}:${pad(d.getUTCMinutes())}`;
+      return multiDay ? `${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())} ${clock}` : clock;
+    };
+
+    const fill = el('div', { class: 'dual-fill' });
+    const valueText = el('span', { class: 'map-window-value' });
+    const pct = (t) => ((t - lo) / (hi - lo || 1)) * 100;
+
+    const paint = () => {
+      const a = pct(mapState.windowFrom);
+      const b = pct(mapState.windowTo);
+      fill.style.left = `${a}%`;
+      fill.style.width = `${Math.max(0, b - a)}%`;
+      fromInput.value = String(mapState.windowFrom);
+      toInput.value = String(mapState.windowTo);
+      valueText.textContent = `${stamp(mapState.windowFrom)} → ${stamp(mapState.windowTo)} (${fmtDuration(
+        mapState.windowTo - mapState.windowFrom,
+      )})`;
+      // The canvas repaints with this exact view on resize.
+      view.windowFrom = mapState.windowFrom;
+      view.windowTo = mapState.windowTo;
+    };
+
+    const fromInput = el('input', {
+      type: 'range',
+      class: 'dual-input',
+      min: String(lo),
+      max: String(hi),
+      step: String(step),
+      'aria-label': 'Timeline from',
+      onInput: () => {
+        mapState.windowFrom = Math.min(Number(fromInput.value), mapState.windowTo);
+        paint();
+        repaintMap();
+      },
+    });
+    const toInput = el('input', {
+      type: 'range',
+      class: 'dual-input',
+      min: String(lo),
+      max: String(hi),
+      step: String(step),
+      'aria-label': 'Timeline until',
+      onInput: () => {
+        mapState.windowTo = Math.max(Number(toInput.value), mapState.windowFrom);
+        paint();
+        repaintMap();
+      },
+    });
+
+    paint();
+
+    return el(
+      'div',
+      { class: 'map-window' },
+      el('span', { class: 'map-window-label', text: 'Timeline' }),
+      el(
+        'div',
+        { class: 'dual-range' },
+        el('div', { class: 'dual-track' }, fill),
+        fromInput,
+        toInput,
+      ),
+      valueText,
+      el('button', {
+        type: 'button',
+        class: 'filter',
+        text: 'Whole period',
+        title: 'Reset the window to the whole analysed period',
+        onClick: () => {
+          mapState.windowFrom = lo;
+          mapState.windowTo = hi;
+          paint();
+          repaintMap();
+        },
+      }),
+    );
+  })();
+
   const layerToggle = (key, label) =>
     el(
       'label',
@@ -1345,6 +1457,7 @@ export function renderMapPanel(panel, report, state, relayout) {
         el('div', { class: 'field' }, el('label', { text: 'Players' }), playerSelect),
         el('div', { class: 'field' }, el('label', { text: 'Custom image' }), bgInput),
       ),
+      windowControl,
       el(
         'div',
         { class: 'filters' },

@@ -135,7 +135,7 @@ function positionAt(player, at) {
 /**
  * @param {HTMLCanvasElement} canvas
  * @param {object} report analysis report
- * @param {object} state   { worldSize, layers, tiles, background, selectedKeys, onTile }
+ * @param {object} state   { worldSize, layers, tiles, background, selectedKeys, windowFrom, windowTo, onTile }
  */
 export function renderMap(canvas, report, state) {
   const adm = report?.adm;
@@ -210,6 +210,20 @@ export function renderMap(canvas, report, state) {
 
   if (!adm) return;
 
+  // ── timeline window ──────────────────────────────────────
+  // Everything drawn from here on is limited to [windowFrom, windowTo] when a
+  // range is supplied; events without a timestamp are only kept for the whole
+  // period, since they cannot be placed inside a narrower one.
+  const hasWindow = Number.isFinite(state.windowFrom) && Number.isFinite(state.windowTo);
+  const inWindow = (at) => !hasWindow || (at !== null && at !== undefined && at >= state.windowFrom && at <= state.windowTo);
+  const lastSampled = (p) => {
+    if (!hasWindow) return p.lastKnownPos;
+    for (let i = p.positions.length - 1; i >= 0; i--) {
+      if (inWindow(p.positions[i].at)) return p.positions[i];
+    }
+    return null;
+  };
+
   // ── heatmap ──────────────────────────────────────────────
   if (layers.heat) {
     const grid = new Float32Array(HEAT_COLS * HEAT_ROWS);
@@ -223,8 +237,8 @@ export function renderMap(canvas, report, state) {
       if (grid[idx] > max) max = grid[idx];
     };
 
-    for (const p of adm.players) for (const s of p.positions) addPoint(s.x, s.y);
-    for (const b of adm.builds) if (b.pos) addPoint(b.pos.x, b.pos.y);
+    for (const p of adm.players) for (const s of p.positions) if (inWindow(s.at)) addPoint(s.x, s.y);
+    for (const b of adm.builds) if (b.pos && inWindow(b.at)) addPoint(b.pos.x, b.pos.y);
 
     if (max > 0) {
       const cw = cssWidth / HEAT_COLS;
@@ -245,7 +259,7 @@ export function renderMap(canvas, report, state) {
   if (layers.builds) {
     ctx.fillStyle = 'rgba(90, 200, 220, 0.85)';
     for (const b of adm.builds) {
-      if (!b.pos) continue;
+      if (!b.pos || !inWindow(b.at)) continue;
       const x = px(b.pos.x);
       const y = py(b.pos.y);
       ctx.fillRect(x - 2.5, y - 2.5, 5, 5);
@@ -256,9 +270,10 @@ export function renderMap(canvas, report, state) {
   if (layers.connects) {
     ctx.fillStyle = 'rgba(120, 190, 120, 0.55)';
     for (const p of adm.players) {
-      if (!p.lastKnownPos) continue;
+      const spot = lastSampled(p);
+      if (!spot) continue;
       ctx.beginPath();
-      ctx.arc(px(p.lastKnownPos.x), py(p.lastKnownPos.y), 2, 0, Math.PI * 2);
+      ctx.arc(px(spot.x), py(spot.y), 2, 0, Math.PI * 2);
       ctx.fill();
     }
   }
@@ -270,7 +285,7 @@ export function renderMap(canvas, report, state) {
       : adm.players.slice(0, 12);
 
     chosen.forEach((p, i) => {
-      const pts = p.positions.filter((s) => s.at !== null);
+      const pts = p.positions.filter((s) => s.at !== null && s.at !== undefined && inWindow(s.at));
       if (pts.length < 2) return;
       ctx.beginPath();
       ctx.strokeStyle = `hsla(${(i * 47) % 360} 72% 60% / 0.65)`;
@@ -288,7 +303,7 @@ export function renderMap(canvas, report, state) {
   // ── kills (shot lines) ───────────────────────────────────
   if (layers.kills) {
     for (const k of adm.kills) {
-      if (!k.pos) continue;
+      if (!k.pos || !inWindow(k.at)) continue;
       const vx = px(k.pos.x);
       const vy = py(k.pos.y);
 
@@ -314,7 +329,7 @@ export function renderMap(canvas, report, state) {
   // ── suspicious jumps ─────────────────────────────────────
   if (layers.jumps) {
     for (const s of adm.suspicious) {
-      if (s.type !== 'teleport' || !s.from || !s.to) continue;
+      if (s.type !== 'teleport' || !s.from || !s.to || !inWindow(s.at)) continue;
       ctx.strokeStyle = 'rgba(217, 165, 59, 0.75)';
       ctx.setLineDash([4, 4]);
       ctx.lineWidth = 1.4;
@@ -330,11 +345,12 @@ export function renderMap(canvas, report, state) {
   const highlighted = state.selectedKeys?.length ? state.selectedKeys : [];
   for (const key of highlighted) {
     const p = adm.playerByKey.get(key);
-    if (!p?.lastKnownPos) continue;
+    const spot = p ? lastSampled(p) : null;
+    if (!spot) continue;
     ctx.strokeStyle = 'rgba(255,255,255,0.8)';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.arc(px(p.lastKnownPos.x), py(p.lastKnownPos.y), 8, 0, Math.PI * 2);
+    ctx.arc(px(spot.x), py(spot.y), 8, 0, Math.PI * 2);
     ctx.stroke();
   }
 }

@@ -87,6 +87,9 @@ const state = {
     backgroundSource: null,
     imageUrl: '',
     imageFailed: false,
+    // Timeline window in epoch seconds; null means the whole analysed period.
+    windowFrom: null,
+    windowTo: null,
     layers: {
       tiles: true,
       names: true,
