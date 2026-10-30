@@ -8,22 +8,9 @@
  * DayZ world coordinates are metres: x = east, z = south, y = up.
  */
 
-// Only maps with a stable, well-known world size carry a fixed value. Terrains
-// like Nasdara are rebuilt by their authors, so their size is inferred from the
-// analysed positions (worldSize: 0) and stays editable.
-export const MAPS = [
-  { id: 'auto', label: 'Auto (from log positions)', worldSize: 0 },
-  { id: 'chernarus', label: 'Chernarus', worldSize: 15360 },
-  { id: 'livonia', label: 'Livonia', worldSize: 15360 },
-  { id: 'sakhal', label: 'Sakhal', worldSize: 12800 },
-  { id: 'namalsk', label: 'Namalsk', worldSize: 12800 },
-  { id: 'nasdara', label: 'Nasdara', worldSize: 0 },
-  { id: 'custom', label: 'Custom / other', worldSize: 0 },
-];
-
 /**
- * World size inferred from the analysed positions, so custom maps (Nasdara,
- * Deer Isle, …) are scaled correctly without being known in advance.
+ * World size inferred from the analysed positions, so a map without metadata
+ * still scales sensibly.
  * @param {{maxX:number, maxY:number}|null|undefined} bounds
  */
 export function inferWorldSize(bounds, fallback = 15360) {

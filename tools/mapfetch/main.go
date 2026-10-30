@@ -14,9 +14,11 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
 	"fmt"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"sync"
@@ -32,8 +34,14 @@ func main() {
 		force   = flag.Bool("force", false, "re-download tiles that already exist")
 		workers = flag.Int("workers", 2, "parallel requests inside one map")
 		par     = flag.Int("parallel", 3, "maps fetched concurrently")
+		rename  = flag.Bool("fixnames", false, "rewrite meta.json display names from the local map ids (no network)")
 	)
 	flag.Parse()
+
+	if *rename {
+		fail(fixNames(*out))
+		return
+	}
 
 	levels, err := parseZooms(*zooms)
 	if err != nil {
@@ -188,6 +196,45 @@ func detectZooms(dir string) (minZoom, maxZoom int, ok bool) {
 		}
 	}
 	return minZoom, maxZoom, maxZoom >= 0
+}
+
+// fixNames refreshes the display name in every meta.json already on disk, so a
+// naming fix does not require re-downloading the tiles.
+func fixNames(out string) error {
+	entries, err := os.ReadDir(out)
+	if err != nil {
+		return err
+	}
+
+	updated := 0
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		path := filepath.Join(out, e.Name(), "meta.json")
+		raw, err := os.ReadFile(path)
+		if err != nil {
+			continue
+		}
+
+		var meta metaFile
+		if err := json.Unmarshal(raw, &meta); err != nil {
+			fmt.Fprintf(os.Stderr, "  skipping %s: %v\n", path, err)
+			continue
+		}
+		want := displayName(e.Name())
+		if meta.Name == want {
+			continue
+		}
+		meta.Name = want
+		if err := writeMeta(path, &meta); err != nil {
+			return err
+		}
+		updated++
+	}
+
+	fmt.Printf("updated the name of %d map(s) in %s\n", updated, out)
+	return nil
 }
 
 func parseZooms(raw string) ([]int, error) {

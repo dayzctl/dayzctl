@@ -54,12 +54,18 @@ export async function fetchLogs(instance) {
 }
 
 /**
- * Map extent, tile URL template and place names for a community map
- * (e.g. "nasdara"). Rejects when the map is not published or the server has no
- * internet access — the map view then falls back to a coordinate grid.
+ * Map extent, tile URL template and place names for a bundled map
+ * (e.g. "nasdara"). Rejects when that map is not installed — the map view then
+ * falls back to a coordinate grid.
  */
 export async function fetchMapMeta(mapId) {
   return requestJSON(`/api/maps/${encodeURIComponent(mapId)}/meta`);
+}
+
+/** @returns {Promise<Array<{id: string, name: string, size: number}>>} */
+export async function fetchMaps() {
+  const payload = await requestJSON('/api/maps');
+  return payload?.maps ?? [];
 }
 
 /**

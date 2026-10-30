@@ -6,7 +6,7 @@
  * UI state and fetch calls.
  */
 
-import { fetchHealth, fetchInstances, fetchLogs, analyze, fetchMapMeta } from './api.js';
+import { fetchHealth, fetchInstances, fetchLogs, analyze, fetchMapMeta, fetchMaps } from './api.js';
 import { fmtInt, fmtBytes } from './format.js';
 import { renderMap } from './mapview.js';
 import {
@@ -72,11 +72,16 @@ const state = {
   mapImageUrl: '',
   // Community map (tiles + place names) for the selected instance.
   mapId: '',
+  // The map the instance is configured with; the Map tab can switch the view to
+  // any other installed map without touching the configuration.
+  instanceMapId: '',
+  availableMaps: [],
+  mapsLoaded: false,
   mapMeta: null,
   mapMetaFailed: false,
   mapMetaLoading: false,
   map: {
-    id: 'auto',
+    // 0 means "use the selected map's own extent".
     worldSize: 0,
     background: null,
     backgroundSource: null,
@@ -211,12 +216,24 @@ async function openInstance(inst) {
   }
 
   // Community map for tiles and place names (defaults to the instance name).
-  state.mapId = inst.map || inst.name || '';
+  state.instanceMapId = inst.map || '';
+  state.mapId = state.instanceMapId;
   state.mapMeta = null;
   state.mapMetaFailed = false;
   state.mapMetaLoading = false;
-  state.map.id = 'auto';
   state.map.worldSize = 0;
+
+  if (!state.mapsLoaded) {
+    fetchMaps()
+      .then((maps) => {
+        state.availableMaps = maps;
+        state.mapsLoaded = true;
+        if (state.activeTab === 'map') state.actions.setState({});
+      })
+      .catch(() => {
+        state.availableMaps = [];
+      });
+  }
 
   dom.connect.hidden = true;
   dom.results.hidden = true;
@@ -365,6 +382,7 @@ function showInstances() {
   state.instance = null;
   state.mapImageUrl = '';
   state.mapId = '';
+  state.instanceMapId = '';
   state.mapMeta = null;
   state.mapMetaFailed = false;
   dom.results.hidden = true;

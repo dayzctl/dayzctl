@@ -100,19 +100,22 @@ clicking through the RPT files.
 DayZ writes `pos=<x, y, z>` as **east, north, altitude**. The map plots `x`
 horizontally and `y` vertically (north up), scaled by the map's world size.
 
-The **Map** selector defaults to *Auto*: the size comes from the map service
-when the map is known, otherwise from the extent present in the ADM file,
-rounded up to whole kilometres. Presets for Chernarus/Livonia (15 360 m),
-Sakhal/Namalsk (12 800 m) are one click away, and *Custom* lets you type any
-world size.
+The **Map** selector switches which map is drawn: the instance's own map (from
+`instances[].map`, defaulting to the instance name), any other map installed on
+the server, or no imagery at all. Picking a map loads its extent, tiles and
+place names, so plotting Nasdara positions on the Chernarus map is one click.
+The world size follows the selected map; typing a number overrides it, and
+without map metadata the size is inferred from the ADM positions, rounded up to
+whole kilometres.
 
 ### Map imagery and place names
 
-The Map tab shows satellite tiles plus place names for the instance's map,
-served by `dayzctl` itself:
+The Map tab shows satellite tiles plus place names for the selected map, served
+by `dayzctl` itself:
 
 | Endpoint | Purpose |
 | --- | --- |
+| `GET /api/maps` | installed maps (id, name, extent, zoom range) |
 | `GET /api/maps/{map}/meta` | world size, zoom limits, tile URL template, place names |
 | `GET /api/maps/{map}/tiles/{z}/{x}/{y}` | one pyramid tile |
 

@@ -275,18 +275,30 @@ func titleCase(s string) string {
 	return strings.Join(words, " ")
 }
 
+// mapNames gives the awkward map ids a readable label in the UI. Anything not
+// listed falls back to title-casing the id.
+var mapNames = map[string]string{
+	"chernarusplus":    "Chernarus",
+	"chernarusplusexp": "Chernarus (Expansion)",
+	"chernarus2035":    "Chernarus 2035",
+	"livonia":          "Livonia",
+	"livoniaexp":       "Livonia (Expansion)",
+	"sakhal":           "Sakhal",
+	"sakhalexp":        "Sakhal (Expansion)",
+	"namalsk":          "Namalsk",
+	"deerisle":         "Deer Isle",
+	"deerisleexp":      "Deer Isle (Expansion)",
+	"takistanplus":     "Takistan Plus",
+	"stuartisland":     "Stuart Island",
+	"visisland":        "Vis Island",
+	"pnw":              "PNW",
+	"nukezzone":        "NukezZone",
+	"nhchernobyl":      "NHChernobyl",
+}
+
 func displayName(id string) string {
-	switch id {
-	case "chernarusplus", "chernarus":
-		return "Chernarus"
-	case "livonia":
-		return "Livonia"
-	case "sakhal", "frostline":
-		return "Sakhal"
-	case "namalsk":
-		return "Namalsk"
-	case "deerisle":
-		return "Deer Isle"
+	if name, ok := mapNames[id]; ok {
+		return name
 	}
 	return titleCase(id)
 }

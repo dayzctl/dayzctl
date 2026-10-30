@@ -5,7 +5,7 @@
 
 import { fmtInt, fmtDuration, fmtTime, fmtClock, fmtDistance, fmtBytes, truncate, colorFor } from './format.js';
 import { SEVERITY, SEVERITY_LABEL, SEVERITY_ORDER } from './severity.js';
-import { MAPS, renderMap, inferWorldSize } from './mapview.js';
+import { renderMap, inferWorldSize } from './mapview.js';
 import { fetchMapMeta } from './api.js';
 
 /** Kill count per weapon, used by the overview card. */
@@ -1052,8 +1052,11 @@ function mapHint(mapMeta, mapState, state) {
     const label = mapMeta.name || mapMeta.id;
     return `Bundled imagery and place names for ${label} (${fmtInt(mapMeta.size)} m). ${coords}`;
   }
+  if (state.mapId === '__none__') {
+    return `No imagery selected \u2014 choose a map above to draw the terrain. ${coords}`;
+  }
   if (state.mapMetaFailed) {
-    return `No bundled imagery for \u201c${state.mapId || 'this instance'}\u201d. Set instances[].map to a bundled map, or pick a custom image. ${coords}`;
+    return `No bundled imagery for \u201c${state.mapId || 'this instance'}\u201d. Pick another map above, or set instances[].map in the configuration. ${coords}`;
   }
   return `Loading map imagery\u2026 Put map.jpg in the instance\u2019s profiles folder, or set instances[].map_image, to use your own. ${coords}`;
 }
@@ -1067,16 +1070,12 @@ export function renderMapPanel(panel, report, state, relayout) {
     return;
   }
 
-  // "Auto" derives the world size from the analysed positions, so maps we
-  // have no preset for (Nasdara, custom terrains) still scale correctly.
-  // When the map service knows the real extent, that value wins.
+  // The map's own extent wins; without one, scale to what the log contains.
   const autoWorld = inferWorldSize(adm.bounds);
   const mapState = state.map;
   const mapMeta = state.mapMeta;
-  const preset = MAPS.find((m) => m.id === mapState.id) ?? MAPS[0];
-  const presetWorld = preset.worldSize > 0 ? preset.worldSize : autoWorld;
-  const inferred = mapMeta?.size ? mapMeta.size : autoWorld;
-  const effectiveWorld = mapState.id === 'auto' ? inferred : (mapState.worldSize || presetWorld);
+  const metaWorld = mapMeta?.size ? mapMeta.size : 0;
+  const effectiveWorld = mapState.worldSize || metaWorld || autoWorld;
   const tiles = mapMeta?.tileUrl
     ? {
         url: mapMeta.tileUrl,
@@ -1099,27 +1098,51 @@ export function renderMapPanel(panel, report, state, relayout) {
   // resolved here, not in the raw state).
   state.lastMapView = view;
 
+  // Map selector: the instance's own map, any other installed map, or no
+  // imagery at all. Switching reloads that map's extent and place names.
+  const pickMap = (id) => {
+    state.mapId = id;
+    state.mapMeta = null;
+    state.mapMetaFailed = false;
+    state.mapMetaLoading = false;
+    mapState.worldSize = 0;
+    state.actions.setState({});
+  };
+
+  const mapOptions = [
+    el('option', {
+      value: '',
+      text: state.instanceMapId
+        ? `Instance map (${state.instanceMapId})`
+        : 'Instance map (none configured)',
+      selected: state.mapId === state.instanceMapId || !state.mapId,
+    }),
+    ...state.availableMaps
+      .filter((m) => m.id !== state.instanceMapId)
+      .map((m) =>
+        el('option', {
+          value: m.id,
+          text: `${m.name || m.id} (${fmtInt(m.size)} m)`,
+          selected: state.mapId === m.id,
+        }),
+      ),
+    el('option', {
+      value: '__none__',
+      text: 'No imagery (grid)',
+      selected: state.mapId === '__none__',
+    }),
+  ];
+
   const mapSelect = el(
     'select',
     {
       onChange: (e) => {
-        const map = MAPS.find((m) => m.id === e.target.value) ?? MAPS[0];
-        mapState.id = map.id;
-        mapState.worldSize = map.id === 'auto' ? inferred : (map.worldSize > 0 ? map.worldSize : inferred);
-        state.actions.setState({});
+        const value = e.target.value;
+        if (value === '__none__') pickMap('__none__');
+        else pickMap(value || state.instanceMapId);
       },
     },
-    ...MAPS.map((m) =>
-      el('option', {
-        value: m.id,
-        text: m.worldSize > 0
-          ? `${m.label} (${fmtInt(m.worldSize)} m)`
-          : m.id === 'auto'
-            ? `${m.label}${adm.bounds ? ` — ${fmtInt(inferred)} m` : ' — no positions yet'}`
-            : `${m.label} (size from log) — ${fmtInt(inferred)} m`,
-        selected: m.id === mapState.id,
-      }),
-    ),
+    ...mapOptions,
   );
 
   const worldInput = el('input', {
@@ -1128,7 +1151,6 @@ export function renderMapPanel(panel, report, state, relayout) {
     step: '100',
     value: String(effectiveWorld),
     onChange: (e) => {
-      mapState.id = 'custom';
       mapState.worldSize = Math.max(1000, Number(e.target.value) || 15360);
       state.actions.setState({});
     },
@@ -1151,8 +1173,8 @@ export function renderMapPanel(panel, report, state, relayout) {
     img.src = imageUrl;
   }
 
-  // Fetch the map's extents and place names once per instance.
-  if (state.mapId && !state.mapMeta && !state.mapMetaFailed && !state.mapMetaLoading) {
+  // Fetch the selected map's extent and place names.
+  if (state.mapId && state.mapId !== '__none__' && !state.mapMeta && !state.mapMetaFailed && !state.mapMetaLoading) {
     state.mapMetaLoading = true;
     fetchMapMeta(state.mapId)
       .then((meta) => {
