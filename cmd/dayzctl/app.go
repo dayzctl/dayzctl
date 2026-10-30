@@ -224,6 +224,7 @@ func loadConfig(cfgPath string) error {
 		return err
 	}
 	shared.Config = cfg
+	shared.ConfigPath = cfgPath
 	return nil
 }
 

@@ -3,6 +3,7 @@ package config
 import (
 	"os"
 	"path/filepath"
+	"strings"
 	"testing"
 )
 
@@ -90,5 +91,42 @@ func TestGetMapsDirHonoursEnvironmentOverride(t *testing.T) {
 	cfg := &ServerConfig{}
 	if got := cfg.GetMapsDir(); got != dir {
 		t.Errorf("GetMapsDir = %q, want the %s override %q", got, MapsDirEnv, dir)
+	}
+}
+
+func TestLoadReportsOffendingLine(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.yaml")
+	body := "steam:\n  username: \"x\"\n\npaths:\n  base: \"/srv/dayz\"\n\ninstances:\n  - name: dayz\n    port: 2302\n   steam_query_port: 27016\n"
+	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := Load(path)
+	if err == nil {
+		t.Fatal("expected a parse error")
+	}
+	msg := err.Error()
+	if !strings.Contains(msg, "failed to parse config YAML") {
+		t.Errorf("error = %q, want the parse wrapper", msg)
+	}
+	// The quoted context has to point at the misaligned key.
+	if !strings.Contains(msg, "steam_query_port") {
+		t.Errorf("error should quote the offending line, got:\n%s", msg)
+	}
+}
+
+func TestLoadWarnsAboutTabIndentation(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.yaml")
+	body := "steam:\n\tusername: \"x\"\n"
+	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	_, err := Load(path)
+	if err == nil {
+		t.Fatal("expected a parse error")
+	}
+	if !strings.Contains(err.Error(), "indented with a tab") {
+		t.Errorf("error should mention tabs, got:\n%s", err.Error())
 	}
 }

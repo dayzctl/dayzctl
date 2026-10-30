@@ -18,6 +18,8 @@ import (
 
 var (
 	Config *config.ServerConfig
+	// ConfigPath is the config file that was loaded.
+	ConfigPath string
 )
 
 func GetInstance(name string) (*config.Instance, error) {

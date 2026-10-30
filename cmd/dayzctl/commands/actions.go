@@ -539,10 +539,15 @@ func VersionAction() error {
 
 // ValidateConfigAction logs config details
 func ValidateConfigAction() error {
-	logger.Info("Config loaded successfully")
+	logger.Info("Config loaded successfully", "path", shared.ConfigPath)
 	logger.Info("Steam user", "user", shared.Config.GetSteamUser())
 	logger.Info("Base directory", "path", shared.Config.GetBaseDir())
 	logger.Info("Install directory", "path", shared.Config.GetInstallDir())
+	mapsDir := shared.Config.GetMapsDir()
+	if mapsDir == "" {
+		mapsDir = "embedded"
+	}
+	logger.Info("Map data", "path", mapsDir)
 	logger.Info("Instances", "count", len(shared.Config.Instances))
 	for _, inst := range shared.Config.Instances {
 		logger.Info("Instance",

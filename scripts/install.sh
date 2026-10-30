@@ -353,6 +353,16 @@ create_config() {
     # Create /etc/dayzctl directory
     mkdir -p /etc/dayzctl || error "Failed to create /etc/dayzctl"
 
+    # Reinstalling overwrites the config, so keep the old one around.
+    if [ -f "$CONFIG_PATH" ]; then
+        local backup="${CONFIG_PATH}.bak.$(date +%Y%m%d%H%M%S)"
+        if cp -f "$CONFIG_PATH" "$backup"; then
+            log "existing config saved as $backup"
+        else
+            warn "could not back up $CONFIG_PATH"
+        fi
+    fi
+
     TEMPLATE_URL="https://raw.githubusercontent.com/dayzctl/dayzctl/main/configs/config.yaml.tmpl"
     TMP_TEMPLATE=$(mktemp)
 
@@ -375,6 +385,14 @@ create_config() {
     rm -f "$TMP_TEMPLATE"
 
     chmod 644 "$CONFIG_PATH" || error "Failed to set permissions on config"
+
+    # Never leave behind a config that dayzctl cannot load; the loader quotes the
+    # offending line when it rejects a file.
+    if ! DAYZCTL_SKIP_ROOT=1 /usr/local/bin/dayzctl --config "$CONFIG_PATH" validate-config > /dev/null 2>&1; then
+        warn "the generated config does not load - fix $CONFIG_PATH before 'dayzctl apply':"
+        DAYZCTL_SKIP_ROOT=1 /usr/local/bin/dayzctl --config "$CONFIG_PATH" validate-config 2>&1 | sed 's/^/    /' || true
+    fi
+
     log "config created at $CONFIG_PATH"
 }
 
@@ -500,6 +518,19 @@ configure_maps_path() {
     fi
 
     if [ -s "$tmp" ]; then
+        # Adding maps: must not break a config that loaded before, because every
+        # later dayzctl call (apply, start, update) would then fail too.
+        local was_valid=0
+        if DAYZCTL_SKIP_ROOT=1 /usr/local/bin/dayzctl --config "$CONFIG_PATH" validate-config > /dev/null 2>&1; then
+            was_valid=1
+        fi
+        if [ "$was_valid" = "1" ] && ! DAYZCTL_SKIP_ROOT=1 /usr/local/bin/dayzctl --config "$tmp" validate-config > /dev/null 2>&1; then
+            warn "$CONFIG_PATH would not load with paths.maps set - leaving it unchanged"
+            DAYZCTL_SKIP_ROOT=1 /usr/local/bin/dayzctl --config "$tmp" validate-config 2>&1 | sed 's/^/    /' || true
+            warn "maps are available in a default location anyway; set paths.maps: $MAPS_DIR by hand if needed"
+            rm -f "$tmp"
+            return 0
+        fi
         cat "$tmp" > "$CONFIG_PATH" || error "Failed to update $CONFIG_PATH"
         chmod 644 "$CONFIG_PATH" || true
         log "configured paths.maps=$MAPS_DIR in $CONFIG_PATH"
@@ -520,6 +551,29 @@ set_ownership() {
 # ============================================================================
 # Main installation
 # ============================================================================
+# ============================================================================
+# Verify the configuration file can be loaded
+# ============================================================================
+# A preserved config from an older install, or a hand edit, can leave the file
+# unparseable; every later command (apply, update, start) would then fail with
+# the same error, so report it here where the cause is still obvious.
+verify_config() {
+    if [ ! -f "$CONFIG_PATH" ]; then
+        warn "no config at $CONFIG_PATH"
+        return 0
+    fi
+
+    if DAYZCTL_SKIP_ROOT=1 /usr/local/bin/dayzctl --config "$CONFIG_PATH" validate-config > /dev/null 2>&1; then
+        log "config OK: $CONFIG_PATH"
+        return 0
+    fi
+
+    warn "$CONFIG_PATH does not load:"
+    DAYZCTL_SKIP_ROOT=1 /usr/local/bin/dayzctl --config "$CONFIG_PATH" validate-config 2>&1 | sed 's/^/    /' || true
+    warn "fix the lines above, or regenerate the file from the template with:"
+    warn "  REINSTALL=1 bash scripts/install.sh"
+}
+
 main() {
     log "=== DayZ Server Installation ==="
     log "dayzctl: root tool for server management"
@@ -535,6 +589,7 @@ main() {
     install_steamcmd
     install_dayzctl
     create_config
+    verify_config
     install_maps
     if [ "${MAPS_READY:-0}" = "1" ]; then
         configure_maps_path

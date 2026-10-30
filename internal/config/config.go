@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"regexp"
+	"strconv"
 	"strings"
 
 	"gopkg.in/yaml.v3"
@@ -405,7 +407,7 @@ func Load(path string) (*ServerConfig, error) {
 
 	var cfg ServerConfig
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
-		return nil, fmt.Errorf("failed to parse config YAML: %w", err)
+		return nil, fmt.Errorf("failed to parse config YAML: %w%s", err, yamlContext(data, err))
 	}
 
 	cfg.SetDefaults()
@@ -415,4 +417,67 @@ func Load(path string) (*ServerConfig, error) {
 	}
 
 	return &cfg, nil
+}
+
+var yamlLineRE = regexp.MustCompile(`(?:^|\s)line (\d+):`)
+
+// yamlErrorLine pulls the line number out of a yaml.v3 error message.
+func yamlErrorLine(msg string) int {
+	m := yamlLineRE.FindStringSubmatch(msg)
+	if m == nil {
+		return 0
+	}
+	n, err := strconv.Atoi(m[1])
+	if err != nil {
+		return 0
+	}
+	return n
+}
+
+// yamlContext quotes the line a YAML error points at, plus a little context.
+// yaml.v3 only reports "line 63: did not find expected key", which is hard to
+// act on in a config that is a hundred lines long.
+func yamlContext(data []byte, err error) string {
+	line := yamlErrorLine(err.Error())
+	if line <= 0 {
+		return ""
+	}
+	lines := strings.Split(string(data), "\n")
+	if line > len(lines) {
+		return ""
+	}
+
+	var b strings.Builder
+	b.WriteString("\n")
+	// yaml.v3 often blames the key that opens a block rather than the line that
+	// is actually malformed, so show a few lines either side of it.
+	for n := max(1, line-3); n <= min(len(lines), line+5); n++ {
+		marker := "  "
+		if n == line {
+			marker = "> "
+		}
+		fmt.Fprintf(&b, "  %s%4d | %s\n", marker, n, strings.TrimRight(lines[n-1], " \t\r"))
+	}
+	if tab := firstTabIndentLine(lines); tab > 0 {
+		fmt.Fprintf(&b, "  hint: line %d is indented with a tab; YAML indentation must be spaces\n", tab)
+	}
+	return strings.TrimRight(b.String(), "\n")
+}
+
+// firstTabIndentLine returns the first line whose indentation contains a tab, or
+// 0 when the file indents with spaces only. YAML rejects tabs for indentation,
+// and the resulting error ("did not find expected key") does not say why.
+func firstTabIndentLine(lines []string) int {
+	for i, line := range lines {
+		for _, r := range line {
+			if r == ' ' {
+				continue
+			}
+			if r == '\t' {
+				return i + 1
+			}
+			break
+		}
+	}
+	return 0
 }
