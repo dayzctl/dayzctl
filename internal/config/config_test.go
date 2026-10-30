@@ -46,25 +46,8 @@ func TestMapsCandidatesOrder(t *testing.T) {
 	}
 }
 
-func TestGetMapsDirPrefersExplicitSetting(t *testing.T) {
-	dir := t.TempDir()
-	cfg := &ServerConfig{}
-	cfg.Paths.Base = "/srv/base"
-	cfg.Paths.Maps = "custom-maps"
-	if err := os.MkdirAll(filepath.Join("/srv/base", "custom-maps"), 0o755); err == nil {
-		t.Skip("cannot create /srv/base in this environment")
-	}
-
-	// An absolute, existing path is returned as-is.
-	cfg.Paths.Maps = dir
-	if got := cfg.GetMapsDir(); got != dir {
-		t.Errorf("GetMapsDir = %q, want %q", got, dir)
-	}
-}
-
 func TestGetMapsDirFallsBackToFixedLocations(t *testing.T) {
 	cfg := &ServerConfig{}
-	cfg.Paths.Maps = filepath.Join(t.TempDir(), "missing")
 
 	got := cfg.GetMapsDir()
 

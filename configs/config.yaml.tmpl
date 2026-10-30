@@ -5,14 +5,6 @@ steam:
 
 paths:
   base: "/srv/dayz"
-  # Log analyzer map data. Nothing to set for a normal install: dayzctl looks
-  # in these fixed places and uses the first one that exists —
-  #   <directory of the dayzctl binary>/maps
-  #   /usr/local/share/dayzctl/maps   (scripts/install.sh)
-  #   /usr/share/dayzctl/maps         (.deb)
-  # and falls back to the maps compiled into the binary.
-  # maps: "/srv/dayz/maps"          # only for a custom location
-  # $DAYZCTL_MAPS_DIR overrides all of the above (useful for tests).
 
 # Server instances
 instances:

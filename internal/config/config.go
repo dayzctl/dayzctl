@@ -113,11 +113,6 @@ type Paths struct {
 	StateDir    string `yaml:"state_dir,omitempty"`
 	StorageDir  string `yaml:"storage_dir,omitempty"`
 	SteamcmdBin string `yaml:"steamcmd_bin,omitempty"`
-	// Maps points at the directory holding the log analyzer's map data
-	// (<map>/meta.json and its tiles). The .deb installs it under
-	// /usr/share/dayzctl/maps; when empty, <install_dir>/maps is used and the
-	// maps compiled into the binary act as a fallback.
-	Maps string `yaml:"maps,omitempty"`
 }
 
 // Instance represents a server instance
@@ -263,22 +258,12 @@ const MapsDirEnv = "DAYZCTL_MAPS_DIR"
 
 // GetMapsDir returns the directory holding the log analyzer's map data.
 //
-// The location is fixed rather than discovered: `paths.maps` when set, then the
-// well-known places below. An empty result means no map directory exists and
-// the web server falls back to the data compiled into the binary.
+// The location is fixed rather than configurable: next to the binary, then the
+// two system directories below. An empty result means no map directory exists
+// and the web server falls back to the data compiled into the binary.
 func (c *ServerConfig) GetMapsDir() string {
 	if dir := strings.TrimSpace(os.Getenv(MapsDirEnv)); dir != "" && isDir(dir) {
 		return dir
-	}
-
-	if c.Paths.Maps != "" {
-		p := c.Paths.Maps
-		if !filepath.IsAbs(p) {
-			p = filepath.Join(c.GetBaseDir(), p)
-		}
-		if isDir(p) {
-			return p
-		}
 	}
 
 	for _, dir := range mapsCandidates() {

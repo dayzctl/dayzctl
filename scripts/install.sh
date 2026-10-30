@@ -8,10 +8,9 @@ DAYZ_HOME="${DAYZ_HOME:-/srv/dayz}"
 STEAM_USER="${STEAM_USER:-kqkklan}"
 REINSTALL="${REINSTALL:-0}"
 CONFIG_PATH="/etc/dayzctl/config.yaml"
-# Map imagery for the log analyzer (tiles + place names).
+# Map imagery for the log analyzer (tiles + place names). This is one of the
+# fixed locations dayzctl checks, so no config setting is needed for it.
 MAPS_DIR="${MAPS_DIR:-/usr/local/share/dayzctl/maps}"
-# Set to 1 once map data is on disk; the config is only pointed at it then.
-MAPS_READY=0
 
 prompt_for_values() {
     if [ ! -t 0 ]; then
@@ -446,7 +445,6 @@ install_maps() {
     local count
     count=$(find "$MAPS_DIR" -name meta.json 2>/dev/null | wc -l | tr -d ' ')
     if [ "${count:-0}" -gt 0 ]; then
-        MAPS_READY=1
         log "map data ready: ${count} map(s) in $MAPS_DIR"
     else
         warn "no maps installed (the analyzer will use its built-in copy or a coordinate grid)"
@@ -490,57 +488,6 @@ unpack_maps() {
 }
 
 # ============================================================================
-# Point the config at the installed map data
-# ============================================================================
-configure_maps_path() {
-    if [ ! -f "$CONFIG_PATH" ]; then
-        return 0
-    fi
-
-    # /usr/local/share/dayzctl/maps is one of the fixed locations dayzctl
-    # checks on its own, so only a custom MAPS_DIR needs to be written down.
-    if [ "$MAPS_DIR" = "/usr/local/share/dayzctl/maps" ]; then
-        log "map data is in a default location ($MAPS_DIR); no config change needed"
-        return 0
-    fi
-
-    local tmp
-    tmp=$(mktemp) || error "Failed to create temporary file"
-
-    if grep -qE '^[[:space:]]*maps:' "$CONFIG_PATH"; then
-        sed -E "s|^[[:space:]]*maps:.*|  maps: \"${MAPS_DIR}\"|" "$CONFIG_PATH" > "$tmp"
-    else
-        # Insert the setting straight after the top-level paths: key.
-        awk -v dir="$MAPS_DIR" '
-            { print }
-            /^paths:[[:space:]]*$/ && !done { printf "  maps: \"%s\"\n", dir; done = 1 }
-        ' "$CONFIG_PATH" > "$tmp"
-    fi
-
-    if [ -s "$tmp" ]; then
-        # Adding maps: must not break a config that loaded before, because every
-        # later dayzctl call (apply, start, update) would then fail too.
-        local was_valid=0
-        if DAYZCTL_SKIP_ROOT=1 /usr/local/bin/dayzctl --config "$CONFIG_PATH" validate-config > /dev/null 2>&1; then
-            was_valid=1
-        fi
-        if [ "$was_valid" = "1" ] && ! DAYZCTL_SKIP_ROOT=1 /usr/local/bin/dayzctl --config "$tmp" validate-config > /dev/null 2>&1; then
-            warn "$CONFIG_PATH would not load with paths.maps set - leaving it unchanged"
-            DAYZCTL_SKIP_ROOT=1 /usr/local/bin/dayzctl --config "$tmp" validate-config 2>&1 | sed 's/^/    /' || true
-            warn "maps are available in a default location anyway; set paths.maps: $MAPS_DIR by hand if needed"
-            rm -f "$tmp"
-            return 0
-        fi
-        cat "$tmp" > "$CONFIG_PATH" || error "Failed to update $CONFIG_PATH"
-        chmod 644 "$CONFIG_PATH" || true
-        log "configured paths.maps=$MAPS_DIR in $CONFIG_PATH"
-    else
-        warn "could not update $CONFIG_PATH; set paths.maps: $MAPS_DIR manually"
-    fi
-    rm -f "$tmp"
-}
-
-# ============================================================================
 # Set ownership
 # ============================================================================
 set_ownership() {
@@ -570,6 +517,14 @@ verify_config() {
 
     warn "$CONFIG_PATH does not load:"
     DAYZCTL_SKIP_ROOT=1 /usr/local/bin/dayzctl --config "$CONFIG_PATH" validate-config 2>&1 | sed 's/^/    /' || true
+
+    # Older installers wrote a paths.maps line; the map location is fixed now, so
+    # such a line is dead weight and a common source of broken indentation.
+    if grep -qE '^[[:space:]]*maps:' "$CONFIG_PATH"; then
+        warn "the 'maps:' line under paths: is no longer needed - delete it"
+        warn "  sudo sed -i '/^[[:space:]]*maps:/d' $CONFIG_PATH"
+    fi
+
     warn "fix the lines above, or regenerate the file from the template with:"
     warn "  REINSTALL=1 bash scripts/install.sh"
 }
@@ -591,9 +546,6 @@ main() {
     create_config
     verify_config
     install_maps
-    if [ "${MAPS_READY:-0}" = "1" ]; then
-        configure_maps_path
-    fi
     set_ownership
 
     log "Applying configuration..."

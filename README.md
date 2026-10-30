@@ -31,11 +31,10 @@ The script also installs the log analyzer's map data:
   (if that asset is missing it warns and the analyzer uses the maps compiled
   into the binary, or draws a grid).
 
-Either way the data lands in a location `dayzctl` already checks, so nothing
-needs to be configured. Override the target with
-`MAPS_DIR=/some/path bash scripts/install.sh` — only a non-default directory is
-written to `paths.maps` in `/etc/dayzctl/config.yaml`. `scripts/uninstall.sh`
-offers to remove the data again.
+Either way the data lands in a location `dayzctl` already checks, so there is
+nothing to configure. Override the target with
+`MAPS_DIR=/some/path bash scripts/install.sh` if you want the files elsewhere.
+`scripts/uninstall.sh` offers to remove the data again.
 
 Releases publish two assets:
 
@@ -45,7 +44,7 @@ Releases publish two assets:
 | `dayzctl-maps.tar.gz` | the same map data as files, for every platform (25 MB) |
 
 The binary works on its own — download it and the Map tab has terrain. The maps
-archive exists so an installed server can keep imagery under `paths.maps` and
+archive exists so an installed server can keep the imagery as plain files and
 update or add maps without rebuilding; it is also what `make maps-archive`
 produces locally.
 
@@ -68,17 +67,17 @@ instead of 40 MB because the tiles live outside it.
 
 #### Where map data is read from
 
-The location is fixed, not auto-detected at runtime. Lookup stops at the first
+The location is fixed and hardcoded — there is no config setting for it and
+installing map data never modifies `config.yaml`. Lookup stops at the first
 entry that exists, and each layer falls back to the tiles embedded in the
 binary:
 
 | Order | Location |
 | --- | --- |
-| 1 | `$DAYZCTL_MAPS_DIR` — explicit override, handy for tests |
-| 2 | `paths.maps` in `config.yaml` — relative paths resolve against `paths.base` |
-| 3 | `maps/` next to the `dayzctl` binary — portable/tarball installs |
-| 4 | `/usr/local/share/dayzctl/maps` — where `install.sh` puts the data |
-| 5 | `/usr/share/dayzctl/maps` — where the `.deb` puts the data |
+| 1 | `$DAYZCTL_MAPS_DIR` — environment override, handy for tests |
+| 2 | `maps/` next to the `dayzctl` binary — portable/tarball installs |
+| 3 | `/usr/local/share/dayzctl/maps` — where `install.sh` puts the data |
+| 4 | `/usr/share/dayzctl/maps` — where the `.deb` puts the data |
 
 The startup log of `dayzctl web` prints the resolved directory
 (`mapsDir=/usr/share/dayzctl/maps`) or `mapsDir=embedded` when no data is found
