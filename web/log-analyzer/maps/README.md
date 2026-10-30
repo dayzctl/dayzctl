@@ -1,4 +1,4 @@
-# Bundled map data
+let the server read maps f# Bundled map data
 
 Everything in this directory is generated ahead of time and embedded into the
 `dayzctl` binary with `go:embed`. The web service never downloads map data while

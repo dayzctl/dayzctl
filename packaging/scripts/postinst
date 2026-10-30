@@ -1,0 +1,15 @@
+#!/bin/sh
+# Refresh systemd so the shipped unit is known. The service is not enabled by
+# default: it needs a configured instance first.
+set -e
+
+if [ -d /run/systemd/system ]; then
+	systemctl daemon-reload >/dev/null 2>&1 || true
+fi
+
+# Map data is read from /usr/share/dayzctl/maps; make sure it is readable.
+if [ -d /usr/share/dayzctl/maps ]; then
+	chmod -R a+rX /usr/share/dayzctl/maps || true
+fi
+
+exit 0

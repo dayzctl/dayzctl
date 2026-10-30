@@ -2,10 +2,10 @@
 
 PROJECT := github.com/dayzctl/dayzctl
 BINARY := dayzctl
-VERSION := $(shell cat pkg/version/version.txt 2>/dev/null || echo "dev")
+VERSION := $(shell cat internal/version/version.txt 2>/dev/null || echo "dev")
 BUILD_TIME := $(shell date -u +%Y-%m-%dT%H:%M:%SZ)
-LDFLAGS := -X '$(PROJECT)/pkg/version.Version=$(VERSION)' \
-           -X '$(PROJECT)/pkg/version.BuildTime=$(BUILD_TIME)'
+LDFLAGS := -X '$(PROJECT)/internal/version.Version=$(VERSION)' \
+           -X '$(PROJECT)/internal/version.BuildTime=$(BUILD_TIME)'
 
 # Build directories
 BUILD_DIR := build
@@ -81,6 +81,22 @@ maps-all: ## Fetch every published map, e.g. make maps-all ZOOMS=3
 	@echo "$(GREEN)Fetching every map (zoom $(or $(ZOOMS),3))...$(NC)"
 	go run ./tools/mapfetch -all -zooms $(or $(ZOOMS),3)
 	@echo "$(GREEN)Done - commit web/log-analyzer/maps and rebuild$(NC)"
+
+.PHONY: deb
+deb: ## Build a Debian package (linux/amd64) with the maps as files
+	@echo "$(GREEN)Building $(BINARY) $(VERSION) .deb...$(NC)"
+	@mkdir -p $(BUILD_DIR)
+	GOOS=linux GOARCH=amd64 $(GOCMD) -tags nomaps -trimpath -ldflags="$(LDFLAGS) -s -w" \
+		-o $(BUILD_DIR)/$(BINARY)-linux-amd64-nomaps ./cmd/$(BINARY)
+	go run ./tools/deb -bin $(BUILD_DIR)/$(BINARY)-linux-amd64-nomaps -out $(BUILD_DIR) -version $(VERSION)
+	@echo "$(GREEN)Package ready in $(BUILD_DIR)/$(NC)"
+
+.PHONY: maps-archive
+maps-archive: ## Pack the map data for a release (scripts/install.sh downloads it)
+	@echo "$(GREEN)Packing map data...$(NC)"
+	@mkdir -p $(BUILD_DIR)
+	tar -czf $(BUILD_DIR)/$(BINARY)-maps.tar.gz -C web/log-analyzer maps
+	@echo "$(GREEN)$(BUILD_DIR)/$(BINARY)-maps.tar.gz$(NC)"
 
 .PHONY: test
 test: ## Run tests

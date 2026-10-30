@@ -127,6 +127,13 @@ func NewApp() *cli.App {
 		Description: "",
 		Flags: []cli.Flag{
 			&cli.StringFlag{Name: "log-level", Value: "info", Usage: "Log level (debug, info, warn, error)"},
+			&cli.StringFlag{
+				Name:      "config",
+				Aliases:   []string{"c"},
+				Usage:     "Path to the `config file`",
+				Value:     config.DefaultConfigPath(),
+				TakesFile: true,
+			},
 		},
 		Before:   setupBefore,
 		Commands: buildCommands(),
@@ -144,6 +151,10 @@ func setupBefore(c *cli.Context) error {
 	}
 
 	cfgPath := config.DefaultConfigPath()
+	if v := c.String("config"); v != "" {
+		cfgPath = v
+	}
+	// Test harnesses run unprivileged and point at a scratch config.
 	if os.Getenv("DAYZCTL_SKIP_ROOT") == "1" {
 		if v := os.Getenv("DAYZCTL_CONFIG"); v != "" {
 			cfgPath = v

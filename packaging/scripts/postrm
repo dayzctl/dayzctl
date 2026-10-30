@@ -1,0 +1,12 @@
+#!/bin/sh
+# On remove (not upgrade) leave /etc/dayzctl/config.yaml in place: it holds the
+# operator's settings. Only tell systemd the unit is gone.
+set -e
+
+if [ "$1" = "remove" ] || [ "$1" = "purge" ]; then
+	if [ -d /run/systemd/system ]; then
+		systemctl daemon-reload >/dev/null 2>&1 || true
+	fi
+fi
+
+exit 0

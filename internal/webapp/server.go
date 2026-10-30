@@ -53,14 +53,14 @@ func New(cfg *config.ServerConfig) (*Server, error) {
 		return nil, err
 	}
 
-	// Map imagery is generated ahead of time by tools/mapfetch and embedded, so
-	// the service never talks to the map host at runtime. A tree built without
-	// generated maps simply has no imagery.
-	mapsFS, err := fs.Sub(webassets.Assets, "log-analyzer/maps")
-	if err != nil {
-		mapsFS = emptyFS{}
+	// Map data is read from disk when a directory is configured (the .deb
+	// installs it under /usr/share/dayzctl/maps), otherwise from the copy
+	// embedded in the binary. Nothing is fetched at runtime either way.
+	var embeddedMaps fs.FS
+	if sub, err := fs.Sub(webassets.Assets, "log-analyzer/maps"); err == nil {
+		embeddedMaps = sub
 	}
-	s.maps = gamemap.New(mapsFS)
+	s.maps = gamemap.NewLayered(mapsLayer(cfg.GetMapsDir()), embeddedMaps)
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /api/health", s.handleHealth)
@@ -77,10 +77,22 @@ func New(cfg *config.ServerConfig) (*Server, error) {
 	return s, nil
 }
 
-// emptyFS stands in for the map tree when no map has been generated yet.
+// emptyFS stands in for the map tree when no map is available at all.
 type emptyFS struct{}
 
 func (emptyFS) Open(string) (fs.File, error) { return nil, fs.ErrNotExist }
+
+// mapsLayer returns the on-disk map directory as an fs.FS, or nil when the
+// directory is unset or missing so the caller can fall back to embedded data.
+func mapsLayer(dir string) fs.FS {
+	if dir == "" {
+		return nil
+	}
+	if info, err := os.Stat(dir); err != nil || !info.IsDir() {
+		return nil
+	}
+	return os.DirFS(dir)
+}
 
 // Handler returns the root http.Handler.
 func (s *Server) Handler() http.Handler { return s.handler }

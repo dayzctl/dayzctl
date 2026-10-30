@@ -23,6 +23,58 @@ This repository provides an installer script at `scripts/install.sh`. To install
 bash -c "$(curl -fsSL https://raw.githubusercontent.com/dayzctl/dayzctl/refs/heads/main/scripts/install.sh)"
 ```
 
+The script also installs the log analyzer's map data:
+
+- running from a checkout, it copies `web/log-analyzer/maps` to
+  `/usr/local/share/dayzctl/maps`;
+- running from a release, it downloads `dayzctl-maps.tar.gz` next to the binary
+  (if that asset is missing it warns and the analyzer uses the maps compiled
+  into the binary, or draws a grid).
+
+Either way it then sets `paths.maps` in `/etc/dayzctl/config.yaml`, so the
+server reads imagery from disk. Override the target with
+`MAPS_DIR=/some/path bash scripts/install.sh`; `scripts/uninstall.sh` offers to
+remove it again.
+
+Releases publish two assets:
+
+| Asset | Contents |
+| --- | --- |
+| `dayzctl_<version>_<os>_<arch>.tar.gz` | the binary with the map data compiled in (~28 MB) |
+| `dayzctl-maps.tar.gz` | the same map data as files, for every platform (25 MB) |
+
+The binary works on its own — download it and the Map tab has terrain. The maps
+archive exists so an installed server can keep imagery under `paths.maps` and
+update or add maps without rebuilding; it is also what `make maps-archive`
+produces locally.
+
+### Debian package (binary + map data)
+
+`make deb` produces `build/dayzctl_<version>_amd64.deb`. Where the release
+binary embeds the tiles, the package ships them as files so the system copy
+stays lean:
+
+| Path | Contents |
+| --- | --- |
+| `/usr/bin/dayzctl` | the binary, built with `-tags nomaps` (no tiles, 11 MB) |
+| `/usr/share/dayzctl/maps/` | 46 maps (tiles + place names), ~33 MB |
+| `/lib/systemd/system/dayzctl-web.service` | `dayzctl web` unit, not enabled by default |
+| `/etc/dayzctl/config.yaml` | starter configuration (conffile, `paths.maps` preset) |
+
+The server reads map data from disk; `paths.maps` in the config points at
+`/usr/share/dayzctl/maps`, and the copy embedded at build time is only a
+fallback. Nothing is downloaded at runtime, and the installed binary is 11 MB
+instead of 40 MB because the tiles live outside it.
+
+```bash
+sudo dpkg -i build/dayzctl_1.0.0_amd64.deb
+sudoedit /etc/dayzctl/config.yaml        # add your instance(s)
+sudo systemctl enable --now dayzctl-web
+```
+
+The package needs no dependencies beyond libc; `dpkg-deb` is not required to
+build it, so `make deb` works on macOS too.
+
 ## Build (compile from source)
 
 Prerequisites:
@@ -48,7 +100,9 @@ GOOS=linux GOARCH=amd64 go build -o build/dayzctl-linux-amd64 ./cmd/dayzctl
 
 ## Configuration
 
-Default config path: `/etc/dayzctl/config.yaml`.
+Default config path: `/etc/dayzctl/config.yaml`. Pass `--config <path>` (a global
+flag, so it comes before the subcommand: `dayzctl --config /tmp/test.yaml web`)
+to use another file.
 
 You can override in tests or custom invocations using `DAYZCTL_CONFIG` when `DAYZCTL_SKIP_ROOT=1` is set (test harnesses use this to avoid writing to `/etc`).
 

@@ -1,0 +1,34 @@
+## dayzctl configuration installed by the .deb
+##
+## Map imagery lives in /usr/share/dayzctl/maps (shipped by this package), so
+## the analyzer reads it from disk instead of carrying a copy in the binary.
+
+steam:
+  username: ""
+
+paths:
+  base: "/srv/dayz"
+  install_dir: "/srv/dayz/server"
+  maps: "/usr/share/dayzctl/maps"
+
+# One entry per DayZ server. `map` must be a directory name from
+# /usr/share/dayzctl/maps (nasdara, chernarusplus, livonia, …); it defaults to
+# the instance name.
+instances:
+  # - name: main
+  #   port: 2302
+  #   steam_query_port: 27016
+  #   template: dayzOffline.chernarusplus
+  #   hostname: "DayZ Server"
+  #   max_players: 60
+  #   enabled: true
+  #   map: chernarusplus
+  #   rcon:
+  #     enabled: true
+  #     port: 2306
+  #     password: change-me
+
+web:
+  enabled: true
+  address: 127.0.0.1
+  port: 8081

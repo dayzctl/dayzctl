@@ -8,6 +8,10 @@ DAYZ_HOME="${DAYZ_HOME:-/srv/dayz}"
 STEAM_USER="${STEAM_USER:-kqkklan}"
 REINSTALL="${REINSTALL:-0}"
 CONFIG_PATH="/etc/dayzctl/config.yaml"
+# Map imagery for the log analyzer (tiles + place names).
+MAPS_DIR="${MAPS_DIR:-/usr/local/share/dayzctl/maps}"
+# Set to 1 once map data is on disk; the config is only pointed at it then.
+MAPS_READY=0
 
 prompt_for_values() {
     if [ ! -t 0 ]; then
@@ -257,6 +261,8 @@ install_dayzctl() {
     fi
 
     log "Extracted version: $VERSION"
+    # install_maps() looks for the matching maps archive.
+    RELEASE_VERSION="$VERSION"
 
     ASSET="dayzctl_${VERSION}_${OS}_${ARCH}.tar.gz"
     DL_URL="https://github.com/dayzctl/dayzctl/releases/download/v${VERSION}/${ASSET}"
@@ -373,6 +379,128 @@ create_config() {
 }
 
 # ============================================================================
+# Install map data for the log analyzer
+# ============================================================================
+# The web UI needs tiles and place names. A source checkout already has them
+# under web/log-analyzer/maps; a release install pulls the maps archive that is
+# published next to the binary. Without it the analyzer still works, it just
+# draws a coordinate grid instead of the terrain.
+install_maps() {
+    log "installing map data for the log analyzer"
+
+    mkdir -p "$(dirname "$MAPS_DIR")" || error "Failed to create $(dirname "$MAPS_DIR")"
+
+    local local_maps="./web/log-analyzer/maps"
+    if [ -d "$local_maps" ] && [ -n "$(find "$local_maps" -name meta.json -print -quit 2>/dev/null)" ]; then
+        log "found local map data: $local_maps"
+        rm -rf "$MAPS_DIR" || error "Failed to clear $MAPS_DIR"
+        mkdir -p "$MAPS_DIR" || error "Failed to create $MAPS_DIR"
+        cp -a "$local_maps"/. "$MAPS_DIR"/ || error "Failed to copy map data"
+    else
+        local version="${RELEASE_VERSION:-}"
+        local url
+        if [ -n "$version" ]; then
+            url="https://github.com/dayzctl/dayzctl/releases/download/v${version}/dayzctl-maps.tar.gz"
+        else
+            url="https://github.com/dayzctl/dayzctl/releases/latest/download/dayzctl-maps.tar.gz"
+        fi
+
+        log "downloading map data: $url"
+        local tmp
+        tmp=$(mktemp) || error "Failed to create temporary file"
+
+        if curl -fsSL "$url" -o "$tmp" 2>/dev/null; then
+            unpack_maps "$tmp" || {
+                rm -f "$tmp"
+                error "Failed to install the downloaded map data"
+            }
+        else
+            warn "map data is not published for this release"
+            warn "the web UI will draw a grid; fetch maps later with 'make maps-all' and copy them to $MAPS_DIR"
+        fi
+        rm -f "$tmp"
+    fi
+
+    chmod -R a+rX "$MAPS_DIR" 2>/dev/null || true
+
+    local count
+    count=$(find "$MAPS_DIR" -name meta.json 2>/dev/null | wc -l | tr -d ' ')
+    if [ "${count:-0}" -gt 0 ]; then
+        MAPS_READY=1
+        log "map data ready: ${count} map(s) in $MAPS_DIR"
+    else
+        warn "no maps installed (the analyzer will use its built-in copy or a coordinate grid)"
+    fi
+}
+
+# ============================================================================
+# Unpack a maps archive into $MAPS_DIR
+# ============================================================================
+# The archive may nest the maps (maps/<id>/meta.json, or
+# web/log-analyzer/maps/<id>/meta.json depending on how it was produced), so the
+# directory holding the map folders is located first instead of trusting a fixed
+# prefix.
+unpack_maps() {
+    local archive="$1"
+    local staging root
+
+    staging=$(mktemp -d) || return 1
+    if ! tar -xzf "$archive" -C "$staging" 2>/dev/null; then
+        rm -rf "$staging"
+        return 1
+    fi
+
+    root=$(find "$staging" -type f -name meta.json 2>/dev/null | head -n 1)
+    if [ -n "$root" ]; then
+        root=$(dirname "$(dirname "$root")")   # <maps>/<id>/meta.json
+    fi
+
+    if [ -z "$root" ] || [ ! -d "$root" ]; then
+        rm -rf "$staging"
+        warn "the map archive did not contain any maps"
+        return 1
+    fi
+
+    rm -rf "$MAPS_DIR"
+    mkdir -p "$MAPS_DIR" || { rm -rf "$staging"; return 1; }
+    cp -a "$root"/. "$MAPS_DIR"/ || { rm -rf "$staging"; return 1; }
+
+    rm -rf "$staging"
+    return 0
+}
+
+# ============================================================================
+# Point the config at the installed map data
+# ============================================================================
+configure_maps_path() {
+    if [ ! -f "$CONFIG_PATH" ]; then
+        return 0
+    fi
+
+    local tmp
+    tmp=$(mktemp) || error "Failed to create temporary file"
+
+    if grep -qE '^[[:space:]]*maps:' "$CONFIG_PATH"; then
+        sed -E "s|^[[:space:]]*maps:.*|  maps: \"${MAPS_DIR}\"|" "$CONFIG_PATH" > "$tmp"
+    else
+        # Insert the setting straight after the top-level paths: key.
+        awk -v dir="$MAPS_DIR" '
+            { print }
+            /^paths:[[:space:]]*$/ && !done { printf "  maps: \"%s\"\n", dir; done = 1 }
+        ' "$CONFIG_PATH" > "$tmp"
+    fi
+
+    if [ -s "$tmp" ]; then
+        cat "$tmp" > "$CONFIG_PATH" || error "Failed to update $CONFIG_PATH"
+        chmod 644 "$CONFIG_PATH" || true
+        log "configured paths.maps=$MAPS_DIR in $CONFIG_PATH"
+    else
+        warn "could not update $CONFIG_PATH; set paths.maps: $MAPS_DIR manually"
+    fi
+    rm -f "$tmp"
+}
+
+# ============================================================================
 # Set ownership
 # ============================================================================
 set_ownership() {
@@ -398,6 +526,10 @@ main() {
     install_steamcmd
     install_dayzctl
     create_config
+    install_maps
+    if [ "${MAPS_READY:-0}" = "1" ]; then
+        configure_maps_path
+    fi
     set_ownership
 
     log "Applying configuration..."
@@ -430,6 +562,7 @@ main() {
     log ""
     log "📁 Configuration: $CONFIG_PATH"
     log "📁 Server files: $DAYZ_HOME/server"
+    log "📁 Map data: $MAPS_DIR"
     log ""
     log "🔧 dayzctl commands (run as root):"
     log "  dayzctl list                        # List configured instances"

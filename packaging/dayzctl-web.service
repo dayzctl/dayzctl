@@ -1,0 +1,22 @@
+[Unit]
+Description=dayzctl web — DayZ ADM/RPT log analyzer
+Documentation=https://github.com/dayzctl/dayzctl
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+# --config is a global flag, so it goes before the subcommand.
+ExecStart=/usr/bin/dayzctl --config /etc/dayzctl/config.yaml web
+Restart=on-failure
+RestartSec=5
+
+# Read-only view of the server install plus the map data.
+NoNewPrivileges=true
+PrivateTmp=true
+ProtectSystem=full
+ProtectHome=read-only
+ReadOnlyPaths=/etc/dayzctl
+
+[Install]
+WantedBy=multi-user.target

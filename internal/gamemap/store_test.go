@@ -114,3 +114,60 @@ func TestStoreRejectsTraversal(t *testing.T) {
 		}
 	}
 }
+
+// TestLayeredDiskOverridesEmbedded covers the packaging arrangement: the .deb
+// ships maps on disk and the binary carries a fallback copy.
+func TestLayeredDiskOverridesEmbedded(t *testing.T) {
+	disk := fstest.MapFS{
+		"nasdara/meta.json":       &fstest.MapFile{Data: []byte(`{"id":"nasdara","size":4096,"format":"jpg","maxZoom":3}`)},
+		"nasdara/3/0/0.jpg":       &fstest.MapFile{Data: []byte("disk-tile")},
+		"chernarusplus/meta.json": &fstest.MapFile{Data: []byte(`{"id":"chernarusplus","size":15360,"format":"webp","maxZoom":3}`)},
+	}
+
+	s := NewLayered(disk, testFS())
+
+	// The on-disk copy wins.
+	meta, err := s.Meta("nasdara")
+	if err != nil {
+		t.Fatalf("Meta: %v", err)
+	}
+	if meta.Size != 4096 || meta.Format != "jpg" {
+		t.Errorf("meta = %+v, want the disk copy", meta)
+	}
+	data, contentType, err := s.Tile("nasdara", 3, 0, 0)
+	if err != nil {
+		t.Fatalf("Tile: %v", err)
+	}
+	if string(data) != "disk-tile" || contentType != "image/jpeg" {
+		t.Errorf("tile = %q (%s), want the disk copy", data, contentType)
+	}
+
+	// Maps only present in the embedded layer are still served.
+	if _, err := s.Meta("chernarusplus"); err != nil {
+		t.Errorf("chernarusplus should come from disk: %v", err)
+	}
+	if !s.Has("chernarusplus") {
+		t.Error("Has should report a map that exists on disk")
+	}
+
+	// Union of both layers, deduplicated and sorted.
+	ids := s.IDs()
+	if len(ids) != 2 || ids[0] != "chernarusplus" || ids[1] != "nasdara" {
+		t.Errorf("IDs = %v, want [chernarusplus nasdara]", ids)
+	}
+}
+
+func TestLayeredEmptyDiskFallsBack(t *testing.T) {
+	s := NewLayered(fstest.MapFS{}, testFS())
+
+	meta, err := s.Meta("nasdara")
+	if err != nil {
+		t.Fatalf("Meta: %v", err)
+	}
+	if meta.Size != 16384 {
+		t.Errorf("size = %v, want the embedded copy", meta.Size)
+	}
+	if _, _, err := s.Tile("nasdara", 3, 3, 3); err != nil {
+		t.Errorf("Tile: %v", err)
+	}
+}

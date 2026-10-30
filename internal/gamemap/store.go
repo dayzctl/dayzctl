@@ -1,9 +1,9 @@
 // Package gamemap serves map imagery and place names for the log analyzer.
 //
-// The data is generated ahead of time by tools/mapfetch and committed under
-// web/log-analyzer/maps/<map>/, then embedded into the binary. Nothing is
-// downloaded while the server runs, so the map works offline and the service
-// never depends on a third-party host being reachable.
+// Map data is generated ahead of time by tools/mapfetch. It is read from a
+// directory when one is configured — that is how the .deb ships it — and falls
+// back to whatever was embedded at build time, so a package build can carry no
+// tiles of its own and still work out of the box.
 package gamemap
 
 import (
@@ -24,7 +24,7 @@ type Place struct {
 	Kind string  `json:"kind,omitempty"`
 }
 
-// Meta describes one bundled map.
+// Meta describes one map.
 type Meta struct {
 	ID          string  `json:"id"`
 	Name        string  `json:"name"`
@@ -40,48 +40,68 @@ type Meta struct {
 	Names       []Place `json:"names"`
 }
 
-// Store serves the bundled maps from an fs.FS whose root holds one directory
-// per map: <map>/meta.json and <map>/<z>/<x>/<y>.<format>.
+// Store serves maps from a stack of filesystems, each holding one directory per
+// map: <map>/meta.json and <map>/<z>/<x>/<y>.<format>. Earlier layers win, so a
+// directory on disk overrides the copy compiled into the binary.
 type Store struct {
-	fsys fs.FS
+	layers []fs.FS
 
-	mu   sync.Mutex
-	meta map[string]*Meta // parsed meta.json per map
+	mu    sync.Mutex
+	meta  map[string]*Meta
+	tiles map[string]fs.FS // map id → the layer its metadata came from
 }
 
-// New wraps a filesystem of bundled maps.
-func New(fsys fs.FS) *Store {
-	return &Store{fsys: fsys, meta: map[string]*Meta{}}
+// New wraps a single filesystem of maps.
+func New(fsys fs.FS) *Store { return NewLayered(fsys) }
+
+// NewLayered builds a store that searches the given filesystems in order,
+// ignoring nil ones.
+func NewLayered(layers ...fs.FS) *Store {
+	kept := make([]fs.FS, 0, len(layers))
+	for _, l := range layers {
+		if l != nil {
+			kept = append(kept, l)
+		}
+	}
+	return &Store{
+		layers: kept,
+		meta:   map[string]*Meta{},
+		tiles:  map[string]fs.FS{},
+	}
 }
 
-// ids lists the maps present in the store.
+// IDs lists every map available, from any layer.
 func (s *Store) IDs() []string {
-	if s.fsys == nil {
-		return nil
-	}
-	entries, err := fs.ReadDir(s.fsys, ".")
-	if err != nil {
-		return nil
-	}
+	seen := map[string]bool{}
 	var ids []string
-	for _, e := range entries {
-		if e.IsDir() && validID(e.Name()) {
-			if _, err := fs.Stat(s.fsys, path.Join(e.Name(), "meta.json")); err == nil {
-				ids = append(ids, e.Name())
+	for _, layer := range s.layers {
+		entries, err := fs.ReadDir(layer, ".")
+		if err != nil {
+			continue
+		}
+		for _, e := range entries {
+			name := e.Name()
+			if !e.IsDir() || !validID(name) || seen[name] {
+				continue
 			}
+			if _, err := fs.Stat(layer, path.Join(name, "meta.json")); err != nil {
+				continue
+			}
+			seen[name] = true
+			ids = append(ids, name)
 		}
 	}
 	sort.Strings(ids)
 	return ids
 }
 
-// Has reports whether a map is bundled.
+// Has reports whether a map is available in any layer.
 func (s *Store) Has(id string) bool {
 	_, err := s.Meta(id)
 	return err == nil
 }
 
-// Meta returns the description of a bundled map.
+// Meta returns the description of a map, from the first layer that has it.
 func (s *Store) Meta(id string) (*Meta, error) {
 	id = normalise(id)
 	if !validID(id) {
@@ -95,15 +115,25 @@ func (s *Store) Meta(id string) (*Meta, error) {
 	}
 	s.mu.Unlock()
 
-	data, err := fs.ReadFile(s.fsys, path.Join(id, "meta.json"))
-	if err != nil {
-		return nil, fmt.Errorf("map %q is not bundled with dayzctl", id)
+	var (
+		meta  Meta
+		found fs.FS
+	)
+	for _, layer := range s.layers {
+		data, err := fs.ReadFile(layer, path.Join(id, "meta.json"))
+		if err != nil {
+			continue
+		}
+		if err := json.Unmarshal(data, &meta); err != nil {
+			return nil, fmt.Errorf("map %q: broken meta.json: %w", id, err)
+		}
+		found = layer
+		break
+	}
+	if found == nil {
+		return nil, fmt.Errorf("map %q is not installed", id)
 	}
 
-	var meta Meta
-	if err := json.Unmarshal(data, &meta); err != nil {
-		return nil, fmt.Errorf("map %q: broken meta.json: %w", id, err)
-	}
 	if meta.ID == "" {
 		meta.ID = id
 	}
@@ -116,11 +146,13 @@ func (s *Store) Meta(id string) (*Meta, error) {
 
 	s.mu.Lock()
 	s.meta[id] = &meta
+	s.tiles[id] = found
 	s.mu.Unlock()
 	return &meta, nil
 }
 
-// Tile returns one tile image and its content type.
+// Tile returns one tile image and its content type. Tiles come from the layer
+// that provided the map's metadata.
 func (s *Store) Tile(id string, z, x, y int) ([]byte, string, error) {
 	meta, err := s.Meta(id)
 	if err != nil {
@@ -134,10 +166,17 @@ func (s *Store) Tile(id string, z, x, y int) ([]byte, string, error) {
 		return nil, "", fmt.Errorf("tile %d/%d/%d out of range", z, x, y)
 	}
 
+	s.mu.Lock()
+	layer := s.tiles[meta.ID]
+	s.mu.Unlock()
+	if layer == nil {
+		return nil, "", fmt.Errorf("map %q is not installed", meta.ID)
+	}
+
 	name := path.Join(meta.ID, fmt.Sprint(z), fmt.Sprint(x), fmt.Sprintf("%d.%s", y, meta.Format))
-	data, err := fs.ReadFile(s.fsys, name)
+	data, err := fs.ReadFile(layer, name)
 	if err != nil {
-		return nil, "", fmt.Errorf("tile %d/%d/%d is not bundled", z, x, y)
+		return nil, "", fmt.Errorf("tile %d/%d/%d is not installed", z, x, y)
 	}
 	return data, contentTypeFor(meta.Format), nil
 }

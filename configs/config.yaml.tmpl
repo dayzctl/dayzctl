@@ -5,6 +5,10 @@ steam:
 
 paths:
   base: "/srv/dayz"
+  # Where the log analyzer reads map data (<map>/meta.json + tiles). The .deb
+  # installs it under /usr/share/dayzctl/maps; leave unset to use
+  # <install_dir>/maps, or to fall back to the maps compiled into the binary.
+  # maps: "/usr/share/dayzctl/maps"
 
 # Server instances
 instances:

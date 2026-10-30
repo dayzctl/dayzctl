@@ -13,6 +13,10 @@ builds:
     binary: dayzctl
     env:
       - CGO_ENABLED=0
+    # Released binaries stay self-contained: the map data is compiled in, so a
+    # downloaded dayzctl has a working Map tab on its own. The .deb is the lean
+    # variant — it ships an 11 MB binary built with `-tags nomaps` plus the map
+    # files under /usr/share/dayzctl/maps, which the server reads from disk.
     goos:
       - linux
       - windows
@@ -31,6 +35,16 @@ archives:
   - id: binary
     formats: [tar.gz]
     name_template: "{{ .Binary }}_{{ .Version }}_{{ .Os }}_{{ .Arch }}"
+
+  # Map imagery for the log analyzer, shared by every platform. scripts/install.sh
+  # downloads it as dayzctl-maps.tar.gz and unpacks it into
+  # /usr/local/share/dayzctl/maps.
+  - id: maps
+    meta: true
+    formats: [tar.gz]
+    name_template: "dayzctl-maps"
+    files:
+      - src: web/log-analyzer/maps
 
 release:
   github:

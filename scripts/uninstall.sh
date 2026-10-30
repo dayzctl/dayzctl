@@ -3,6 +3,8 @@ set -euo pipefail
 
 DAYZ_HOME="${DAYZ_HOME:-/srv/dayz}"
 CONFIG_PATH="/etc/dayzctl/config.yaml"
+# Map imagery installed for the log analyzer (see scripts/install.sh).
+MAPS_DIR="${MAPS_DIR:-/usr/local/share/dayzctl/maps}"
 
 GREEN='\033[0;32m'
 RED='\033[0;31m'
@@ -95,6 +97,18 @@ remove_binary_and_config() {
         fi
     else
         log "No config found at $CONFIG_PATH"
+    fi
+
+    if [ -d "$MAPS_DIR" ]; then
+        if confirm "Remove the log analyzer's map data at $MAPS_DIR?"; then
+            rm -rf "$MAPS_DIR" || warn "Failed to remove $MAPS_DIR"
+            rmdir --ignore-fail-on-non-empty "$(dirname "$MAPS_DIR")" 2>/dev/null || true
+            log "Map data removed"
+        else
+            log "Preserving map data at $MAPS_DIR"
+        fi
+    else
+        log "No map data found at $MAPS_DIR"
     fi
 }
 

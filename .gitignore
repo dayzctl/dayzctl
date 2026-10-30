@@ -157,3 +157,6 @@ $RECYCLE.BIN/
 build/
 
 # End of https://www.toptal.com/developers/gitignore/api/git,linux,macos,sonar,backup,windows,sonarqube,visualstudiocode,go
+
+# goreleaser snapshot output
+dist/
