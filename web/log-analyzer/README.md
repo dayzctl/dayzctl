@@ -87,30 +87,42 @@ of the instance's profiles folder.
 ## Coordinates
 
 DayZ writes `pos=<x, y, z>` as **east, north, altitude**. The map plots `x`
-horizontally and `y` vertically, scaled by the map's world size.
+horizontally and `y` vertically (north up), scaled by the map's world size.
 
-The **Map** selector defaults to *Auto (from log positions)*: the canvas scales
-to the extent actually present in the ADM file, rounded up to whole kilometres,
-so maps without a preset (Nasdara, Deer Isle, custom terrains) still plot
-correctly. Presets for Chernarus/Livonia (15 360 m), Sakhal/Namalsk
-(12 800 m) and Nasdara (15 360 m) are one click away, and *Custom* lets you type
-any world size.
+The **Map** selector defaults to *Auto*: the size comes from the map service
+when the map is known, otherwise from the extent present in the ADM file,
+rounded up to whole kilometres. Presets for Chernarus/Livonia (15 360 m),
+Sakhal/Namalsk (12 800 m) are one click away, and *Custom* lets you type any
+world size.
 
-### Map imagery
+### Map imagery and place names
 
-No map artwork is bundled — DayZ map images are copyrighted. dayzctl serves a
-background from the first file it finds:
+The Map tab shows satellite tiles plus place names for the instance's map,
+served by `dayzctl` itself:
 
-1. `instances[].map_image` in the config (relative to `paths.install_dir`, an
-   absolute path, or an `http(s)://` URL that the service proxies),
-2. `<profiles>/map.jpg|png|webp`, `map_<instance>.*`, `<instance>.*`,
-   `<instance>-map.*`,
-3. `<install_dir>/maps/<same names>`,
-4. `<install_dir>/<same names>`.
+| Endpoint | Purpose |
+| --- | --- |
+| `GET /api/maps/{map}/meta` | world size, zoom limits, tile URL template, place names |
+| `GET /api/maps/{map}/tiles/{z}/{x}/{y}` | one pyramid tile |
 
-So `cp nasdara.png /srv/dayz/server/profiles/nasdara/map.png` is enough; the Map
-tab picks it up on the next analysis. Without an image the tab draws a
-kilometre grid, which is still accurate for positions.
+The map is chosen with `instances[].map` and **defaults to the instance name**,
+so an instance called `nasdara` shows Nasdara with no configuration at all.
+Any map published on [dayz.xam.nu](https://dayz.xam.nu) works —
+`chernarusplus`, `livonia`, `sakhal`, `namalsk`, `deerisle`, …
+
+The first time a map is opened, the service resolves its version, downloads the
+place names and proxies the tiles the browser asks for. Everything is cached
+under `<install_dir>/cache/maps/<map>/`, so a later view is instant and works
+without internet access. Fetching is rate limited to stay polite to the CDN.
+Map imagery © [dayz.xam.nu](https://dayz.xam.nu); nothing is redistributed with
+dayzctl.
+
+To use your own picture instead, set `instances[].map_image` (relative to
+`paths.install_dir`, an absolute path, or an `http(s)://` URL the service
+proxies) or drop `map.jpg|png|webp` into the instance's profiles folder as
+`map.*`, `<instance>.*`, `<instance>-map.*` or `map_<instance>.*`. The **Custom
+image** picker overrides both for the current session. Without any imagery the
+tab draws a kilometre grid, which is still accurate for positions.
 
 ## Suspicious activity is a hint, not proof
 

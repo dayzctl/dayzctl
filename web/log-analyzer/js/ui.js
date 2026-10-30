@@ -6,6 +6,7 @@
 import { fmtInt, fmtDuration, fmtTime, fmtClock, fmtDistance, fmtBytes, truncate, colorFor } from './format.js';
 import { SEVERITY, SEVERITY_LABEL, SEVERITY_ORDER } from './severity.js';
 import { MAPS, renderMap, inferWorldSize } from './mapview.js';
+import { fetchMapMeta } from './api.js';
 
 /** Kill count per weapon, used by the overview card. */
 function topWeapons(kills, limit = 8) {
@@ -875,6 +876,24 @@ export function renderTimeline(panel, report) {
 
 /* ── Map ─────────────────────────────────────────────────── */
 
+// Hint under the map: explains where the imagery comes from and how to fix it.
+function mapHint(mapMeta, mapState, state) {
+  const coords = 'Coordinates are DayZ world metres: x = east, y = north, z = altitude.';
+  if (mapState.background) {
+    const src = mapState.backgroundSource === 'server'
+      ? 'served by dayzctl for this instance'
+      : mapState.backgroundSource || 'loaded image';
+    return `Background: ${src}. ${coords}`;
+  }
+  if (mapMeta?.tileUrl) {
+    return `Imagery and place names from ${mapMeta.source || 'dayz.xam.nu'} (map \u201c${mapMeta.id}\u201d, ${fmtInt(mapMeta.size)} m). ${coords}`;
+  }
+  if (state.mapMetaFailed) {
+    return `No imagery for \u201c${state.mapId || 'this instance'}\u201d \u2014 the map is not published on dayz.xam.nu, or the server has no internet. Set instances[].map and reload, or pick a custom image. ${coords}`;
+  }
+  return `Loading map imagery\u2026 Put map.jpg in the instance\u2019s profiles folder, or set instances[].map_image, to use your own. ${coords}`;
+}
+
 export function renderMapPanel(panel, report, state, relayout) {
   clear(panel);
   const adm = report.adm;
@@ -886,12 +905,21 @@ export function renderMapPanel(panel, report, state, relayout) {
 
   // "Auto" derives the world size from the analysed positions, so maps we
   // have no preset for (Nasdara, custom terrains) still scale correctly.
+  // When the map service knows the real extent, that value wins.
   const autoWorld = inferWorldSize(adm.bounds);
   const mapState = state.map;
+  const mapMeta = state.mapMeta;
   const preset = MAPS.find((m) => m.id === mapState.id) ?? MAPS[0];
   const presetWorld = preset.worldSize > 0 ? preset.worldSize : autoWorld;
-  const effectiveWorld = mapState.id === 'auto' ? autoWorld : (mapState.worldSize || presetWorld);
-  const view = { ...mapState, worldSize: effectiveWorld };
+  const inferred = mapMeta?.size ? mapMeta.size : autoWorld;
+  const effectiveWorld = mapState.id === 'auto' ? inferred : (mapState.worldSize || presetWorld);
+  const tiles = mapMeta?.tileUrl
+    ? { url: mapMeta.tileUrl, maxZoom: mapMeta.maxZoom || 7, names: mapMeta.names || [] }
+    : null;
+  const view = { ...mapState, worldSize: effectiveWorld, tiles };
+  // The resize handler repaints with this exact view (world size and tiles are
+  // resolved here, not in the raw state).
+  state.lastMapView = view;
 
   const mapSelect = el(
     'select',
@@ -899,7 +927,7 @@ export function renderMapPanel(panel, report, state, relayout) {
       onChange: (e) => {
         const map = MAPS.find((m) => m.id === e.target.value) ?? MAPS[0];
         mapState.id = map.id;
-        mapState.worldSize = map.id === 'auto' ? autoWorld : (map.worldSize > 0 ? map.worldSize : autoWorld);
+        mapState.worldSize = map.id === 'auto' ? inferred : (map.worldSize > 0 ? map.worldSize : inferred);
         state.actions.setState({});
       },
     },
@@ -909,8 +937,8 @@ export function renderMapPanel(panel, report, state, relayout) {
         text: m.worldSize > 0
           ? `${m.label} (${fmtInt(m.worldSize)} m)`
           : m.id === 'auto'
-            ? `${m.label}${adm.bounds ? ` — ${fmtInt(autoWorld)} m` : ' — no positions yet'}`
-            : `${m.label} (size from log) — ${fmtInt(autoWorld)} m`,
+            ? `${m.label}${adm.bounds ? ` — ${fmtInt(inferred)} m` : ' — no positions yet'}`
+            : `${m.label} (size from log) — ${fmtInt(inferred)} m`,
         selected: m.id === mapState.id,
       }),
     ),
@@ -928,8 +956,8 @@ export function renderMapPanel(panel, report, state, relayout) {
     },
   });
 
-  // A map image served for this instance is used automatically; the file picker
-  // below is only an override for this browser session.
+  // Map imagery comes from the map service for this instance's map (Nasdara,
+  // Chernarus, …). A file picked here simply overrides it for this session.
   const imageUrl = state.mapImageUrl || '';
   if (imageUrl && !mapState.background && !mapState.imageFailed && mapState.imageUrl !== imageUrl) {
     mapState.imageUrl = imageUrl;
@@ -943,6 +971,21 @@ export function renderMapPanel(panel, report, state, relayout) {
       mapState.imageFailed = true;
     };
     img.src = imageUrl;
+  }
+
+  // Fetch the map's extents and place names once per instance.
+  if (state.mapId && !state.mapMeta && !state.mapMetaFailed && !state.mapMetaLoading) {
+    state.mapMetaLoading = true;
+    fetchMapMeta(state.mapId)
+      .then((meta) => {
+        state.mapMeta = meta;
+        state.mapMetaLoading = false;
+        state.actions.setState({});
+      })
+      .catch(() => {
+        state.mapMetaLoading = false;
+        state.mapMetaFailed = true;
+      });
   }
 
   const bgInput = el('input', {
@@ -994,6 +1037,18 @@ export function renderMapPanel(panel, report, state, relayout) {
   const canvas = el('canvas', { id: 'map-canvas' });
   const stage = el('div', { class: 'map-stage' }, canvas);
 
+  // Tiles arrive asynchronously; coalesce repaints so a burst of loads does not
+  // redraw the canvas dozens of times.
+  let repaintPending = false;
+  view.onTile = () => {
+    if (repaintPending) return;
+    repaintPending = true;
+    setTimeout(() => {
+      repaintPending = false;
+      if (canvas.isConnected) renderMap(canvas, report, view);
+    }, 40);
+  };
+
   panel.append(
     card(
       'ADM on the map',
@@ -1003,11 +1058,13 @@ export function renderMapPanel(panel, report, state, relayout) {
         el('div', { class: 'field' }, el('label', { text: 'Map' }), mapSelect),
         el('div', { class: 'field' }, el('label', { text: 'World size (m)' }), worldInput),
         el('div', { class: 'field' }, el('label', { text: 'Player' }), playerSelect),
-        el('div', { class: 'field' }, el('label', { text: 'Background image' }), bgInput),
+        el('div', { class: 'field' }, el('label', { text: 'Custom image' }), bgInput),
       ),
       el(
         'div',
         { class: 'filters' },
+        layerToggle('tiles', 'Map imagery'),
+        layerToggle('names', 'Place names'),
         layerToggle('kills', 'Kills'),
         layerToggle('trails', 'Trails'),
         layerToggle('builds', 'Bases'),
@@ -1023,12 +1080,7 @@ export function renderMapPanel(panel, report, state, relayout) {
         el('span', {}, el('i', { style: 'background:#5ac8dc' }), 'Build action'),
         el('span', {}, el('i', { style: 'background:var(--warning)' }), 'Impossible movement'),
       ),
-      el('p', {
-        class: 'small faint',
-        text: mapState.background
-          ? `Background: ${mapState.backgroundSource === 'server' ? 'served by dayzctl for this instance' : mapState.backgroundSource || 'loaded image'}. Coordinates are DayZ world metres: x = east, y = north, z = altitude.`
-          : 'Put map.jpg (or map.png) in the instance\u2019s profiles folder, or set instances[].map_image, and it is drawn automatically. Coordinates are DayZ world metres: x = east, y = north, z = altitude.',
-      }),
+      el('p', { class: 'small faint', text: mapHint(mapMeta, mapState, state) }),
     ),
   );
 

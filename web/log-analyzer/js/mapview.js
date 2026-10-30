@@ -38,6 +38,96 @@ export function inferWorldSize(bounds, fallback = 15360) {
 const HEAT_COLS = 96;
 const HEAT_ROWS = 96;
 
+/* ── Tile imagery ──────────────────────────────────────────
+ * The map service publishes a {z}/{x}/{y} pyramid: 2^z tiles per side,
+ * tile (0,0) at the north-west corner, one tile = 256 px.
+ */
+const TILE_SIZE = 256;
+const tileImages = new Map(); // "url|z|x|y" → { img, state }
+
+/**
+ * Zoom level to request for a canvas of `px` CSS pixels. One step finer than
+ * "exactly covers the canvas" keeps the imagery crisp on retina screens.
+ */
+function tileZoom(px, maxZoom) {
+  const wanted = Math.ceil(Math.log2(Math.max(1, (px * 2) / TILE_SIZE)));
+  return Math.max(1, Math.min(maxZoom || 7, wanted));
+}
+
+/**
+ * Draws every tile of the chosen zoom level, and repaints once a tile arrives.
+ * @returns {boolean} false when nothing could be drawn yet
+ */
+function drawTiles(ctx, view, width, height, onTile) {
+  const t = view.tiles;
+  if (!t?.url) return false;
+
+  const z = tileZoom(width, t.maxZoom);
+  const perSide = 2 ** z;
+  const srcSize = perSide * TILE_SIZE; // source pixels covering the world
+  const scale = width / srcSize;
+  let drawn = 0;
+
+  for (let ty = 0; ty < perSide; ty++) {
+    for (let tx = 0; tx < perSide; tx++) {
+      const key = `${t.url}|${z}|${tx}|${ty}`;
+      const cached = tileImages.get(key);
+
+      if (cached?.ok) {
+        ctx.drawImage(cached.img, tx * TILE_SIZE * scale, ty * TILE_SIZE * scale,
+          TILE_SIZE * scale + 0.6, TILE_SIZE * scale + 0.6);
+        drawn++;
+        continue;
+      }
+      if (cached) continue; // failed earlier; do not retry endlessly
+
+      tileImages.set(key, { img: null, ok: false, pending: true });
+      const img = new Image();
+      img.decoding = 'async';
+      img.onload = () => {
+        tileImages.set(key, { img, ok: true });
+        onTile?.();
+      };
+      img.onerror = () => tileImages.set(key, { img: null, ok: false });
+      img.src = t.url.replace('{z}', z).replace('{x}', tx).replace('{y}', ty);
+    }
+  }
+  return drawn > 0 || perSide === 0;
+}
+
+/**
+ * Place names, skipping labels that would overlap one already drawn.
+ */
+function drawNames(ctx, names, width, world, toX, toY) {
+  if (!names?.length) return;
+  ctx.save();
+  ctx.font = '11px ui-sans-serif, system-ui, sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.lineJoin = 'round';
+
+  const placed = [];
+  for (const n of names) {
+    const x = toX(n.x);
+    const y = toY(n.y);
+    if (x < -40 || x > width + 40 || y < 8 || y > width + 8) continue;
+
+    const w = ctx.measureText(n.name).width + 6;
+    const box = [x - w / 2, y - 7, w, 14];
+    if (placed.some((p) => !(box[0] > p[0] + p[2] || box[0] + box[2] < p[0]
+      || box[1] > p[1] + p[3] || box[1] + box[3] < p[1]))) continue;
+    placed.push(box);
+
+    ctx.strokeStyle = 'rgba(0, 0, 0, 0.75)';
+    ctx.lineWidth = 3;
+    ctx.strokeText(n.name, x, y);
+    ctx.fillStyle = 'rgba(232, 238, 244, 0.92)';
+    ctx.fillText(n.name, x, y);
+  }
+  ctx.restore();
+  void world;
+}
+
 /**
  * Nearest recorded position of `key` at or before `at`.
  * Positions are {x: east, y: north, z: altitude}, matching DayZ's pos=<x, y, z>.
@@ -58,7 +148,7 @@ function positionAt(player, at) {
 /**
  * @param {HTMLCanvasElement} canvas
  * @param {object} report analysis report
- * @param {object} state   { worldSize, layers, background, selectedPlayer }
+ * @param {object} state   { worldSize, layers, tiles, background, selectedPlayer, onTile }
  */
 export function renderMap(canvas, report, state) {
   const adm = report?.adm;
@@ -79,20 +169,28 @@ export function renderMap(canvas, report, state) {
 
   const world = state.worldSize || 15360;
   const px = (x) => (x / world) * cssWidth;
-  const py = (north) => (north / world) * cssHeight;
+  // DayZ's second coordinate grows north, so the canvas y axis is inverted:
+  // the north edge of the map must end up at the top, like the imagery.
+  const py = (north) => (1 - north / world) * cssHeight;
 
   // ── background ───────────────────────────────────────────
   ctx.fillStyle = '#0a0d10';
   ctx.fillRect(0, 0, cssWidth, cssHeight);
 
+  const layers = state.layers || {};
+  let haveImagery = false;
+
   if (state.background) {
     ctx.globalAlpha = 0.9;
     try {
       ctx.drawImage(state.background, 0, 0, cssWidth, cssHeight);
+      haveImagery = true;
     } catch {
       /* image not ready yet — grid is drawn next frame */
     }
     ctx.globalAlpha = 1;
+  } else if (layers.tiles !== false && drawTiles(ctx, state, cssWidth, cssHeight, state.onTile)) {
+    haveImagery = true;
   } else {
     // Coordinate grid, every 1 km.
     ctx.strokeStyle = 'rgba(120, 140, 160, 0.12)';
@@ -118,10 +216,12 @@ export function renderMap(canvas, report, state) {
       ctx.fillText(`${Math.round(v / 100) / 10}km`, 3, py(v) + 11);
     }
   }
+  // ── place names ──────────────────────────────────────────
+  if (haveImagery && layers.names !== false && state.tiles?.names?.length) {
+    drawNames(ctx, state.tiles.names, cssWidth, world, px, py);
+  }
 
   if (!adm) return;
-
-  const layers = state.layers;
 
   // ── heatmap ──────────────────────────────────────────────
   if (layers.heat) {
@@ -129,7 +229,8 @@ export function renderMap(canvas, report, state) {
     let max = 0;
     const addPoint = (east, north) => {
       const cx = Math.min(HEAT_COLS - 1, Math.max(0, Math.floor((east / world) * HEAT_COLS)));
-      const cz = Math.min(HEAT_ROWS - 1, Math.max(0, Math.floor((north / world) * HEAT_ROWS)));
+      // Row 0 is the north edge of the canvas.
+      const cz = Math.min(HEAT_ROWS - 1, Math.max(0, Math.floor((1 - north / world) * HEAT_ROWS)));
       const idx = cz * HEAT_COLS + cx;
       grid[idx] += 1;
       if (grid[idx] > max) max = grid[idx];

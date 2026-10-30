@@ -54,6 +54,15 @@ export async function fetchLogs(instance) {
 }
 
 /**
+ * Map extent, tile URL template and place names for a community map
+ * (e.g. "nasdara"). Rejects when the map is not published or the server has no
+ * internet access — the map view then falls back to a coordinate grid.
+ */
+export async function fetchMapMeta(mapId) {
+  return requestJSON(`/api/maps/${encodeURIComponent(mapId)}/meta`);
+}
+
+/**
  * Analyse a selection (or everything when `files` is empty).
  * @returns {Promise<object>} the report the views expect
  */

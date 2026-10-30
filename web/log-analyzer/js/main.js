@@ -6,7 +6,7 @@
  * UI state and fetch calls.
  */
 
-import { fetchHealth, fetchInstances, fetchLogs, analyze } from './api.js';
+import { fetchHealth, fetchInstances, fetchLogs, analyze, fetchMapMeta } from './api.js';
 import { fmtInt, fmtBytes } from './format.js';
 import { renderMap } from './mapview.js';
 import {
@@ -62,6 +62,11 @@ const state = {
   killsSort: 'time',
   suspiciousFilter: 'all',
   mapImageUrl: '',
+  // Community map (tiles + place names) for the selected instance.
+  mapId: '',
+  mapMeta: null,
+  mapMetaFailed: false,
+  mapMetaLoading: false,
   map: {
     id: 'auto',
     worldSize: 0,
@@ -70,7 +75,16 @@ const state = {
     imageUrl: '',
     imageFailed: false,
     selectedPlayer: null,
-    layers: { kills: true, trails: false, builds: true, heat: false, connects: false, jumps: true },
+    layers: {
+      tiles: true,
+      names: true,
+      kills: true,
+      trails: false,
+      builds: true,
+      heat: false,
+      connects: false,
+      jumps: true,
+    },
   },
 };
 
@@ -187,6 +201,14 @@ async function openInstance(inst) {
     state.map.backgroundSource = null;
   }
 
+  // Community map for tiles and place names (defaults to the instance name).
+  state.mapId = inst.map || inst.name || '';
+  state.mapMeta = null;
+  state.mapMetaFailed = false;
+  state.mapMetaLoading = false;
+  state.map.id = 'auto';
+  state.map.worldSize = 0;
+
   dom.connect.hidden = true;
   dom.results.hidden = true;
   dom.files.hidden = false;
@@ -282,6 +304,9 @@ function showInstances() {
   state.report = null;
   state.instance = null;
   state.mapImageUrl = '';
+  state.mapId = '';
+  state.mapMeta = null;
+  state.mapMetaFailed = false;
   dom.results.hidden = true;
   dom.files.hidden = true;
   dom.connect.hidden = false;
@@ -419,7 +444,10 @@ dom.tabs.addEventListener('click', (event) => {
 window.addEventListener('resize', () => {
   if (state.activeTab !== 'map' || !currentMapCanvas || !state.report) return;
   clearTimeout(resizeTimer);
-  resizeTimer = setTimeout(() => renderMap(currentMapCanvas, state.report, state.map), 120);
+  resizeTimer = setTimeout(
+    () => renderMap(currentMapCanvas, state.report, state.lastMapView || state.map),
+    120,
+  );
 });
 
 boot();

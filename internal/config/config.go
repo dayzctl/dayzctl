@@ -130,6 +130,10 @@ type Instance struct {
 	// Relative paths are resolved against the install directory. When empty,
 	// map.jpg / map.png is picked up from the profiles or install folder.
 	MapImage string `yaml:"map_image,omitempty"`
+	// Map selects the community map used for tiles and place names, e.g.
+	// "nasdara", "chernarusplus" or "livonia". It defaults to the instance
+	// name, so an instance called "nasdara" needs no configuration.
+	Map string `yaml:"map,omitempty"`
 }
 
 // ModRef represents a mod reference in the config
