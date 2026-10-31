@@ -406,7 +406,14 @@ export function renderPlayers(panel, report, state) {
   const query = state.playerQuery.trim().toLowerCase();
   const selected = state.selectedPlayers;
   const onlySelected = state.playersOnlySelected;
-  const matches = adm.players.filter((p) => !query || p.name.toLowerCase().includes(query));
+
+  // A player with nothing inside the Timeline window is left out of the list,
+  // so it only offers people the other tabs can actually show.
+  const window = timelineWindow(state);
+  const inTimeline = adm.players.filter((p) => activeInTimeline(p, window));
+  const hiddenCount = adm.players.length - inTimeline.length;
+
+  const matches = inTimeline.filter((p) => !query || p.name.toLowerCase().includes(query));
   const players = onlySelected ? matches.filter((p) => selected.has(p.key)) : matches;
 
   const toggle = (key, on) => {
@@ -456,6 +463,22 @@ export function renderPlayers(panel, report, state) {
       }),
     ),
   );
+
+  if (hiddenCount > 0) {
+    panel.append(
+      el(
+        'p',
+        { class: 'small faint', style: 'margin:-4px 0 12px' },
+        `${fmtInt(hiddenCount)} player${hiddenCount === 1 ? '' : 's'} with nothing between ${window.label} hidden. `,
+        el('button', {
+          type: 'button',
+          class: 'filter',
+          text: 'Show the whole log',
+          onClick: () => state.actions.setState({ timelineFrom: '', timelineTo: '' }),
+        }),
+      ),
+    );
+  }
 
   const rows = players.slice(0, 500).map((p) =>
     el(
@@ -846,6 +869,44 @@ function parseClock(value) {
 function fmtClockInput(secs) {
   const s = Math.max(0, Math.min(86340, secs));
   return `${String(Math.floor(s / 3600)).padStart(2, '0')}:${String(Math.floor((s % 3600) / 60)).padStart(2, '0')}`;
+}
+
+/** Epoch seconds → seconds since midnight, matching the log's own clock. */
+function todOf(epoch) {
+  if (!Number.isFinite(epoch)) return NaN;
+  const rest = epoch % 86400;
+  return rest < 0 ? rest + 86400 : rest;
+}
+
+/**
+ * The Timeline tab's From/to window. `active` is false while both fields are
+ * empty, which means "the whole log"; an overturned range (22:00 → 04:00) is a
+ * window across midnight.
+ */
+function timelineWindow(state) {
+  const from = parseClock(state.timelineFrom);
+  const to = parseClock(state.timelineTo);
+  const active = from !== null || to !== null;
+  const start = from ?? 0;
+  const end = to ?? 86399;
+  const wrapped = from !== null && to !== null && from > to;
+  const inside = (tod) => {
+    if (!Number.isFinite(tod)) return false;
+    if (!active) return true;
+    if (start === end) return true;
+    return wrapped ? tod >= start || tod <= end : tod >= start && tod <= end;
+  };
+  const label = active ? `${fmtClockInput(start)} – ${fmtClockInput(end)}` : 'the whole log';
+  return { active, inside, label };
+}
+
+/** Whether a player did anything inside the timeline window. */
+function activeInTimeline(player, window) {
+  if (!window.active) return true;
+  if (player.positions?.some((s) => window.inside(todOf(s.at)))) return true;
+  return (player.sessions ?? []).some(
+    (s) => window.inside(todOf(s.start)) || window.inside(todOf(s.end)),
+  );
 }
 
 export function renderTimeline(panel, report, state) {
@@ -1388,9 +1449,34 @@ export function renderMapPanel(panel, report, state, relayout) {
     if (canvas.isConnected) renderMap(canvas, report, view);
   };
   const chosen = state.selectedPlayers;
+  const period = adm.period || {};
+  let poolSize = adm.players.length;
+
+  // Same idea as the Players tab: a player with no position inside the map's
+  // timeline window cannot be drawn, so the list leaves them out — except the
+  // ones already ticked, which must stay untickable. The window moves while the
+  // slider is dragged, so the pool is recomputed on every fill.
+  const pickerPool = () => {
+    const fullRange =
+      Number.isFinite(mapState.windowFrom) &&
+      Number.isFinite(mapState.windowTo) &&
+      Number.isFinite(period.from) &&
+      Number.isFinite(period.to) &&
+      mapState.windowFrom <= period.from &&
+      mapState.windowTo >= period.to;
+    if (!Number.isFinite(mapState.windowFrom) || !Number.isFinite(mapState.windowTo) || fullRange) {
+      return adm.players;
+    }
+    return adm.players.filter(
+      (p) =>
+        chosen.has(p.key) ||
+        p.positions.some((s) => Number.isFinite(s.at) && s.at >= mapState.windowFrom && s.at <= mapState.windowTo),
+    );
+  };
+
   const summaryText = () =>
     chosen.size
-      ? `${fmtInt(chosen.size)} of ${fmtInt(adm.players.length)} selected`
+      ? `${fmtInt(chosen.size)} of ${fmtInt(poolSize)} selected`
       : 'All players (top 12 trails)';
   const pickerSummary = el('span', { text: summaryText() });
 
@@ -1446,7 +1532,10 @@ export function renderMapPanel(panel, report, state, relayout) {
 
   function fillPicker() {
     const query = pickerSearch.value.trim().toLowerCase();
-    const matches = adm.players.filter((p) => !query || p.name.toLowerCase().includes(query));
+    const pool = pickerPool();
+    poolSize = pool.length;
+    pickerSummary.textContent = summaryText();
+    const matches = pool.filter((p) => !query || p.name.toLowerCase().includes(query));
     shown = matches.slice(0, 400);
 
     const rows = shown.map((p) =>
@@ -1549,6 +1638,7 @@ export function renderMapPanel(panel, report, state, relayout) {
       onInput: () => {
         mapState.windowFrom = Math.min(Number(fromInput.value), mapState.windowTo);
         paint();
+        fillPicker();
         repaintMap();
       },
     });
@@ -1562,6 +1652,7 @@ export function renderMapPanel(panel, report, state, relayout) {
       onInput: () => {
         mapState.windowTo = Math.max(Number(toInput.value), mapState.windowFrom);
         paint();
+        fillPicker();
         repaintMap();
       },
     });
@@ -1589,6 +1680,7 @@ export function renderMapPanel(panel, report, state, relayout) {
           mapState.windowFrom = lo;
           mapState.windowTo = hi;
           paint();
+          fillPicker();
           repaintMap();
         },
       }),

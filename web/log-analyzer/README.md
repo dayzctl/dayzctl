@@ -99,7 +99,8 @@ unticked until you select it.
 - **Players** — sessions, playtime, kills, deaths, K/D, chat, builds, flags.
   Tick several players to compare them: their details stack below the table, and
   *Show selected only* narrows the list to them. The Map tab can then draw just
-  those players.
+  those players. Players with no activity inside the Timeline window are left
+  out of the list, with a one-click *Show the whole log* to undo it.
 - **Kills** — PvP kills with weapon and distance; sort by time or longest shot.
 - **Base building** — build/place actions with coordinates.
 - **Suspicious** — combat logging, impossible movement, shared ids, short
@@ -112,7 +113,9 @@ unticked until you select it.
   normalised timeline, or for whichever players are ticked. Kills, build actions
   and position jumps leave a dot; hovering one names the event (time, players,
   item), and a dot shared by several events lists the players involved.
-  *Players* is a multi-select list: tick any number of players and every layer is
+  *Players* is a multi-select list (limited to players with samples inside the
+  map's own timeline window, so it only offers what can be drawn): tick any
+  number of players and every layer is
   limited to them — heatmap, kills (either side of the fight), bases, last
   positions and jumps, not just the trails. The set is shared with the Players
   tab. The *Timeline* window under the toolbar narrows every layer to a
