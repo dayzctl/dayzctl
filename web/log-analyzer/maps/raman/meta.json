@@ -6,10 +6,6 @@
   "tileSize": 256,
   "minZoom": 3,
   "maxZoom": 3,
-  "source": "dayz.xam.nu",
-  "version": "Mar.14-11",
-  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/raman)",
-  "generatedAt": "2026-10-30T12:32:21Z",
   "names": [
     {
       "name": "Beshsar",

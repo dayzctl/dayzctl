@@ -6,10 +6,6 @@
   "tileSize": 256,
   "minZoom": 3,
   "maxZoom": 3,
-  "source": "dayz.xam.nu",
-  "version": "1.122-11",
-  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/rostow)",
-  "generatedAt": "2026-10-30T12:32:45Z",
   "names": [
     {
       "name": "Kovrin",

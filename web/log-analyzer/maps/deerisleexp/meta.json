@@ -6,10 +6,6 @@
   "tileSize": 256,
   "minZoom": 3,
   "maxZoom": 3,
-  "source": "dayz.xam.nu",
-  "version": "6.1-14",
-  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/deerisleexp)",
-  "generatedAt": "2026-10-30T12:29:20Z",
   "names": [
     {
       "name": "Paris Island",

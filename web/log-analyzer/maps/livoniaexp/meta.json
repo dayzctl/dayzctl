@@ -6,10 +6,6 @@
   "tileSize": 256,
   "minZoom": 3,
   "maxZoom": 3,
-  "source": "dayz.xam.nu",
-  "version": "1.30-1",
-  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/livoniaexp)",
-  "generatedAt": "2026-10-30T12:29:04Z",
   "names": [
     {
       "name": "Bielawa",

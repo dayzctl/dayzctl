@@ -108,8 +108,10 @@ unticked until you select it.
   shift or a single evening can be inspected on its own. An overturned range
   (22:00 → 04:00) is treated as a window across midnight.
 - **Map** — positions with kills, trails, bases, heatmap and position jumps.
-  Trails are drawn by default: thick per-player lines for the 12 busiest players
-  on a normalised timeline, or for whichever players are ticked.
+  Trails are drawn by default: per-player lines for the 12 busiest players on a
+  normalised timeline, or for whichever players are ticked. Kills, build actions
+  and position jumps leave a dot; hovering one names the event (time, players,
+  item), and a dot shared by several events lists the players involved.
   *Players* is a multi-select list: tick any number of players and every layer is
   limited to them — heatmap, kills (either side of the fight), bases, last
   positions and jumps, not just the trails. The set is shared with the Players
@@ -160,12 +162,10 @@ go run ./tools/mapfetch -map nasdara -zooms 3,4      # ~5.6 MB, 320 tiles
 go run ./tools/mapfetch -map chernarusplus -zooms 3,4
 ```
 
-The generator resolves the map's version, converts its place names to DayZ
-world metres and writes `meta.json` plus the tiles. It skips tiles that already
-exist, so an interrupted run resumes; pass `-force` to re-download. Commit the
-result and rebuild — `go:embed` picks the files up automatically.
-
-Map imagery © [dayz.xam.nu](https://dayz.xam.nu).
+The generator converts each map's place names to DayZ world metres and writes
+`meta.json` plus the tiles. It skips tiles that already exist, so an interrupted
+run resumes; pass `-force` to re-download. Commit the result and rebuild —
+`go:embed` picks the files up automatically.
 
 To use your own picture instead, set `instances[].map_image` (relative to
 `paths.install_dir`, an absolute path, or an `http(s)://` URL the service

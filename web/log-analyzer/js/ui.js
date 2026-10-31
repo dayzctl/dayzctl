@@ -1209,7 +1209,61 @@ export function renderMapPanel(panel, report, state, relayout) {
   });
 
   const canvas = el('canvas', { id: 'map-canvas' });
-  const stage = el('div', { class: 'map-stage' }, canvas);
+  const tooltip = el('div', { class: 'map-tooltip', hidden: true });
+  const stage = el('div', { class: 'map-stage' }, canvas, tooltip);
+
+  // ── event dots ───────────────────────────────────────────
+  // renderMap records every drawn event as a hotspot; hovering one shows what
+  // happened there, and a shared dot lists the players instead.
+  const secondsOfDay = (at) => (Number.isFinite(at) ? ((at % 86400) + 86400) % 86400 : null);
+
+  const describeSpot = (spot) => {
+    if (spot.items.length === 1) {
+      const item = spot.items[0];
+      const tod = secondsOfDay(item.at);
+      return tod === null ? item.text : `${fmtClock(tod)} · ${item.text}`;
+    }
+    const names = [...new Set(spot.items.flatMap((i) => i.players).filter(Boolean))];
+    return `${fmtInt(spot.items.length)} events · ${names.join(', ')}`;
+  };
+
+  const showTooltip = (spot) => {
+    if (!spot) {
+      tooltip.hidden = true;
+      return;
+    }
+    tooltip.textContent = describeSpot(spot);
+    tooltip.hidden = false;
+    // Keep it inside the stage: flip left/up when the dot is near an edge.
+    const maxX = Math.max(8, stage.clientWidth - tooltip.offsetWidth - 10);
+    const maxY = Math.max(8, stage.clientHeight - tooltip.offsetHeight - 10);
+    tooltip.style.left = `${Math.min(Math.max(8, spot.x + 14), maxX)}px`;
+    tooltip.style.top = `${Math.min(Math.max(8, spot.y - tooltip.offsetHeight - 12), maxY)}px`;
+  };
+
+  const hoverAt = (clientX, clientY) => {
+    const list = view.hotspots || [];
+    const rect = canvas.getBoundingClientRect();
+    const x = clientX - rect.left;
+    const y = clientY - rect.top;
+    let best = null;
+    let bestDist = 13 * 13;
+    for (const spot of list) {
+      const dist = (spot.x - x) ** 2 + (spot.y - y) ** 2;
+      if (dist <= bestDist) {
+        bestDist = dist;
+        best = spot;
+      }
+    }
+    const key = best ? best.key : null;
+    if (key !== mapState.hoverKey) {
+      mapState.hoverKey = key;
+      view.hoverKey = key;
+      repaintMap();
+    }
+    showTooltip(best);
+    return Boolean(best);
+  };
 
   // ── zoom & pan ───────────────────────────────────────────
   // Wheel zooms about the pointer, dragging pans, double-click fits the map
@@ -1276,12 +1330,17 @@ export function renderMapPanel(panel, report, state, relayout) {
   canvas.addEventListener('pointerdown', (event) => {
     if (event.button !== 0 || !view.viewport) return;
     drag = { x: event.clientX, y: event.clientY, cx: view.viewport.cx, cy: view.viewport.cy };
+    tooltip.hidden = true;
     canvas.setPointerCapture(event.pointerId);
     canvas.classList.add('dragging');
   });
 
   canvas.addEventListener('pointermove', (event) => {
-    if (!drag || !view.viewport) return;
+    if (!drag) {
+      hoverAt(event.clientX, event.clientY);
+      return;
+    }
+    if (!view.viewport) return;
     const vp = view.viewport;
     const moved = clampView(
       vp.world,
@@ -1297,7 +1356,15 @@ export function renderMapPanel(panel, report, state, relayout) {
 
   canvas.addEventListener('pointerup', endDrag);
   canvas.addEventListener('pointercancel', endDrag);
-  canvas.addEventListener('pointerleave', endDrag);
+  canvas.addEventListener('pointerleave', () => {
+    endDrag();
+    tooltip.hidden = true;
+    if (mapState.hoverKey) {
+      mapState.hoverKey = null;
+      view.hoverKey = null;
+      repaintMap();
+    }
+  });
 
   canvas.addEventListener(
     'wheel',

@@ -333,6 +333,18 @@ export function renderMap(canvas, report, state) {
     }
   }
 
+  // ── event dots ───────────────────────────────────────────
+  // Every drawn event leaves a hoverable dot. Events landing on the same spot
+  // share one dot, so the tooltip can list the players involved.
+  const hotspots = new Map();
+  const addHotspot = (pos, item) => {
+    if (!pos) return;
+    const key = `${Math.round(pos.x / 25)}:${Math.round(pos.y / 25)}`;
+    const spot = hotspots.get(key) || { key, x: px(pos.x), y: py(pos.y), items: [] };
+    spot.items.push(item);
+    hotspots.set(key, spot);
+  };
+
   // ── base building ────────────────────────────────────────
   if (layers.builds) {
     ctx.fillStyle = 'rgba(90, 200, 220, 0.85)';
@@ -341,6 +353,12 @@ export function renderMap(canvas, report, state) {
       const x = px(b.pos.x);
       const y = py(b.pos.y);
       ctx.fillRect(x - 2.5, y - 2.5, 5, 5);
+      addHotspot(b.pos, {
+        kind: 'build',
+        at: b.at,
+        players: [b.player],
+        text: `${b.kind === 'place' ? 'Placed' : 'Built'} ${b.object}`,
+      });
     }
   }
 
@@ -367,9 +385,10 @@ export function renderMap(canvas, report, state) {
       const pts = p.positions.filter((s) => s.at !== null && s.at !== undefined && inWindow(s.at));
       if (pts.length < 2) return;
       ctx.beginPath();
-      ctx.strokeStyle = `hsla(${(i * 47) % 360} 78% 62% / 0.8)`;
-      // Thick enough to follow on a 16 km map; round caps keep corners smooth.
-      ctx.lineWidth = 3;
+      ctx.strokeStyle = `hsla(${(i * 47) % 360} 78% 62% / 0.75)`;
+      // Round caps keep corners smooth; the width stays readable but does not
+      // swallow the imagery when several trails overlap.
+      ctx.lineWidth = 1.8;
       ctx.lineJoin = 'round';
       ctx.lineCap = 'round';
       pts.forEach((s, idx) => {
@@ -406,6 +425,13 @@ export function renderMap(canvas, report, state) {
       ctx.beginPath();
       ctx.arc(vx, vy, 3, 0, Math.PI * 2);
       ctx.fill();
+
+      addHotspot(k.pos, {
+        kind: 'kill',
+        at: k.at,
+        players: [k.killer, k.victim],
+        text: `${k.killer} killed ${k.victim}`,
+      });
     }
   }
 
@@ -421,7 +447,31 @@ export function renderMap(canvas, report, state) {
       ctx.lineTo(px(s.to.x), py(s.to.y));
       ctx.stroke();
       ctx.setLineDash([]);
+
+      ctx.fillStyle = 'rgba(217, 165, 59, 0.9)';
+      for (const end of [s.from, s.to]) {
+        ctx.beginPath();
+        ctx.arc(px(end.x), py(end.y), 2.5, 0, Math.PI * 2);
+        ctx.fill();
+      }
+      addHotspot(s.to, {
+        kind: 'jump',
+        at: s.at,
+        players: [s.player],
+        text: `Impossible movement — ${s.detail}`,
+      });
     }
+  }
+
+  // The dot under the pointer gets a ring, drawn last so nothing covers it.
+  state.hotspots = [...hotspots.values()];
+  const hovered = state.hoverKey ? hotspots.get(state.hoverKey) : null;
+  if (hovered) {
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
+    ctx.lineWidth = 1.6;
+    ctx.beginPath();
+    ctx.arc(hovered.x, hovered.y, 9, 0, Math.PI * 2);
+    ctx.stroke();
   }
 
   // ── selection highlight ──────────────────────────────────

@@ -438,17 +438,14 @@ func (s *Server) handleMapMeta(w http.ResponseWriter, r *http.Request) {
 	// The data is embedded in the binary, so it only changes with an upgrade.
 	w.Header().Set(headerCacheControl, "max-age=3600")
 	writeJSON(w, http.StatusOK, map[string]any{
-		"id":          meta.ID,
-		"name":        meta.Name,
-		"size":        meta.Size,
-		"minZoom":     meta.MinZoom,
-		"maxZoom":     meta.MaxZoom,
-		"tileSize":    meta.TileSize,
-		"source":      meta.Source,
-		"version":     meta.Version,
-		"names":       meta.Names,
-		"tileUrl":     "/api/maps/" + url.PathEscape(meta.ID) + "/tiles/{z}/{x}/{y}",
-		"attribution": meta.Attribution,
+		"id":       meta.ID,
+		"name":     meta.Name,
+		"size":     meta.Size,
+		"minZoom":  meta.MinZoom,
+		"maxZoom":  meta.MaxZoom,
+		"tileSize": meta.TileSize,
+		"names":    meta.Names,
+		"tileUrl":  "/api/maps/" + url.PathEscape(meta.ID) + "/tiles/{z}/{x}/{y}",
 	})
 }
 

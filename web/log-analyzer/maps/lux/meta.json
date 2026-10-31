@@ -6,10 +6,6 @@
   "tileSize": 256,
   "minZoom": 3,
   "maxZoom": 3,
-  "source": "dayz.xam.nu",
-  "version": "May.29-3",
-  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/lux)",
-  "generatedAt": "2026-10-30T12:29:53Z",
   "names": [
     {
       "name": "Khong",

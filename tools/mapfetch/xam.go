@@ -64,18 +64,14 @@ type xamConfig struct {
 }
 
 // meta converts the downloaded map data into the file the UI reads.
-func (c *xamConfig) meta(id, rev string) *metaFile {
+func (c *xamConfig) meta(id string) *metaFile {
 	size := c.Info.Size
 	m := &metaFile{
-		ID:          id,
-		Name:        displayName(id),
-		Size:        size,
-		Format:      defaultString(c.Info.Format, "webp"),
-		TileSize:    256,
-		Source:      "dayz.xam.nu",
-		Version:     rev,
-		Attribution: "Map imagery © dayz.xam.nu (dayz.xam.nu/" + id + ")",
-		GeneratedAt: time.Now().UTC().Format(time.RFC3339),
+		ID:       id,
+		Name:     displayName(id),
+		Size:     size,
+		Format:   defaultString(c.Info.Format, "webp"),
+		TileSize: 256,
 	}
 	for _, loc := range c.Markers.Locations {
 		if place, ok := toPlace(loc.Kind, loc.Pos, loc.Names, size, c.Info.GPSInvertY); ok {

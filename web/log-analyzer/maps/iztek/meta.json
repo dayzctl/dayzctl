@@ -6,10 +6,6 @@
   "tileSize": 256,
   "minZoom": 3,
   "maxZoom": 3,
-  "source": "dayz.xam.nu",
-  "version": "2.0.4-14",
-  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/iztek)",
-  "generatedAt": "2026-10-30T12:29:47Z",
   "names": [
     {
       "name": "Borisovo",
@@ -162,7 +158,7 @@
       "kind": "local"
     },
     {
-      "name": "Azak Port \u0026 Ind.",
+      "name": "Azak Port & Ind.",
       "x": 6611.3,
       "y": 3763.6,
       "kind": "local"

@@ -18,18 +18,14 @@ type place struct {
 }
 
 type metaFile struct {
-	ID          string  `json:"id"`
-	Name        string  `json:"name"`
-	Size        float64 `json:"size"`
-	Format      string  `json:"format"`
-	TileSize    int     `json:"tileSize"`
-	MinZoom     int     `json:"minZoom"`
-	MaxZoom     int     `json:"maxZoom"`
-	Source      string  `json:"source"`
-	Version     string  `json:"version"`
-	Attribution string  `json:"attribution"`
-	GeneratedAt string  `json:"generatedAt"`
-	Names       []place `json:"names"`
+	ID       string  `json:"id"`
+	Name     string  `json:"name"`
+	Size     float64 `json:"size"`
+	Format   string  `json:"format"`
+	TileSize int     `json:"tileSize"`
+	MinZoom  int     `json:"minZoom"`
+	MaxZoom  int     `json:"maxZoom"`
+	Names    []place `json:"names"`
 }
 
 func writeMeta(path string, meta *metaFile) error {

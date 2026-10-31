@@ -503,6 +503,22 @@ details.samples pre {
 #map-canvas { display: block; width: 100%; height: auto; cursor: grab; }
 #map-canvas.dragging { cursor: grabbing; }
 
+/* Tooltip for the event dots on the map */
+.map-tooltip {
+  position: absolute;
+  z-index: 30;
+  max-width: min(320px, calc(100% - 20px));
+  padding: 6px 9px;
+  border-radius: 7px;
+  border: 1px solid var(--border);
+  background: rgba(10, 13, 16, 0.94);
+  color: var(--text);
+  font-size: 12.5px;
+  line-height: 1.35;
+  pointer-events: none;
+  box-shadow: 0 10px 26px rgba(0, 0, 0, 0.55);
+}
+
 /* Zoom buttons and readout under the map toolbar */
 .map-zoom { display: flex; align-items: center; gap: 6px; }
 .map-zoom .btn { padding: 5px 9px; min-width: 30px; }

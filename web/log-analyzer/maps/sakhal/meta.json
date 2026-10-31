@@ -6,10 +6,6 @@
   "tileSize": 256,
   "minZoom": 3,
   "maxZoom": 3,
-  "source": "dayz.xam.nu",
-  "version": "1.30",
-  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/sakhal)",
-  "generatedAt": "2026-10-30T12:37:27Z",
   "names": [
     {
       "name": "Petropavlovsk-sakhalinsk",

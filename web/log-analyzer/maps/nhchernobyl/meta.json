@@ -6,9 +6,5 @@
   "tileSize": 256,
   "minZoom": 3,
   "maxZoom": 3,
-  "source": "dayz.xam.nu",
-  "version": "Jul.22-11",
-  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/nhchernobyl)",
-  "generatedAt": "2026-10-30T12:30:55Z",
   "names": null
 }

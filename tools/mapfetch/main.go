@@ -128,7 +128,7 @@ func fetchOne(src *source, mapID string, zooms []int, out string, force bool) er
 	if err != nil {
 		return err
 	}
-	meta := cfg.meta(mapID, rev)
+	meta := cfg.meta(mapID)
 	fmt.Printf("  version %s · world %s m · %d place names\n", rev, fmtNum(meta.Size), len(meta.Names))
 
 	dir := out + "/" + mapID

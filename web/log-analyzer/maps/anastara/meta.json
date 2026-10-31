@@ -6,10 +6,6 @@
   "tileSize": 256,
   "minZoom": 3,
   "maxZoom": 3,
-  "source": "dayz.xam.nu",
-  "version": "Jan.15-11",
-  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/anastara)",
-  "generatedAt": "2026-10-30T12:29:07Z",
   "names": [
     {
       "name": "Moskov",

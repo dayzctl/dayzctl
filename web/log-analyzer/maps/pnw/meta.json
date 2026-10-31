@@ -6,10 +6,6 @@
   "tileSize": 256,
   "minZoom": 3,
   "maxZoom": 3,
-  "source": "dayz.xam.nu",
-  "version": "2.0-13",
-  "attribution": "Map imagery © dayz.xam.nu (dayz.xam.nu/pnw)",
-  "generatedAt": "2026-10-30T12:31:58Z",
   "names": [
     {
       "name": "Ocean Shores",
