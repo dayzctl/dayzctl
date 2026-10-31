@@ -29,6 +29,13 @@ import (
 	webassets "github.com/dayzctl/dayzctl/web"
 )
 
+// Headers and messages reused across handlers.
+const (
+	headerCacheControl  = "Cache-Control"
+	headerContentType   = "Content-Type"
+	errInstanceNotFound = "instance not found: "
+)
+
 // Server bundles the HTTP handler with its dependencies.
 type Server struct {
 	cfg      *config.ServerConfig
@@ -180,7 +187,7 @@ func (s *Server) handleInstances(w http.ResponseWriter, r *http.Request) {
 func (s *Server) handleLogs(w http.ResponseWriter, r *http.Request) {
 	instance := r.PathValue("instance")
 	if !s.instanceExists(instance) {
-		writeError(w, http.StatusNotFound, "instance not found: "+instance)
+		writeError(w, http.StatusNotFound, errInstanceNotFound+instance)
 		return
 	}
 
@@ -204,7 +211,7 @@ type analyzeRequest struct {
 func (s *Server) handleAnalyze(w http.ResponseWriter, r *http.Request) {
 	instance := r.PathValue("instance")
 	if !s.instanceExists(instance) {
-		writeError(w, http.StatusNotFound, "instance not found: "+instance)
+		writeError(w, http.StatusNotFound, errInstanceNotFound+instance)
 		return
 	}
 
@@ -229,7 +236,7 @@ func (s *Server) handleAnalyze(w http.ResponseWriter, r *http.Request) {
 		"files", len(report.Files),
 		"cached", report.FromCache)
 
-	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set(headerCacheControl, "no-store")
 	writeJSON(w, http.StatusOK, report)
 }
 
@@ -270,12 +277,19 @@ func (s *Server) mapImagePath(inst *config.Instance) (string, bool) {
 		filepath.Join(install, "maps"),
 		install,
 	}
+	if p, ok := firstMapImage(dirs, inst.Name); ok {
+		return p, true
+	}
+	return "", false
+}
 
+// firstMapImage looks for map.<ext>, and <instance>.<ext>, in each directory.
+func firstMapImage(dirs []string, instance string) (string, bool) {
 	for _, dir := range dirs {
 		for _, stemPattern := range mapImageStems {
 			stem := stemPattern
 			if strings.Contains(stemPattern, "%s") {
-				stem = fmt.Sprintf(stemPattern, inst.Name)
+				stem = fmt.Sprintf(stemPattern, instance)
 			}
 			for _, ext := range mapImageExts {
 				if p := filepath.Join(dir, stem+ext); isRegularFile(p) {
@@ -315,7 +329,7 @@ func (s *Server) mapImageAvailable(inst *config.Instance) bool {
 func (s *Server) handleMapImage(w http.ResponseWriter, r *http.Request) {
 	inst := s.findInstance(r.PathValue("instance"))
 	if inst == nil {
-		writeError(w, http.StatusNotFound, "instance not found: "+r.PathValue("instance"))
+		writeError(w, http.StatusNotFound, errInstanceNotFound+r.PathValue("instance"))
 		return
 	}
 
@@ -332,7 +346,7 @@ func (s *Server) handleMapImage(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// The image is admin-provided and may be replaced at any time.
-	w.Header().Set("Cache-Control", "no-cache")
+	w.Header().Set(headerCacheControl, "no-cache")
 	http.ServeFile(w, r, path)
 }
 
@@ -358,12 +372,12 @@ func (s *Server) proxyMapImage(w http.ResponseWriter, r *http.Request, src strin
 		return
 	}
 
-	contentType := resp.Header.Get("Content-Type")
+	contentType := resp.Header.Get(headerContentType)
 	if !strings.HasPrefix(contentType, "image/") {
 		contentType = "image/jpeg"
 	}
-	w.Header().Set("Content-Type", contentType)
-	w.Header().Set("Cache-Control", "max-age=300")
+	w.Header().Set(headerContentType, contentType)
+	w.Header().Set(headerCacheControl, "max-age=300")
 
 	if _, err := io.Copy(w, io.LimitReader(resp.Body, 64<<20)); err != nil {
 		logger.Debug("Map image proxy stopped early", "instance", r.PathValue("instance"), "error", err)
@@ -409,7 +423,7 @@ func (s *Server) handleMaps(w http.ResponseWriter, r *http.Request) {
 		})
 	}
 
-	w.Header().Set("Cache-Control", "max-age=3600")
+	w.Header().Set(headerCacheControl, "max-age=3600")
 	writeJSON(w, http.StatusOK, map[string]any{"maps": maps})
 }
 
@@ -422,7 +436,7 @@ func (s *Server) handleMapMeta(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// The data is embedded in the binary, so it only changes with an upgrade.
-	w.Header().Set("Cache-Control", "max-age=3600")
+	w.Header().Set(headerCacheControl, "max-age=3600")
 	writeJSON(w, http.StatusOK, map[string]any{
 		"id":          meta.ID,
 		"name":        meta.Name,
@@ -454,8 +468,8 @@ func (s *Server) handleMapTile(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	w.Header().Set("Content-Type", contentType)
-	w.Header().Set("Cache-Control", "public, max-age=604800, immutable")
+	w.Header().Set(headerContentType, contentType)
+	w.Header().Set(headerCacheControl, "public, max-age=604800, immutable")
 	_, _ = w.Write(data)
 }
 
@@ -464,8 +478,8 @@ func (s *Server) handleMapTile(w http.ResponseWriter, r *http.Request) {
 // ---------------------------------------------------------------------------
 
 func writeJSON(w http.ResponseWriter, status int, payload any) {
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set(headerContentType, "application/json; charset=utf-8")
+	w.Header().Set(headerCacheControl, "no-store")
 	w.WriteHeader(status)
 	if err := json.NewEncoder(w).Encode(payload); err != nil {
 		logger.Error("Failed to write JSON response", "error", err)
@@ -486,7 +500,7 @@ func noCacheHTML(next http.Handler) http.Handler {
 			strings.HasSuffix(r.URL.Path, ".html"),
 			strings.HasSuffix(r.URL.Path, ".js"),
 			strings.HasSuffix(r.URL.Path, ".css"):
-			w.Header().Set("Cache-Control", "no-cache")
+			w.Header().Set(headerCacheControl, "no-cache")
 		}
 		next.ServeHTTP(w, r)
 	})

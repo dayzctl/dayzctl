@@ -480,7 +480,9 @@ details.samples pre {
   margin-bottom: 12px;
 }
 .field { display: flex; flex-direction: column; gap: 4px; }
-.field label { font-size: 11.5px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.5px; }
+/* Only the caption above a control, not labels nested inside it (the player
+   picker rows are <label> elements too and must keep their own styling). */
+.field > label { font-size: 11.5px; color: var(--text-faint); text-transform: uppercase; letter-spacing: 0.5px; }
 .field select, .field input[type="number"], .field input[type="file"] {
   background: #0d1116;
   color: var(--text);

@@ -165,8 +165,8 @@ func (s *Server) renderLogin(w http.ResponseWriter, status int, next, user, errM
 		"{{ERROR}}", block,
 	).Replace(loginPage)
 
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Header().Set("Cache-Control", "no-store")
+	w.Header().Set(headerContentType, "text/html; charset=utf-8")
+	w.Header().Set(headerCacheControl, "no-store")
 	w.WriteHeader(status)
 	_, _ = w.Write([]byte(page))
 }

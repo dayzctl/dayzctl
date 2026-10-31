@@ -115,6 +115,8 @@ func sniffType(path string) FileType {
 	for len(sample) < 40 && sc.Scan() {
 		sample = append(sample, sc.Text())
 	}
+	// A read error just means fewer sample lines; the type is still sniffed.
+	_ = sc.Err()
 	detected := DetectType(path, sample)
 	return detected
 }

@@ -254,12 +254,12 @@ func (p *playerState) touch(at *float64) {
 	}
 }
 
-func (p *playerState) pushPosition(at *float64, pos *Position, max int) {
+func (p *playerState) pushPosition(at *float64, pos *Position, limit int) {
 	if pos == nil {
 		return
 	}
 	p.lastKnown = pos
-	if len(p.positions) < max {
+	if len(p.positions) < limit {
 		p.positions = append(p.positions, PosSample{At: at, X: pos.X, Y: pos.Y, Z: pos.Z})
 	}
 }
@@ -391,7 +391,7 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 			// handshake, then the spawn line carrying the position). Only the
 			// first opens a session or counts and playtime inflate.
 			if s := p.session(); s != nil {
-				if s.Start != nil && at != nil && *at-*s.Start <= 120 {
+				if s.Start != nil && *at-*s.Start <= 120 {
 					// …unless the player died in between: that "connected" line is
 					// a respawn and starts a new session.
 					if !hasBreakBetween(p.breaks, *s.Start, *at) {
@@ -443,12 +443,8 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 				if c.ref == nil {
 					continue
 				}
-				ref := *c.ref
-				now := ref
-				if at != nil {
-					now = *at
-				}
-				delta := now - ref
+				// `at` is &e.T, so it is always set.
+				delta := *at - *c.ref
 				if delta >= 0 && delta <= opts.CombatLogWindow {
 					p.suspicion += 2
 					secs := delta
@@ -471,7 +467,7 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 			victim := getPlayer(e.PlayerKey, e.Player)
 			killer := getPlayer(e.OtherKey, e.Other)
 
-			alreadyCounted := victim.pendingDeath != nil && at != nil && absFloat(*at-*victim.pendingDeath) <= 5
+			alreadyCounted := victim.pendingDeath != nil && absFloat(*at-*victim.pendingDeath) <= 5
 			if !alreadyCounted {
 				victim.deaths++
 			}
@@ -479,7 +475,7 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 
 			// The kill line itself has no coordinates; the death marker does.
 			var markerPos *Position
-			if victim.pendingDeath != nil && at != nil && absFloat(*at-*victim.pendingDeath) <= 10 {
+			if victim.pendingDeath != nil && absFloat(*at-*victim.pendingDeath) <= 10 {
 				markerPos = victim.lastKnown
 			}
 			killPos := e.Pos

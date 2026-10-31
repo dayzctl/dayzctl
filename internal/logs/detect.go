@@ -68,37 +68,12 @@ var (
 // sample. Extensions win when present, because hosted providers sometimes
 // ship everything as ".log".
 func DetectType(name string, sample []string) FileType {
-	byExt := TypeFromName(name)
-	if byExt == FileCrash {
-		return FileCrash
+	switch byExt := TypeFromName(name); byExt {
+	case FileCrash, FileADM, FileRPT:
+		return byExt
 	}
 
-	text := strings.Join(sample, "\n")
-
-	admScore, rptScore, scriptScore := 0, 0, 0
-	for _, re := range admMarkers {
-		if re.MatchString(text) {
-			admScore += 2
-		}
-	}
-	for _, re := range rptMarkers {
-		if re.MatchString(text) {
-			rptScore += 2
-		}
-	}
-	for _, line := range sample {
-		if reScriptLine.MatchString(line) {
-			scriptScore += 3
-			break
-		}
-	}
-
-	if byExt == FileADM {
-		return FileADM
-	}
-	if byExt == FileRPT {
-		return FileRPT
-	}
+	admScore, rptScore, scriptScore := scoreSample(sample)
 	if scriptScore > 0 && scriptScore >= admScore && scriptScore >= rptScore {
 		return FileScript
 	}
@@ -111,6 +86,29 @@ func DetectType(name string, sample []string) FileType {
 		return FileRPT
 	}
 	return FileUnknown
+}
+
+// scoreSample counts how strongly a content sample looks like each file type:
+// two points per matching ADM/RPT marker, three for a script line.
+func scoreSample(sample []string) (adm, rpt, script int) {
+	text := strings.Join(sample, "\n")
+	for _, re := range admMarkers {
+		if re.MatchString(text) {
+			adm += 2
+		}
+	}
+	for _, re := range rptMarkers {
+		if re.MatchString(text) {
+			rpt += 2
+		}
+	}
+	for _, line := range sample {
+		if reScriptLine.MatchString(line) {
+			script += 3
+			break
+		}
+	}
+	return adm, rpt, script
 }
 
 // RPTOrigin distinguishes a server RPT from a player's game-client RPT.

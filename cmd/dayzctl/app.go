@@ -168,38 +168,40 @@ func setupBefore(c *cli.Context) error {
 	return nil
 }
 
+// Flags that only ask for help rather than doing work.
+const (
+	helpFlagShort = "-h"
+	helpFlagLong  = "--help"
+)
+
 // isHelpInvocation returns true when the CLI was invoked in a way that only
 // requests help or version information and does not require full setup.
 func isHelpInvocation() bool {
-	firstArg := ""
-	if len(os.Args) > 1 {
-		firstArg = os.Args[1]
-	}
-	if firstArg == "" || firstArg == "-h" || firstArg == "--help" || firstArg == "help" || firstArg == "version" {
+	args := os.Args[1:]
+	if len(args) == 0 {
 		return true
 	}
-	// `logs` parses its own tail-style flags, so urfave/cli never sees its
-	// help flag. Recognize it here so help works without root or a config.
-	// A bare `dayzctl logs` also prints help instead of querying the journal.
-	if firstArg == "logs" {
-		rest := os.Args[2:]
-		if len(rest) == 0 {
+	switch args[0] {
+	case helpFlagShort, helpFlagLong, "help", "version":
+		return true
+	case "logs":
+		// `logs` parses its own tail-style flags, so urfave/cli never sees its
+		// help flag. Recognize it here so help works without root or a config.
+		// A bare `dayzctl logs` also prints help instead of querying the journal.
+		if len(args) == 1 || (len(args) == 2 && args[1] == "help") {
 			return true
-		}
-		if len(rest) == 1 && rest[0] == "help" {
-			return true
-		}
-		for _, a := range rest {
-			if a == "-h" || a == "--help" {
-				return true
-			}
 		}
 	}
 
 	// Any --help/-h anywhere also skips root and config loading, so
 	// `dayzctl web --help` works on a machine without a config file.
-	for _, a := range os.Args[1:] {
-		if a == "-h" || a == "--help" {
+	return hasHelpFlag(args)
+}
+
+// hasHelpFlag reports whether any argument is a help flag.
+func hasHelpFlag(args []string) bool {
+	for _, a := range args {
+		if a == helpFlagShort || a == helpFlagLong {
 			return true
 		}
 	}

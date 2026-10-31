@@ -33,6 +33,9 @@ type Verdict struct {
 
 // Rules is evaluated in order; the first match wins. Keep specific patterns
 // above the generic fallbacks.
+// fixNothingToDo is the advice for lines that need no action.
+const fixNothingToDo = "Nothing to do."
+
 var Rules = []Rule{
 	{
 		ID:       "server-telemetry",
@@ -62,7 +65,7 @@ var Rules = []Rule{
 		Vanilla:  true,
 		Title:    "Entity loader trace",
 		Explain:  "A line from the entity loader while the world spawns. Informational only.",
-		Fix:      "Nothing to do.",
+		Fix:      fixNothingToDo,
 	},
 	{
 		ID:       "addon-requires-addon",
@@ -318,7 +321,7 @@ var Rules = []Rule{
 		Vanilla:  true,
 		Title:    "Connection lifecycle",
 		Explain:  "Step-by-step logging of a player joining or leaving. Several lines belong to a single connection.",
-		Fix:      "Nothing to do.",
+		Fix:      fixNothingToDo,
 	},
 	{
 		ID:       "connection-block-detail",
@@ -328,7 +331,7 @@ var Rules = []Rule{
 		Vanilla:  true,
 		Title:    "Connection block detail",
 		Explain:  "Continuation lines of the connection block above: character, player and session ids.",
-		Fix:      "Nothing to do.",
+		Fix:      fixNothingToDo,
 	},
 	{
 		ID:       "engine-subsystem",
@@ -338,7 +341,7 @@ var Rules = []Rule{
 		Vanilla:  true,
 		Title:    "Engine subsystem trace",
 		Explain:  "Periodic trace from an engine subsystem while the world runs.",
-		Fix:      "Nothing to do.",
+		Fix:      fixNothingToDo,
 	},
 	{
 		ID:       "shutdown",
@@ -357,7 +360,7 @@ var Rules = []Rule{
 		Vanilla:  true,
 		Title:    "Player connection event",
 		Explain:  "A player joined or left. Server RPTs repeat these; the ADM has the full picture.",
-		Fix:      "Nothing to do.",
+		Fix:      fixNothingToDo,
 	},
 }
 

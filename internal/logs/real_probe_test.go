@@ -118,11 +118,11 @@ func TestProbeRealLogs(t *testing.T) {
 	}
 }
 
-func truncateStr(s string, max int) string {
-	if len(s) <= max {
+func truncateStr(s string, limit int) string {
+	if len(s) <= limit {
 		return s
 	}
-	return s[:max-1] + "…"
+	return s[:limit-1] + "…"
 }
 
 // sampleUnmatched returns distinct ADM messages the parser classified as OTHER.
@@ -154,6 +154,9 @@ func sampleUnmatched(path string) []string {
 				out = append(out, msg)
 			}
 		}
+	}
+	if err := sc.Err(); err != nil {
+		fmt.Printf("scan %s: %v\n", path, err)
 	}
 	return out
 }

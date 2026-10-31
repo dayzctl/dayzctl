@@ -396,6 +396,6 @@ func (p *AdmParser) SetBaseDate(day time.Time) {
 }
 
 // Tods returns the observed time-of-day range.
-func (p *AdmParser) Tods() (min, max float64, ok bool) {
+func (p *AdmParser) Tods() (low, high float64, ok bool) {
 	return p.minTod, p.maxTod, p.hasTod
 }
