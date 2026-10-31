@@ -367,8 +367,11 @@ export function renderMap(canvas, report, state) {
       const pts = p.positions.filter((s) => s.at !== null && s.at !== undefined && inWindow(s.at));
       if (pts.length < 2) return;
       ctx.beginPath();
-      ctx.strokeStyle = `hsla(${(i * 47) % 360} 72% 60% / 0.65)`;
-      ctx.lineWidth = 1.6;
+      ctx.strokeStyle = `hsla(${(i * 47) % 360} 78% 62% / 0.8)`;
+      // Thick enough to follow on a 16 km map; round caps keep corners smooth.
+      ctx.lineWidth = 3;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
       pts.forEach((s, idx) => {
         const x = px(s.x);
         const y = py(s.y);

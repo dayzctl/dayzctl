@@ -108,6 +108,8 @@ unticked until you select it.
   shift or a single evening can be inspected on its own. An overturned range
   (22:00 → 04:00) is treated as a window across midnight.
 - **Map** — positions with kills, trails, bases, heatmap and position jumps.
+  Trails are drawn by default: thick per-player lines for the 12 busiest players
+  on a normalised timeline, or for whichever players are ticked.
   *Players* is a multi-select list: tick any number of players and every layer is
   limited to them — heatmap, kills (either side of the fight), bases, last
   positions and jumps, not just the trails. The set is shared with the Players

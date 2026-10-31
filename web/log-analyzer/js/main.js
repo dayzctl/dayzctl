@@ -100,7 +100,7 @@ const state = {
       tiles: true,
       names: true,
       kills: true,
-      trails: false,
+      trails: true,
       builds: true,
       heat: false,
       connects: false,
