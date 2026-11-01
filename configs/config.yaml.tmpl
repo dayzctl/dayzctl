@@ -34,23 +34,39 @@ instances:
     # setting. Only maps bundled with the binary are available; generate more
     # with: go run ./tools/mapfetch -map chernarusplus -zooms 3,4
     # map: nasdara
-    # Optional: scheduled restart warnings + graceful shutdown, written to
-    # this instance's mission db/messages.xml (DayZ "Server Messages").
-    # ALL values are in MINUTES, relative to server start (DayZ schedules
-    # countdowns against server uptime, not wall-clock time).
-    #
-    # A message with 'deadline' is a countdown: DayZ broadcasts it by itself
-    # at 90, 60, 45, 30, 20, 15, 10, 5, 2 and 1 minutes before the deadline,
-    # so use the '#tmin' placeholder (minutes remaining) instead of a
-    # hardcoded number. 'shutdown: true' makes the server save and exit when
-    # the countdown reaches zero; it is ignored without 'deadline'.
-    # Other placeholders: #name (server name), #port (server port).
-    # DayZ caps the text at 160 characters.
-    shutdown_messages:
-      # Restart every 6 hours (360 minutes) with a countdown + graceful exit.
-      - deadline: 360
-        text: "#name will restart in #tmin minutes."
-        shutdown: true
+
+# Scheduled restart warnings + graceful shutdown (DayZ "Server Messages").
+#
+# DayZ reads messages.xml from the MISSION folder, not per instance, so this
+# block is defined once here and written to the mission of every map in use:
+#   <installDir>/mpmissions/<template>/db/messages.xml
+# Instances sharing a template share the file; each distinct map gets a copy.
+#
+# ALL values are in MINUTES, relative to server start (DayZ schedules
+# countdowns against server uptime, not wall-clock time).
+#
+# A message can be any mix of the three DayZ message kinds:
+#   welcome   - on_connect: true (+ optional delay in minutes)
+#   repeating - repeat: <minutes between broadcasts>
+#   countdown - deadline: <minutes>, announced by DayZ at 90, 60, 45, 30, 20,
+#               15, 10, 5, 2 and 1 minutes before the deadline, so use the
+#               '#tmin' placeholder (minutes remaining) instead of a hardcoded
+#               number. 'shutdown: true' makes the server save and exit when
+#               the countdown reaches zero; it is ignored without 'deadline'.
+#
+# Placeholders: #name (server name), #port (server port), #tmin (countdown
+# only). DayZ caps the text at 160 characters.
+shutdown_messages:
+  # Restart every 6 hours (360 minutes) with a countdown + graceful exit.
+  - deadline: 360
+    text: "#name will restart in #tmin minutes."
+    shutdown: true
+  # Welcome message, sent once to every player that connects.
+  - on_connect: true
+    text: "Welcome to #name, enjoy your stay!"
+  # Reminder broadcast to everyone every 30 minutes.
+  - repeat: 30
+    text: "You're playing on #name. Thank you for joining us!"
 
 # Backup settings
 backup:

@@ -37,6 +37,11 @@ type ServerConfig struct {
 	Healthcheck  Healthcheck   `yaml:"healthcheck"`
 	State        State         `yaml:"state"`
 	Web          Web           `yaml:"web"`
+	// ShutdownMessages is the server-wide restart countdown written to every
+	// mission in use. DayZ reads messages.xml from the mission (map) folder,
+	// not per instance, so the same list is applied once to each distinct
+	// <installDir>/mpmissions/<template>/db/messages.xml.
+	ShutdownMessages []ShutdownMessage `yaml:"shutdown_messages,omitempty"`
 }
 
 // Server represents server-wide settings
@@ -121,17 +126,21 @@ type Paths struct {
 
 // Instance represents a server instance
 type Instance struct {
-	Name             string            `yaml:"name"`
-	InstanceID       int               `yaml:"instanceId"`
-	Port             int               `yaml:"port"`
-	SteamQueryPort   int               `yaml:"steam_query_port"`
-	Template         string            `yaml:"template"`
-	Hostname         string            `yaml:"hostname"`
-	MaxPlayers       int               `yaml:"max_players"`
-	Enabled          bool              `yaml:"enabled"`
-	RCON             RCON              `yaml:"rcon"`
-	Mods             []ModRef          `yaml:"mods"`
-	ServerMods       []ModRef          `yaml:"servermods"`
+	Name           string   `yaml:"name"`
+	InstanceID     int      `yaml:"instanceId"`
+	Port           int      `yaml:"port"`
+	SteamQueryPort int      `yaml:"steam_query_port"`
+	Template       string   `yaml:"template"`
+	Hostname       string   `yaml:"hostname"`
+	MaxPlayers     int      `yaml:"max_players"`
+	Enabled        bool     `yaml:"enabled"`
+	RCON           RCON     `yaml:"rcon"`
+	Mods           []ModRef `yaml:"mods"`
+	ServerMods     []ModRef `yaml:"servermods"`
+	// ShutdownMessages is deprecated: messages.xml is read by DayZ from the
+	// mission folder, so it is shared by every instance running the same
+	// template. Use the top-level 'shutdown_messages' instead; a value here
+	// still works as a per-mission override (with a deprecation warning).
 	ShutdownMessages []ShutdownMessage `yaml:"shutdown_messages"`
 	// MapImage is an optional background image for the log analyzer's map.
 	// Relative paths are resolved against the install directory. When empty,
@@ -151,11 +160,12 @@ type ModRef struct {
 
 // ShutdownMessage represents a single <message> element written to the
 // mission's db/messages.xml (see "DayZ: Server Messages"). Every time value
-// is in minutes, which is DayZ's own unit. A message with Deadline > 0 is a
-// countdown: DayZ broadcasts it automatically at 90, 60, 45, 30, 20, 15, 10,
-// 5, 2 and 1 minutes before the deadline, and, when Shutdown is set, saves
-// the world and exits once the deadline is reached. That is the server's own
-// "gentle" shutdown mechanism, distinct from killing the process externally.
+// is in minutes, which is DayZ's own unit. The element covers the three kinds
+// of DayZ server message, which can be combined:
+//   - welcome   : OnConnect set, optional Delay   (sent once per connecting player)
+//   - repeating : Repeat > 0                      (broadcast every Repeat minutes)
+//   - countdown : Deadline > 0, optional Shutdown (announced at 90/60/45/30/20/15/10/5/2/1
+//     minutes before the deadline, then the server saves and exits)
 type ShutdownMessage struct {
 	// Deadline is the number of minutes after server start at which the
 	// countdown reaches zero (DayZ schedules these relative to server
@@ -170,8 +180,14 @@ type ShutdownMessage struct {
 	// countdown reaches zero. Requires Deadline > 0.
 	Shutdown bool `yaml:"shutdown"`
 	// Repeat is the interval in minutes between broadcasts of this message;
-	// 0 means it is sent only at the countdown moments (or once).
+	// 0 means it is not repeated. Use it for periodic reminders.
 	Repeat int `yaml:"repeat,omitempty"`
+	// OnConnect, when true, sends the message once to every player that
+	// connects (a welcome message).
+	OnConnect bool `yaml:"on_connect,omitempty"`
+	// Delay is the number of minutes to wait before sending the message; it
+	// only applies together with OnConnect (0 = immediately after connect).
+	Delay int `yaml:"delay,omitempty"`
 }
 
 // RCON represents RCON configuration

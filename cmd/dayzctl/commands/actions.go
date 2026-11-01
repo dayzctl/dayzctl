@@ -617,9 +617,15 @@ func RenderConfigAction(instanceName string) error {
 			logger.Info("Rendering config for instance", "name", instance.Name)
 			configPath := fmt.Sprintf("%s/serverDZ-%s.cfg", shared.Config.GetInstallDir(), instance.Name)
 			logger.Info("Config would be written to", "path", configPath)
-			if len(instance.ShutdownMessages) > 0 {
-				logger.Info("Shutdown messages would be written to", "path", generate.MessagesPath(shared.Config, instance))
-			}
+		}
+
+		// messages.xml is stored per mission (map), so report each mission once.
+		paths, err := generate.MessagesPaths(shared.Config, instances)
+		if err != nil {
+			return err
+		}
+		for _, path := range paths {
+			logger.Info("Shutdown messages would be written to", "path", path)
 		}
 
 		return nil

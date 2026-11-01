@@ -28,6 +28,10 @@ func (c *ServerConfig) Validate() error {
 		return err
 	}
 
+	if err := validateShutdownMessages("shutdown_messages", c.ShutdownMessages); err != nil {
+		return err
+	}
+
 	return nil
 }
 
@@ -67,23 +71,23 @@ func validateInstance(inst Instance) error {
 			return fmt.Errorf("instance %s: RCON password is required when RCON is enabled", inst.Name)
 		}
 	}
-	return validateShutdownMessages(inst)
+	return validateShutdownMessages("instance "+inst.Name+": shutdown_messages", inst.ShutdownMessages)
 }
 
 // validateShutdownMessages rejects message blocks DayZ would ignore, so the
 // problem surfaces at config load instead of as messages that never appear
 // in game. See "DayZ: Server Messages" for the supported format.
-func validateShutdownMessages(inst Instance) error {
-	for i, m := range inst.ShutdownMessages {
-		where := fmt.Sprintf("instance %s: shutdown_messages[%d]", inst.Name, i)
+func validateShutdownMessages(label string, messages []ShutdownMessage) error {
+	for i, m := range messages {
+		where := fmt.Sprintf("%s[%d]", label, i)
 		if strings.TrimSpace(m.Text) == "" {
 			return fmt.Errorf("%s: text is required", where)
 		}
 		if utf8.RuneCountInString(m.Text) > 160 {
 			return fmt.Errorf("%s: text is longer than DayZ's 160 character limit", where)
 		}
-		if m.Deadline < 0 || m.Repeat < 0 {
-			return fmt.Errorf("%s: deadline and repeat are minutes and must not be negative", where)
+		if m.Deadline < 0 || m.Repeat < 0 || m.Delay < 0 {
+			return fmt.Errorf("%s: deadline, repeat and delay are minutes and must not be negative", where)
 		}
 		if m.Shutdown && m.Deadline == 0 {
 			return fmt.Errorf("%s: shutdown requires deadline > 0 (DayZ ignores it for non-countdown messages)", where)
