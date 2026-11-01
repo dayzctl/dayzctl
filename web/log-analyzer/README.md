@@ -134,6 +134,11 @@ The world size follows the selected map; typing a number overrides it, and
 without map metadata the size is inferred from the ADM positions, rounded up to
 whole kilometres.
 
+The canvas is sized to the window — as wide as its card, but never taller than
+the space left once the toolbar, legend and hint are accounted for — so opening
+the tab brings the whole map into view instead of a long page. On short windows
+the card tightens (hidden hint, smaller paddings) to keep the map on screen.
+
 The map zooms and pans: the wheel zooms about the pointer, dragging moves the
 view, double-click (or **Fit**) returns to the whole map. Zoom stops at 1× — the
 map can never be zoomed out past its own size — and panning is clamped to the

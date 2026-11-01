@@ -452,6 +452,21 @@ function setTab(tab) {
     panel.classList.toggle('active', panel.dataset.panel === tab);
   }
   renderActivePanel();
+  if (tab === 'map') revealMapCard();
+}
+
+// The map is sized to the window, so bring the whole card into view instead of
+// leaving half of it below the fold.
+function revealMapCard() {
+  const card = dom.panels.querySelector('.panel.active .card');
+  if (!card) return;
+  const rect = card.getBoundingClientRect();
+  if (rect.top < 0 || rect.bottom > window.innerHeight - 4) {
+    // Instant, not smooth: the card is sized to the viewport, so it must be in
+    // place before the map is drawn, and smooth scrolling is paused in
+    // background tabs.
+    card.scrollIntoView({ block: 'start' });
+  }
 }
 
 function panelFor(tab) {

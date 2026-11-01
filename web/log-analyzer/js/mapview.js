@@ -37,18 +37,19 @@ export const MAX_MAP_ZOOM = 64;
  *
  * @returns {{zoom:number, k:number, cx:number, cy:number}} k = CSS px per metre
  */
-export function clampView(world, zoom, size, cx, cy) {
+export function clampView(world, zoom, width, height, cx, cy) {
   const w = world > 0 ? world : 15360;
   const z = Math.min(MAX_MAP_ZOOM, Math.max(1, Number(zoom) || 1));
-  const k = (size / w) * z;
-  const half = size / (2 * k);
-  const fits = 2 * half >= w;
-  const axis = (c) => {
-    if (fits) return w / 2;
+  // Zoom 1 has to show the whole map, so the scale follows the shorter side of
+  // the canvas and the rest is letterboxed.
+  const k = (Math.min(width, height) / w) * z;
+  const axis = (c, size) => {
+    const half = size / (2 * k);
+    if (2 * half >= w) return w / 2;
     const v = Number.isFinite(c) ? c : w / 2;
     return Math.min(Math.max(v, half), w - half);
   };
-  return { zoom: z, k, cx: axis(cx), cy: axis(cy) };
+  return { zoom: z, k, cx: axis(cx, width), cy: axis(cy, height) };
 }
 
 /* ── Tile imagery ──────────────────────────────────────────
@@ -177,6 +178,25 @@ function positionAt(player, at) {
   return best ? { x: best.x, y: best.y } : null;
 }
 
+
+// Breathing room left below the canvas so the card edge is visible.
+const MAP_FOOTER_ALLOWANCE = 24;
+
+/**
+ * How tall the map may be before the page starts scrolling.
+ *
+ * The card's non-canvas part (toolbar above, legend and hint below) is taken as
+ * the difference between the card and the canvas heights, so it stays correct
+ * whatever the card contains. It is independent of the canvas height, which is
+ * what makes a single measurement enough.
+ */
+function availableHeight(canvas) {
+  const card = canvas.closest('.card') ?? canvas.parentElement;
+  if (!card) return window.innerHeight;
+  const overhead = Math.max(0, card.getBoundingClientRect().height - canvas.getBoundingClientRect().height);
+  return Math.round(window.innerHeight - overhead - MAP_FOOTER_ALLOWANCE);
+}
+
 /**
  * @param {HTMLCanvasElement} canvas
  * @param {object} report analysis report
@@ -187,8 +207,11 @@ export function renderMap(canvas, report, state) {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
-  const cssWidth = Math.max(280, Math.round(canvas.parentElement?.clientWidth ?? 640));
-  const cssHeight = cssWidth;
+  // Fit the map to the space it can actually use: as wide as its card, but never
+  // taller than the window allows once the controls above it are accounted for,
+  // so neither the map nor the page has to scroll.
+  const cssWidth = Math.max(200, Math.round(canvas.parentElement?.clientWidth ?? 640));
+  const cssHeight = Math.max(200, Math.min(cssWidth, availableHeight(canvas)));
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
   canvas.width = Math.round(cssWidth * dpr);
@@ -201,7 +224,7 @@ export function renderMap(canvas, report, state) {
 
   const world = state.worldSize || 15360;
   // Zoom/pan: zoom 1 fits the whole map, so it cannot be zoomed out further.
-  const vp = clampView(world, state.zoom, cssWidth, state.centerX, state.centerY);
+  const vp = clampView(world, state.zoom, cssWidth, cssHeight, state.centerX, state.centerY);
   const k = vp.k;
   const x0 = vp.cx - cssWidth / (2 * k); // west edge, world metres
   const y0 = vp.cy + cssHeight / (2 * k); // north edge

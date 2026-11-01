@@ -698,3 +698,14 @@ details.samples pre {
   .kpi .value { font-size: 19px; }
   .instances { grid-template-columns: 1fr; }
 }
+
+/* Short windows: tighten the map card so the canvas still fits on screen. */
+@media (max-height: 820px) {
+  .card { padding: 12px 14px; }
+  .card > h3 { margin-bottom: 8px; }
+  .map-controls { margin-bottom: 8px; gap: 8px; }
+  .map-window { margin-bottom: 8px; gap: 8px; }
+  .filters { margin-bottom: 8px; }
+  .legend { font-size: 11px; margin-top: 6px; gap: 10px; }
+  .map-hint { display: none; }
+}

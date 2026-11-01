@@ -1366,11 +1366,12 @@ export function renderMapPanel(panel, report, state, relayout) {
     // World point currently under the anchor stays put while scaling.
     const worldX = vp.cx + (ax - vp.width / 2) / vp.k;
     const worldY = vp.cy - (ay - vp.height / 2) / vp.k;
-    const kNext = (vp.width / vp.world) * zoom;
+    const kNext = (Math.min(vp.width, vp.height) / vp.world) * zoom;
     const clamped = clampView(
       vp.world,
       zoom,
       vp.width,
+      vp.height,
       worldX - (ax - vp.width / 2) / kNext,
       worldY + (ay - vp.height / 2) / kNext,
     );
@@ -1407,6 +1408,7 @@ export function renderMapPanel(panel, report, state, relayout) {
       vp.world,
       vp.zoom,
       vp.width,
+      vp.height,
       drag.cx - (event.clientX - drag.x) / vp.k,
       drag.cy + (event.clientY - drag.y) / vp.k,
     );
@@ -1779,7 +1781,7 @@ export function renderMapPanel(panel, report, state, relayout) {
         el('span', {}, el('i', { style: 'background:#5ac8dc' }), 'Build action'),
         el('span', {}, el('i', { style: 'background:var(--warning)' }), 'Impossible movement'),
       ),
-      el('p', { class: 'small faint', text: mapHint(mapMeta, mapState, state) }),
+      el('p', { class: 'small faint map-hint', text: mapHint(mapMeta, mapState, state) }),
     ),
   );
 

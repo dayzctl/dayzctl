@@ -11,8 +11,7 @@ func testFS() fstest.MapFS {
 	return fstest.MapFS{
 		"nasdara/meta.json": &fstest.MapFile{Data: []byte(`{
 			"id":"nasdara","name":"Nasdara","size":16384,"format":"webp",
-			"tileSize":256,"minZoom":3,"maxZoom":4,"source":"dayz.xam.nu",
-			"version":"1.30-11","attribution":"Map imagery © dayz.xam.nu",
+			"tileSize":256,"minZoom":3,"maxZoom":4,
 			"names":[{"name":"Dashtabad","x":10655.3,"y":10792.1,"kind":"city"}]
 		}`)},
 		"nasdara/3/3/3.webp":   &fstest.MapFile{Data: []byte("tile-3-3-3")},

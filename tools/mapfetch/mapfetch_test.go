@@ -1,6 +1,9 @@
 package main
 
-import "testing"
+import (
+	"encoding/json"
+	"testing"
+)
 
 const registry = `JSON.parse('{"chernarusplus":{"v":"1.30","i":0},"nasdara":{"v":"1.30","i":11},` +
 	`"chiemsee":{"v":"4.0","i":11},"banov":{"v":"Jun.15","i":0}}')`
@@ -100,4 +103,44 @@ func itoa(n int) string {
 		n /= 10
 	}
 	return string(b)
+}
+
+// TestMetaJSONKeys guards the shape of the generated meta.json: the provenance
+// fields (source, version, attribution, generatedAt) were dropped on purpose, so
+// map.fetch must not start writing them again.
+func TestMetaJSONKeys(t *testing.T) {
+	m := &metaFile{
+		ID:       "nasdara",
+		Name:     "Nasdara",
+		Size:     16384,
+		Format:   "webp",
+		TileSize: 256,
+		MinZoom:  3,
+		MaxZoom:  4,
+		Names:    []place{{Name: "Dashtabad", X: 1, Y: 2, Kind: "city"}},
+	}
+
+	data, err := json.Marshal(m)
+	if err != nil {
+		t.Fatalf("marshal: %v", err)
+	}
+	var got map[string]any
+	if err := json.Unmarshal(data, &got); err != nil {
+		t.Fatalf("unmarshal: %v", err)
+	}
+
+	want := []string{"id", "name", "size", "format", "tileSize", "minZoom", "maxZoom", "names"}
+	for _, key := range want {
+		if _, ok := got[key]; !ok {
+			t.Errorf("meta.json is missing %q", key)
+		}
+	}
+	for _, key := range []string{"source", "version", "attribution", "generatedAt"} {
+		if _, ok := got[key]; ok {
+			t.Errorf("meta.json must not contain %q", key)
+		}
+	}
+	if len(got) != len(want) {
+		t.Errorf("meta.json has %d keys, want %d: %v", len(got), len(want), got)
+	}
 }
