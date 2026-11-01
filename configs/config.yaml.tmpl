@@ -35,18 +35,21 @@ instances:
     # with: go run ./tools/mapfetch -map chernarusplus -zooms 3,4
     # map: nasdara
     # Optional: scheduled restart warnings + graceful shutdown, written to
-    # this instance's mission db/messages.xml. 'deadline' is expressed in
-    # minutes after server start. The generator converts minutes to seconds
-    # when writing db/messages.xml that DayZ reads. The message with
-    # 'shutdown: true' tells the DayZ server to save and exit cleanly once
-    # its deadline is reached (see 'dayzctl help apply').
+    # this instance's mission db/messages.xml (DayZ "Server Messages").
+    # ALL values are in MINUTES, relative to server start (DayZ schedules
+    # countdowns against server uptime, not wall-clock time).
+    #
+    # A message with 'deadline' is a countdown: DayZ broadcasts it by itself
+    # at 90, 60, 45, 30, 20, 15, 10, 5, 2 and 1 minutes before the deadline,
+    # so use the '#tmin' placeholder (minutes remaining) instead of a
+    # hardcoded number. 'shutdown: true' makes the server save and exit when
+    # the countdown reaches zero; it is ignored without 'deadline'.
+    # Other placeholders: #name (server name), #port (server port).
+    # DayZ caps the text at 160 characters.
     shutdown_messages:
-      # 6h - 5 minutes => 355 minutes
-      - deadline: 355  # 6h - 5 min
-        text: "Server restart in 5 minutes"
-      # 6h => 360 minutes
-      - deadline: 360  # 6h
-        text: "Server is restarting now!"
+      # Restart every 6 hours (360 minutes) with a countdown + graceful exit.
+      - deadline: 360
+        text: "#name will restart in #tmin minutes."
         shutdown: true
 
 # Backup settings

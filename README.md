@@ -243,8 +243,11 @@ dayzctl restart <instance> --timeout 120  # wait up to 120s, then restart
 ```
 
 - Scheduled warnings and self-shutdown: configure `shutdown_messages` per instance in the config to write
-	the mission `db/messages.xml` (broadcasts countdown warnings and can trigger the server's built-in
-	graceful shutdown when a message has `shutdown: true`). These files are written to:
+	the mission `db/messages.xml` (DayZ "Server Messages"). A message with `deadline` (minutes after server
+	start) is a countdown the server announces by itself at 90, 60, 45, 30, 20, 15, 10, 5, 2 and 1 minutes
+	before the deadline - use the `#tmin` placeholder for the remaining minutes. Adding `shutdown: true`
+	triggers the server's built-in graceful shutdown when the countdown reaches zero. Instances without
+	`shutdown_messages` keep their existing file. These files are written to:
 
 ```
 <installDir>/mpmissions/<template>/db/messages.xml

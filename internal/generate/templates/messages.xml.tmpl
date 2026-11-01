@@ -1,32 +1,23 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!-- DayZ server messages (see DayZ:Server_Messages).
+     Every time value is in minutes.
+       delay     - minutes to wait before sending; only used with <onConnect>1</onConnect>
+       repeat    - minutes between broadcasts; 0 disables the Repeat flag
+       deadline  - minutes after server start at which the countdown ends;
+                   0 disables the Countdown flag
+       onConnect - 0/1, send once to every player that connects
+       shutdown  - 0/1, save and exit when the countdown hits zero; ignored
+                   by DayZ unless the message is a countdown (deadline > 0)
+       text      - max 160 characters; #name, #port and #tmin placeholders -->
 <messages>
 {{- range .Messages }}
     <message>
-        <id>{{.ID}}</id>
-        <deadline>{{.Deadline}}</deadline>
-        {{- if gt .Repeat 0 }}
+        <delay>{{.Delay}}</delay>
         <repeat>{{.Repeat}}</repeat>
-        {{- end }}
-        {{- if gt .PlayerCount 0 }}
-        <playerCount>{{.PlayerCount}}</playerCount>
-        {{- end }}
+        <deadline>{{.Deadline}}</deadline>
+        <onConnect>{{.OnConnect}}</onConnect>
         <shutdown>{{.Shutdown}}</shutdown>
         <text>{{.Text}}</text>
     </message>
 {{- end }}
-    <message>
-        <repeat>15</repeat>
-        <text>You're playing on my server (#name). Thank you .)</text>
-    </message>
-    <message>
-        <delay>10</delay>
-        <repeat>50</repeat>
-        <onconnect>1</onconnect>
-        <text>Check our web page at www.dayz.com</text>
-    </message>
-    <message>
-        <delay>2</delay>
-        <onconnect>1</onconnect>
-        <text>Welcome to my server #name</text>
-    </message>
 </messages>

@@ -149,29 +149,29 @@ type ModRef struct {
 	Name string `yaml:"name"`
 }
 
-// ShutdownMessage represents a single scheduled entry written to the
-// mission's db/messages.xml. DayZ uses this file to broadcast countdown
-// warnings to players before a scheduled restart and, when Shutdown is
-// true, to perform the actual graceful shutdown (world/player state save,
-// then exit) once Deadline is reached - this is the server's own "gentle"
-// shutdown mechanism, distinct from killing the process externally.
+// ShutdownMessage represents a single <message> element written to the
+// mission's db/messages.xml (see "DayZ: Server Messages"). Every time value
+// is in minutes, which is DayZ's own unit. A message with Deadline > 0 is a
+// countdown: DayZ broadcasts it automatically at 90, 60, 45, 30, 20, 15, 10,
+// 5, 2 and 1 minutes before the deadline, and, when Shutdown is set, saves
+// the world and exits once the deadline is reached. That is the server's own
+// "gentle" shutdown mechanism, distinct from killing the process externally.
 type ShutdownMessage struct {
-	// Deadline is the number of minutes after server start at which this
-	// message fires (DayZ schedules these relative to server uptime, not
-	// wall-clock time). The generator writes minutes directly into the
-	// produced db/messages.xml so the values remain in minutes.
+	// Deadline is the number of minutes after server start at which the
+	// countdown reaches zero (DayZ schedules these relative to server
+	// uptime, not wall-clock time). 0 means the message is not a countdown.
 	Deadline int `yaml:"deadline"`
-	// Text is the message broadcast to all connected players.
+	// Text is the message broadcast to players. DayZ allows up to 160
+	// characters and supports the #name, #port and #tmin placeholders;
+	// #tmin only expands inside a countdown, so prefer it over a hardcoded
+	// number when Deadline > 0.
 	Text string `yaml:"text"`
-	// Shutdown, when true, tells the server to gracefully save and exit
-	// once this message's deadline is reached.
+	// Shutdown, when true, tells the server to save and exit once the
+	// countdown reaches zero. Requires Deadline > 0.
 	Shutdown bool `yaml:"shutdown"`
-	// Repeat is the interval in seconds to repeat this message; 0 means it
-	// fires only once.
+	// Repeat is the interval in minutes between broadcasts of this message;
+	// 0 means it is sent only at the countdown moments (or once).
 	Repeat int `yaml:"repeat,omitempty"`
-	// PlayerCount is the minimum number of online players required for the
-	// message to be shown; 0 means always show it.
-	PlayerCount int `yaml:"player_count,omitempty"`
 }
 
 // RCON represents RCON configuration
