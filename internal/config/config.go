@@ -158,36 +158,29 @@ type ModRef struct {
 	Name string `yaml:"name"`
 }
 
-// ShutdownMessage represents a single <message> element written to the
-// mission's db/messages.xml (see "DayZ: Server Messages"). Every time value
-// is in minutes, which is DayZ's own unit. The element covers the three kinds
-// of DayZ server message, which can be combined:
-//   - welcome   : OnConnect set, optional Delay   (sent once per connecting player)
-//   - repeating : Repeat > 0                      (broadcast every Repeat minutes)
-//   - countdown : Deadline > 0, optional Shutdown (announced at 90/60/45/30/20/15/10/5/2/1
-//     minutes before the deadline, then the server saves and exits)
+// ShutdownMessage represents a single scheduled entry written to the
+// mission's db/messages.xml. DayZ uses this file to broadcast countdown
+// warnings to players before a scheduled restart and, when Shutdown is
+// true, to perform the actual graceful shutdown (world/player state save,
+// then exit) once Deadline is reached - this is the server's own "gentle"
+// shutdown mechanism, distinct from killing the process externally.
 type ShutdownMessage struct {
-	// Deadline is the number of minutes after server start at which the
-	// countdown reaches zero (DayZ schedules these relative to server
-	// uptime, not wall-clock time). 0 means the message is not a countdown.
+	// Deadline is the number of minutes after server start at which this
+	// message fires (DayZ schedules these relative to server uptime, not
+	// wall-clock time). The generator writes minutes directly into the
+	// produced db/messages.xml so the values remain in minutes.
 	Deadline int `yaml:"deadline"`
-	// Text is the message broadcast to players. DayZ allows up to 160
-	// characters and supports the #name, #port and #tmin placeholders;
-	// #tmin only expands inside a countdown, so prefer it over a hardcoded
-	// number when Deadline > 0.
+	// Text is the message broadcast to all connected players.
 	Text string `yaml:"text"`
-	// Shutdown, when true, tells the server to save and exit once the
-	// countdown reaches zero. Requires Deadline > 0.
+	// Shutdown, when true, tells the server to gracefully save and exit
+	// once this message's deadline is reached.
 	Shutdown bool `yaml:"shutdown"`
-	// Repeat is the interval in minutes between broadcasts of this message;
-	// 0 means it is not repeated. Use it for periodic reminders.
+	// Repeat is the interval in seconds to repeat this message; 0 means it
+	// fires only once.
 	Repeat int `yaml:"repeat,omitempty"`
-	// OnConnect, when true, sends the message once to every player that
-	// connects (a welcome message).
-	OnConnect bool `yaml:"on_connect,omitempty"`
-	// Delay is the number of minutes to wait before sending the message; it
-	// only applies together with OnConnect (0 = immediately after connect).
-	Delay int `yaml:"delay,omitempty"`
+	// PlayerCount is the minimum number of online players required for the
+	// message to be shown; 0 means always show it.
+	PlayerCount int `yaml:"player_count,omitempty"`
 }
 
 // RCON represents RCON configuration
@@ -459,7 +452,7 @@ func Load(path string) (*ServerConfig, error) {
 
 	var cfg ServerConfig
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
-		return nil, fmt.Errorf("failed to parse config YAML %s: %w%s", path, err, yamlContext(data, err))
+		return nil, fmt.Errorf("failed to parse config YAML: %w%s", err, yamlContext(data, err))
 	}
 
 	cfg.SetDefaults()
@@ -512,11 +505,6 @@ func yamlContext(data []byte, err error) string {
 	}
 	if tab := firstTabIndentLine(lines); tab > 0 {
 		fmt.Fprintf(&b, "  hint: line %d is indented with a tab; YAML indentation must be spaces\n", tab)
-	}
-	// yaml.v3 blames the key that opened the block, so say what usually went
-	// wrong instead of leaving the operator to compare columns by eye.
-	if strings.Contains(err.Error(), "did not find expected key") {
-		fmt.Fprintf(&b, "  hint: a key is mis-indented; keys inside one mapping must start in the same column\n")
 	}
 	return strings.TrimRight(b.String(), "\n")
 }
