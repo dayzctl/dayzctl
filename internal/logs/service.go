@@ -107,7 +107,7 @@ func sniffType(path string) FileType {
 	if err != nil {
 		return FileUnknown
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	sc := bufio.NewScanner(f)
 	sc.Buffer(make([]byte, 64*1024), maxLineLen)
@@ -264,7 +264,7 @@ func (s *Service) analyze(instance string, files []resolvedFile) (*Report, error
 		if detected == FileUnknown {
 			info.Type = FileUnknown
 			info.Error = "unrecognised file — skipped"
-			f.Close()
+			_ = f.Close()
 			report.Files = append(report.Files, info)
 			continue
 		}

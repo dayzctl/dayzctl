@@ -365,7 +365,9 @@ func (s *Server) proxyMapImage(w http.ResponseWriter, r *http.Request, src strin
 		writeError(w, http.StatusBadGateway, "cannot fetch map_image: "+err.Error())
 		return
 	}
-	defer resp.Body.Close()
+	// The image is streamed to the client; a close error has no way to be
+	// reported once the response has started.
+	defer func() { _ = resp.Body.Close() }()
 
 	if resp.StatusCode != http.StatusOK {
 		writeError(w, http.StatusBadGateway, fmt.Sprintf("map_image returned HTTP %d", resp.StatusCode))
@@ -513,8 +515,12 @@ func withGzip(next http.Handler) http.Handler {
 		w.Header().Set("Content-Encoding", "gzip")
 		w.Header().Add("Vary", "Accept-Encoding")
 		gz := gzip.NewWriter(w)
-		defer gz.Close()
 		next.ServeHTTP(&gzipResponseWriter{ResponseWriter: w, Writer: gz}, r)
+		// Closing writes the gzip footer; by then the body is already on the
+		// wire, so the error can only be logged.
+		if err := gz.Close(); err != nil {
+			logger.Warn("gzip writer close failed", "error", err)
+		}
 	})
 }
 

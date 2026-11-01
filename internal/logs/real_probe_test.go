@@ -131,7 +131,7 @@ func sampleUnmatched(path string) []string {
 	if err != nil {
 		return nil
 	}
-	defer f.Close()
+	defer func() { _ = f.Close() }()
 
 	parser := &AdmParser{}
 	seen := map[string]bool{}

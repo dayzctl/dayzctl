@@ -16,12 +16,18 @@ type arMember struct {
 
 // writeAr writes a classic (System V/GNU) ar archive, which is the container a
 // .deb uses.
-func writeAr(dest string, members []arMember) error {
+func writeAr(dest string, members []arMember) (err error) {
 	out, err := os.Create(dest)
 	if err != nil {
 		return err
 	}
-	defer out.Close()
+	// A file's write errors can surface only on close, so keep the first error
+	// and report it from the deferred close.
+	defer func() {
+		if cerr := out.Close(); cerr != nil && err == nil {
+			err = cerr
+		}
+	}()
 
 	if _, err := out.WriteString("!<arch>\n"); err != nil {
 		return err
@@ -38,7 +44,7 @@ func writeAr(dest string, members []arMember) error {
 			}
 			info, err := src.Stat()
 			if err != nil {
-				src.Close()
+				_ = src.Close()
 				return err
 			}
 			size = info.Size()
@@ -49,13 +55,13 @@ func writeAr(dest string, members []arMember) error {
 			m.name, mtime, 0, 0, "100644", size)
 		if len(hdr) != 60 {
 			if src != nil {
-				src.Close()
+				_ = src.Close()
 			}
 			return fmt.Errorf("ar header for %q is %d bytes, want 60", m.name, len(hdr))
 		}
 		if _, err := out.WriteString(hdr); err != nil {
 			if src != nil {
-				src.Close()
+				_ = src.Close()
 			}
 			return err
 		}
@@ -63,7 +69,7 @@ func writeAr(dest string, members []arMember) error {
 		var written int64
 		if src != nil {
 			written, err = io.Copy(out, src)
-			src.Close()
+			_ = src.Close()
 			if err != nil {
 				return err
 			}
@@ -85,5 +91,5 @@ func writeAr(dest string, members []arMember) error {
 			}
 		}
 	}
-	return out.Close()
+	return nil
 }

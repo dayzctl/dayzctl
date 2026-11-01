@@ -137,7 +137,7 @@ Environment variables:
 ## Web UI
 
 `dayzctl web` serves an ADM/RPT log analyzer from the server itself and exposes a
-small JSON API. Parsing happens in Go (`internal/logs`), so the browser only
+a small JSON API. Parsing happens in Go (`internal/logs`), so the browser only
 renders the report and no log ever leaves the host.
 
 ```bash
@@ -145,10 +145,11 @@ sudo dayzctl web                        # http://127.0.0.1:8081
 sudo dayzctl web --addr 0.0.0.0 --port 8081
 ```
 
-To run it as a service, set `web.enabled: true` (and optionally
-`web.address`/`web.port`); `dayzctl apply` writes and enables
-`dayz-web.service`. See `web/log-analyzer/README.md` for the API, the analysis
-tabs and how to extend the RPT rule set.
+The generated config enables it (`web.enabled: true`, loopback only), and
+`dayzctl apply` writes and enables `dayz-web.service` from it. Set
+`web.enabled: false` to have apply remove and disable the unit again; apply says
+which of the two it did. See `web/log-analyzer/README.md` for the API, the
+analysis tabs and how to extend the RPT rule set.
 
 ### Login switch
 

@@ -239,6 +239,9 @@ func writeIfChanged(path string, content []byte) (bool, error) {
 // defined once and every command refers to it.
 const WebUnitName = "dayz-web.service"
 
+// WebUnitPath is the absolute path of the generated web UI unit.
+func WebUnitPath() string { return filepath.Join(systemdDir, WebUnitName) }
+
 // WebData is the template input for dayz-web.service.
 //
 // The listen address and port are deliberately not part of the unit: the web

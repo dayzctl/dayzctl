@@ -105,9 +105,9 @@ func processPlayersForInstance(inst *config.Instance, clientFactory func(int, st
 		return nil
 	}
 	tw := tabwriter.NewWriter(os.Stdout, 0, 0, 2, ' ', 0)
-	fmt.Fprintln(tw, "ID\tIP\tPORT\tPING\tGUID\tNAME")
+	_, _ = fmt.Fprintln(tw, "ID\tIP\tPORT\tPING\tGUID\tNAME")
 	for _, p := range players {
-		fmt.Fprintf(tw, "%d\t%s\t%s\t%s\t%s\t%s\n", p.ID, p.IP, p.Port, p.Ping, p.GUID, p.Name)
+		_, _ = fmt.Fprintf(tw, "%d\t%s\t%s\t%s\t%s\t%s\n", p.ID, p.IP, p.Port, p.Ping, p.GUID, p.Name)
 	}
 	_ = tw.Flush()
 	return nil

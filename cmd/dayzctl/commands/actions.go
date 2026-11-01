@@ -337,9 +337,23 @@ func reconcileSystemdUnits(sysd *systemd.Systemd, cfg *config.ServerConfig) erro
 
 	if cfg.Web.Enabled {
 		enableWebService(sysd)
+	} else {
+		// A missing unit is the usual surprise after an install: say why nothing
+		// was written instead of letting apply look like a no-op.
+		fmt.Printf("Web UI service not installed: web.enabled is false in %s\n", appliedConfigPath())
+		fmt.Println("Set web.enabled: true there and run 'dayzctl apply' again to get " + systemd.WebUnitName)
 	}
 
 	return nil
+}
+
+// appliedConfigPath is the config file apply read, for messages that tell the
+// operator which file to edit.
+func appliedConfigPath() string {
+	if shared.ConfigPath != "" {
+		return shared.ConfigPath
+	}
+	return config.DefaultConfigPath()
 }
 
 // enableInstances enables systemd services for enabled instances.
@@ -364,10 +378,11 @@ func enableUpdateTimer(sysd *systemd.Systemd) {
 
 // enableWebService enables the web UI unit generated for web.enabled configs.
 func enableWebService(sysd *systemd.Systemd) {
-	fmt.Println("Enabling web UI service...")
 	if err := sysd.Enable(systemd.WebUnitName); err != nil {
 		fmt.Printf("Failed to enable web UI service: %v\n", err)
+		return
 	}
+	fmt.Printf("Enabling web UI service: %s\n", systemd.WebUnitPath())
 }
 
 // disableWebService stops the web UI unit from starting again. It stays quiet
