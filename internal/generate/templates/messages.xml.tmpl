@@ -1,22 +1,22 @@
 <?xml version="1.0" encoding="UTF-8" standalone="yes"?>
-<!-- DayZ server messages (see DayZ:Server_Messages).
-     Every time value is in minutes.
-       delay     - minutes to wait before sending; only used with <onConnect>1</onConnect>
-       repeat    - minutes between broadcasts; 0 disables the Repeat flag
-       deadline  - minutes after server start at which the countdown ends;
-                   0 disables the Countdown flag
-       onConnect - 0/1, send once to every player that connects
-       shutdown  - 0/1, save and exit when the countdown hits zero; ignored
-                   by DayZ unless the message is a countdown (deadline > 0)
-       text      - max 160 characters; #name, #port and #tmin placeholders -->
 <messages>
 {{- range .Messages }}
     <message>
+        {{- if gt .Delay 0 }}
         <delay>{{.Delay}}</delay>
+        {{- end }}
+        {{- if gt .Repeat 0 }}
         <repeat>{{.Repeat}}</repeat>
+        {{- end }}
+        {{- if gt .Deadline 0 }}
         <deadline>{{.Deadline}}</deadline>
-        <onConnect>{{.OnConnect}}</onConnect>
-        <shutdown>{{.Shutdown}}</shutdown>
+        {{- end }}
+        {{- if .OnConnect }}
+        <onconnect>1</onconnect>
+        {{- end }}
+        {{- if .Shutdown }}
+        <shutdown>1</shutdown>
+        {{- end }}
         <text>{{.Text}}</text>
     </message>
 {{- end }}

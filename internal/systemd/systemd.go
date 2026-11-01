@@ -30,7 +30,10 @@ var pruneTimerTemplate string
 //go:embed templates/instance.service.tmpl
 var instanceServiceTemplate string
 
-//go:embed templates/dayz-web.service.tmpl
+// The template file is named after what it renders (a web unit); the unit
+// itself is installed as WebUnitName (dayz-web.service).
+//
+//go:embed templates/web.service.tmpl
 var webServiceTemplate string
 
 type Systemd struct{}
@@ -242,7 +245,8 @@ const WebUnitName = "dayz-web.service"
 // WebUnitPath is the absolute path of the generated web UI unit.
 func WebUnitPath() string { return filepath.Join(systemdDir, WebUnitName) }
 
-// WebData is the template input for dayz-web.service.
+// WebData is the template input for web.service.tmpl (installed as
+// dayz-web.service).
 //
 // The listen address and port are deliberately not part of the unit: the web
 // command reads web.address / web.port from the config file, so an operator can
@@ -293,15 +297,16 @@ func (s *Systemd) reconcileWebUnit(cfg *config.ServerConfig) (bool, error) {
 	return changed, nil
 }
 
-// RenderWebUnit renders the dayz-web.service template from the embedded copy.
+// RenderWebUnit renders the web.service.tmpl template into the contents of
+// dayz-web.service from the embedded copy.
 func RenderWebUnit(data WebData) ([]byte, error) {
 	tmpl, err := template.New("web").Parse(webServiceTemplate)
 	if err != nil {
-		return nil, fmt.Errorf("parse dayz-web.service template: %w", err)
+		return nil, fmt.Errorf("parse web.service.tmpl template: %w", err)
 	}
 	var buf bytes.Buffer
 	if err := tmpl.Execute(&buf, data); err != nil {
-		return nil, fmt.Errorf("render dayz-web.service: %w", err)
+		return nil, fmt.Errorf("render %s: %w", WebUnitName, err)
 	}
 	return buf.Bytes(), nil
 }

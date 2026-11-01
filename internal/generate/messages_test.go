@@ -11,7 +11,7 @@ import (
 )
 
 // TestGenerateMessagesWritesExpectedXML checks the generated file matches the
-// documented DayZ format (delay, repeat, deadline, onConnect, shutdown, text).
+// documented DayZ format (delay, repeat, deadline, onconnect, shutdown, text).
 func TestGenerateMessagesWritesExpectedXML(t *testing.T) {
 	tmp := t.TempDir()
 	cfg := &config.ServerConfig{
@@ -37,11 +37,7 @@ func TestGenerateMessagesWritesExpectedXML(t *testing.T) {
 	content := string(data)
 	for _, want := range []string{
 		"<messages>",
-		"<delay>0</delay>",
-		"<repeat>0</repeat>",
 		"<deadline>30</deadline>",
-		"<onConnect>0</onConnect>",
-		"<shutdown>0</shutdown>",
 		"Restart in #tmin minutes",
 		"<deadline>59</deadline>",
 		"<shutdown>1</shutdown>",
@@ -52,11 +48,13 @@ func TestGenerateMessagesWritesExpectedXML(t *testing.T) {
 		}
 	}
 
-	// Elements DayZ does not understand must not be written, or the server
-	// ignores the messages.
-	for _, unwanted := range []string{"<id>", "<playerCount>", "<onconnect>"} {
+	// Mirror Bohemia's own sample (DayZ-Central-Economy): only the elements
+	// that apply are written, and all of them are lowercase. DayZ does not
+	// know <onConnect>, <id> or <playerCount>, and zero-valued elements are
+	// not part of the shipped format.
+	for _, unwanted := range []string{"<id>", "<playerCount>", "<onConnect>", "<delay>0</delay>", "<repeat>0</repeat>", "<shutdown>0</shutdown>"} {
 		if strings.Contains(content, unwanted) {
-			t.Errorf("messages.xml contains unsupported element %q; got:\n%s", unwanted, content)
+			t.Errorf("messages.xml contains %q, which is not part of the DayZ format; got:\n%s", unwanted, content)
 		}
 	}
 
@@ -243,7 +241,7 @@ func TestGenerateMessagesSupportsWelcomeAndRepeating(t *testing.T) {
 			Delay     int    `xml:"delay"`
 			Repeat    int    `xml:"repeat"`
 			Deadline  int    `xml:"deadline"`
-			OnConnect int    `xml:"onConnect"`
+			OnConnect int    `xml:"onconnect"`
 			Shutdown  int    `xml:"shutdown"`
 			Text      string `xml:"text"`
 		} `xml:"message"`
@@ -381,7 +379,7 @@ func TestGenerateMessagesIsWellFormedXML(t *testing.T) {
 		Delay     int    `xml:"delay"`
 		Repeat    int    `xml:"repeat"`
 		Deadline  int    `xml:"deadline"`
-		OnConnect int    `xml:"onConnect"`
+		OnConnect int    `xml:"onconnect"`
 		Shutdown  int    `xml:"shutdown"`
 		Text      string `xml:"text"`
 	}
@@ -401,6 +399,56 @@ func TestGenerateMessagesIsWellFormedXML(t *testing.T) {
 	if got := doc.Messages[1]; got.Deadline != 720 || got.Repeat != 30 || got.Shutdown != 0 || got.Text != "R&D maintenance" {
 		t.Errorf("unexpected second message: %+v", got)
 	}
+}
+
+// TestGenerateMessagesMatchesBohemiaSample renders the four examples from the
+// messages.xml Bohemia ships in DayZ-Central-Economy. DayZ only honours the
+// exact element spelling and structure of that file, so this is the reference
+// the generator has to reproduce.
+func TestGenerateMessagesMatchesBohemiaSample(t *testing.T) {
+	tmp := t.TempDir()
+	cfg := &config.ServerConfig{
+		Paths: config.Paths{Base: tmp},
+		ShutdownMessages: []config.ShutdownMessage{
+			{Deadline: 600, Shutdown: true, Text: "#name will shutdown in #tmin minutes."},
+			{Repeat: 15, Text: "You're playing on my server (#name). Thank you .)"},
+			{Delay: 10, Repeat: 50, OnConnect: true, Text: "Check our web page at www.dayz.com"},
+			{Delay: 2, OnConnect: true, Text: "Welcome to my server #name"},
+		},
+	}
+	inst := &config.Instance{Name: "sample", Template: "dayzOffline.enoch"}
+
+	if err := GenerateMessages(cfg, []*config.Instance{inst}); err != nil {
+		t.Fatalf("GenerateMessages error: %v", err)
+	}
+
+	data, err := os.ReadFile(MessagesPath(cfg, inst))
+	if err != nil {
+		t.Fatalf("read messages.xml: %v", err)
+	}
+
+	want := `<messages>` +
+		`<message><deadline>600</deadline><shutdown>1</shutdown><text>#name will shutdown in #tmin minutes.</text></message>` +
+		`<message><repeat>15</repeat><text>You're playing on my server (#name). Thank you .)</text></message>` +
+		`<message><delay>10</delay><repeat>50</repeat><onconnect>1</onconnect><text>Check our web page at www.dayz.com</text></message>` +
+		`<message><delay>2</delay><onconnect>1</onconnect><text>Welcome to my server #name</text></message>` +
+		`</messages>`
+
+	if got := compactXML(string(data)); got != want {
+		t.Fatalf("generated messages.xml does not match the reference format\n got: %s\nwant: %s", got, want)
+	}
+}
+
+// compactXML drops the declaration, comments and inter-tag whitespace so the
+// structure of a document can be compared to a reference.
+func compactXML(document string) string {
+	if idx := strings.Index(document, "<messages>"); idx >= 0 {
+		document = document[idx:]
+	}
+	document = strings.ReplaceAll(document, "\n", "")
+	document = strings.ReplaceAll(document, "\r", "")
+	document = strings.ReplaceAll(document, "    ", "")
+	return document
 }
 
 func TestOutputUsesLFOnly(t *testing.T) {

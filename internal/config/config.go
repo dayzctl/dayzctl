@@ -459,7 +459,7 @@ func Load(path string) (*ServerConfig, error) {
 
 	var cfg ServerConfig
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
-		return nil, fmt.Errorf("failed to parse config YAML: %w%s", err, yamlContext(data, err))
+		return nil, fmt.Errorf("failed to parse config YAML %s: %w%s", path, err, yamlContext(data, err))
 	}
 
 	cfg.SetDefaults()
@@ -512,6 +512,11 @@ func yamlContext(data []byte, err error) string {
 	}
 	if tab := firstTabIndentLine(lines); tab > 0 {
 		fmt.Fprintf(&b, "  hint: line %d is indented with a tab; YAML indentation must be spaces\n", tab)
+	}
+	// yaml.v3 blames the key that opened the block, so say what usually went
+	// wrong instead of leaving the operator to compare columns by eye.
+	if strings.Contains(err.Error(), "did not find expected key") {
+		fmt.Fprintf(&b, "  hint: a key is mis-indented; keys inside one mapping must start in the same column\n")
 	}
 	return strings.TrimRight(b.String(), "\n")
 }

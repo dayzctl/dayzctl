@@ -27,15 +27,16 @@ const maxMessageLength = 160
 const countdownOffsets = "90/60/45/30/20/15/10/5/2/1"
 
 // messageEntry is a single <message> element of a mission's db/messages.xml.
-// Every time value is written in minutes, which is what DayZ expects; the
-// zero value switches the corresponding flag off, matching the empty element
-// DayZ itself writes (e.g. <repeat>0</repeat> means "no Repeat flag").
+// DayZ only understands the lowercase elements delay, repeat, deadline,
+// onconnect, shutdown and text, and unused ones are omitted entirely - this
+// mirrors the sample Bohemia ships in DayZ-Central-Economy. Every time value
+// is in minutes, which is what DayZ expects.
 type messageEntry struct {
 	Delay     int // minutes, only meaningful with OnConnect
-	Repeat    int // minutes between broadcasts, 0 = no Repeat flag
-	Deadline  int // minutes after server start, 0 = no Countdown flag
-	OnConnect int // 0/1
-	Shutdown  int // 0/1, requires Deadline > 0
+	Repeat    int // minutes between broadcasts, 0 = no <repeat>
+	Deadline  int // minutes after server start, 0 = no countdown
+	OnConnect bool
+	Shutdown  bool // requires Deadline > 0
 	Text      string
 }
 
@@ -149,6 +150,8 @@ func writeMessages(installDir string, mission resolvedMission) error {
 		return fmt.Errorf("failed to create mission db directory: %w", err)
 	}
 
+	warnIfMissionMissing(installDir, mission.Template)
+
 	path := filepath.Join(dbDir, "messages.xml")
 
 	// Parse and execute embedded template.
@@ -181,26 +184,47 @@ func buildMessageEntries(template string, messages []config.ShutdownMessage) ([]
 		if err := validateShutdownMessage(template, i, m); err != nil {
 			return nil, err
 		}
-		shutdown := 0
-		if m.Shutdown {
-			shutdown = 1
-		}
-		onConnect := 0
-		if m.OnConnect {
-			onConnect = 1
-		}
 		entries = append(entries, messageEntry{
 			Delay:     m.Delay,
 			Repeat:    m.Repeat,
 			Deadline:  m.Deadline,
-			OnConnect: onConnect,
-			Shutdown:  shutdown,
+			OnConnect: m.OnConnect,
+			Shutdown:  m.Shutdown,
 			// DayZ parses this file as XML: an unescaped '&' or '<' makes the
 			// whole document invalid and every message disappears.
 			Text: escapeXMLText(m.Text),
 		})
 	}
 	return entries, nil
+}
+
+// warnIfMissionMissing points out the most common reason a perfectly valid
+// messages.xml does nothing: the server is not running that mission, so the
+// file lands in a folder DayZ never opens.
+func warnIfMissionMissing(installDir, template string) {
+	missionsDir := filepath.Join(installDir, "mpmissions")
+	entries, err := os.ReadDir(missionsDir)
+	if err != nil {
+		return // mpmissions may not exist yet; nothing useful to say
+	}
+
+	var available []string
+	missionFound := false
+	for _, entry := range entries {
+		if !entry.IsDir() {
+			continue
+		}
+		available = append(available, entry.Name())
+		if entry.Name() == template {
+			missionFound = true
+		}
+	}
+	if missionFound {
+		return
+	}
+
+	logger.Warn("Mission folder does not exist, DayZ will not read this messages.xml - check the instance 'template'",
+		"mission", template, "expected", filepath.Join(missionsDir, template), "available", available)
 }
 
 // xmlTextEscaper escapes only what is required inside an XML text node. Quotes
