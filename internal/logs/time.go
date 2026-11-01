@@ -174,11 +174,3 @@ func atoi(s string) int {
 	}
 	return n
 }
-
-// group returns capture group i (1-based) or "" when absent.
-func group(groups []string, i int) string {
-	if i-1 < 0 || i-1 >= len(groups) {
-		return ""
-	}
-	return groups[i-1]
-}

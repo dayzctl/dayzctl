@@ -304,7 +304,7 @@ func (s *Service) analyze(instance string, files []resolvedFile) (*Report, error
 		if err := sc.Err(); err != nil {
 			info.Error = err.Error()
 		}
-		f.Close()
+		_ = f.Close()
 
 		if info.Lines == 0 && detected != FileADM {
 			info.Lines = len(head)

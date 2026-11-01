@@ -128,7 +128,7 @@ func build(opt Options) (string, int64, error) {
 	if err != nil {
 		return "", 0, err
 	}
-	defer os.Remove(dataFile)
+	defer func() { _ = os.Remove(dataFile) }()
 
 	control, err := controlArchive(opt, md5sums, installed)
 	if err != nil {
@@ -238,7 +238,7 @@ func writeDataArchive(entries []entry) (string, []string, int, error) {
 	if err != nil {
 		return "", nil, 0, err
 	}
-	defer tmp.Close()
+	defer func() { _ = tmp.Close() }()
 
 	gz, err := gzip.NewWriterLevel(tmp, gzip.BestSpeed) // tiles are already compressed
 	if err != nil {
@@ -276,23 +276,23 @@ func writeDataArchive(entries []entry) (string, []string, int, error) {
 		}
 		info, err := src.Stat()
 		if err != nil {
-			src.Close()
+			_ = src.Close()
 			return "", nil, 0, err
 		}
 
 		hdr.Typeflag = tar.TypeReg
 		hdr.Size = info.Size()
 		if err := tw.WriteHeader(hdr); err != nil {
-			src.Close()
+			_ = src.Close()
 			return "", nil, 0, err
 		}
 
 		hash := md5.New()
 		if _, err := io.Copy(io.MultiWriter(tw, hash), src); err != nil {
-			src.Close()
+			_ = src.Close()
 			return "", nil, 0, err
 		}
-		src.Close()
+		_ = src.Close()
 
 		md5sums = append(md5sums, hex.EncodeToString(hash.Sum(nil))+"  "+e.name)
 		installed += info.Size()

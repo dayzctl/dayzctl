@@ -39,7 +39,7 @@ func TestBundledMapsAreListed(t *testing.T) {
 		if m.Size <= 0 {
 			t.Errorf("size = %v, want the map extent", m.Size)
 		}
-		if m.MaxZoom < m.MaxZoom || m.MaxZoom == 0 {
+		if m.MaxZoom <= 0 {
 			t.Errorf("maxZoom = %d, want the generated zoom range", m.MaxZoom)
 		}
 		if m.Names == 0 {

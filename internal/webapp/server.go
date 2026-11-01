@@ -91,11 +91,6 @@ func New(cfg *config.ServerConfig) (*Server, error) {
 	return s, nil
 }
 
-// emptyFS stands in for the map tree when no map is available at all.
-type emptyFS struct{}
-
-func (emptyFS) Open(string) (fs.File, error) { return nil, fs.ErrNotExist }
-
 // mapsLayer returns the on-disk map directory as an fs.FS, or nil when the
 // directory is unset or missing so the caller can fall back to embedded data.
 func mapsLayer(dir string) fs.FS {
