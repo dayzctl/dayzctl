@@ -37,7 +37,11 @@ func TestGenerateMessagesWritesExpectedXML(t *testing.T) {
 	content := string(data)
 	for _, want := range []string{
 		"<messages>",
+		"<delay>0</delay>",
+		"<repeat>0</repeat>",
 		"<deadline>30</deadline>",
+		"<onconnect>0</onconnect>",
+		"<shutdown>0</shutdown>",
 		"Restart in #tmin minutes",
 		"<deadline>59</deadline>",
 		"<shutdown>1</shutdown>",
@@ -48,11 +52,10 @@ func TestGenerateMessagesWritesExpectedXML(t *testing.T) {
 		}
 	}
 
-	// Mirror Bohemia's own sample (DayZ-Central-Economy): only the elements
-	// that apply are written, and all of them are lowercase. DayZ does not
-	// know <onConnect>, <id> or <playerCount>, and zero-valued elements are
-	// not part of the shipped format.
-	for _, unwanted := range []string{"<id>", "<playerCount>", "<onConnect>", "<delay>0</delay>", "<repeat>0</repeat>", "<shutdown>0</shutdown>"} {
+	// DayZ parses this file by element name, so the spelling has to be exactly
+	// what the working production files use: all lowercase. <onConnect>,
+	// <id> and <playerCount> are not part of the format.
+	for _, unwanted := range []string{"<id>", "<playerCount>", "<onConnect>"} {
 		if strings.Contains(content, unwanted) {
 			t.Errorf("messages.xml contains %q, which is not part of the DayZ format; got:\n%s", unwanted, content)
 		}
@@ -401,22 +404,19 @@ func TestGenerateMessagesIsWellFormedXML(t *testing.T) {
 	}
 }
 
-// TestGenerateMessagesMatchesBohemiaSample renders the four examples from the
-// messages.xml Bohemia ships in DayZ-Central-Economy. DayZ only honours the
-// exact element spelling and structure of that file, so this is the reference
-// the generator has to reproduce.
-func TestGenerateMessagesMatchesBohemiaSample(t *testing.T) {
+// TestGenerateMessagesMatchesWorkingServer reproduces the messages.xml of a
+// live DayZ server (SumrakDZN/Namalsk-Server,
+// "Mission Files/regular.namalsk/db/messages.xml"), which uses all six
+// lowercase elements: delay, repeat, deadline, onconnect, shutdown, text.
+func TestGenerateMessagesMatchesWorkingServer(t *testing.T) {
 	tmp := t.TempDir()
 	cfg := &config.ServerConfig{
 		Paths: config.Paths{Base: tmp},
 		ShutdownMessages: []config.ShutdownMessage{
-			{Deadline: 600, Shutdown: true, Text: "#name will shutdown in #tmin minutes."},
-			{Repeat: 15, Text: "You're playing on my server (#name). Thank you .)"},
-			{Delay: 10, Repeat: 50, OnConnect: true, Text: "Check our web page at www.dayz.com"},
-			{Delay: 2, OnConnect: true, Text: "Welcome to my server #name"},
+			{Deadline: 480, Shutdown: true, Text: "This server will restart in #tmin minutes."},
 		},
 	}
-	inst := &config.Instance{Name: "sample", Template: "dayzOffline.enoch"}
+	inst := &config.Instance{Name: "namalsk", Template: "regular.namalsk"}
 
 	if err := GenerateMessages(cfg, []*config.Instance{inst}); err != nil {
 		t.Fatalf("GenerateMessages error: %v", err)
@@ -428,14 +428,18 @@ func TestGenerateMessagesMatchesBohemiaSample(t *testing.T) {
 	}
 
 	want := `<messages>` +
-		`<message><deadline>600</deadline><shutdown>1</shutdown><text>#name will shutdown in #tmin minutes.</text></message>` +
-		`<message><repeat>15</repeat><text>You're playing on my server (#name). Thank you .)</text></message>` +
-		`<message><delay>10</delay><repeat>50</repeat><onconnect>1</onconnect><text>Check our web page at www.dayz.com</text></message>` +
-		`<message><delay>2</delay><onconnect>1</onconnect><text>Welcome to my server #name</text></message>` +
+		`<message>` +
+		`<delay>0</delay>` +
+		`<repeat>0</repeat>` +
+		`<deadline>480</deadline>` +
+		`<onconnect>0</onconnect>` +
+		`<shutdown>1</shutdown>` +
+		`<text>This server will restart in #tmin minutes.</text>` +
+		`</message>` +
 		`</messages>`
 
 	if got := compactXML(string(data)); got != want {
-		t.Fatalf("generated messages.xml does not match the reference format\n got: %s\nwant: %s", got, want)
+		t.Fatalf("generated messages.xml does not match the working reference\n got: %s\nwant: %s", got, want)
 	}
 }
 
@@ -449,6 +453,35 @@ func compactXML(document string) string {
 	document = strings.ReplaceAll(document, "\r", "")
 	document = strings.ReplaceAll(document, "    ", "")
 	return document
+}
+
+// TestWriteFileIfChanged keeps `dayzctl apply` from rewriting messages.xml on
+// every run, so the "restart needed" hint only appears on real changes.
+func TestWriteFileIfChanged(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "messages.xml")
+
+	changed, err := writeFileIfChanged(path, []byte("one"))
+	if err != nil || !changed {
+		t.Fatalf("first write: changed=%v err=%v, want changed=true", changed, err)
+	}
+
+	changed, err = writeFileIfChanged(path, []byte("one"))
+	if err != nil || changed {
+		t.Fatalf("identical write: changed=%v err=%v, want changed=false", changed, err)
+	}
+
+	changed, err = writeFileIfChanged(path, []byte("two"))
+	if err != nil || !changed {
+		t.Fatalf("changed write: changed=%v err=%v, want changed=true", changed, err)
+	}
+
+	data, err := os.ReadFile(path)
+	if err != nil {
+		t.Fatalf("read back: %v", err)
+	}
+	if string(data) != "two" {
+		t.Fatalf("content = %q, want %q", data, "two")
+	}
 }
 
 func TestOutputUsesLFOnly(t *testing.T) {

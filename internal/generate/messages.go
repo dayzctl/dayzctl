@@ -28,15 +28,15 @@ const countdownOffsets = "90/60/45/30/20/15/10/5/2/1"
 
 // messageEntry is a single <message> element of a mission's db/messages.xml.
 // DayZ only understands the lowercase elements delay, repeat, deadline,
-// onconnect, shutdown and text, and unused ones are omitted entirely - this
-// mirrors the sample Bohemia ships in DayZ-Central-Economy. Every time value
-// is in minutes, which is what DayZ expects.
+// onconnect, shutdown and text; they are always written, in that order, like
+// the working production files (e.g. SumrakDZN/Namalsk-Server) and the
+// official wiki example. Every time value is in minutes.
 type messageEntry struct {
 	Delay     int // minutes, only meaningful with OnConnect
-	Repeat    int // minutes between broadcasts, 0 = no <repeat>
+	Repeat    int // minutes between broadcasts, 0 = no repeat
 	Deadline  int // minutes after server start, 0 = no countdown
-	OnConnect bool
-	Shutdown  bool // requires Deadline > 0
+	OnConnect int // 0/1
+	Shutdown  int // 0/1, requires Deadline > 0
 	Text      string
 }
 
@@ -169,11 +169,44 @@ func writeMessages(installDir string, mission resolvedMission) error {
 	content := buf.Bytes()
 	// Ensure file uses Unix LF line endings.
 	content = bytes.ReplaceAll(content, []byte("\r\n"), []byte("\n"))
-	if err := os.WriteFile(path, content, 0644); err != nil {
+
+	changed, err := writeFileIfChanged(path, content)
+	if err != nil {
 		return fmt.Errorf("failed to write messages.xml: %w", err)
 	}
+	if !changed {
+		logger.Debug("messages.xml already up to date", "path", path, "mission", mission.Template)
+		return nil
+	}
+
 	logger.Info("Wrote messages.xml", "path", path, "mission", mission.Template, "instances", mission.Instances)
+	// DayZ loads messages.xml once, when the mission starts, so a running
+	// server keeps broadcasting the messages it read earlier.
+	logger.Warn("DayZ reads messages.xml at mission load - restart the instance to activate the new messages",
+		"units", instanceUnits(mission.Instances), "mission", mission.Template)
 	return nil
+}
+
+// instanceUnits returns the systemd unit names of the instances that share a
+// mission, so the restart hint names the exact services to touch.
+func instanceUnits(instances []string) []string {
+	units := make([]string, 0, len(instances))
+	for _, name := range instances {
+		units = append(units, "dayz@"+name+".service")
+	}
+	return units
+}
+
+// writeFileIfChanged writes content only when it differs from what is already
+// on disk, so repeated `dayzctl apply` runs do not touch the file.
+func writeFileIfChanged(path string, content []byte) (bool, error) {
+	if existing, err := os.ReadFile(path); err == nil && bytes.Equal(existing, content) {
+		return false, nil
+	}
+	if err := os.WriteFile(path, content, 0644); err != nil {
+		return false, err
+	}
+	return true, nil
 }
 
 // buildMessageEntries validates the configured messages and converts them into
@@ -188,8 +221,8 @@ func buildMessageEntries(template string, messages []config.ShutdownMessage) ([]
 			Delay:     m.Delay,
 			Repeat:    m.Repeat,
 			Deadline:  m.Deadline,
-			OnConnect: m.OnConnect,
-			Shutdown:  m.Shutdown,
+			OnConnect: flag(m.OnConnect),
+			Shutdown:  flag(m.Shutdown),
 			// DayZ parses this file as XML: an unescaped '&' or '<' makes the
 			// whole document invalid and every message disappears.
 			Text: escapeXMLText(m.Text),
@@ -225,6 +258,14 @@ func warnIfMissionMissing(installDir, template string) {
 
 	logger.Warn("Mission folder does not exist, DayZ will not read this messages.xml - check the instance 'template'",
 		"mission", template, "expected", filepath.Join(missionsDir, template), "available", available)
+}
+
+// flag converts a bool to the 0/1 integer DayZ expects in its flag elements.
+func flag(enabled bool) int {
+	if enabled {
+		return 1
+	}
+	return 0
 }
 
 // xmlTextEscaper escapes only what is required inside an XML text node. Quotes

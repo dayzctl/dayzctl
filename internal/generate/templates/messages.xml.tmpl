@@ -2,21 +2,11 @@
 <messages>
 {{- range .Messages }}
     <message>
-        {{- if gt .Delay 0 }}
         <delay>{{.Delay}}</delay>
-        {{- end }}
-        {{- if gt .Repeat 0 }}
         <repeat>{{.Repeat}}</repeat>
-        {{- end }}
-        {{- if gt .Deadline 0 }}
         <deadline>{{.Deadline}}</deadline>
-        {{- end }}
-        {{- if .OnConnect }}
-        <onconnect>1</onconnect>
-        {{- end }}
-        {{- if .Shutdown }}
-        <shutdown>1</shutdown>
-        {{- end }}
+        <onconnect>{{.OnConnect}}</onconnect>
+        <shutdown>{{.Shutdown}}</shutdown>
         <text>{{.Text}}</text>
     </message>
 {{- end }}
