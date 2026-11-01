@@ -529,6 +529,21 @@ verify_config() {
     warn "  REINSTALL=1 bash scripts/install.sh"
 }
 
+# ============================================================================
+# Report whether the web UI unit exists
+# ============================================================================
+# `dayzctl apply` writes and enables dayz-web.service only when web.enabled is
+# true, so a fresh install legitimately has no unit. Say so once here instead of
+# leaving an operator wondering why 'systemctl status dayz-web' finds nothing.
+report_web_unit() {
+    local unit=/etc/systemd/system/dayz-web.service
+    if [ -f "$unit" ]; then
+        log "web UI unit installed: $unit"
+    else
+        log "no web UI unit: set 'web.enabled: true' in $CONFIG_PATH and re-run 'dayzctl apply' to create $unit"
+    fi
+}
+
 main() {
     log "=== DayZ Server Installation ==="
     log "dayzctl: root tool for server management"
@@ -555,6 +570,7 @@ main() {
         error "dayzctl apply failed - see output above"
     }
     log "Configuration applied successfully"
+    report_web_unit
 
     log ""
     log "Steam login is required to download the DayZ server and mods."

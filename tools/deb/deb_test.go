@@ -98,7 +98,6 @@ func fixture(t *testing.T) (debPath string, t2 *testing.T) {
 	}
 
 	bin := write("dayzctl", "#!/bin/sh\necho dayzctl\n")
-	unit := write("dayzctl-web.service", "[Unit]\n")
 	config := write("config.yaml", "web:\n  port: 8081\n")
 	license := write("LICENSE", "MIT\n")
 	write("maps/nasdara/meta.json", `{"id":"nasdara","size":16384,"format":"webp"}`)
@@ -109,7 +108,6 @@ func fixture(t *testing.T) (debPath string, t2 *testing.T) {
 	path, _, err := build(Options{
 		Binary:     bin,
 		Maps:       filepath.Join(root, "maps"),
-		Unit:       unit,
 		Config:     config,
 		Scripts:    filepath.Join(root, "scripts"),
 		License:    license,
@@ -165,7 +163,6 @@ func TestPackageLayout(t *testing.T) {
 		"usr/bin/dayzctl":                           0o755,
 		"usr/share/dayzctl/maps/nasdara/meta.json":  0o644,
 		"usr/share/dayzctl/maps/nasdara/3/0/0.webp": 0o644,
-		"lib/systemd/system/dayzctl-web.service":    0o644,
 		"etc/dayzctl/config.yaml":                   0o644,
 		"usr/share/doc/dayzctl/copyright":           0o644,
 	}
@@ -181,6 +178,20 @@ func TestPackageLayout(t *testing.T) {
 	}
 	if _, ok := data["usr/"]; !ok {
 		t.Error("directory entries are missing")
+	}
+}
+
+// TestPackageShipsNoSystemdUnits pins the decision that services belong to
+// `dayzctl apply`: the package installs no unit file, so a packaged install and
+// an apply-generated one can never disagree or leave a stale service behind.
+func TestPackageShipsNoSystemdUnits(t *testing.T) {
+	path, _ := fixture(t)
+	data := readTarGz(t, readAr(t, path)["data.tar.gz"])
+
+	for name := range data {
+		if strings.HasSuffix(name, ".service") || strings.HasSuffix(name, ".timer") || strings.HasPrefix(name, "lib/") {
+			t.Errorf("package should not ship %q", name)
+		}
 	}
 }
 
@@ -211,7 +222,6 @@ func TestBuildRejectsMissingInputs(t *testing.T) {
 	_, _, err := build(Options{
 		Binary:  filepath.Join(t.TempDir(), "nope"),
 		Maps:    t.TempDir(),
-		Unit:    filepath.Join(t.TempDir(), "nope.service"),
 		Config:  filepath.Join(t.TempDir(), "nope.yaml"),
 		Out:     t.TempDir(),
 		Version: "1",

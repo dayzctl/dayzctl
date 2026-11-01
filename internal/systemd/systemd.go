@@ -139,31 +139,45 @@ func formatModsForSystemd(modRefs []config.ModRef) string {
 	return "\"" + strings.Join(prefixed, ";") + "\""
 }
 
-func (s *Systemd) GenerateUnits(cfg *config.ServerConfig) error {
-	units := map[string]string{
-		"dayz-update.service": updateServiceTemplate,
-		"dayz-update.timer":   updateTimerTemplate,
-		"dayz-prune.service":  pruneServiceTemplate,
-		"dayz-prune.timer":    pruneTimerTemplate,
-	}
+// systemdDir is where every generated unit is written. It is a variable so the
+// tests can point it at a temporary directory.
+var systemdDir = "/etc/systemd/system"
 
-	for name, content := range units {
-		path := "/etc/systemd/system/" + name
-		if err := os.WriteFile(path, []byte(content), 0644); err != nil {
-			return fmt.Errorf("failed to write %s: %w", name, err)
-		}
-	}
+// unitFile is one unit to write, already rendered or taken from an embedded
+// template.
+type unitFile struct {
+	name    string
+	content []byte
+}
 
-	svcTmpl, err := template.New("instance").Parse(instanceServiceTemplate)
-	if err != nil {
-		return err
-	}
+// GenerateUnits writes every unit the configuration implies and returns the
+// names of the files that actually changed on disk. Files whose content already
+// matches are left untouched, so a second `dayzctl apply` reports no change and
+// does not need to reload systemd.
+//
+// The units are part of apply rather than of the package: nothing is shipped
+// ready-made, so the files always match the configuration they were generated
+// from and an upgrade cannot leave a stale service behind.
+func (s *Systemd) GenerateUnits(cfg *config.ServerConfig) ([]string, error) {
+	var units []unitFile
+
+	units = append(units,
+		unitFile{"dayz-update.service", []byte(updateServiceTemplate)},
+		unitFile{"dayz-update.timer", []byte(updateTimerTemplate)},
+		unitFile{"dayz-prune.service", []byte(pruneServiceTemplate)},
+		unitFile{"dayz-prune.timer", []byte(pruneTimerTemplate)},
+	)
 
 	installDir := cfg.GetInstallDir()
 	logger.Debug("Generating systemd units", "installDir", installDir)
 
 	cpuCount := getCPUCount()
 	logger.Info("Detected CPU cores", "count", cpuCount)
+
+	svcTmpl, err := template.New("instance").Parse(instanceServiceTemplate)
+	if err != nil {
+		return nil, err
+	}
 
 	for _, instance := range cfg.GetEnabledInstances() {
 		beDir := filepath.Join(installDir, "battleye-"+instance.Name)
@@ -180,33 +194,78 @@ func (s *Systemd) GenerateUnits(cfg *config.ServerConfig) error {
 
 		var svcBuf bytes.Buffer
 		if err := svcTmpl.Execute(&svcBuf, data); err != nil {
-			return err
+			return nil, err
 		}
-		svcPath := fmt.Sprintf("/etc/systemd/system/dayz@%s.service", instance.Name)
-		if err := os.WriteFile(svcPath, svcBuf.Bytes(), 0644); err != nil {
-			return fmt.Errorf("failed to write service for %s: %w", instance.Name, err)
+		units = append(units, unitFile{fmt.Sprintf("dayz@%s.service", instance.Name), svcBuf.Bytes()})
+	}
+
+	var changed []string
+	for _, u := range units {
+		ok, err := writeIfChanged(filepath.Join(systemdDir, u.name), u.content)
+		if err != nil {
+			return changed, fmt.Errorf("failed to write %s: %w", u.name, err)
+		}
+		if ok {
+			changed = append(changed, u.name)
 		}
 	}
 
-	if cfg.Web.Enabled {
-		if err := s.writeWebUnit(cfg); err != nil {
-			return err
-		}
+	webChanged, err := s.reconcileWebUnit(cfg)
+	if err != nil {
+		return changed, err
+	}
+	if webChanged {
+		changed = append(changed, WebUnitName)
 	}
 
-	return nil
+	return changed, nil
 }
 
+// writeIfChanged writes content to path only when it differs from what is
+// already there, and reports whether it wrote.
+func writeIfChanged(path string, content []byte) (bool, error) {
+	existing, err := os.ReadFile(path)
+	if err == nil && bytes.Equal(existing, content) {
+		return false, nil
+	}
+	if err := os.WriteFile(path, content, 0644); err != nil {
+		return false, err
+	}
+	return true, nil
+}
+
+// WebUnitName is the systemd unit that runs the web UI. It is written and
+// enabled by `dayzctl apply` — the package ships no unit files — so the name is
+// defined once and every command refers to it.
+const WebUnitName = "dayz-web.service"
+
 // WebData is the template input for dayz-web.service.
+//
+// The listen address and port are deliberately not part of the unit: the web
+// command reads web.address / web.port from the config file, so an operator can
+// change them without regenerating the unit.
 type WebData struct {
 	BinaryPath string
-	Address    string
-	Port       int
 	WorkingDir string
 }
 
-// writeWebUnit writes dayz-web.service when the web UI is enabled.
-func (s *Systemd) writeWebUnit(cfg *config.ServerConfig) error {
+// reconcileWebUnit writes dayz-web.service when the web UI is enabled and
+// removes it when it is not, so a disabled service cannot fail at boot, and
+// reports whether the file changed.
+func (s *Systemd) reconcileWebUnit(cfg *config.ServerConfig) (bool, error) {
+	path := filepath.Join(systemdDir, WebUnitName)
+
+	if !cfg.Web.Enabled {
+		if _, err := os.Stat(path); err != nil {
+			return false, nil // nothing generated before
+		}
+		if err := os.Remove(path); err != nil {
+			return false, fmt.Errorf("failed to remove %s: %w", WebUnitName, err)
+		}
+		logger.Info("Removed web unit", "path", path)
+		return true, nil
+	}
+
 	binaryPath, err := os.Executable()
 	if err != nil {
 		binaryPath = "dayzctl"
@@ -214,26 +273,25 @@ func (s *Systemd) writeWebUnit(cfg *config.ServerConfig) error {
 		binaryPath = resolved
 	}
 
-	content, err := renderWebUnit(WebData{
+	content, err := RenderWebUnit(WebData{
 		BinaryPath: binaryPath,
-		Address:    cfg.Web.Address,
-		Port:       cfg.Web.Port,
 		WorkingDir: cfg.GetBaseDir(),
 	})
 	if err != nil {
-		return err
+		return false, err
 	}
 
-	path := "/etc/systemd/system/dayz-web.service"
-	if err := os.WriteFile(path, content, 0644); err != nil {
-		return fmt.Errorf("failed to write dayz-web.service: %w", err)
+	changed, err := writeIfChanged(path, content)
+	if err != nil {
+		return false, fmt.Errorf("failed to write %s: %w", WebUnitName, err)
 	}
-	logger.Debug("Wrote web unit", "path", path, "address", cfg.Web.Address, "port", cfg.Web.Port)
-	return nil
+	logger.Debug("Web unit", "path", path, "changed", changed,
+		"address", cfg.Web.Address, "port", cfg.Web.Port)
+	return changed, nil
 }
 
-// renderWebUnit renders the dayz-web.service template.
-func renderWebUnit(data WebData) ([]byte, error) {
+// RenderWebUnit renders the dayz-web.service template from the embedded copy.
+func RenderWebUnit(data WebData) ([]byte, error) {
 	tmpl, err := template.New("web").Parse(webServiceTemplate)
 	if err != nil {
 		return nil, fmt.Errorf("parse dayz-web.service template: %w", err)

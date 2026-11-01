@@ -46,9 +46,12 @@ web:
 ```
 
 `dayzctl apply` generates `/etc/systemd/system/dayz-web.service`, runs
-`daemon-reload` and enables it. The unit runs the binary directly, restarts on
-failure and applies hardening (`ProtectSystem=full`, `ProtectHome=read-only`,
-`NoNewPrivileges`, `PrivateTmp`).
+`daemon-reload` and enables it. Nothing is shipped as a ready-made unit, so the
+file always matches the configuration: it is written when `web.enabled` is true
+and removed (and disabled) when it is false, and an unchanged unit is left
+alone — `daemon-reload` only runs when a unit's content actually changed. The
+unit runs the binary directly, restarts on failure and applies hardening
+(`ProtectSystem=full`, `ProtectHome=read-only`, `NoNewPrivileges`, `PrivateTmp`).
 
 ```bash
 systemctl status dayz-web.service

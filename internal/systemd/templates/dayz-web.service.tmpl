@@ -6,9 +6,11 @@ Wants=network-online.target
 
 [Service]
 Type=simple
-ExecStart={{ .BinaryPath }} web --addr {{ .Address }} --port {{ .Port }}
-WorkingDirectory={{ .WorkingDir }}
-Restart=on-failure
+# The listen address and port come from web.address / web.port in the config
+# file, so changing them does not require regenerating this unit.
+ExecStart={{ .BinaryPath }} web
+{{ if .WorkingDir }}WorkingDirectory={{ .WorkingDir }}
+{{ end }}Restart=on-failure
 RestartSec=5s
 StandardOutput=journal
 StandardError=journal
@@ -22,6 +24,7 @@ ProtectKernelTunables=yes
 ProtectControlGroups=yes
 RestrictSUIDSGID=yes
 LockPersonality=yes
+ReadOnlyPaths=/etc/dayzctl
 
 [Install]
 WantedBy=multi-user.target

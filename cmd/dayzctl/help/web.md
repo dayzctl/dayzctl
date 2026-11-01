@@ -37,8 +37,11 @@ Examples:
   dayzctl web --addr 0.0.0.0 --port 8081
 
 systemd:
-  `dayzctl apply` writes /etc/systemd/system/dayz-web.service when
-  web.enabled is true and enables it. Control it with:
+  `dayzctl apply` is the only thing that installs services. It writes
+  /etc/systemd/system/dayz-web.service when web.enabled is true, enables it,
+  and removes and disables it when web.enabled is false. A unit file is only
+  rewritten when its content changed, and `daemon-reload` only runs when
+  something did. Control the service with:
     systemctl start|stop|status dayz-web.service
     journalctl -u dayz-web.service -f
 

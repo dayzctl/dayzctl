@@ -277,7 +277,7 @@ func applyOrchestrator(target string) error {
 	}
 
 	sysd := systemd.New()
-	if err := generateAndReloadSystemd(sysd); err != nil {
+	if err := reconcileSystemdUnits(sysd, shared.Config); err != nil {
 		return err
 	}
 
@@ -285,10 +285,6 @@ func applyOrchestrator(target string) error {
 
 	if shared.Config.Updates.Enabled {
 		enableUpdateTimer(sysd)
-	}
-
-	if shared.Config.Web.Enabled {
-		enableWebService(sysd)
 	}
 
 	fmt.Println("Configuration applied successfully")
@@ -309,15 +305,40 @@ func collectApplyInstances(target string) ([]*config.Instance, error) {
 	return shared.GetInstances(target)
 }
 
-// generateAndReloadSystemd generates systemd unit files and reloads systemd.
-func generateAndReloadSystemd(sysd *systemd.Systemd) error {
+// reconcileSystemdUnits is where units are installed: apply writes them, so no
+// separate command is needed to create, update or remove one.
+//
+// Only files whose content actually changed are written, and systemd is
+// reloaded only when something did, so a repeated apply is a no-op. The web UI
+// unit is written when it is enabled and removed when it is not, and the
+// matching enable/disable runs here too.
+func reconcileSystemdUnits(sysd *systemd.Systemd, cfg *config.ServerConfig) error {
+	// Disable first: removing an enabled unit leaves a dangling symlink.
+	if !cfg.Web.Enabled {
+		disableWebService(sysd)
+	}
+
 	fmt.Println("Generating systemd units...")
-	if err := sysd.GenerateUnits(shared.Config); err != nil {
+	changed, err := sysd.GenerateUnits(cfg)
+	if err != nil {
 		return fmt.Errorf("failed to generate units: %w", err)
 	}
-	if err := sysd.Reload(); err != nil {
-		return fmt.Errorf("failed to reload systemd: %w", err)
+
+	if len(changed) == 0 {
+		fmt.Println("Systemd units are up to date")
+	} else {
+		for _, name := range changed {
+			fmt.Printf("Updated %s\n", name)
+		}
+		if err := sysd.Reload(); err != nil {
+			return fmt.Errorf("failed to reload systemd: %w", err)
+		}
 	}
+
+	if cfg.Web.Enabled {
+		enableWebService(sysd)
+	}
+
 	return nil
 }
 
@@ -344,9 +365,18 @@ func enableUpdateTimer(sysd *systemd.Systemd) {
 // enableWebService enables the web UI unit generated for web.enabled configs.
 func enableWebService(sysd *systemd.Systemd) {
 	fmt.Println("Enabling web UI service...")
-	if err := sysd.Enable("dayz-web.service"); err != nil {
+	if err := sysd.Enable(systemd.WebUnitName); err != nil {
 		fmt.Printf("Failed to enable web UI service: %v\n", err)
 	}
+}
+
+// disableWebService stops the web UI unit from starting again. It stays quiet
+// when the unit was never enabled, which is the normal case.
+func disableWebService(sysd *systemd.Systemd) {
+	if err := sysd.Disable(systemd.WebUnitName); err != nil {
+		return
+	}
+	fmt.Println("Disabled web UI service")
 }
 
 // UpdateAction runs update

@@ -76,7 +76,9 @@ server:
   # admin_log_build_actions: 1 # log build actions
 
 # Web UI and log analysis API (ADM/RPT).
-# `dayzctl apply` writes and enables dayz-web.service when enabled is true.
+# `dayzctl apply` owns the service: it writes and enables dayz-web.service when
+# enabled is true, removes and disables it when false, and only reloads
+# systemd when a unit file actually changed.
 # There is no built-in authentication: keep the loopback address, or put an
 # authenticating reverse proxy in front of it before binding to 0.0.0.0.
 web:

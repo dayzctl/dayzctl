@@ -58,8 +58,13 @@ stays lean:
 | --- | --- |
 | `/usr/bin/dayzctl` | the binary, built with `-tags nomaps` (no tiles, 11 MB) |
 | `/usr/share/dayzctl/maps/` | 46 maps (tiles + place names), ~33 MB |
-| `/lib/systemd/system/dayzctl-web.service` | `dayzctl web` unit, not enabled by default |
 | `/etc/dayzctl/config.yaml` | starter configuration (conffile) |
+
+The package ships **no** systemd units. `dayzctl apply` is the only thing that
+writes them (`dayz-web.service`, the instance units, the update/prune timers),
+enables what the configuration asks for, and reloads systemd only when a unit's
+content actually changed — so a repeated apply is a no-op and an upgrade can
+never leave a stale service behind.
 
 The server reads map data from disk; the copy embedded at build time is only a
 fallback. Nothing is downloaded at runtime, and the installed binary is 11 MB
@@ -86,7 +91,8 @@ on disk.
 ```bash
 sudo dpkg -i build/dayzctl_1.0.0_amd64.deb
 sudoedit /etc/dayzctl/config.yaml        # add your instance(s)
-sudo systemctl enable --now dayzctl-web
+sudo dayzctl apply                       # writes and enables the systemd units
+sudo systemctl start dayz-web            # optional: start the UI now
 ```
 
 The package needs no dependencies beyond libc; `dpkg-deb` is not required to

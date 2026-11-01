@@ -1,9 +1,10 @@
 #!/bin/sh
-# Stop the analyzer before its binary is replaced.
+# Stop the analyzer before its binary is replaced. The unit itself was written
+# by `dayzctl apply`, so only stop it when it is actually running.
 set -e
 
-if [ -d /run/systemd/system ] && systemctl is-active --quiet dayzctl-web 2>/dev/null; then
-	systemctl stop dayzctl-web >/dev/null 2>&1 || true
+if [ -d /run/systemd/system ] && systemctl is-active --quiet dayz-web 2>/dev/null; then
+        systemctl stop dayz-web >/dev/null 2>&1 || true
 fi
 
 exit 0

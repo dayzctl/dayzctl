@@ -151,9 +151,17 @@ func ApplyConfig() error {
 	}
 
 	sysd := systemd.New()
-	if err := sysd.GenerateUnits(Config); err != nil {
+	changed, err := sysd.GenerateUnits(Config)
+	if err != nil {
 		return fmt.Errorf("failed to generate units: %w", err)
 	}
+	if len(changed) == 0 {
+		logger.Info("Systemd units unchanged, skipping reload")
+		logger.Info("Configuration applied successfully")
+		return nil
+	}
+
+	logger.Info("Systemd units updated", "files", strings.Join(changed, ", "))
 	if err := sysd.Reload(); err != nil {
 		return fmt.Errorf("failed to reload systemd: %w", err)
 	}

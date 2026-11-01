@@ -28,19 +28,22 @@ import (
 )
 
 // Package layout.
+//
+// The package ships no systemd units: `dayzctl apply` renders dayz-web.service
+// and the instance/update/prune units from the configuration and enables them
+// there, so a packaged install cannot differ from an apply-generated one.
 const (
 	binPath    = "usr/bin/dayzctl"
 	mapsPath   = "usr/share/dayzctl/maps"
 	docPath    = "usr/share/doc/dayzctl"
-	unitPath   = "lib/systemd/system/dayzctl-web.service"
 	configPath = "etc/dayzctl/config.yaml"
 )
 
 func main() {
 	var (
-		bin     = flag.String("bin", "build/dayzctl-linux-amd64", "linux binary to package")
-		maps    = flag.String("maps", "web/log-analyzer/maps", "map data directory to ship")
-		unit    = flag.String("unit", "packaging/dayzctl-web.service", "systemd unit file")
+		bin  = flag.String("bin", "build/dayzctl-linux-amd64", "linux binary to package")
+		maps = flag.String("maps", "web/log-analyzer/maps", "map data directory to ship")
+
 		config  = flag.String("config", "packaging/config.yaml", "default configuration (installed as a conffile)")
 		scripts = flag.String("scripts", "packaging/scripts", "directory with postinst/prerm/postrm")
 		license = flag.String("license", "LICENSE", "file installed as /usr/share/doc/dayzctl/copyright")
@@ -58,9 +61,9 @@ func main() {
 	}
 
 	opt := Options{
-		Binary:     *bin,
-		Maps:       *maps,
-		Unit:       *unit,
+		Binary: *bin,
+		Maps:   *maps,
+
 		Config:     *config,
 		Scripts:    *scripts,
 		License:    *license,
@@ -83,7 +86,6 @@ func main() {
 type Options struct {
 	Binary     string
 	Maps       string
-	Unit       string
 	Config     string
 	Scripts    string
 	License    string
@@ -164,8 +166,7 @@ func collect(opt Options) ([]entry, error) {
 	// Directories first so the tar stream is well-formed.
 	dirs := map[string]bool{
 		"usr": true, "usr/bin": true, "usr/share": true, "usr/share/dayzctl": true,
-		mapsPath: true, docPath: true, "lib": true, "lib/systemd": true,
-		"lib/systemd/system": true, "etc": true, "etc/dayzctl": true,
+		mapsPath: true, docPath: true, "etc": true, "etc/dayzctl": true,
 	}
 
 	maps, err := filepath.Abs(opt.Maps)
@@ -210,7 +211,6 @@ func collect(opt Options) ([]entry, error) {
 
 	required := []struct{ path, dst string }{
 		{opt.Binary, binPath},
-		{opt.Unit, unitPath},
 		{opt.Config, configPath},
 	}
 	if opt.License != "" {
