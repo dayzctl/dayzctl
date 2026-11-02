@@ -3,13 +3,33 @@
      DayZ reads this file from the mission folder at server start.
      All time values are in minutes. -->
 <messages>
-{{- range .Messages }}
+{{- with .Welcome }}
     <message>
+        {{- if gt .Delay 0 }}
         <delay>{{.Delay}}</delay>
-        <repeat>{{.Repeat}}</repeat>
+        {{- end }}
+        <onconnect>1</onconnect>
+        <text>{{.Text}}</text>
+    </message>
+{{- end }}
+{{- range .Cyclic }}
+    <message>
+        {{- if gt .Delay 0 }}
+        <delay>{{.Delay}}</delay>
+        {{- end }}
+        <repeat>{{.Every}}</repeat>
+        {{- if .OnConnect }}
+        <onconnect>1</onconnect>
+        {{- end }}
+        <text>{{.Text}}</text>
+    </message>
+{{- end }}
+{{- with .Shutdown }}
+    <message>
         <deadline>{{.Deadline}}</deadline>
-        <onconnect>{{.OnConnect}}</onconnect>
-        <shutdown>{{.Shutdown}}</shutdown>
+        {{- if .Stop }}
+        <shutdown>1</shutdown>
+        {{- end }}
         <text>{{.Text}}</text>
     </message>
 {{- end }}

@@ -16,17 +16,36 @@ import (
 //go:embed templates/messages.xml.tmpl
 var messagesTmpl string
 
-// messagesFile is the root <messages> element of a mission's db/messages.xml.
-// messageEntry is a single <message> entry: the three config sections
-// (welcome, cyclic, shutdown) all end up here, one per message kind.
-// All time values are written in minutes, which is DayZ's unit.
-type messageEntry struct {
-	Delay     int // minutes after connect, welcome messages only
-	Repeat    int // minutes between broadcasts, cyclic messages only
-	Deadline  int // minutes after server start, shutdown countdown only
-	OnConnect int // 0/1
-	Shutdown  int // 0/1
+// welcomeEntry is the message sent once to every player that connects.
+type welcomeEntry struct {
+	Delay int // minutes after connect; omitted from the file when 0
+	Text  string
+}
+
+// cyclicEntry is a message broadcast to all players every Every minutes, and
+// optionally to each player that connects.
+type cyclicEntry struct {
+	Every     int
+	OnConnect bool // also send it to every player that connects
+	Delay     int  // minutes after connect; only meaningful with OnConnect
 	Text      string
+}
+
+// shutdownEntry is the restart countdown written as <deadline>.
+type shutdownEntry struct {
+	Deadline int
+	Stop     bool // save and exit when the countdown reaches zero
+	Text     string
+}
+
+// messagesData is the template input. Each section is rendered separately and
+// writes only the elements DayZ needs for that kind of message: a welcome
+// message carries <onconnect>, a cyclic one <repeat>, the countdown
+// <deadline> (plus <shutdown> when the server should stop).
+type messagesData struct {
+	Welcome  *welcomeEntry
+	Cyclic   []cyclicEntry
+	Shutdown *shutdownEntry
 }
 
 // resolvedMission is one mission (map) folder that receives a messages.xml,
@@ -124,7 +143,7 @@ func sameMessages(a, b config.Messages) bool {
 
 // generateMissionMessages writes db/messages.xml for a single mission.
 func generateMissionMessages(installDir string, mission resolvedMission) error {
-	msgs := buildMessageEntries(mission.Messages)
+	data := buildMessagesData(mission.Messages)
 
 	dbDir := filepath.Join(installDir, "mpmissions", mission.Template, "db")
 	if err := os.MkdirAll(dbDir, 0755); err != nil {
@@ -140,7 +159,6 @@ func generateMissionMessages(installDir string, mission resolvedMission) error {
 	}
 
 	var buf bytes.Buffer
-	data := struct{ Messages []messageEntry }{Messages: msgs}
 	if err := tmpl.Execute(&buf, data); err != nil {
 		return fmt.Errorf("failed to execute messages template: %w", err)
 	}
@@ -155,39 +173,34 @@ func generateMissionMessages(installDir string, mission resolvedMission) error {
 	return nil
 }
 
-// buildMessageEntries turns the configured messages into template data: one
-// welcome message, then the cyclic broadcasts, then the shutdown countdown.
-func buildMessageEntries(messages config.Messages) []messageEntry {
-	entries := make([]messageEntry, 0, len(messages.Cyclic)+2)
+// buildMessagesData turns the configured messages into template data. The
+// template renders each section only when it is configured, so an unused
+// message kind adds nothing to the file.
+func buildMessagesData(messages config.Messages) messagesData {
+	var data messagesData
 
 	if welcome := messages.Welcome; welcome != nil {
-		entries = append(entries, messageEntry{
-			Delay:     welcome.Delay,
-			OnConnect: 1,
-			Text:      welcome.Text,
-		})
+		data.Welcome = &welcomeEntry{Delay: welcome.Delay, Text: welcome.Text}
 	}
 
 	for _, cyclic := range messages.Cyclic {
-		entries = append(entries, messageEntry{
-			Repeat: cyclic.Every,
-			Text:   cyclic.Text,
+		data.Cyclic = append(data.Cyclic, cyclicEntry{
+			Every:     cyclic.Every,
+			OnConnect: cyclic.OnConnect,
+			Delay:     cyclic.Delay,
+			Text:      cyclic.Text,
 		})
 	}
 
 	if shutdown := messages.Shutdown; shutdown != nil {
-		shutdownFlag := 0
-		if shutdown.StopServer {
-			shutdownFlag = 1
-		}
-		entries = append(entries, messageEntry{
+		data.Shutdown = &shutdownEntry{
 			Deadline: shutdown.Deadline,
-			Shutdown: shutdownFlag,
+			Stop:     shutdown.StopServer,
 			Text:     shutdown.Text,
-		})
+		}
 	}
 
-	return entries
+	return data
 }
 
 // MessagesPath returns the path where messages.xml would be written for

@@ -14,7 +14,9 @@ kind of DayZ message, every time value is in minutes:
 
   welcome:   sent once to every player that connects ('delay' = minutes to
              wait after the connection)
-  cyclic:    broadcasts to everyone, 'every' = minutes between them
+  cyclic:    broadcasts to everyone, 'every' = minutes between them;
+             'on_connect: true' also sends that message on connect
+             (optionally after 'delay' minutes)
   shutdown:  restart countdown; DayZ announces it at 90, 60, 45, 30, 20,
              15, 10, 5, 2 and 1 minutes before 'deadline', and
              'stop_server: true' saves state and exits when it is reached

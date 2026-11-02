@@ -191,12 +191,18 @@ type WelcomeMessage struct {
 	Delay int `yaml:"delay,omitempty"`
 }
 
-// CyclicMessage is broadcast to everyone repeatedly.
+// CyclicMessage is broadcast to everyone repeatedly, and optionally to every
+// player that connects as well (DayZ sends the same message on both events).
 type CyclicMessage struct {
 	// Every is the interval in minutes between broadcasts.
 	Every int `yaml:"every"`
 	// Text is the broadcast message (#name, #port placeholders).
 	Text string `yaml:"text"`
+	// OnConnect also sends this message to every player that connects.
+	OnConnect bool `yaml:"on_connect,omitempty"`
+	// Delay is the number of minutes to wait after a player connects before
+	// sending the on-connect copy; ignored without OnConnect.
+	Delay int `yaml:"delay,omitempty"`
 }
 
 // ShutdownMessage is the restart countdown. DayZ announces it at 90, 60, 45,
@@ -549,6 +555,15 @@ func messagesFromLegacy(list []LegacyShutdownMessage) Messages {
 	var messages Messages
 	for _, entry := range list {
 		switch {
+		case entry.OnConnect && entry.Repeat > 0:
+			// Same message broadcast repeatedly and sent to every player that
+			// connects - exactly what a cyclic message with on_connect does.
+			messages.Cyclic = append(messages.Cyclic, CyclicMessage{
+				Every:     entry.Repeat,
+				Text:      entry.Text,
+				OnConnect: true,
+				Delay:     entry.Delay,
+			})
 		case entry.OnConnect:
 			if messages.Welcome == nil {
 				messages.Welcome = &WelcomeMessage{Text: entry.Text, Delay: entry.Delay}

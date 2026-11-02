@@ -50,11 +50,24 @@ func TestGenerateMessagesWritesExpectedXML(t *testing.T) {
 		}
 	}
 
-	// Only the elements DayZ documents are written.
-	for _, unwanted := range []string{"<id>", "<playerCount>"} {
+	// Only the elements DayZ documents are written, and each message kind
+	// carries just its own: no <repeat> or <deadline> on the welcome message,
+	// no <delay>/<onconnect> on the others, and never <id>/<playerCount>.
+	for _, unwanted := range []string{
+		"<id>", "<playerCount>",
+		"<delay>0</delay>",
+		"<onconnect>0</onconnect>",
+		"<shutdown>0</shutdown>",
+		"<repeat>0</repeat>",
+		"<deadline>0</deadline>",
+	} {
 		if strings.Contains(content, unwanted) {
-			t.Errorf("messages.xml contains %q, which DayZ does not know; got:\n%s", unwanted, content)
+			t.Errorf("messages.xml contains %q, which should not be written; got:\n%s", unwanted, content)
 		}
+	}
+
+	if strings.Count(content, "<message>") != 3 {
+		t.Errorf("expected 3 messages (welcome, cyclic, shutdown), got:\n%s", content)
 	}
 
 	if got := MessagesPath(cfg, inst); got != path {
@@ -86,6 +99,44 @@ func TestMinutesAreWrittenAsMinutes(t *testing.T) {
 	}
 	content := string(data)
 	for _, want := range []string{"<delay>2</delay>", "<repeat>15</repeat>", "<deadline>120</deadline>"} {
+		if !strings.Contains(content, want) {
+			t.Errorf("messages.xml missing %q; got:\n%s", want, content)
+		}
+	}
+	// stop_server is off, so no <shutdown> element at all.
+	if strings.Contains(content, "<shutdown>") {
+		t.Errorf("messages.xml should not carry <shutdown> when stop_server is false; got:\n%s", content)
+	}
+}
+
+// TestCyclicCanAlsoBeSentOnConnect covers a message that is broadcast every N
+// minutes and also sent to each connecting player (DayZ example 3).
+func TestCyclicCanAlsoBeSentOnConnect(t *testing.T) {
+	tmp := t.TempDir()
+	cfg := &config.ServerConfig{
+		Paths: config.Paths{Base: tmp},
+		Messages: config.Messages{
+			Cyclic: []config.CyclicMessage{
+				{Every: 50, OnConnect: true, Delay: 10, Text: "Check our web page at www.dayz.com"},
+			},
+		},
+	}
+	inst := &config.Instance{Name: "both", Template: "dayzOffline.chernarusplus"}
+
+	if err := GenerateMessages(cfg, []*config.Instance{inst}); err != nil {
+		t.Fatalf("GenerateMessages error: %v", err)
+	}
+
+	data, err := os.ReadFile(MessagesPath(cfg, inst))
+	if err != nil {
+		t.Fatalf("read messages.xml: %v", err)
+	}
+	content := string(data)
+
+	if strings.Count(content, "<message>") != 1 {
+		t.Fatalf("expected a single message, got:\n%s", content)
+	}
+	for _, want := range []string{"<delay>10</delay>", "<repeat>50</repeat>", "<onconnect>1</onconnect>"} {
 		if !strings.Contains(content, want) {
 			t.Errorf("messages.xml missing %q; got:\n%s", want, content)
 		}

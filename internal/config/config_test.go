@@ -162,6 +162,42 @@ shutdown_messages:
 	}
 }
 
+func TestLoadTranslatesLegacyCyclicOnConnect(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.yaml")
+	body := `steam:
+  username: "x"
+paths:
+  base: "/srv/dayz"
+instances:
+  - name: dayz
+    port: 2302
+    template: dayzOffline.chernarusplus
+shutdown_messages:
+  - delay: 10
+    repeat: 50
+    on_connect: true
+    text: "Check our web page at www.dayz.com"
+`
+	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg, err := Load(path)
+	if err != nil {
+		t.Fatalf("Load error: %v", err)
+	}
+	if cfg.Messages.Welcome != nil {
+		t.Errorf("a repeat+on_connect entry belongs to cyclic, got welcome %+v", cfg.Messages.Welcome)
+	}
+	if len(cfg.Messages.Cyclic) != 1 {
+		t.Fatalf("cyclic = %+v", cfg.Messages.Cyclic)
+	}
+	got := cfg.Messages.Cyclic[0]
+	if got.Every != 50 || !got.OnConnect || got.Delay != 10 {
+		t.Errorf("cyclic[0] = %+v", got)
+	}
+}
+
 func TestLoadKeepsInstanceMessagesOverride(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.yaml")
 	body := `steam:
