@@ -9,14 +9,16 @@ import (
 	"github.com/dayzctl/dayzctl/internal/config"
 )
 
+// TestGenerateMessagesWritesExpectedXML checks one <message> per message kind:
+// welcome (onconnect), cyclic (repeat) and the shutdown countdown.
 func TestGenerateMessagesWritesExpectedXML(t *testing.T) {
 	tmp := t.TempDir()
-	// The global block is the supported way to configure messages.
 	cfg := &config.ServerConfig{
 		Paths: config.Paths{Base: tmp},
-		ShutdownMessages: []config.ShutdownMessage{
-			{Deadline: 30, Text: "Restart in 30 minutes"},
-			{Deadline: 59, Text: "Restarting now!", Shutdown: true},
+		Messages: config.Messages{
+			Welcome:  &config.WelcomeMessage{Text: "Welcome to #name"},
+			Cyclic:   []config.CyclicMessage{{Every: 30, Text: "Join our Discord"}},
+			Shutdown: &config.ShutdownMessage{Deadline: 360, Text: "Restart in #tmin minutes", StopServer: true},
 		},
 	}
 
@@ -35,17 +37,23 @@ func TestGenerateMessagesWritesExpectedXML(t *testing.T) {
 	content := string(data)
 	for _, want := range []string{
 		"<messages>",
-		"<id>0</id>",
-		"<deadline>30</deadline>",
-		"<shutdown>0</shutdown>",
-		"Restart in 30 minutes",
-		"<id>1</id>",
-		"<deadline>59</deadline>",
+		"<onconnect>1</onconnect>",
+		"Welcome to #name",
+		"<repeat>30</repeat>",
+		"Join our Discord",
+		"<deadline>360</deadline>",
 		"<shutdown>1</shutdown>",
-		"Restarting now!",
+		"Restart in #tmin minutes",
 	} {
 		if !strings.Contains(content, want) {
 			t.Errorf("messages.xml missing expected content %q; got:\n%s", want, content)
+		}
+	}
+
+	// Only the elements DayZ documents are written.
+	for _, unwanted := range []string{"<id>", "<playerCount>"} {
+		if strings.Contains(content, unwanted) {
+			t.Errorf("messages.xml contains %q, which DayZ does not know; got:\n%s", unwanted, content)
 		}
 	}
 
@@ -54,14 +62,46 @@ func TestGenerateMessagesWritesExpectedXML(t *testing.T) {
 	}
 }
 
+// TestMinutesAreWrittenAsMinutes guards the unit: DayZ expects minutes, and
+// every time value in the config is a minute value.
+func TestMinutesAreWrittenAsMinutes(t *testing.T) {
+	tmp := t.TempDir()
+	cfg := &config.ServerConfig{
+		Paths: config.Paths{Base: tmp},
+		Messages: config.Messages{
+			Welcome:  &config.WelcomeMessage{Text: "welcome", Delay: 2},
+			Cyclic:   []config.CyclicMessage{{Every: 15, Text: "cyclic"}},
+			Shutdown: &config.ShutdownMessage{Deadline: 120, Text: "shutdown"},
+		},
+	}
+	inst := &config.Instance{Name: "conv", Template: "dayzOffline.chernarusplus"}
+
+	if err := GenerateMessages(cfg, []*config.Instance{inst}); err != nil {
+		t.Fatalf("GenerateMessages error: %v", err)
+	}
+
+	data, err := os.ReadFile(MessagesPath(cfg, inst))
+	if err != nil {
+		t.Fatalf("read messages.xml: %v", err)
+	}
+	content := string(data)
+	for _, want := range []string{"<delay>2</delay>", "<repeat>15</repeat>", "<deadline>120</deadline>"} {
+		if !strings.Contains(content, want) {
+			t.Errorf("messages.xml missing %q; got:\n%s", want, content)
+		}
+	}
+}
+
 // TestGenerateMessagesWritesOncePerMission is the point of the top-level
-// shutdown_messages block: several instances running the same mission share one
+// 'messages' block: several instances running the same mission share one
 // messages.xml, and each distinct mission gets its own copy.
 func TestGenerateMessagesWritesOncePerMission(t *testing.T) {
 	tmp := t.TempDir()
 	cfg := &config.ServerConfig{
-		Paths:            config.Paths{Base: tmp},
-		ShutdownMessages: []config.ShutdownMessage{{Deadline: 360, Text: "Restart in #tmin minutes", Shutdown: true}},
+		Paths: config.Paths{Base: tmp},
+		Messages: config.Messages{
+			Shutdown: &config.ShutdownMessage{Deadline: 360, Text: "Restart in #tmin minutes", StopServer: true},
+		},
 	}
 
 	instances := []*config.Instance{
@@ -122,16 +162,104 @@ func TestGenerateMessagesSkipsMissionsWithoutMessages(t *testing.T) {
 	}
 }
 
+// TestGenerateMessagesInstanceOverrideKeepsWorking keeps the deprecated
+// instance-level block usable: it wins for its own mission only.
+func TestGenerateMessagesInstanceOverrideKeepsWorking(t *testing.T) {
+	tmp := t.TempDir()
+	cfg := &config.ServerConfig{
+		Paths:    config.Paths{Base: tmp},
+		Messages: config.Messages{Shutdown: &config.ShutdownMessage{Deadline: 360, Text: "global #tmin"}},
+	}
+
+	instances := []*config.Instance{
+		{
+			Name:     "custom",
+			Template: "dayzOffline.enoch",
+			Messages: config.Messages{Shutdown: &config.ShutdownMessage{Deadline: 120, Text: "custom #tmin"}},
+		},
+		{Name: "plain", Template: "dayzOffline.chernarusplus"},
+	}
+
+	if err := GenerateMessages(cfg, instances); err != nil {
+		t.Fatalf("GenerateMessages error: %v", err)
+	}
+
+	custom, err := os.ReadFile(MessagesPathForMission(cfg, "dayzOffline.enoch"))
+	if err != nil {
+		t.Fatalf("read custom mission messages.xml: %v", err)
+	}
+	if !strings.Contains(string(custom), "custom #tmin") || strings.Contains(string(custom), "global #tmin") {
+		t.Fatalf("expected the instance override to win for its mission, got:\n%s", custom)
+	}
+
+	plain, err := os.ReadFile(MessagesPathForMission(cfg, "dayzOffline.chernarusplus"))
+	if err != nil {
+		t.Fatalf("read plain mission messages.xml: %v", err)
+	}
+	if !strings.Contains(string(plain), "global #tmin") {
+		t.Fatalf("expected the global messages for the other mission, got:\n%s", plain)
+	}
+}
+
+// TestGenerateMessagesRejectsConflictingOverrides refuses two instances that
+// share a mission but want different messages: only one file can exist.
+func TestGenerateMessagesRejectsConflictingOverrides(t *testing.T) {
+	tmp := t.TempDir()
+	cfg := &config.ServerConfig{Paths: config.Paths{Base: tmp}}
+
+	instances := []*config.Instance{
+		{
+			Name:     "a",
+			Template: "dayzOffline.chernarusplus",
+			Messages: config.Messages{Shutdown: &config.ShutdownMessage{Deadline: 60, Text: "a #tmin"}},
+		},
+		{
+			Name:     "b",
+			Template: "dayzOffline.chernarusplus",
+			Messages: config.Messages{Shutdown: &config.ShutdownMessage{Deadline: 90, Text: "b #tmin"}},
+		},
+	}
+
+	err := GenerateMessages(cfg, instances)
+	if err == nil {
+		t.Fatal("expected an error for conflicting instance-level messages on the same mission")
+	}
+	if !strings.Contains(err.Error(), "top-level 'messages'") {
+		t.Fatalf("unexpected error: %v", err)
+	}
+}
+
 func TestGenerateMessagesRequiresTemplate(t *testing.T) {
 	tmp := t.TempDir()
 	cfg := &config.ServerConfig{Paths: config.Paths{Base: tmp}}
 
 	inst := &config.Instance{
-		Name:             "myserver",
-		ShutdownMessages: []config.ShutdownMessage{{Deadline: 60, Text: "hi"}},
+		Name:     "myserver",
+		Messages: config.Messages{Shutdown: &config.ShutdownMessage{Deadline: 60, Text: "hi"}},
 	}
 
 	if err := GenerateMessages(cfg, []*config.Instance{inst}); err == nil {
 		t.Fatal("expected error when template is missing")
+	}
+}
+
+func TestOutputUsesLFOnly(t *testing.T) {
+	tmp := t.TempDir()
+	cfg := &config.ServerConfig{
+		Paths:    config.Paths{Base: tmp},
+		Messages: config.Messages{Shutdown: &config.ShutdownMessage{Deadline: 1, Text: "eol test"}},
+	}
+	inst := &config.Instance{Name: "eol", Template: "dayzOffline.chernarusplus"}
+
+	if err := GenerateMessages(cfg, []*config.Instance{inst}); err != nil {
+		t.Fatalf("GenerateMessages error: %v", err)
+	}
+
+	data, err := os.ReadFile(MessagesPath(cfg, inst))
+	if err != nil {
+		t.Fatalf("read messages.xml: %v", err)
+	}
+	if strings.Contains(string(data), "\r") {
+		t.Fatalf("expected LF-only file, found CR bytes in %s", MessagesPath(cfg, inst))
 	}
 }

@@ -13,6 +13,8 @@ import (
 	"time"
 
 	"gopkg.in/yaml.v3"
+
+	"github.com/dayzctl/dayzctl/internal/logger"
 )
 
 // DefaultConfigPath returns the default path to the config file
@@ -37,11 +39,13 @@ type ServerConfig struct {
 	Healthcheck  Healthcheck   `yaml:"healthcheck"`
 	State        State         `yaml:"state"`
 	Web          Web           `yaml:"web"`
-	// ShutdownMessages is the server-wide restart countdown written to every
-	// mission in use. DayZ reads messages.xml from the mission (map) folder,
-	// not per instance, so the same list is applied once to each distinct
-	// <installDir>/mpmissions/<template>/db/messages.xml.
-	ShutdownMessages []ShutdownMessage `yaml:"shutdown_messages,omitempty"`
+	// Messages are the DayZ server messages written to the mission of every
+	// map in use. DayZ reads messages.xml from the mission folder, not per
+	// instance, so the block is defined once here and generated per mission.
+	Messages Messages `yaml:"messages,omitempty"`
+	// ShutdownMessages is the pre-2.x list form, kept only so existing configs
+	// keep working: it is translated into Messages at load time.
+	ShutdownMessages []LegacyShutdownMessage `yaml:"shutdown_messages,omitempty"`
 }
 
 // Server represents server-wide settings
@@ -137,11 +141,12 @@ type Instance struct {
 	RCON           RCON     `yaml:"rcon"`
 	Mods           []ModRef `yaml:"mods"`
 	ServerMods     []ModRef `yaml:"servermods"`
-	// ShutdownMessages is deprecated: messages.xml is read by DayZ from the
-	// mission folder, so it is shared by every instance running the same
-	// template. Use the top-level 'shutdown_messages' instead; a value here
-	// still works as a per-mission override (with a deprecation warning).
-	ShutdownMessages []ShutdownMessage `yaml:"shutdown_messages"`
+	// Messages overrides the top-level messages for this instance's mission.
+	// Deprecated: messages.xml is stored per mission (map), so instances
+	// running the same template share a single file.
+	Messages Messages `yaml:"messages,omitempty"`
+	// ShutdownMessages is the pre-2.x list form; translated into Messages.
+	ShutdownMessages []LegacyShutdownMessage `yaml:"shutdown_messages"`
 	// MapImage is an optional background image for the log analyzer's map.
 	// Relative paths are resolved against the install directory. When empty,
 	// map.jpg / map.png is picked up from the profiles or install folder.
@@ -163,24 +168,68 @@ type ModRef struct {
 // warnings to players before a scheduled restart and, when Shutdown is
 // true, to perform the actual graceful shutdown (world/player state save,
 // then exit) once Deadline is reached - this is the server's own "gentle"
-// shutdown mechanism, distinct from killing the process externally.
-type ShutdownMessage struct {
-	// Deadline is the number of minutes after server start at which this
-	// message fires (DayZ schedules these relative to server uptime, not
-	// wall-clock time). The generator writes minutes directly into the
-	// produced db/messages.xml so the values remain in minutes.
-	Deadline int `yaml:"deadline"`
-	// Text is the message broadcast to all connected players.
+// Messages groups the DayZ server messages written to the mission's
+// db/messages.xml (see "DayZ: Server Messages"). The file is read from the
+// mission folder, so it is generated once per map in use rather than per
+// instance. The three sections mirror the three kinds of message DayZ knows.
+type Messages struct {
+	// Welcome is sent once to every player that connects.
+	Welcome *WelcomeMessage `yaml:"welcome,omitempty"`
+	// Cyclic messages are broadcast to all players at a fixed interval.
+	Cyclic []CyclicMessage `yaml:"cyclic,omitempty"`
+	// Shutdown is the restart countdown (and optional graceful exit).
+	Shutdown *ShutdownMessage `yaml:"shutdown,omitempty"`
+}
+
+// WelcomeMessage is shown once to every connecting player.
+type WelcomeMessage struct {
+	// Text is the message sent to the player. DayZ supports the #name and
+	// #port placeholders and caps the text at 160 characters.
 	Text string `yaml:"text"`
-	// Shutdown, when true, tells the server to gracefully save and exit
-	// once this message's deadline is reached.
-	Shutdown bool `yaml:"shutdown"`
-	// Repeat is the interval in seconds to repeat this message; 0 means it
-	// fires only once.
-	Repeat int `yaml:"repeat,omitempty"`
-	// PlayerCount is the minimum number of online players required for the
-	// message to be shown; 0 means always show it.
-	PlayerCount int `yaml:"player_count,omitempty"`
+	// Delay is the number of minutes to wait after the player connects
+	// before sending the message; 0 sends it immediately.
+	Delay int `yaml:"delay,omitempty"`
+}
+
+// CyclicMessage is broadcast to everyone repeatedly.
+type CyclicMessage struct {
+	// Every is the interval in minutes between broadcasts.
+	Every int `yaml:"every"`
+	// Text is the broadcast message (#name, #port placeholders).
+	Text string `yaml:"text"`
+}
+
+// ShutdownMessage is the restart countdown. DayZ announces it at 90, 60, 45,
+// 30, 20, 15, 10, 5, 2 and 1 minutes before Deadline, measured from server
+// start, and - when StopServer is set - saves the world and exits once the
+// deadline is reached. That is the server's own "gentle" shutdown mechanism,
+// distinct from killing the process externally.
+type ShutdownMessage struct {
+	// Deadline is the number of minutes after server start at which the
+	// countdown reaches zero.
+	Deadline int `yaml:"deadline"`
+	// Text is the countdown message; #tmin expands to the minutes remaining.
+	Text string `yaml:"text"`
+	// StopServer saves and exits the server when the countdown reaches zero.
+	StopServer bool `yaml:"stop_server,omitempty"`
+}
+
+// Empty reports whether no message is configured at all.
+func (m Messages) Empty() bool {
+	return m.Welcome == nil && len(m.Cyclic) == 0 && m.Shutdown == nil
+}
+
+// LegacyShutdownMessage is a single entry of the pre-2.x 'shutdown_messages'
+// list. It mixes all three message kinds into one struct and is only kept so
+// existing configs keep working; it is translated into Messages on load.
+type LegacyShutdownMessage struct {
+	Deadline    int    `yaml:"deadline"`
+	Text        string `yaml:"text"`
+	Shutdown    bool   `yaml:"shutdown"`
+	Repeat      int    `yaml:"repeat,omitempty"`
+	PlayerCount int    `yaml:"player_count,omitempty"`
+	OnConnect   bool   `yaml:"on_connect,omitempty"`
+	Delay       int    `yaml:"delay,omitempty"`
 }
 
 // RCON represents RCON configuration
@@ -455,6 +504,7 @@ func Load(path string) (*ServerConfig, error) {
 		return nil, fmt.Errorf("failed to parse config YAML: %w%s", err, yamlContext(data, err))
 	}
 
+	cfg.normalizeMessages()
 	cfg.SetDefaults()
 
 	if err := cfg.Validate(); err != nil {
@@ -462,6 +512,63 @@ func Load(path string) (*ServerConfig, error) {
 	}
 
 	return &cfg, nil
+}
+
+// normalizeMessages translates the deprecated 'shutdown_messages' list (which
+// mixed the three kinds of DayZ message into one entry each) into the typed
+// 'messages' block, so older configs keep working unchanged.
+func (c *ServerConfig) normalizeMessages() {
+	if len(c.ShutdownMessages) > 0 {
+		if c.Messages.Empty() {
+			c.Messages = messagesFromLegacy(c.ShutdownMessages)
+			logger.Warn("'shutdown_messages' is deprecated; it was translated into the new 'messages' block",
+				"key", "shutdown_messages", "replacement", "messages")
+		} else {
+			logger.Warn("'shutdown_messages' is deprecated and ignored because 'messages' is configured",
+				"key", "shutdown_messages")
+		}
+		c.ShutdownMessages = nil
+	}
+
+	for i := range c.Instances {
+		inst := &c.Instances[i]
+		if len(inst.ShutdownMessages) == 0 {
+			continue
+		}
+		inst.Messages = messagesFromLegacy(inst.ShutdownMessages)
+		inst.ShutdownMessages = nil
+		logger.Warn("instance-level 'shutdown_messages' is deprecated; messages.xml is per mission (map), so move the block to the top-level 'messages'",
+			"instance", inst.Name)
+	}
+}
+
+// messagesFromLegacy maps a legacy entry list onto the three message kinds.
+// Entries that would do nothing (no deadline, repeat or on-connect flag) are
+// dropped with a warning instead of producing a silent no-op in-game.
+func messagesFromLegacy(list []LegacyShutdownMessage) Messages {
+	var messages Messages
+	for _, entry := range list {
+		switch {
+		case entry.OnConnect:
+			if messages.Welcome == nil {
+				messages.Welcome = &WelcomeMessage{Text: entry.Text, Delay: entry.Delay}
+			}
+		case entry.Deadline > 0:
+			if messages.Shutdown == nil {
+				messages.Shutdown = &ShutdownMessage{
+					Deadline:   entry.Deadline,
+					Text:       entry.Text,
+					StopServer: entry.Shutdown,
+				}
+			}
+		case entry.Repeat > 0:
+			messages.Cyclic = append(messages.Cyclic, CyclicMessage{Every: entry.Repeat, Text: entry.Text})
+		default:
+			logger.Warn("Ignoring 'shutdown_messages' entry without deadline, repeat or on_connect",
+				"text", entry.Text)
+		}
+	}
+	return messages
 }
 
 var yamlLineRE = regexp.MustCompile(`(?:^|\s)line (\d+):`)

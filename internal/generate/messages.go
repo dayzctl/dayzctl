@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"reflect"
 	"text/template"
 
 	"github.com/dayzctl/dayzctl/internal/config"
@@ -16,33 +17,34 @@ import (
 var messagesTmpl string
 
 // messagesFile is the root <messages> element of a mission's db/messages.xml.
-// messageEntry is a single <message> entry used to render the template.
-// Note: config values for Deadline and Repeat are expressed in minutes; the
-// generator writes them as minutes in the produced db/messages.xml.
+// messageEntry is a single <message> entry: the three config sections
+// (welcome, cyclic, shutdown) all end up here, one per message kind.
+// All time values are written in minutes, which is DayZ's unit.
 type messageEntry struct {
-	ID          int
-	Deadline    int // minutes
-	Repeat      int // minutes
-	PlayerCount int
-	Shutdown    int
-	Text        string
+	Delay     int // minutes after connect, welcome messages only
+	Repeat    int // minutes between broadcasts, cyclic messages only
+	Deadline  int // minutes after server start, shutdown countdown only
+	OnConnect int // 0/1
+	Shutdown  int // 0/1
+	Text      string
 }
 
 // resolvedMission is one mission (map) folder that receives a messages.xml,
-// together with the message list that belongs to it.
+// together with the messages that belong to it.
 type resolvedMission struct {
 	Template  string
 	Instances []string
-	Messages  []config.ShutdownMessage
+	Messages  config.Messages
+	override  bool // set when an instance defined its own messages block
 }
 
 // GenerateMessages writes db/messages.xml once for every mission (map) used by
 // the given instances. DayZ reads the file from the mission folder
 // (<installDir>/mpmissions/<template>/db/messages.xml), so it is shared by all
 // instances running that mission - writing it per instance would overwrite the
-// same path repeatedly. The top-level shutdown_messages are used for every
-// mission; a (deprecated) instance-level block overrides them for its own
-// mission. Missions with nothing configured are left untouched.
+// same path repeatedly. The top-level 'messages' block is used for every
+// mission; a (deprecated) instance-level block overrides it for its own
+// mission. Missions with no messages configured are left untouched.
 func GenerateMessages(cfg *config.ServerConfig, instances []*config.Instance) error {
 	missions, err := resolveMissions(cfg, instances)
 	if err != nil {
@@ -57,19 +59,20 @@ func GenerateMessages(cfg *config.ServerConfig, instances []*config.Instance) er
 	return nil
 }
 
-// resolveMissions groups instances by mission template and picks the message
-// list for each of them.
+// resolveMissions groups instances by mission template and picks the messages
+// for each of them.
 func resolveMissions(cfg *config.ServerConfig, instances []*config.Instance) ([]resolvedMission, error) {
 	byTemplate := make(map[string]*resolvedMission)
 	var order []string
 
 	for _, instance := range instances {
-		override := instance.ShutdownMessages
+		override := instance.Messages
+		hasOverride := !override.Empty()
 		if instance.Template == "" {
-			if len(override) > 0 {
+			if hasOverride {
 				return nil, fmt.Errorf("instance %s has no mission 'template' set", instance.Name)
 			}
-			if len(cfg.ShutdownMessages) > 0 {
+			if !cfg.Messages.Empty() {
 				logger.Warn("Instance has no mission 'template', skipping its messages.xml", "instance", instance.Name)
 			}
 			continue
@@ -82,14 +85,15 @@ func resolveMissions(cfg *config.ServerConfig, instances []*config.Instance) ([]
 			order = append(order, instance.Template)
 		}
 
-		if len(override) > 0 {
-			if mission.Messages != nil && !sameMessages(mission.Messages, override) {
+		if hasOverride {
+			if mission.override && !sameMessages(mission.Messages, override) {
 				return nil, fmt.Errorf(
-					"instances %v share mission %s but define different shutdown_messages; messages.xml is per mission, so move the block to the top-level 'shutdown_messages'",
+					"instances %v share mission %s but define different messages; messages.xml is per mission, so move the block to the top-level 'messages'",
 					append(mission.Instances, instance.Name), instance.Template)
 			}
 			mission.Messages = override
-			logger.Warn("Instance-level shutdown_messages are deprecated: messages.xml is stored per mission (map), not per instance; move the block to the top-level 'shutdown_messages'",
+			mission.override = true
+			logger.Warn("Instance-level 'messages' is deprecated: messages.xml is stored per mission (map), not per instance; move the block to the top-level 'messages'",
 				"instance", instance.Name, "mission", instance.Template)
 		}
 		mission.Instances = append(mission.Instances, instance.Name)
@@ -98,14 +102,14 @@ func resolveMissions(cfg *config.ServerConfig, instances []*config.Instance) ([]
 	resolved := make([]resolvedMission, 0, len(order))
 	for _, template := range order {
 		mission := byTemplate[template]
-		if mission.Messages == nil {
-			mission.Messages = cfg.ShutdownMessages
-		} else if len(cfg.ShutdownMessages) > 0 {
-			logger.Warn("Top-level shutdown_messages ignored for this mission because an instance overrides them",
+		if !mission.override {
+			mission.Messages = cfg.Messages
+		} else if !cfg.Messages.Empty() {
+			logger.Warn("Top-level 'messages' ignored for this mission because an instance overrides them",
 				"mission", template, "instances", mission.Instances)
 		}
-		if len(mission.Messages) == 0 {
-			logger.Debug("No shutdown_messages configured, leaving messages.xml untouched", "mission", template)
+		if mission.Messages.Empty() {
+			logger.Debug("No messages configured, leaving messages.xml untouched", "mission", template)
 			continue
 		}
 		resolved = append(resolved, *mission)
@@ -113,37 +117,14 @@ func resolveMissions(cfg *config.ServerConfig, instances []*config.Instance) ([]
 	return resolved, nil
 }
 
-// sameMessages reports whether two message lists are identical.
-func sameMessages(a, b []config.ShutdownMessage) bool {
-	if len(a) != len(b) {
-		return false
-	}
-	for i := range a {
-		if a[i] != b[i] {
-			return false
-		}
-	}
-	return true
+// sameMessages reports whether two message blocks are identical.
+func sameMessages(a, b config.Messages) bool {
+	return reflect.DeepEqual(a, b)
 }
 
 // generateMissionMessages writes db/messages.xml for a single mission.
 func generateMissionMessages(installDir string, mission resolvedMission) error {
-	// Build template data. Keep values in minutes (no conversion).
-	var msgs []messageEntry
-	for i, m := range mission.Messages {
-		shutdown := 0
-		if m.Shutdown {
-			shutdown = 1
-		}
-		msgs = append(msgs, messageEntry{
-			ID:          i,
-			Deadline:    m.Deadline,
-			Repeat:      m.Repeat,
-			PlayerCount: m.PlayerCount,
-			Shutdown:    shutdown,
-			Text:        m.Text,
-		})
-	}
+	msgs := buildMessageEntries(mission.Messages)
 
 	dbDir := filepath.Join(installDir, "mpmissions", mission.Template, "db")
 	if err := os.MkdirAll(dbDir, 0755); err != nil {
@@ -172,6 +153,41 @@ func generateMissionMessages(installDir string, mission resolvedMission) error {
 	}
 	logger.Info("Wrote messages.xml", "path", path, "mission", mission.Template, "instances", mission.Instances)
 	return nil
+}
+
+// buildMessageEntries turns the configured messages into template data: one
+// welcome message, then the cyclic broadcasts, then the shutdown countdown.
+func buildMessageEntries(messages config.Messages) []messageEntry {
+	entries := make([]messageEntry, 0, len(messages.Cyclic)+2)
+
+	if welcome := messages.Welcome; welcome != nil {
+		entries = append(entries, messageEntry{
+			Delay:     welcome.Delay,
+			OnConnect: 1,
+			Text:      welcome.Text,
+		})
+	}
+
+	for _, cyclic := range messages.Cyclic {
+		entries = append(entries, messageEntry{
+			Repeat: cyclic.Every,
+			Text:   cyclic.Text,
+		})
+	}
+
+	if shutdown := messages.Shutdown; shutdown != nil {
+		shutdownFlag := 0
+		if shutdown.StopServer {
+			shutdownFlag = 1
+		}
+		entries = append(entries, messageEntry{
+			Deadline: shutdown.Deadline,
+			Shutdown: shutdownFlag,
+			Text:     shutdown.Text,
+		})
+	}
+
+	return entries
 }
 
 // MessagesPath returns the path where messages.xml would be written for

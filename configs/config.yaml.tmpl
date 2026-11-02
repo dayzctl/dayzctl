@@ -35,25 +35,33 @@ instances:
     # with: go run ./tools/mapfetch -map chernarusplus -zooms 3,4
     # map: nasdara
 
-# Scheduled restart warnings + graceful shutdown (DayZ "Server Messages").
+# DayZ server messages ("Server Messages").
 #
 # DayZ reads messages.xml from the MISSION folder, not per instance, so this
 # block is defined once here and written to the mission of every map in use:
 #   <installDir>/mpmissions/<template>/db/messages.xml
 # Instances sharing a template share the file; each distinct map gets a copy.
-# Every value is in minutes, relative to server start. A message with
-# 'deadline' is a countdown: DayZ announces it at 90, 60, 45, 30, 20, 15, 10,
-# 5, 2 and 1 minutes before the deadline, and 'shutdown: true' makes the server
-# save and exit when it is reached (ignored without 'deadline'). Placeholders:
-# #name (server name), #port (server port), #tmin (minutes remaining).
-shutdown_messages:
-  # 6h - 5 minutes => 355 minutes
-  - deadline: 355  # 6h - 5 min
-    text: "Server restart in 5 minutes"
-  # 6h => 360 minutes
-  - deadline: 360  # 6h
-    text: "Server is restarting now!"
-    shutdown: true
+# Every time value is in minutes, relative to server start.
+# Placeholders: #name (server name), #port (server port), #tmin (minutes left,
+# shutdown countdown only). DayZ caps each text at 160 characters.
+messages:
+  # Sent once to every player that connects ('delay' waits that many minutes).
+  welcome:
+    text: "Welcome to #name, enjoy your stay!"
+    delay: 0
+
+  # Broadcast to everyone, one entry per message.
+  cyclic:
+    - every: 30
+      text: "You're playing on #name. Thank you for joining us!"
+
+  # Restart countdown. DayZ announces it at 90, 60, 45, 30, 20, 15, 10, 5, 2
+  # and 1 minutes before 'deadline'; 'stop_server: true' saves the world and
+  # exits once it is reached (without it, only warnings are sent).
+  shutdown:
+    deadline: 360
+    text: "#name will restart in #tmin minutes."
+    stop_server: true
 
 # Backup settings
 backup:

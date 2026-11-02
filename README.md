@@ -242,11 +242,11 @@ dayzctl stop <instance> --force           # skip graceful attempt and stop immed
 dayzctl restart <instance> --timeout 120  # wait up to 120s, then restart
 ```
 
-- Scheduled warnings and self-shutdown: configure `shutdown_messages` **once at the top level** of the config to
-	write the mission `db/messages.xml` of every map in use (broadcasts countdown warnings and can trigger the
-	server's built-in graceful shutdown when a message has `shutdown: true`). DayZ reads the file from the
-	mission folder, not per instance, so it is generated once per mission template - instances sharing a map
-	share the file. These files are written to:
+- Scheduled warnings and self-shutdown: configure the top-level `messages` block once and it is written to
+	the mission `db/messages.xml` of every map in use. DayZ reads the file from the mission folder, not per
+	instance, so it is generated once per mission template - instances sharing a map share the file. The block
+	has one section per kind of message: `welcome` (sent on connect), `cyclic` (repeated broadcasts) and
+	`shutdown` (restart countdown + optional graceful exit). These files are written to:
 
 ```
 <installDir>/mpmissions/<template>/db/messages.xml

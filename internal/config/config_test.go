@@ -116,6 +116,84 @@ func TestLoadWarnsAboutTabIndentation(t *testing.T) {
 	}
 }
 
+func TestLoadTranslatesLegacyShutdownMessages(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.yaml")
+	body := `steam:
+  username: "x"
+paths:
+  base: "/srv/dayz"
+instances:
+  - name: dayz
+    port: 2302
+    template: dayzOffline.chernarusplus
+shutdown_messages:
+  - deadline: 360
+    text: "Restart in #tmin minutes"
+    shutdown: true
+  - repeat: 30
+    text: "Join our Discord"
+  - on_connect: true
+    delay: 2
+    text: "Welcome to #name"
+`
+	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg, err := Load(path)
+	if err != nil {
+		t.Fatalf("Load error: %v", err)
+	}
+
+	if len(cfg.ShutdownMessages) != 0 {
+		t.Errorf("legacy list should be cleared after translation, got %+v", cfg.ShutdownMessages)
+	}
+	if cfg.Messages.Shutdown == nil {
+		t.Fatal("expected a shutdown message")
+	}
+	if got := cfg.Messages.Shutdown; got.Deadline != 360 || !got.StopServer || got.Text != "Restart in #tmin minutes" {
+		t.Errorf("shutdown = %+v", got)
+	}
+	if len(cfg.Messages.Cyclic) != 1 || cfg.Messages.Cyclic[0].Every != 30 {
+		t.Errorf("cyclic = %+v", cfg.Messages.Cyclic)
+	}
+	if cfg.Messages.Welcome == nil || cfg.Messages.Welcome.Delay != 2 {
+		t.Errorf("welcome = %+v", cfg.Messages.Welcome)
+	}
+}
+
+func TestLoadKeepsInstanceMessagesOverride(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.yaml")
+	body := `steam:
+  username: "x"
+paths:
+  base: "/srv/dayz"
+instances:
+  - name: dayz
+    port: 2302
+    template: dayzOffline.chernarusplus
+    messages:
+      shutdown:
+        deadline: 120
+        text: "Instance restart in #tmin minutes"
+`
+	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg, err := Load(path)
+	if err != nil {
+		t.Fatalf("Load error: %v", err)
+	}
+	if cfg.Messages.Empty() != true {
+		t.Errorf("top-level messages should stay empty, got %+v", cfg.Messages)
+	}
+	inst := cfg.Instances[0]
+	if inst.Messages.Shutdown == nil || inst.Messages.Shutdown.Deadline != 120 {
+		t.Errorf("instance messages = %+v", inst.Messages)
+	}
+}
+
 func TestWebAuthValidation(t *testing.T) {
 	cases := []struct {
 		name string
