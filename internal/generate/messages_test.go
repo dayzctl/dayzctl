@@ -16,9 +16,9 @@ func TestGenerateMessagesWritesExpectedXML(t *testing.T) {
 	cfg := &config.ServerConfig{
 		Paths: config.Paths{Base: tmp},
 		Messages: config.Messages{
-			Welcome:  &config.WelcomeMessage{Text: "Welcome to #name"},
-			Cyclic:   []config.CyclicMessage{{Every: 30, Text: "Join our Discord"}},
-			Shutdown: &config.ShutdownMessage{Deadline: 360, Text: "Restart in #tmin minutes", StopServer: true},
+			Welcome:   &config.WelcomeMessage{Text: "Welcome to #name"},
+			Cyclic:    []config.CyclicMessage{{Every: 30, Text: "Join our Discord"}},
+			Countdown: &config.CountdownMessage{Deadline: 360, Text: "Restart in #tmin minutes", StopServer: true},
 		},
 	}
 
@@ -82,9 +82,9 @@ func TestMinutesAreWrittenAsMinutes(t *testing.T) {
 	cfg := &config.ServerConfig{
 		Paths: config.Paths{Base: tmp},
 		Messages: config.Messages{
-			Welcome:  &config.WelcomeMessage{Text: "welcome", Delay: 2},
-			Cyclic:   []config.CyclicMessage{{Every: 15, Text: "cyclic"}},
-			Shutdown: &config.ShutdownMessage{Deadline: 120, Text: "shutdown"},
+			Welcome:   &config.WelcomeMessage{Text: "welcome", Delay: 2},
+			Cyclic:    []config.CyclicMessage{{Every: 15, Text: "cyclic"}},
+			Countdown: &config.CountdownMessage{Deadline: 120, Text: "shutdown"},
 		},
 	}
 	inst := &config.Instance{Name: "conv", Template: "dayzOffline.chernarusplus"}
@@ -151,7 +151,7 @@ func TestGenerateMessagesWritesOncePerMission(t *testing.T) {
 	cfg := &config.ServerConfig{
 		Paths: config.Paths{Base: tmp},
 		Messages: config.Messages{
-			Shutdown: &config.ShutdownMessage{Deadline: 360, Text: "Restart in #tmin minutes", StopServer: true},
+			Countdown: &config.CountdownMessage{Deadline: 360, Text: "Restart in #tmin minutes", StopServer: true},
 		},
 	}
 
@@ -219,14 +219,14 @@ func TestGenerateMessagesInstanceOverrideKeepsWorking(t *testing.T) {
 	tmp := t.TempDir()
 	cfg := &config.ServerConfig{
 		Paths:    config.Paths{Base: tmp},
-		Messages: config.Messages{Shutdown: &config.ShutdownMessage{Deadline: 360, Text: "global #tmin"}},
+		Messages: config.Messages{Countdown: &config.CountdownMessage{Deadline: 360, Text: "global #tmin"}},
 	}
 
 	instances := []*config.Instance{
 		{
 			Name:     "custom",
 			Template: "dayzOffline.enoch",
-			Messages: config.Messages{Shutdown: &config.ShutdownMessage{Deadline: 120, Text: "custom #tmin"}},
+			Messages: config.Messages{Countdown: &config.CountdownMessage{Deadline: 120, Text: "custom #tmin"}},
 		},
 		{Name: "plain", Template: "dayzOffline.chernarusplus"},
 	}
@@ -262,12 +262,12 @@ func TestGenerateMessagesRejectsConflictingOverrides(t *testing.T) {
 		{
 			Name:     "a",
 			Template: "dayzOffline.chernarusplus",
-			Messages: config.Messages{Shutdown: &config.ShutdownMessage{Deadline: 60, Text: "a #tmin"}},
+			Messages: config.Messages{Countdown: &config.CountdownMessage{Deadline: 60, Text: "a #tmin"}},
 		},
 		{
 			Name:     "b",
 			Template: "dayzOffline.chernarusplus",
-			Messages: config.Messages{Shutdown: &config.ShutdownMessage{Deadline: 90, Text: "b #tmin"}},
+			Messages: config.Messages{Countdown: &config.CountdownMessage{Deadline: 90, Text: "b #tmin"}},
 		},
 	}
 
@@ -286,7 +286,7 @@ func TestGenerateMessagesRequiresTemplate(t *testing.T) {
 
 	inst := &config.Instance{
 		Name:     "myserver",
-		Messages: config.Messages{Shutdown: &config.ShutdownMessage{Deadline: 60, Text: "hi"}},
+		Messages: config.Messages{Countdown: &config.CountdownMessage{Deadline: 60, Text: "hi"}},
 	}
 
 	if err := GenerateMessages(cfg, []*config.Instance{inst}); err == nil {
@@ -298,7 +298,7 @@ func TestOutputUsesLFOnly(t *testing.T) {
 	tmp := t.TempDir()
 	cfg := &config.ServerConfig{
 		Paths:    config.Paths{Base: tmp},
-		Messages: config.Messages{Shutdown: &config.ShutdownMessage{Deadline: 1, Text: "eol test"}},
+		Messages: config.Messages{Countdown: &config.CountdownMessage{Deadline: 1, Text: "eol test"}},
 	}
 	inst := &config.Instance{Name: "eol", Template: "dayzOffline.chernarusplus"}
 

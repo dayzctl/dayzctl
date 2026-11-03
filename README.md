@@ -246,7 +246,8 @@ dayzctl restart <instance> --timeout 120  # wait up to 120s, then restart
 	the mission `db/messages.xml` of every map in use. DayZ reads the file from the mission folder, not per
 	instance, so it is generated once per mission template - instances sharing a map share the file. The block
 	has one section per kind of message: `welcome` (sent on connect), `cyclic` (repeated broadcasts, optionally also
-	sent on connect) and `shutdown` (restart countdown + optional graceful exit). These files are written to:
+	sent on connect) and `countdown` (DayZ's Countdown flag, with `stop_server` for the graceful exit). These files
+	are written to:
 
 ```
 <installDir>/mpmissions/<template>/db/messages.xml

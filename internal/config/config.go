@@ -173,12 +173,18 @@ type ModRef struct {
 // mission folder, so it is generated once per map in use rather than per
 // instance. The three sections mirror the three kinds of message DayZ knows.
 type Messages struct {
-	// Welcome is sent once to every player that connects.
+	// Welcome is sent once to every player that connects (On connect flag).
 	Welcome *WelcomeMessage `yaml:"welcome,omitempty"`
-	// Cyclic messages are broadcast to all players at a fixed interval.
+	// Cyclic messages are broadcast to all players at a fixed interval
+	// (Repeat flag, optionally combined with On connect).
 	Cyclic []CyclicMessage `yaml:"cyclic,omitempty"`
-	// Shutdown is the restart countdown (and optional graceful exit).
-	Shutdown *ShutdownMessage `yaml:"shutdown,omitempty"`
+	// Countdown enables the Countdown flag: DayZ announces the message at 90,
+	// 60, 45, 30, 20, 15, 10, 5, 2 and 1 minutes before its deadline, and
+	// StopServer adds the Shutdown flag on top of it.
+	Countdown *CountdownMessage `yaml:"countdown,omitempty"`
+	// Shutdown is the previous name of Countdown; it is translated with a
+	// deprecation warning by normalizeMessages.
+	Shutdown *CountdownMessage `yaml:"shutdown,omitempty"`
 }
 
 // WelcomeMessage is shown once to every connecting player.
@@ -205,24 +211,26 @@ type CyclicMessage struct {
 	Delay int `yaml:"delay,omitempty"`
 }
 
-// ShutdownMessage is the restart countdown. DayZ announces it at 90, 60, 45,
-// 30, 20, 15, 10, 5, 2 and 1 minutes before Deadline, measured from server
-// start, and - when StopServer is set - saves the world and exits once the
-// deadline is reached. That is the server's own "gentle" shutdown mechanism,
-// distinct from killing the process externally.
-type ShutdownMessage struct {
+// CountdownMessage enables DayZ's Countdown flag: the message is sent to all
+// players 90, 60, 45, 30, 20, 15, 10, 5, 2 and 1 minutes before Deadline
+// (measured from server start). When StopServer is set, DayZ also saves the
+// world and exits once the countdown reaches zero - the server's own "gentle"
+// shutdown, distinct from killing the process externally. Without the
+// countdown the Shutdown flag is ignored.
+type CountdownMessage struct {
 	// Deadline is the number of minutes after server start at which the
-	// countdown reaches zero.
+	// countdown reaches zero; > 0 is what turns the Countdown flag on.
 	Deadline int `yaml:"deadline"`
 	// Text is the countdown message; #tmin expands to the minutes remaining.
 	Text string `yaml:"text"`
-	// StopServer saves and exits the server when the countdown reaches zero.
+	// StopServer enables the Shutdown flag: save and exit when the countdown
+	// reaches zero.
 	StopServer bool `yaml:"stop_server,omitempty"`
 }
 
 // Empty reports whether no message is configured at all.
 func (m Messages) Empty() bool {
-	return m.Welcome == nil && len(m.Cyclic) == 0 && m.Shutdown == nil
+	return m.Welcome == nil && len(m.Cyclic) == 0 && m.Countdown == nil && m.Shutdown == nil
 }
 
 // LegacyShutdownMessage is a single entry of the pre-2.x 'shutdown_messages'
@@ -524,6 +532,8 @@ func Load(path string) (*ServerConfig, error) {
 // mixed the three kinds of DayZ message into one entry each) into the typed
 // 'messages' block, so older configs keep working unchanged.
 func (c *ServerConfig) normalizeMessages() {
+	c.migrateMessagesBlock(&c.Messages)
+
 	if len(c.ShutdownMessages) > 0 {
 		if c.Messages.Empty() {
 			c.Messages = messagesFromLegacy(c.ShutdownMessages)
@@ -538,6 +548,7 @@ func (c *ServerConfig) normalizeMessages() {
 
 	for i := range c.Instances {
 		inst := &c.Instances[i]
+		c.migrateMessagesBlock(&inst.Messages)
 		if len(inst.ShutdownMessages) == 0 {
 			continue
 		}
@@ -546,6 +557,19 @@ func (c *ServerConfig) normalizeMessages() {
 		logger.Warn("instance-level 'shutdown_messages' is deprecated; messages.xml is per mission (map), so move the block to the top-level 'messages'",
 			"instance", inst.Name)
 	}
+}
+
+// migrateMessagesBlock handles the rename of the 'shutdown' section to
+// 'countdown', the name DayZ uses for the flag that deadline switches on.
+func (c *ServerConfig) migrateMessagesBlock(messages *Messages) {
+	if messages.Shutdown == nil {
+		return
+	}
+	if messages.Countdown == nil {
+		messages.Countdown = messages.Shutdown
+		logger.Warn("'messages.shutdown' is deprecated; the section is now 'messages.countdown' (the Shutdown flag is its 'stop_server' field)")
+	}
+	messages.Shutdown = nil
 }
 
 // messagesFromLegacy maps a legacy entry list onto the three message kinds.
@@ -569,8 +593,8 @@ func messagesFromLegacy(list []LegacyShutdownMessage) Messages {
 				messages.Welcome = &WelcomeMessage{Text: entry.Text, Delay: entry.Delay}
 			}
 		case entry.Deadline > 0:
-			if messages.Shutdown == nil {
-				messages.Shutdown = &ShutdownMessage{
+			if messages.Countdown == nil {
+				messages.Countdown = &CountdownMessage{
 					Deadline:   entry.Deadline,
 					Text:       entry.Text,
 					StopServer: entry.Shutdown,

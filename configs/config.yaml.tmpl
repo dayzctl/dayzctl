@@ -61,10 +61,11 @@ messages:
       delay: 1
       text: "Join our Discord: discord.gg/example"
 
-  # Restart countdown. DayZ announces it at 90, 60, 45, 30, 20, 15, 10, 5, 2
-  # and 1 minutes before 'deadline'; 'stop_server: true' saves the world and
-  # exits once it is reached (without it, only warnings are sent).
-  shutdown:
+  # Countdown flag: DayZ announces this message at 90, 60, 45, 30, 20, 15, 10,
+  # 5, 2 and 1 minutes before 'deadline'. 'stop_server: true' adds the Shutdown
+  # flag on top of it: the world is saved and the server exits when the
+  # countdown reaches zero (DayZ ignores 'stop_server' without a countdown).
+  countdown:
     deadline: 360
     text: "#name will restart in #tmin minutes."
     stop_server: true

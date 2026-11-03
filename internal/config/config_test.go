@@ -148,10 +148,10 @@ shutdown_messages:
 	if len(cfg.ShutdownMessages) != 0 {
 		t.Errorf("legacy list should be cleared after translation, got %+v", cfg.ShutdownMessages)
 	}
-	if cfg.Messages.Shutdown == nil {
+	if cfg.Messages.Countdown == nil {
 		t.Fatal("expected a shutdown message")
 	}
-	if got := cfg.Messages.Shutdown; got.Deadline != 360 || !got.StopServer || got.Text != "Restart in #tmin minutes" {
+	if got := cfg.Messages.Countdown; got.Deadline != 360 || !got.StopServer || got.Text != "Restart in #tmin minutes" {
 		t.Errorf("shutdown = %+v", got)
 	}
 	if len(cfg.Messages.Cyclic) != 1 || cfg.Messages.Cyclic[0].Every != 30 {
@@ -198,6 +198,41 @@ shutdown_messages:
 	}
 }
 
+func TestLoadMigratesMessagesShutdownToCountdown(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "config.yaml")
+	body := `steam:
+  username: "x"
+paths:
+  base: "/srv/dayz"
+instances:
+  - name: dayz
+    port: 2302
+    template: dayzOffline.chernarusplus
+messages:
+  shutdown:
+    deadline: 360
+    text: "Restart in #tmin minutes"
+    stop_server: true
+`
+	if err := os.WriteFile(path, []byte(body), 0o644); err != nil {
+		t.Fatal(err)
+	}
+
+	cfg, err := Load(path)
+	if err != nil {
+		t.Fatalf("Load error: %v", err)
+	}
+	if cfg.Messages.Shutdown != nil {
+		t.Errorf("legacy 'shutdown' section should be cleared, got %+v", cfg.Messages.Shutdown)
+	}
+	if cfg.Messages.Countdown == nil {
+		t.Fatal("expected the section to be migrated to 'countdown'")
+	}
+	if got := cfg.Messages.Countdown; got.Deadline != 360 || !got.StopServer {
+		t.Errorf("countdown = %+v", got)
+	}
+}
+
 func TestLoadKeepsInstanceMessagesOverride(t *testing.T) {
 	path := filepath.Join(t.TempDir(), "config.yaml")
 	body := `steam:
@@ -225,7 +260,7 @@ instances:
 		t.Errorf("top-level messages should stay empty, got %+v", cfg.Messages)
 	}
 	inst := cfg.Instances[0]
-	if inst.Messages.Shutdown == nil || inst.Messages.Shutdown.Deadline != 120 {
+	if inst.Messages.Countdown == nil || inst.Messages.Countdown.Deadline != 120 {
 		t.Errorf("instance messages = %+v", inst.Messages)
 	}
 }

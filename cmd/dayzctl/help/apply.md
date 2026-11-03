@@ -17,9 +17,10 @@ kind of DayZ message, every time value is in minutes:
   cyclic:    broadcasts to everyone, 'every' = minutes between them;
              'on_connect: true' also sends that message on connect
              (optionally after 'delay' minutes)
-  shutdown:  restart countdown; DayZ announces it at 90, 60, 45, 30, 20,
-             15, 10, 5, 2 and 1 minutes before 'deadline', and
-             'stop_server: true' saves state and exits when it is reached
+  countdown: enables DayZ's Countdown flag - the message is announced at 90,
+             60, 45, 30, 20, 15, 10, 5, 2 and 1 minutes before 'deadline';
+             'stop_server: true' adds the Shutdown flag so the server saves
+             state and exits when the countdown reaches zero
 
 Placeholders: #name (server name), #port (server port), #tmin (minutes
 remaining, countdown only). Missions with nothing configured keep their

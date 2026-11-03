@@ -31,10 +31,12 @@ type cyclicEntry struct {
 	Text      string
 }
 
-// shutdownEntry is the restart countdown written as <deadline>.
-type shutdownEntry struct {
+// countdownEntry enables DayZ's Countdown flag: the message is announced 90,
+// 60, 45, 30, 20, 15, 10, 5, 2 and 1 minutes before Deadline, and Stop adds
+// the Shutdown flag so the server saves and exits when it is reached.
+type countdownEntry struct {
 	Deadline int
-	Stop     bool // save and exit when the countdown reaches zero
+	Stop     bool
 	Text     string
 }
 
@@ -43,9 +45,9 @@ type shutdownEntry struct {
 // message carries <onconnect>, a cyclic one <repeat>, the countdown
 // <deadline> (plus <shutdown> when the server should stop).
 type messagesData struct {
-	Welcome  *welcomeEntry
-	Cyclic   []cyclicEntry
-	Shutdown *shutdownEntry
+	Welcome   *welcomeEntry
+	Cyclic    []cyclicEntry
+	Countdown *countdownEntry
 }
 
 // resolvedMission is one mission (map) folder that receives a messages.xml,
@@ -192,11 +194,11 @@ func buildMessagesData(messages config.Messages) messagesData {
 		})
 	}
 
-	if shutdown := messages.Shutdown; shutdown != nil {
-		data.Shutdown = &shutdownEntry{
-			Deadline: shutdown.Deadline,
-			Stop:     shutdown.StopServer,
-			Text:     shutdown.Text,
+	if countdown := messages.Countdown; countdown != nil {
+		data.Countdown = &countdownEntry{
+			Deadline: countdown.Deadline,
+			Stop:     countdown.StopServer,
+			Text:     countdown.Text,
 		}
 	}
 
