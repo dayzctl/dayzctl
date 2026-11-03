@@ -113,7 +113,10 @@ unticked until you select it.
   (22:00 → 04:00) is treated as a window across midnight.
 - **Map** — positions with kills, trails, bases, heatmap and position jumps.
   Trails are drawn by default: per-player lines for the 12 busiest players on a
-  normalised timeline, or for whichever players are ticked. Kills, build actions
+  normalised timeline, or for whichever players are ticked. A trail uses the
+  same colour as its player's name everywhere else in the UI (Players, Kills,
+  Base building, Suspicious and the *Players* picker), so a line can be matched
+  to a name without a legend. Kills, build actions
   and position jumps leave a dot; hovering one names the event (time, players,
   item), and a dot shared by several events lists the players involved.
   *Players* is a multi-select list (limited to players with samples inside the

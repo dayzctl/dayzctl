@@ -64,13 +64,24 @@ export function truncate(text, max = 120) {
   return `${s.slice(0, max - 1)}…`;
 }
 
-/** Deterministic colour from a string, for per-player accents. */
-export function colorFor(name) {
+/** Deterministic hue (0-359) from a string, for per-player accents. */
+export function hueFor(name) {
   let h = 0;
   for (let i = 0; i < name.length; i++) {
     h = (h * 31 + name.codePointAt(i)) % 360;
   }
-  return `hsl(${h} 62% 58%)`;
+  return h;
+}
+
+/**
+ * Deterministic colour from a string, for per-player accents. Passing an
+ * `alpha` below 1 returns the same hue as an hsla(), so translucent drawings
+ * (map trails) stay recognisably the same player colour as the lists.
+ */
+export function colorFor(name, alpha) {
+  const h = hueFor(name);
+  if (alpha === undefined || alpha >= 1) return `hsl(${h} 62% 58%)`;
+  return `hsla(${h} 62% 58% / ${alpha})`;
 }
 
 /** Case-insensitive, diacritic-insensitive key used to merge player names. */

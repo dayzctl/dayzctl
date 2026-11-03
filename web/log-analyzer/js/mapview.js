@@ -8,6 +8,8 @@
  * DayZ world coordinates are metres: x = east, z = south, y = up.
  */
 
+import { colorFor } from './format.js';
+
 /**
  * World size inferred from the analysed positions, so a map without metadata
  * still scales sensibly.
@@ -404,11 +406,13 @@ export function renderMap(canvas, report, state) {
       ? adm.players.filter((p) => state.selectedKeys.includes(p.key)).slice(0, 40)
       : adm.players.slice(0, 12);
 
-    chosen.forEach((p, i) => {
+    chosen.forEach((p) => {
       const pts = p.positions.filter((s) => s.at !== null && s.at !== undefined && inWindow(s.at));
       if (pts.length < 2) return;
       ctx.beginPath();
-      ctx.strokeStyle = `hsla(${(i * 47) % 360} 78% 62% / 0.75)`;
+      // Same colour as the player's row in the picker and the tables, so a
+      // trail can be matched to a name without a legend.
+      ctx.strokeStyle = colorFor(p.name, 0.8);
       // Round caps keep corners smooth; the width stays readable but does not
       // swallow the imagery when several trails overlap.
       ctx.lineWidth = 1.8;
