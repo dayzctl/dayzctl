@@ -140,16 +140,18 @@ The world size follows the selected map; typing a number overrides it, and
 without map metadata the size is inferred from the ADM positions, rounded up to
 whole kilometres.
 
-The canvas is sized to the window — as wide as its card, but never taller than
-the space left once the toolbar, legend and hint are accounted for — so opening
-the tab brings the whole map into view instead of a long page. On short windows
-the card tightens (hidden hint, smaller paddings) to keep the map on screen.
+The canvas is sized to the window — as wide as its card, and as tall as the
+space left once the toolbar, legend and hint are accounted for — so opening the
+tab brings the whole map into view instead of a long page. On short windows the
+card tightens (hidden hint, smaller paddings) to keep the map on screen.
 
-The map zooms and pans: the wheel zooms about the pointer, dragging moves the
-view, double-click (or **Fit**) returns to the whole map. Zoom stops at 1× — the
-map can never be zoomed out past its own size — and panning is clamped to the
-map edges, so there is no empty space around it. Zooming in stops where the
-tile pyramid runs out, about 4× upscaling, instead of turning into mush.
+The map fills that area at 1×: the side that is short is cropped rather than
+letterboxed, so a wide window gets a big map instead of a small square. The map
+zooms and pans: the wheel zooms about the pointer, dragging moves the view,
+**Fit** (or a double-click) zooms out to the whole map, which is the lowest zoom
+level — below it the map would sit in a frame of empty space. Panning is clamped
+to the map edges, so there is no empty space around it. Zooming in stops where
+the tile pyramid runs out, about 4× upscaling, instead of turning into mush.
 
 ### Map imagery and place names
 

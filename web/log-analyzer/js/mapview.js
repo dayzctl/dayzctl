@@ -31,27 +31,30 @@ const HEAT_ROWS = 96;
 export const MAX_MAP_ZOOM = 64;
 
 /**
- * Resolves the viewport for a square canvas of `size` CSS pixels.
+ * Resolves the viewport for a canvas of `width` × `height` CSS pixels.
  *
- * `zoom` 1 means the whole map fits (the map can never be zoomed out past its
- * own size), and the centre is clamped so no empty space can be dragged into
- * view.
+ * Zoom 1 means *fill*: the map covers the whole canvas, so a wide panel is
+ * filled edge to edge instead of letterboxing a small square in the middle.
+ * Zooming out below 1 (down to `minZoom`, the fit scale) brings the entire map
+ * back into view. The centre is clamped so no empty space can be dragged in.
  *
- * @returns {{zoom:number, k:number, cx:number, cy:number}} k = CSS px per metre
+ * @returns {{zoom:number, k:number, cx:number, cy:number, minZoom:number}}
+ *          k = CSS px per metre
  */
 export function clampView(world, zoom, width, height, cx, cy) {
   const w = world > 0 ? world : 15360;
-  const z = Math.min(MAX_MAP_ZOOM, Math.max(1, Number(zoom) || 1));
-  // Zoom 1 has to show the whole map, so the scale follows the shorter side of
-  // the canvas and the rest is letterboxed.
-  const k = (Math.min(width, height) / w) * z;
+  const cover = Math.max(width, height) / w;
+  const fit = Math.min(width, height) / w;
+  const minZoom = cover > 0 ? Math.min(1, fit / cover) : 1;
+  const z = Math.min(MAX_MAP_ZOOM, Math.max(minZoom, Number(zoom) || 1));
+  const k = cover * z;
   const axis = (c, size) => {
     const half = size / (2 * k);
     if (2 * half >= w) return w / 2;
     const v = Number.isFinite(c) ? c : w / 2;
     return Math.min(Math.max(v, half), w - half);
   };
-  return { zoom: z, k, cx: axis(cx, width), cy: axis(cy, height) };
+  return { zoom: z, k, cx: axis(cx, width), cy: axis(cy, height), minZoom };
 }
 
 /* ── Tile imagery ──────────────────────────────────────────
@@ -209,11 +212,11 @@ export function renderMap(canvas, report, state) {
   const ctx = canvas.getContext('2d');
   if (!ctx) return;
 
-  // Fit the map to the space it can actually use: as wide as its card, but never
-  // taller than the window allows once the controls above it are accounted for,
-  // so neither the map nor the page has to scroll.
-  const cssWidth = Math.max(200, Math.round(canvas.parentElement?.clientWidth ?? 640));
-  const cssHeight = Math.max(200, Math.min(cssWidth, availableHeight(canvas)));
+  // Use every pixel the card can give: the full width and the height left once
+  // the controls are accounted for. The map then scales to cover that area
+  // (see clampView), so a wide window gets a big map instead of a small square.
+  const cssWidth = Math.max(240, Math.round(canvas.parentElement?.clientWidth ?? 640));
+  const cssHeight = Math.max(240, availableHeight(canvas));
   const dpr = Math.min(window.devicePixelRatio || 1, 2);
 
   canvas.width = Math.round(cssWidth * dpr);
@@ -239,6 +242,9 @@ export function renderMap(canvas, report, state) {
   state.viewport = { ...vp, world, width: cssWidth, height: cssHeight, left: x0, top: y0 };
   canvas.dataset.zoom = vp.zoom.toFixed(2);
   canvas.dataset.center = `${Math.round(vp.cx)},${Math.round(vp.cy)}`;
+  // A resize can clamp the zoom (the fit scale follows the canvas shape), so
+  // the caller gets the viewport that was actually drawn.
+  if (typeof state.onViewport === 'function') state.onViewport(state.viewport);
 
   // ── background ───────────────────────────────────────────
   ctx.fillStyle = '#0a0d10';

@@ -1327,15 +1327,23 @@ export function renderMapPanel(panel, report, state, relayout) {
   };
 
   // ── zoom & pan ───────────────────────────────────────────
-  // Wheel zooms about the pointer, dragging pans, double-click fits the map
-  // again. clampView keeps the zoom at >= 1 (the whole map) and stops panning
-  // from revealing empty space around it.
+  // Wheel zooms about the pointer, dragging pans, **Fit**/double-click shows the
+  // whole map. Zoom 1 fills the canvas (a wide panel gets a wide map); the
+  // floor is the fit scale, where the entire map is visible. clampView stops
+  // panning from revealing empty space around it.
   const zoomLabel = el('span', { class: 'map-zoom-value', text: '1.0×' });
 
   const syncZoomLabel = () => {
     zoomLabel.textContent = `${(mapState.zoom || 1).toFixed(1)}×`;
   };
   syncZoomLabel();
+
+  // The renderer may clamp the zoom to the fit scale after a resize; keep the
+  // stored zoom and the readout on the value that was actually drawn.
+  view.onViewport = (vp) => {
+    mapState.zoom = vp.zoom;
+    syncZoomLabel();
+  };
 
   // `view` is the snapshot the renderer draws, so zoom and pan have to be copied
   // into it as well, not only into mapState.
@@ -1347,26 +1355,28 @@ export function renderMapPanel(panel, report, state, relayout) {
   };
 
   // Zooming in past the deepest tile level just stretches pixels, so the
-  // ceiling follows the map's own pyramid (about 4x upscaling at most).
+  // ceiling follows the map's own pyramid (about 4x upscaling at most). The
+  // scale is driven by the canvas's longer side, since the map covers it.
   const zoomCeiling = () => {
     const vp = view.viewport;
     const tileMax = state.mapMeta?.maxZoom;
     if (!vp) return MAX_MAP_ZOOM;
     if (!tileMax) return 16; // no imagery: the grid has nothing to resolve
-    const limit = (4 * 2 ** tileMax * 256) / Math.max(1, vp.width);
+    const limit = (4 * 2 ** tileMax * 256) / Math.max(1, vp.width, vp.height);
     return Math.max(2, Math.min(MAX_MAP_ZOOM, limit));
   };
 
   const zoomTo = (nextZoom, anchorX = null, anchorY = null) => {
     const vp = view.viewport;
     if (!vp) return;
-    const zoom = Math.min(zoomCeiling(), Math.max(1, nextZoom));
+    // Zoom 1 fills the canvas; the floor is the scale that fits the whole map.
+    const zoom = Math.min(zoomCeiling(), Math.max(vp.minZoom ?? 1, nextZoom));
     const ax = anchorX ?? vp.width / 2;
     const ay = anchorY ?? vp.height / 2;
     // World point currently under the anchor stays put while scaling.
     const worldX = vp.cx + (ax - vp.width / 2) / vp.k;
     const worldY = vp.cy - (ay - vp.height / 2) / vp.k;
-    const kNext = (Math.min(vp.width, vp.height) / vp.world) * zoom;
+    const kNext = (Math.max(vp.width, vp.height) / vp.world) * zoom;
     const clamped = clampView(
       vp.world,
       zoom,
@@ -1378,6 +1388,17 @@ export function renderMapPanel(panel, report, state, relayout) {
     mapState.zoom = clamped.zoom;
     mapState.centerX = clamped.cx;
     mapState.centerY = clamped.cy;
+    syncZoomLabel();
+    applyViewport();
+  };
+
+  // Back to the whole map, centred: the only zoom level that shows everything.
+  const zoomToFit = () => {
+    const vp = view.viewport;
+    if (!vp) return;
+    mapState.zoom = vp.minZoom ?? 1;
+    mapState.centerX = null;
+    mapState.centerY = null;
     syncZoomLabel();
     applyViewport();
   };
@@ -1441,7 +1462,7 @@ export function renderMapPanel(panel, report, state, relayout) {
     { passive: false },
   );
 
-  canvas.addEventListener('dblclick', () => zoomTo(1));
+  canvas.addEventListener('dblclick', () => zoomToFit());
 
   // Player picker: any combination of players can be ticked, instead of
   // all-or-one. The set is shared with the Players tab, so ticks made there
@@ -1755,7 +1776,7 @@ export function renderMapPanel(panel, report, state, relayout) {
               class: 'btn tiny',
               text: 'Fit',
               title: 'Show the whole map (double-click)',
-              onClick: () => zoomTo(1),
+              onClick: () => zoomToFit(),
             }),
           ),
         ),

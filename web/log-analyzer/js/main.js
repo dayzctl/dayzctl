@@ -85,7 +85,8 @@ const state = {
   map: {
     // 0 means "use the selected map's own extent".
     worldSize: 0,
-    // Zoom 1 fits the whole map; the view can never be zoomed out past it.
+    // Zoom 1 fills the canvas (a wide panel gets a wide map); zooming out as
+    // far as the fit scale shows the whole map at once.
     zoom: 1,
     centerX: null,
     centerY: null,
