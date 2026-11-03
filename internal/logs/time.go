@@ -94,8 +94,12 @@ func (c *Clock) Stamp(secs float64, day *time.Time) float64 {
 		// Only a large backwards jump means "new day"; small ones are
 		// out-of-order lines within the same day.
 		c.dayOffset += 86400
-	}
-	if !c.started || secs > c.lastSecs {
+		// The clock now lives on the new day, so the reference time has to
+		// follow it. Leaving lastSecs on yesterday's late hour would roll the
+		// day over again on every following line, drifting the timeline into
+		// the future by one day per event.
+		c.lastSecs = secs
+	} else if !c.started || secs > c.lastSecs {
 		c.lastSecs = secs
 	}
 	c.started = true

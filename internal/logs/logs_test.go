@@ -82,6 +82,47 @@ func TestClockKeepsOutOfOrderLinesOnSameDay(t *testing.T) {
 	}
 }
 
+func TestClockRollsOverOnlyOncePerDay(t *testing.T) {
+	var c Clock
+	late := c.Stamp(21*3600+16*60, nil) // 21:16
+	// DayZ restarts and keeps writing to the same ADM file: the next line is
+	// 08:35 the following morning, a jump back of more than 12 hours.
+	first := c.Stamp(8*3600+35*60, nil)
+	if want := late + (11*3600 + 19*60); first != want {
+		t.Fatalf("first line of the new day = %v, want %v", first, want)
+	}
+	// Every later line of that day must land on the same day, not roll over
+	// again just because the clock is still behind yesterday's 21:16.
+	for _, tod := range []float64{8*3600 + 46*60, 9*3600 + 2*60, 14*3600 + 38*60, 23*3600 + 59*60} {
+		got := c.Stamp(tod, nil)
+		if want := first - (8*3600 + 35*60) + tod; got != want {
+			t.Fatalf("stamp(%v) = %v, want %v", tod, got, want)
+		}
+	}
+}
+
+func TestAdmParserKeepsOneDayPerRestart(t *testing.T) {
+	p := &AdmParser{}
+	lines := []string{
+		`AdminLog started on 2026-10-18 at 20:09:11`,
+		`21:16:03 | Player "Survivor" (id=abc pos=<100, 200, 0>) is connected`,
+		`08:35:35 | Player "Survivor" (id=abc pos=<100, 200, 0>) is connected`,
+		`08:45:55 | Player "Survivor" (id=abc pos=<100, 200, 0>) is connected`,
+	}
+	for _, line := range lines {
+		p.Feed(line)
+	}
+	if len(p.Events) != 3 {
+		t.Fatalf("events = %d, want 3", len(p.Events))
+	}
+	if got := p.Events[2].T - p.Events[1].T; got != 10*60+20 {
+		t.Fatalf("gap between the two morning lines = %.0fs, want 620s (a day rolled over twice?)", got)
+	}
+	if got := p.Events[1].T - p.Events[0].T; got != (11*3600 + 19*60 + 32) {
+		t.Fatalf("gap across the restart = %.0fs, want %.0fs", got, 11*3600+19*60+32.0)
+	}
+}
+
 func TestParseAdmMessage(t *testing.T) {
 	cases := []struct {
 		msg  string
