@@ -1327,10 +1327,10 @@ export function renderMapPanel(panel, report, state, relayout) {
   };
 
   // ── zoom & pan ───────────────────────────────────────────
-  // Wheel zooms about the pointer, dragging pans, **Fit**/double-click shows the
-  // whole map. Zoom 1 fills the canvas (a wide panel gets a wide map); the
-  // floor is the fit scale, where the entire map is visible. clampView stops
-  // panning from revealing empty space around it.
+  // Wheel zooms about the pointer, dragging pans, **Fit**/double-click returns
+  // to 1×, where the map's width matches the frame exactly. Zooming in is
+  // allowed; zooming out below 1× is not, so the frame never shows empty bands
+  // on the sides. clampView stops panning from revealing empty space.
   const zoomLabel = el('span', { class: 'map-zoom-value', text: '1.0×' });
 
   const syncZoomLabel = () => {
@@ -1355,28 +1355,28 @@ export function renderMapPanel(panel, report, state, relayout) {
   };
 
   // Zooming in past the deepest tile level just stretches pixels, so the
-  // ceiling follows the map's own pyramid (about 4x upscaling at most). The
-  // scale is driven by the canvas's longer side, since the map covers it.
+  // ceiling follows the map's own pyramid (about 4x upscaling at most). Zoom 1
+  // already fits the map's width to the canvas.
   const zoomCeiling = () => {
     const vp = view.viewport;
     const tileMax = state.mapMeta?.maxZoom;
     if (!vp) return MAX_MAP_ZOOM;
     if (!tileMax) return 16; // no imagery: the grid has nothing to resolve
-    const limit = (4 * 2 ** tileMax * 256) / Math.max(1, vp.width, vp.height);
+    const limit = (4 * 2 ** tileMax * 256) / Math.max(1, vp.width);
     return Math.max(2, Math.min(MAX_MAP_ZOOM, limit));
   };
 
   const zoomTo = (nextZoom, anchorX = null, anchorY = null) => {
     const vp = view.viewport;
     if (!vp) return;
-    // Zoom 1 fills the canvas; the floor is the scale that fits the whole map.
-    const zoom = Math.min(zoomCeiling(), Math.max(vp.minZoom ?? 1, nextZoom));
+    // Zoom 1 fits the map's width; it cannot be zoomed out past that.
+    const zoom = Math.min(zoomCeiling(), Math.max(1, nextZoom));
     const ax = anchorX ?? vp.width / 2;
     const ay = anchorY ?? vp.height / 2;
     // World point currently under the anchor stays put while scaling.
     const worldX = vp.cx + (ax - vp.width / 2) / vp.k;
     const worldY = vp.cy - (ay - vp.height / 2) / vp.k;
-    const kNext = (Math.max(vp.width, vp.height) / vp.world) * zoom;
+    const kNext = (vp.width / vp.world) * zoom;
     const clamped = clampView(
       vp.world,
       zoom,
@@ -1392,11 +1392,9 @@ export function renderMapPanel(panel, report, state, relayout) {
     applyViewport();
   };
 
-  // Back to the whole map, centred: the only zoom level that shows everything.
+  // Back to width fit, centred: the widest the map can be shown.
   const zoomToFit = () => {
-    const vp = view.viewport;
-    if (!vp) return;
-    mapState.zoom = vp.minZoom ?? 1;
+    mapState.zoom = 1;
     mapState.centerX = null;
     mapState.centerY = null;
     syncZoomLabel();
@@ -1775,7 +1773,7 @@ export function renderMapPanel(panel, report, state, relayout) {
               type: 'button',
               class: 'btn tiny',
               text: 'Fit',
-              title: 'Show the whole map (double-click)',
+              title: 'Fit the map width to the frame (double-click)',
               onClick: () => zoomToFit(),
             }),
           ),
