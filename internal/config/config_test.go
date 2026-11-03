@@ -244,7 +244,7 @@ instances:
     port: 2302
     template: dayzOffline.chernarusplus
     messages:
-      shutdown:
+      countdown:
         deadline: 120
         text: "Instance restart in #tmin minutes"
 `

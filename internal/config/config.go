@@ -518,7 +518,7 @@ func Load(path string) (*ServerConfig, error) {
 		return nil, fmt.Errorf("failed to parse config YAML: %w%s", err, yamlContext(data, err))
 	}
 
-	cfg.normalizeMessages()
+	cfg.normalizeMessages(path)
 	cfg.SetDefaults()
 
 	if err := cfg.Validate(); err != nil {
@@ -531,43 +531,44 @@ func Load(path string) (*ServerConfig, error) {
 // normalizeMessages translates the deprecated 'shutdown_messages' list (which
 // mixed the three kinds of DayZ message into one entry each) into the typed
 // 'messages' block, so older configs keep working unchanged.
-func (c *ServerConfig) normalizeMessages() {
-	c.migrateMessagesBlock(&c.Messages)
+func (c *ServerConfig) normalizeMessages(path string) {
+	c.migrateMessagesBlock(&c.Messages, path)
 
 	if len(c.ShutdownMessages) > 0 {
 		if c.Messages.Empty() {
 			c.Messages = messagesFromLegacy(c.ShutdownMessages)
 			logger.Warn("'shutdown_messages' is deprecated; it was translated into the new 'messages' block",
-				"key", "shutdown_messages", "replacement", "messages")
+				"path", path, "key", "shutdown_messages", "replacement", "messages")
 		} else {
 			logger.Warn("'shutdown_messages' is deprecated and ignored because 'messages' is configured",
-				"key", "shutdown_messages")
+				"path", path, "key", "shutdown_messages")
 		}
 		c.ShutdownMessages = nil
 	}
 
 	for i := range c.Instances {
 		inst := &c.Instances[i]
-		c.migrateMessagesBlock(&inst.Messages)
+		c.migrateMessagesBlock(&inst.Messages, path)
 		if len(inst.ShutdownMessages) == 0 {
 			continue
 		}
 		inst.Messages = messagesFromLegacy(inst.ShutdownMessages)
 		inst.ShutdownMessages = nil
 		logger.Warn("instance-level 'shutdown_messages' is deprecated; messages.xml is per mission (map), so move the block to the top-level 'messages'",
-			"instance", inst.Name)
+			"path", path, "instance", inst.Name)
 	}
 }
 
 // migrateMessagesBlock handles the rename of the 'shutdown' section to
 // 'countdown', the name DayZ uses for the flag that deadline switches on.
-func (c *ServerConfig) migrateMessagesBlock(messages *Messages) {
+func (c *ServerConfig) migrateMessagesBlock(messages *Messages, path string) {
 	if messages.Shutdown == nil {
 		return
 	}
 	if messages.Countdown == nil {
 		messages.Countdown = messages.Shutdown
-		logger.Warn("'messages.shutdown' is deprecated; the section is now 'messages.countdown' (the Shutdown flag is its 'stop_server' field)")
+		logger.Warn("'messages.shutdown' is deprecated; rename it to 'messages.countdown' (the Shutdown flag moved to its 'stop_server' field)",
+			"path", path)
 	}
 	messages.Shutdown = nil
 }
