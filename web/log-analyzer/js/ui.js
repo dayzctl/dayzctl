@@ -1327,10 +1327,10 @@ export function renderMapPanel(panel, report, state, relayout) {
   };
 
   // ── zoom & pan ───────────────────────────────────────────
-  // Wheel zooms about the pointer, dragging pans, **Fit**/double-click returns
-  // to 1×, where the map's width matches the frame exactly. Zooming in is
-  // allowed; zooming out below 1× is not, so the frame never shows empty bands
-  // on the sides. clampView stops panning from revealing empty space.
+  // Wheel (and Safari pinch) zooms about the pointer, double-click zooms in at
+  // the pointer, dragging pans, **Fit**/returns to 1× where the map's width
+  // matches the frame exactly. Zooming out below 1× is not allowed, so the
+  // frame never shows empty bands on the sides.
   const zoomLabel = el('span', { class: 'map-zoom-value', text: '1.0×' });
 
   const syncZoomLabel = () => {
@@ -1368,7 +1368,14 @@ export function renderMapPanel(panel, report, state, relayout) {
 
   const zoomTo = (nextZoom, anchorX = null, anchorY = null) => {
     const vp = view.viewport;
-    if (!vp) return;
+    // Before the first paint there is no viewport to anchor to; keep the
+    // requested zoom anyway so early clicks are not lost.
+    if (!vp) {
+      mapState.zoom = Math.max(1, Math.min(zoomCeiling(), nextZoom));
+      syncZoomLabel();
+      applyViewport();
+      return;
+    }
     // Zoom 1 fits the map's width; it cannot be zoomed out past that.
     const zoom = Math.min(zoomCeiling(), Math.max(1, nextZoom));
     const ax = anchorX ?? vp.width / 2;
@@ -1448,19 +1455,45 @@ export function renderMapPanel(panel, report, state, relayout) {
     }
   });
 
-  canvas.addEventListener(
-    'wheel',
-    (event) => {
+  canvas.addEventListener('wheel', (event) => {
       if (!view.viewport) return;
       event.preventDefault();
       const rect = canvas.getBoundingClientRect();
-      const factor = Math.exp(-event.deltaY * 0.0015);
+      // deltaY is in pixels in Chrome/Safari but in *lines* (or pages) in
+      // Firefox and on most real mice. Without this the factor stays ~0.995
+      // per notch there and the map looks like it refuses to zoom.
+      const vp = view.viewport;
+      const unit = event.deltaMode === 1 ? 24 : event.deltaMode === 2 ? vp.height : 1;
+      const delta = Math.max(-400, Math.min(400, event.deltaY * unit));
+      const factor = Math.exp(-delta * 0.0015);
       zoomTo((mapState.zoom || 1) * factor, event.clientX - rect.left, event.clientY - rect.top);
     },
     { passive: false },
   );
 
-  canvas.addEventListener('dblclick', () => zoomToFit());
+  // Double-click zooms in where the pointer is; **Fit** is the way back out.
+  canvas.addEventListener('dblclick', (event) => {
+    const rect = canvas.getBoundingClientRect();
+    zoomTo((mapState.zoom || 1) * 1.6, event.clientX - rect.left, event.clientY - rect.top);
+  });
+
+  // Safari reports trackpad pinch as gesture events (not wheel), so hook them
+  // too or pinch-zooming the map does nothing there.
+  let gestureZoom = null;
+  canvas.addEventListener('gesturestart', (event) => {
+    event.preventDefault();
+    gestureZoom = mapState.zoom || 1;
+  });
+  canvas.addEventListener('gesturechange', (event) => {
+    event.preventDefault();
+    if (gestureZoom === null) return;
+    const rect = canvas.getBoundingClientRect();
+    zoomTo(gestureZoom * (event.scale || 1), event.clientX - rect.left, event.clientY - rect.top);
+  });
+  canvas.addEventListener('gestureend', (event) => {
+    event.preventDefault();
+    gestureZoom = null;
+  });
 
   // Player picker: any combination of players can be ticked, instead of
   // all-or-one. The set is shared with the Players tab, so ticks made there
@@ -1773,7 +1806,7 @@ export function renderMapPanel(panel, report, state, relayout) {
               type: 'button',
               class: 'btn tiny',
               text: 'Fit',
-              title: 'Fit the map width to the frame (double-click)',
+              title: 'Back to the width fit (zoom 1×)',
               onClick: () => zoomToFit(),
             }),
           ),

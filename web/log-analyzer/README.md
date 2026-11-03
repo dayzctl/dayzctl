@@ -149,11 +149,12 @@ the map on screen.
 The map fits that frame by **width**: at 1× one world width spans the whole
 canvas, so a wide window gets a big map instead of a small square with empty
 space on the sides. The surplus height is cropped, not letterboxed. The map
-zooms and pans: the wheel zooms about the pointer, dragging moves the view, and
-**Fit** (or a double-click) returns to the width fit. That is also the lowest
-zoom — it can never be zoomed out to show empty bands beside the map — while
-panning is clamped to the map edges. Zooming in stops where the tile pyramid
-runs out, about 4× upscaling, instead of turning into mush.
+zooms and pans: the wheel (or a trackpad pinch) zooms about the pointer, a
+double-click zooms in at the pointer, dragging moves the view, and **Fit**
+returns to the width fit. That is also the lowest zoom — it can never be zoomed
+out to show empty bands beside the map — while panning is clamped to the map
+edges. Zooming in stops where the tile pyramid runs out, about 4× upscaling,
+instead of turning into mush.
 
 ### Map imagery and place names
 
