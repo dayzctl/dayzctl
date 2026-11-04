@@ -829,5 +829,9 @@
       "y": 4759.1,
       "kind": "citycenter"
     }
+  ],
+  "styles": [
+    "satellite",
+    "topographic"
   ]
 }

@@ -373,5 +373,9 @@
       "y": 7051.9,
       "kind": "local"
     }
+  ],
+  "styles": [
+    "satellite",
+    "topographic"
   ]
 }

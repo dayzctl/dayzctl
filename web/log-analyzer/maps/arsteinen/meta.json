@@ -571,5 +571,9 @@
       "y": 9631.1,
       "kind": "viewpoint"
     }
+  ],
+  "styles": [
+    "satellite",
+    "topographic"
   ]
 }

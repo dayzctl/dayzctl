@@ -158,7 +158,7 @@
       "kind": "local"
     },
     {
-      "name": "Azak Port & Ind.",
+      "name": "Azak Port \u0026 Ind.",
       "x": 6611.3,
       "y": 3763.6,
       "kind": "local"
@@ -325,5 +325,9 @@
       "y": 6998.9,
       "kind": "mediummilitary"
     }
+  ],
+  "styles": [
+    "satellite",
+    "topographic"
   ]
 }

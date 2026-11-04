@@ -7,7 +7,7 @@ then in `/usr/local/share/dayzctl/maps`, then in `/usr/share/dayzctl/maps` (see
 the root `README.md`). The web service never downloads map data while it runs,
 so the Map tab works without internet access.
 
-46 maps ship here (33 MB): the vanilla terrains plus the community maps
+46 maps ship here (65 MB): the vanilla terrains plus the community maps
 published on the map host — Chernarus, Livonia, Sakhal, Namalsk, Deer Isle,
 Esseker, Banov, Namalsk, Pripyat, Takistan Plus and the rest. Each map carries
 its own world size and place names, so an instance only needs
@@ -16,9 +16,24 @@ its own world size and place names, so an instance only needs
 Layout:
 
 ```
-<map>/meta.json          world size, zoom range, attribution, place names
-<map>/<z>/<x>/<y>.webp   one tile (256 px, 2^z tiles per side)
+<map>/meta.json                        world size, zooms, place names, styles
+<map>/<style>/<z>/<x>/<y>.webp         one tile (256 px, 2^z tiles per side)
 ```
+
+## Styles
+
+Two basemaps are published for almost every map, and the UI switches between
+them freely:
+
+| style | what it is | when to use it |
+| --- | --- | --- |
+| `satellite` | the photograph of the terrain | recognising buildings and tree lines |
+| `topographic` | a drawn map carrying the road network | following trails and kills along roads and streets |
+
+The Map tab opens on `topographic`, because roads and streets stay readable
+under trails and dots, and the **Basemap** picker switches to the photograph.
+A map generated before styles existed has no `styles` key in `meta.json` and is
+served as satellite-only.
 
 Tiles are WebP where the map host serves WebP and JPEG where it serves JPEG;
 `meta.json` records which, and the server sends the matching content type.
@@ -26,20 +41,23 @@ Tiles are WebP where the map host serves WebP and JPEG where it serves JPEG;
 ## Regenerating
 
 ```sh
-go run ./tools/mapfetch -list                     # ids the map host publishes
-go run ./tools/mapfetch -all -zooms 3             # every map, 64 tiles each
-go run ./tools/mapfetch -map nasdara -zooms 3,4   # one map, extra detail
+go run ./tools/mapfetch -list                            # ids the map host publishes
+go run ./tools/mapfetch -all                            # every map, both styles
+go run ./tools/mapfetch -map nasdara -zooms 3,4         # one map, extra detail
+go run ./tools/mapfetch -map nasdara -styles topographic  # one style only
 # or: make maps-all ZOOMS=3   /   make maps MAP=chernarusplus ZOOMS=3,4
 ```
 
 The generator resolves each map's current version, converts the published place
 names to DayZ world metres and writes the tiles. It skips anything already
-present, so an interrupted run resumes; `-force` re-downloads. Removing a map is
-just deleting its directory — `meta.json` is what the server offers.
+present, so an interrupted run resumes and a second run only adds what is
+missing; without `-zooms` it reuses the zoom levels the map already has on disk.
+`-force` re-downloads. Removing a map is just deleting its directory —
+`meta.json` is what the server offers.
 
 ## Zoom levels
 
-One zoom level costs `4^z` tiles. For a 16 km map:
+One zoom level costs `4^z` tiles per style. For a 16 km map:
 
 | zooms | tiles | size | detail |
 | --- | --- | --- | --- |

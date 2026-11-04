@@ -158,27 +158,32 @@ instead of turning into mush.
 
 ### Map imagery and place names
 
-The Map tab shows satellite tiles plus place names for the selected map, served
-by `dayzctl` itself:
+The Map tab shows tiles plus place names for the selected map, served by
+`dayzctl` itself. Two basemaps ship for every map and the **Basemap** picker
+switches between them: **Roads & streets** (the drawn road map, and the default,
+because trails and dots stay readable on it) and **Satellite** (the photograph of
+the terrain). Older map data without a road map opens on satellite alone.
 
 | Endpoint | Purpose |
 | --- | --- |
-| `GET /api/maps` | installed maps (id, name, extent, zoom range) |
-| `GET /api/maps/{map}/meta` | world size, zoom limits, tile URL template, place names |
-| `GET /api/maps/{map}/tiles/{z}/{x}/{y}` | one pyramid tile |
+| `GET /api/maps` | installed maps (id, name, extent, zoom range, styles) |
+| `GET /api/maps/{map}/meta` | world size, zoom limits, styles, default style, tile URL template, place names |
+| `GET /api/maps/{map}/tiles/{style}/{z}/{x}/{y}` | one pyramid tile |
+| `GET /api/maps/{map}/tiles/{z}/{x}/{y}` | the same for the satellite imagery |
 
 The map is chosen with `instances[].map` and **defaults to the instance name**,
 so an instance called `nasdara` shows Nasdara with no configuration at all.
 Only maps bundled with the binary are offered.
 
 **Nothing is downloaded at runtime.** Map data is generated ahead of time and
-committed under `web/log-analyzer/maps/<map>/`, then embedded into the binary —
-so the service works with no internet access and never depends on a third-party
-host being up. To refresh a map (or add another one), regenerate the files:
+committed under `web/log-analyzer/maps/<map>/<style>/`, then embedded into the
+binary — so the service works with no internet access and never depends on a
+third-party host being up. To refresh a map (or add another one), regenerate the
+files:
 
 ```sh
-go run ./tools/mapfetch -map nasdara -zooms 3,4      # ~5.6 MB, 320 tiles
-go run ./tools/mapfetch -map chernarusplus -zooms 3,4
+go run ./tools/mapfetch -map nasdara -zooms 3,4      # both basemaps, 640 tiles
+go run ./tools/mapfetch -map chernarusplus           # keeps the zooms it has
 ```
 
 The generator converts each map's place names to DayZ world metres and writes

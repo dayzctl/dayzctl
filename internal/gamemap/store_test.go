@@ -6,16 +6,19 @@ import (
 )
 
 // testFS mirrors the layout tools/mapfetch writes:
-// <map>/meta.json and <map>/<z>/<x>/<y>.<format>.
+// <map>/<style>/<z>/<x>/<y>.<format>, plus the flat layout used before styles
+// existed.
 func testFS() fstest.MapFS {
 	return fstest.MapFS{
 		"nasdara/meta.json": &fstest.MapFile{Data: []byte(`{
 			"id":"nasdara","name":"Nasdara","size":16384,"format":"webp",
 			"tileSize":256,"minZoom":3,"maxZoom":4,
+			"styles":["satellite","topographic"],
 			"names":[{"name":"Dashtabad","x":10655.3,"y":10792.1,"kind":"city"}]
 		}`)},
-		"nasdara/3/3/3.webp":   &fstest.MapFile{Data: []byte("tile-3-3-3")},
-		"nasdara/4/15/15.webp": &fstest.MapFile{Data: []byte("tile-4-15-15")},
+		"nasdara/satellite/3/3/3.webp":   &fstest.MapFile{Data: []byte("tile-3-3-3")},
+		"nasdara/satellite/4/15/15.webp": &fstest.MapFile{Data: []byte("tile-4-15-15")},
+		"nasdara/topographic/3/3/3.webp": &fstest.MapFile{Data: []byte("roads-3-3-3")},
 	}
 }
 
@@ -50,6 +53,62 @@ func TestStoreServesTiles(t *testing.T) {
 	if contentType != "image/webp" {
 		t.Errorf("content type = %q, want image/webp", contentType)
 	}
+}
+
+func TestStoreServesTopographicTiles(t *testing.T) {
+	s := New(testFS())
+
+	data, _, err := s.TileStyle("nasdara", StyleTopographic, 3, 3, 3)
+	if err != nil {
+		t.Fatalf("TileStyle: %v", err)
+	}
+	if string(data) != "roads-3-3-3" {
+		t.Errorf("data = %q, want the road-map tile", data)
+	}
+
+	// A style the map does not ship is a 404, not a wrong image.
+	if _, _, err := s.TileStyle("nasdara", StyleTopographic, 4, 15, 15); err == nil {
+		t.Error("expected an error for a tile the road map does not have")
+	}
+	// An unknown style never reaches the filesystem.
+	if _, _, err := s.TileStyle("nasdara", "../../etc", 3, 3, 3); err == nil {
+		t.Error("expected an error for an unknown style")
+	}
+	// The default style for a map that has a road map is the road map.
+	if got := mustMeta(t, s, "nasdara").DefaultStyle(); got != StyleTopographic {
+		t.Errorf("default style = %q, want %q", got, StyleTopographic)
+	}
+}
+
+// TestStoreReadsLegacyFlatTileLayout keeps older map directories, generated
+// before styles existed, working.
+func TestStoreReadsLegacyFlatTileLayout(t *testing.T) {
+	legacy := fstest.MapFS{
+		"livonia/meta.json":  &fstest.MapFile{Data: []byte(`{"id":"livonia","size":12800,"maxZoom":3}`)},
+		"livonia/3/1/2.webp": &fstest.MapFile{Data: []byte("legacy-tile")},
+	}
+	s := New(legacy)
+
+	data, _, err := s.Tile("livonia", 3, 1, 2)
+	if err != nil {
+		t.Fatalf("Tile: %v", err)
+	}
+	if string(data) != "legacy-tile" {
+		t.Errorf("data = %q, want the legacy tile", data)
+	}
+	// With no styles in the metadata the map is satellite-only.
+	if got := mustMeta(t, s, "livonia").StyleList(); len(got) != 1 || got[0] != StyleSatellite {
+		t.Errorf("styles = %v, want [satellite]", got)
+	}
+}
+
+func mustMeta(t *testing.T, s *Store, id string) *Meta {
+	t.Helper()
+	meta, err := s.Meta(id)
+	if err != nil {
+		t.Fatalf("Meta(%q): %v", id, err)
+	}
+	return meta
 }
 
 func TestStoreRejectsOutOfRangeTiles(t *testing.T) {

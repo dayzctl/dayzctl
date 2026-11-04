@@ -415,5 +415,9 @@
       "y": 7471.9,
       "kind": "city"
     }
+  ],
+  "styles": [
+    "satellite",
+    "topographic"
   ]
 }

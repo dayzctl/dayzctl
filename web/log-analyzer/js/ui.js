@@ -1100,6 +1100,12 @@ export function renderTimeline(panel, report, state) {
 
 /* ── Map ─────────────────────────────────────────────────── */
 
+// Labels for the imagery styles the server can serve.
+const MAP_STYLE_LABELS = {
+  satellite: 'Satellite',
+  topographic: 'Roads & streets',
+};
+
 // Hint under the map: explains what is drawn and how to change it.
 function mapHint(mapMeta, mapState, state) {
   const coords = 'Coordinates are DayZ world metres: x = east, y = north, z = altitude.';
@@ -1111,7 +1117,8 @@ function mapHint(mapMeta, mapState, state) {
   }
   if (mapMeta?.tileUrl) {
     const label = mapMeta.name || mapMeta.id;
-    return `Bundled imagery and place names for ${label} (${fmtInt(mapMeta.size)} m). ${coords}`;
+    const sheet = mapState.style === 'topographic' ? 'road map' : 'satellite imagery';
+    return `Bundled ${sheet} and place names for ${label} (${fmtInt(mapMeta.size)} m). ${coords}`;
   }
   if (state.mapId === '__none__') {
     return `No imagery selected \u2014 choose a map above to draw the terrain. ${coords}`;
@@ -1137,9 +1144,17 @@ export function renderMapPanel(panel, report, state, relayout) {
   const mapMeta = state.mapMeta;
   const metaWorld = mapMeta?.size ? mapMeta.size : 0;
   const effectiveWorld = mapState.worldSize || metaWorld || autoWorld;
+  // Imagery style. The drawn road map ("topographic") keeps streets readable
+  // under trails and dots, so it is the default when a map ships it; the
+  // satellite photograph is one pick away.
+  const styles = mapMeta?.styles?.length ? mapMeta.styles : ['satellite'];
+  const style = styles.includes(mapState.style) ? mapState.style : mapMeta?.defaultStyle || styles[0];
+  // Only pin the style once the map's metadata is in: before that the fallback
+  // is a guess, and writing it back would stick the map on satellite forever.
+  if (mapMeta) mapState.style = style;
   const tiles = mapMeta?.tileUrl
     ? {
-        url: mapMeta.tileUrl,
+        url: mapMeta.tileUrl.replace('{style}', style),
         minZoom: mapMeta.minZoom || 1,
         maxZoom: mapMeta.maxZoom || 7,
         names: mapMeta.names || [],
@@ -1161,7 +1176,9 @@ export function renderMapPanel(panel, report, state, relayout) {
     state.mapMetaFailed = false;
     state.mapMetaLoading = false;
     mapState.worldSize = 0;
-    // A different map means a different extent, so start from the whole view.
+    // A different map means a different extent and different styles, so start
+    // from the whole view and the map's own default basemap.
+    mapState.style = '';
     mapState.zoom = 1;
     mapState.centerX = null;
     mapState.centerY = null;
@@ -1203,6 +1220,33 @@ export function renderMapPanel(panel, report, state, relayout) {
     },
     ...mapOptions,
   );
+
+  // Basemap: the drawn road map versus the satellite photograph. Only offered
+  // when the map actually ships more than one style.
+  const styleSelect =
+    styles.length > 1
+      ? el(
+          'div',
+          { class: 'field' },
+          el('label', { text: 'Basemap' }),
+          el(
+            'select',
+            {
+              onChange: (e) => {
+                mapState.style = e.target.value;
+                state.actions.setState({});
+              },
+            },
+            ...styles.map((s) =>
+              el('option', {
+                value: s,
+                text: MAP_STYLE_LABELS[s] || s,
+                selected: s === style,
+              }),
+            ),
+          ),
+        )
+      : null;
 
   const worldInput = el('input', {
     type: 'number',
@@ -1775,6 +1819,7 @@ export function renderMapPanel(panel, report, state, relayout) {
         'div',
         { class: 'map-controls' },
         el('div', { class: 'field' }, el('label', { text: 'Map' }), mapSelect),
+        styleSelect,
         el('div', { class: 'field' }, el('label', { text: 'World size (m)' }), worldInput),
         el('div', { class: 'field' }, el('label', { text: 'Players' }), playerSelect),
         el('div', { class: 'field' }, el('label', { text: 'Custom image' }), bgInput),

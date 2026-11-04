@@ -463,5 +463,9 @@
       "y": 1880.9,
       "kind": "village"
     }
+  ],
+  "styles": [
+    "satellite",
+    "topographic"
   ]
 }

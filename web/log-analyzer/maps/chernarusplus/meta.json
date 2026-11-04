@@ -1213,5 +1213,9 @@
       "y": 10179,
       "kind": "local"
     }
+  ],
+  "styles": [
+    "satellite",
+    "topographic"
   ]
 }

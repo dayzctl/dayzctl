@@ -229,5 +229,9 @@
       "y": 6184.2,
       "kind": "namemarine"
     }
+  ],
+  "styles": [
+    "satellite",
+    "topographic"
   ]
 }

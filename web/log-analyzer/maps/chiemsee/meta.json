@@ -391,5 +391,9 @@
       "y": 8031.5,
       "kind": "marine"
     }
+  ],
+  "styles": [
+    "satellite",
+    "topographic"
   ]
 }

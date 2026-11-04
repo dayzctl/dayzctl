@@ -367,5 +367,9 @@
       "y": 6219.8,
       "kind": "ruin"
     }
+  ],
+  "styles": [
+    "satellite",
+    "topographic"
   ]
 }
