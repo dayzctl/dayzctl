@@ -283,9 +283,5 @@
       "y": 21600,
       "kind": "information"
     }
-  ],
-  "styles": [
-    "satellite",
-    "topographic"
   ]
 }

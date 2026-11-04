@@ -829,9 +829,5 @@
       "y": 12600,
       "kind": "hill"
     }
-  ],
-  "styles": [
-    "satellite",
-    "topographic"
   ]
 }

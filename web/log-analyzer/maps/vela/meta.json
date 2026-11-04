@@ -97,9 +97,5 @@
       "y": 7559.5,
       "kind": "strongpointarea"
     }
-  ],
-  "styles": [
-    "satellite",
-    "topographic"
   ]
 }

@@ -90,9 +90,6 @@ const state = {
     zoom: 1,
     centerX: null,
     centerY: null,
-    // Basemap style ("satellite" or "topographic"); empty means the map's own
-    // default, which is the road map when it is installed.
-    style: '',
     background: null,
     backgroundSource: null,
     imageUrl: '',
@@ -101,8 +98,6 @@ const state = {
     windowFrom: null,
     windowTo: null,
     layers: {
-      tiles: true,
-      names: true,
       kills: true,
       trails: true,
       builds: true,

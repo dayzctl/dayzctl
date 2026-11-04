@@ -180,17 +180,10 @@ func (s *source) config(id, rev string) (*xamConfig, error) {
 	return &cfg, nil
 }
 
-func (s *source) tile(cfg *xamConfig, style string, z, x, y int) ([]byte, error) {
-	url := fmt.Sprintf("%s/dayz/maps/%s/%s/%s/%d/%d/%d.%s",
-		staticHost, cfg.Info.TileSet, cfg.Info.TileVer, style, z, x, y, defaultString(cfg.Info.Format, "webp"))
+func (s *source) tile(cfg *xamConfig, z, x, y int) ([]byte, error) {
+	url := fmt.Sprintf("%s/dayz/maps/%s/%s/satellite/%d/%d/%d.%s",
+		staticHost, cfg.Info.TileSet, cfg.Info.TileVer, z, x, y, defaultString(cfg.Info.Format, "webp"))
 	return s.get(url)
-}
-
-// hasStyle reports whether the host publishes a tile style for this map, by
-// asking for the north-west tile of the shallowest zoom level.
-func (s *source) hasStyle(cfg *xamConfig, style string, z int) bool {
-	_, err := s.tile(cfg, style, z, 0, 0)
-	return err == nil
 }
 
 // get performs a rate-limited request with the headers the map host insists on.

@@ -26,9 +26,6 @@ type metaFile struct {
 	MinZoom  int     `json:"minZoom"`
 	MaxZoom  int     `json:"maxZoom"`
 	Names    []place `json:"names"`
-	// Styles lists the imagery styles written to disk, e.g. satellite and
-	// topographic (the road map).
-	Styles []string `json:"styles,omitempty"`
 }
 
 func writeMeta(path string, meta *metaFile) error {

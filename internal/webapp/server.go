@@ -81,7 +81,6 @@ func New(cfg *config.ServerConfig) (*Server, error) {
 	mux.HandleFunc("GET /api/maps", s.handleMaps)
 	mux.HandleFunc("GET /api/maps/{map}/meta", s.handleMapMeta)
 	mux.HandleFunc("GET /api/maps/{map}/tiles/{z}/{x}/{y}", s.handleMapTile)
-	mux.HandleFunc("GET /api/maps/{map}/tiles/{style}/{z}/{x}/{y}", s.handleMapTileStyle)
 	mux.HandleFunc("POST /api/instances/{instance}/analyze", s.handleAnalyze)
 	mux.HandleFunc("GET /login", s.handleLoginForm)
 	mux.HandleFunc("POST /login", s.handleLogin)
@@ -399,12 +398,11 @@ func mapIDFor(inst *config.Instance) string {
 // handleMaps lists the maps bundled with this binary.
 func (s *Server) handleMaps(w http.ResponseWriter, r *http.Request) {
 	type summary struct {
-		ID      string   `json:"id"`
-		Name    string   `json:"name"`
-		Size    float64  `json:"size"`
-		Names   int      `json:"names"`
-		MaxZoom int      `json:"maxZoom"`
-		Styles  []string `json:"styles"`
+		ID      string  `json:"id"`
+		Name    string  `json:"name"`
+		Size    float64 `json:"size"`
+		Names   int     `json:"names"`
+		MaxZoom int     `json:"maxZoom"`
 	}
 
 	maps := make([]summary, 0, 16)
@@ -419,7 +417,6 @@ func (s *Server) handleMaps(w http.ResponseWriter, r *http.Request) {
 			Size:    meta.Size,
 			Names:   len(meta.Names),
 			MaxZoom: meta.MaxZoom,
-			Styles:  meta.StyleList(),
 		})
 	}
 
@@ -438,33 +435,19 @@ func (s *Server) handleMapMeta(w http.ResponseWriter, r *http.Request) {
 	// The data is embedded in the binary, so it only changes with an upgrade.
 	w.Header().Set(headerCacheControl, "max-age=3600")
 	writeJSON(w, http.StatusOK, map[string]any{
-		"id":           meta.ID,
-		"name":         meta.Name,
-		"size":         meta.Size,
-		"minZoom":      meta.MinZoom,
-		"maxZoom":      meta.MaxZoom,
-		"tileSize":     meta.TileSize,
-		"names":        meta.Names,
-		"styles":       meta.StyleList(),
-		"defaultStyle": meta.DefaultStyle(),
-		"tileUrl":      "/api/maps/" + url.PathEscape(meta.ID) + "/tiles/{style}/{z}/{x}/{y}",
+		"id":       meta.ID,
+		"name":     meta.Name,
+		"size":     meta.Size,
+		"minZoom":  meta.MinZoom,
+		"maxZoom":  meta.MaxZoom,
+		"tileSize": meta.TileSize,
+		"names":    meta.Names,
+		"tileUrl":  "/api/maps/" + url.PathEscape(meta.ID) + "/tiles/{z}/{x}/{y}",
 	})
 }
 
-// handleMapTile serves one pyramid tile of the satellite imagery. The style is
-// part of the path in the URL the UI uses; this route is the default-style
-// shorthand.
+// handleMapTile serves one pyramid tile from the embedded map data.
 func (s *Server) handleMapTile(w http.ResponseWriter, r *http.Request) {
-	s.serveMapTile(w, r, gamemap.StyleSatellite)
-}
-
-// handleMapTileStyle serves one tile of an explicit style (satellite or
-// topographic).
-func (s *Server) handleMapTileStyle(w http.ResponseWriter, r *http.Request) {
-	s.serveMapTile(w, r, r.PathValue("style"))
-}
-
-func (s *Server) serveMapTile(w http.ResponseWriter, r *http.Request, style string) {
 	z, errZ := strconv.Atoi(r.PathValue("z"))
 	x, errX := strconv.Atoi(r.PathValue("x"))
 	y, errY := strconv.Atoi(r.PathValue("y"))
@@ -473,7 +456,7 @@ func (s *Server) serveMapTile(w http.ResponseWriter, r *http.Request, style stri
 		return
 	}
 
-	data, contentType, err := s.maps.TileStyle(r.PathValue("map"), style, z, x, y)
+	data, contentType, err := s.maps.Tile(r.PathValue("map"), z, x, y)
 	if err != nil {
 		writeError(w, http.StatusNotFound, err.Error())
 		return

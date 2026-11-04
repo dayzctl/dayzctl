@@ -6,9 +6,5 @@
   "tileSize": 256,
   "minZoom": 3,
   "maxZoom": 3,
-  "names": null,
-  "styles": [
-    "satellite",
-    "topographic"
-  ]
+  "names": null
 }

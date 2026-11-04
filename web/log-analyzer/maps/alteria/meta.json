@@ -205,9 +205,5 @@
       "y": 6250,
       "kind": "namehill"
     }
-  ],
-  "styles": [
-    "satellite",
-    "topographic"
   ]
 }
