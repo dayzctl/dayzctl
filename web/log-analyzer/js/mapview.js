@@ -1,9 +1,10 @@
 /**
  * Map rendering on a plain 2D canvas.
  *
- * No tiles are shipped or downloaded: DayZ map imagery is copyrighted, so the
- * default is a coordinate grid, and you can load your own map image (e.g. an
- * iZurvive screenshot or the map_dayz_chernarus.jpg from your server files).
+ * The basemap is the bundled topographic imagery of the DayZ map (a drawn road
+ * map), plus place names from the map metadata and the event overlay; without
+ * any imagery a coordinate grid is drawn, and a custom picture can be loaded
+ * instead.
  *
  * DayZ world coordinates are metres: x = east, z = south, y = up.
  */

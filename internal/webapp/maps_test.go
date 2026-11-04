@@ -3,6 +3,7 @@ package webapp
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 	"testing"
 )
 
@@ -48,6 +49,31 @@ func TestBundledMapsAreListed(t *testing.T) {
 	}
 	if !found {
 		t.Error("chernarusplus is missing from the bundled map list")
+	}
+}
+
+// Tiles are served as immutable, so the tile URL must change when the imagery
+// is regenerated — otherwise a browser keeps showing the old tiles.
+func TestMapMetaVersionsTileURL(t *testing.T) {
+	srv := newTestServer(t)
+
+	rec := do(t, srv, "GET", "/api/maps/chernarusplus/meta", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, want 200: %s", rec.Code, rec.Body.String())
+	}
+
+	var meta struct {
+		Version string `json:"version"`
+		TileURL string `json:"tileUrl"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &meta); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if meta.Version == "" {
+		t.Fatal("expected the generated map data to carry a version")
+	}
+	if !strings.Contains(meta.TileURL, "?v="+meta.Version) {
+		t.Errorf("tileUrl = %q, want it to carry ?v=%s", meta.TileURL, meta.Version)
 	}
 }
 

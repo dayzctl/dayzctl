@@ -34,6 +34,9 @@ type Meta struct {
 	MinZoom  int     `json:"minZoom"`
 	MaxZoom  int     `json:"maxZoom"`
 	Names    []Place `json:"names"`
+	// Version identifies the imagery (tile set revision + style). It is appended
+	// to tile URLs so new imagery is not served from an old browser cache.
+	Version string `json:"version,omitempty"`
 }
 
 // Store serves maps from a stack of filesystems, each holding one directory per

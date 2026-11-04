@@ -18,12 +18,30 @@ the server reads (see below).
 Layout:
 
 ```
-<map>/meta.json          world size, zoom range, attribution, place names
+<map>/meta.json          world size, zoom range, place names, data version
 <map>/<z>/<x>/<y>.webp   one tile (256 px, 2^z tiles per side)
 ```
 
+The `version` field is a fingerprint of the tiles in that directory. The server
+appends it to the tile URLs (`…/tiles/4/3/2?v=9a0e8fb355ce`), so regenerating a
+map with different imagery makes browsers fetch the new tiles instead of serving
+the old ones from a cache that was told they never change. `mapfetch -fixmeta`
+recomputes it, and the zoom range, from whatever is on disk — offline.
+
 Tiles are WebP where the map host serves WebP and JPEG where it serves JPEG;
 `meta.json` records which, and the server sends the matching content type.
+
+## Which imagery
+
+The tiles are the map host's **topographic** style: the drawn road map with
+terrain shading, forests and the road/street network, not the satellite
+photograph. That is the rendering the community map site shows by default, and
+it is the one that works under the log analyzer's trails, kill markers and build
+dots — roads stay visible instead of being lost in dark satellite imagery.
+
+The host also publishes a `satellite` style at the same URL shape; fetch it with
+`-style satellite` if you prefer the photograph (the on-disk tiles are just
+replaced, the UI has no style switch).
 
 ## Regenerating
 
@@ -35,11 +53,12 @@ go run ./tools/mapfetch -all -zooms 3                    # every published map (
 # or: make maps-all   /   make maps MAP=chernarusplus ZOOMS=3,4,5
 ```
 
-`-official` fetches the bundled six and defaults to `-zooms 3,4,5`; every other
-mode uses `-zooms` (default `3`). The generator resolves each map's current
-version, converts the published place names to DayZ world metres and writes the
-tiles. It skips anything already present, so an interrupted run resumes;
-`-force` re-downloads. Removing a map is just deleting its directory —
+`-official` fetches the bundled seven and defaults to `-zooms 3,4,5`; every other
+mode uses `-zooms` (default `3`). `-style` picks the imagery (default
+`topographic`, the alternative is `satellite`). The generator resolves each
+map's current version, converts the published place names to DayZ world metres
+and writes the tiles. It skips anything already present, so an interrupted run
+resumes; `-force` re-downloads. Removing a map is just deleting its directory —
 `meta.json` is what the server offers.
 
 To add a map without shipping it in the binary, generate it into your install's
@@ -53,16 +72,16 @@ One zoom level costs `4^z` tiles. For a 16 km map, as served by the map host:
 
 | zooms | tiles | size | detail |
 | --- | --- | --- | --- |
-| `3` | 64 | ~0.7 MB | 7.5 m per pixel — fine for the whole map at once |
-| `3,4` | 320 | ~3 MB | 3.7 m per pixel — roads stay thin when zoomed |
-| `3,4,5` | 1344 | ~11 MB | 1.9 m per pixel — street level, what the bundled maps ship |
+| `3` | 64 | ~0.9 MB | 7.5 m per pixel — fine for the whole map at once |
+| `3,4` | 320 | ~4 MB | 3.7 m per pixel — roads stay thin when zoomed |
+| `3,4,5` | 1344 | ~14 MB | 1.9 m per pixel — street level, what the bundled maps ship |
 
-The deeper levels matter because the imagery is the host's own raster, which has
-its road network already drawn in at each zoom: the more levels we ship, the
-longer roads stay crisp instead of being blown up from the coarse overview. The
-UI picks the zoom that matches the canvas size, clamps it to the range in
-`meta.json` and stops a few steps past the deepest level, so a map shipped at
-zoom 3 still renders correctly — it just cannot be zoomed in as far.
+The deeper levels matter because the imagery is the host's own raster, with the
+road network drawn in at each zoom: the more levels we ship, the longer roads
+stay crisp instead of being blown up from the coarse overview. The UI picks the
+zoom that matches the canvas size, clamps it to the range in `meta.json` and
+stops a few steps past the deepest level, so a map shipped at zoom 3 still
+renders correctly — it just cannot be zoomed in as far.
 
 ## Provenance
 

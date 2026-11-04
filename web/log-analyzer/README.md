@@ -170,9 +170,10 @@ by `dayzctl` itself:
 The map is chosen with `instances[].map` and **defaults to the instance name**,
 so an instance called `chernarusplus` shows Chernarus with no configuration at
 all. Seven maps ship with the binary — Chernarus, Livonia, Sakhal, Namalsk, Deer
-Isle, Banov and Nasdara — each with zoom levels 3 to 5, so roads stay thin and
-crisp when you zoom in (the imagery is the map host's own raster, which has the
-road network drawn in at every level).
+Isle, Banov and Nasdara — each with zoom levels 3 to 5. The tiles are the map
+host's **topographic** rendering (the drawn road map, not the satellite
+photograph), so roads and streets stay readable under the trails and dots, and
+at 1.9 m per pixel they stay sharp several zoom steps past the full-map view.
 
 **Nothing is downloaded at runtime.** Map data is generated ahead of time and
 committed under `web/log-analyzer/maps/<map>/`, then embedded into the binary —

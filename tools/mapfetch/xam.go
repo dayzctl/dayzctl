@@ -180,9 +180,17 @@ func (s *source) config(id, rev string) (*xamConfig, error) {
 	return &cfg, nil
 }
 
-func (s *source) tile(cfg *xamConfig, z, x, y int) ([]byte, error) {
-	url := fmt.Sprintf("%s/dayz/maps/%s/%s/satellite/%d/%d/%d.%s",
-		staticHost, cfg.Info.TileSet, cfg.Info.TileVer, z, x, y, defaultString(cfg.Info.Format, "webp"))
+// Imagery styles the map host publishes for most maps. The topographic one is
+// the drawn road map dayzctl ships: roads and streets stay readable under the
+// trails and event dots the log analyzer draws on top.
+const (
+	styleSatellite   = "satellite"
+	styleTopographic = "topographic"
+)
+
+func (s *source) tile(cfg *xamConfig, style string, z, x, y int) ([]byte, error) {
+	url := fmt.Sprintf("%s/dayz/maps/%s/%s/%s/%d/%d/%d.%s",
+		staticHost, cfg.Info.TileSet, cfg.Info.TileVer, style, z, x, y, defaultString(cfg.Info.Format, "webp"))
 	return s.get(url)
 }
 

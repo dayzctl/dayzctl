@@ -26,6 +26,11 @@ type metaFile struct {
 	MinZoom  int     `json:"minZoom"`
 	MaxZoom  int     `json:"maxZoom"`
 	Names    []place `json:"names"`
+	// Version identifies the imagery that was downloaded (the host's tile set
+	// revision plus the style). The server appends it to tile URLs, so a map
+	// regenerated with different imagery is refetched instead of coming from a
+	// browser cache that was told the tiles never change.
+	Version string `json:"version,omitempty"`
 }
 
 func writeMeta(path string, meta *metaFile) error {

@@ -433,7 +433,13 @@ func (s *Server) handleMapMeta(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// The data is embedded in the binary, so it only changes with an upgrade.
+	// The tiles, however, are cached as immutable by the browser: the version
+	// stamp in the tile URL is what makes regenerated imagery actually reload.
 	w.Header().Set(headerCacheControl, "max-age=3600")
+	tileURL := "/api/maps/" + url.PathEscape(meta.ID) + "/tiles/{z}/{x}/{y}"
+	if meta.Version != "" {
+		tileURL += "?v=" + url.QueryEscape(meta.Version)
+	}
 	writeJSON(w, http.StatusOK, map[string]any{
 		"id":       meta.ID,
 		"name":     meta.Name,
@@ -442,7 +448,8 @@ func (s *Server) handleMapMeta(w http.ResponseWriter, r *http.Request) {
 		"maxZoom":  meta.MaxZoom,
 		"tileSize": meta.TileSize,
 		"names":    meta.Names,
-		"tileUrl":  "/api/maps/" + url.PathEscape(meta.ID) + "/tiles/{z}/{x}/{y}",
+		"version":  meta.Version,
+		"tileUrl":  tileURL,
 	})
 }
 

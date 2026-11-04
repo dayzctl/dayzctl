@@ -14,6 +14,8 @@
 package main
 
 import (
+	"crypto/sha256"
+	"encoding/hex"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -31,16 +33,22 @@ func main() {
 		official = flag.Bool("official", false, "fetch only the bundled maps (Chernarus, Livonia, Sakhal, Namalsk, Deer Isle, Banov, Nasdara)")
 		list     = flag.Bool("list", false, "print the published map ids and exit")
 		zooms    = flag.String("zooms", "3", "comma-separated zoom levels to download (0-7)")
+		style    = flag.String("style", styleTopographic, "imagery style: topographic (road map, the default) or satellite")
 		out      = flag.String("out", "web/log-analyzer/maps", "output directory")
 		force    = flag.Bool("force", false, "re-download tiles that already exist")
 		workers  = flag.Int("workers", 2, "parallel requests inside one map")
 		par      = flag.Int("parallel", 3, "maps fetched concurrently")
 		rename   = flag.Bool("fixnames", false, "rewrite meta.json display names from the local map ids (no network)")
+		fixdata  = flag.Bool("fixmeta", false, "rewrite meta.json (zoom range, data version) from the tiles on disk (no network)")
 	)
 	flag.Parse()
 
 	if *rename {
 		fail(fixNames(*out))
+		return
+	}
+	if *fixdata {
+		fail(fixMeta(*out))
 		return
 	}
 
@@ -62,6 +70,11 @@ func main() {
 		fail(err)
 	}
 
+	sheetStyle := strings.ToLower(strings.TrimSpace(*style))
+	if sheetStyle != styleSatellite && sheetStyle != styleTopographic {
+		fail(fmt.Errorf("unknown style %q (use topographic or satellite)", *style))
+	}
+
 	src := newSource(*workers)
 
 	if *list || *all || *official {
@@ -75,14 +88,14 @@ func main() {
 			}
 			return
 		}
-		fail(fetchAll(src, ids, levels, *out, *force, *par))
+		fail(fetchAll(src, ids, levels, sheetStyle, *out, *force, *par))
 		return
 	}
 
 	if *mapID == "" {
 		fail(fmt.Errorf("nothing to do: pass -map <id>, -official, -all, or -list"))
 	}
-	fail(fetchOne(src, *mapID, levels, *out, *force))
+	fail(fetchOne(src, *mapID, levels, sheetStyle, *out, *force))
 }
 
 // officialMaps is the set bundled with the binary: the terrains most servers
@@ -109,11 +122,11 @@ func targets(src *source, official bool) ([]string, error) {
 // fetchAll downloads every published map, skipping the ones already complete.
 // Maps are fetched a few at a time: a single stream is latency-bound and a full
 // run would otherwise take close to an hour.
-func fetchAll(src *source, ids []string, zooms []int, out string, force bool, parallel int) error {
+func fetchAll(src *source, ids []string, zooms []int, style, out string, force bool, parallel int) error {
 	if parallel < 1 {
 		parallel = 1
 	}
-	fmt.Printf("fetching %d maps (zoom %v, %d at a time)\n", len(ids), zooms, parallel)
+	fmt.Printf("fetching %d maps (zoom %v, %s, %d at a time)\n", len(ids), zooms, style, parallel)
 
 	var (
 		mu     sync.Mutex
@@ -130,7 +143,7 @@ func fetchAll(src *source, ids []string, zooms []int, out string, force bool, pa
 			defer wg.Done()
 			defer func() { <-sem }()
 
-			if err := fetchOne(src, id, zooms, out, force); err != nil {
+			if err := fetchOne(src, id, zooms, style, out, force); err != nil {
 				fmt.Fprintf(os.Stderr, "  skipping %s: %v\n", id, err)
 				mu.Lock()
 				failed = append(failed, id)
@@ -153,7 +166,7 @@ func fetchAll(src *source, ids []string, zooms []int, out string, force bool, pa
 	return nil
 }
 
-func fetchOne(src *source, mapID string, zooms []int, out string, force bool) error {
+func fetchOne(src *source, mapID string, zooms []int, style, out string, force bool) error {
 	rev, err := src.revision(mapID)
 	if err != nil {
 		return err
@@ -181,7 +194,7 @@ func fetchOne(src *source, mapID string, zooms []int, out string, force bool) er
 					skipped++
 					continue
 				}
-				data, err := src.tile(cfg, z, x, y)
+				data, err := src.tile(cfg, style, z, x, y)
 				if err != nil {
 					return fmt.Errorf("tile %d/%d/%d: %w", z, x, y, err)
 				}
@@ -200,6 +213,7 @@ func fetchOne(src *source, mapID string, zooms []int, out string, force bool) er
 		return fmt.Errorf("no tiles were written")
 	}
 	meta.MinZoom, meta.MaxZoom = minZoom, maxZoom
+	meta.Version = dataVersion(dir)
 
 	if err := writeMeta(dir+"/meta.json", meta); err != nil {
 		return err
@@ -270,6 +284,78 @@ func fixNames(out string) error {
 
 	fmt.Printf("updated the name of %d map(s) in %s\n", updated, out)
 	return nil
+}
+
+// fixMeta rewrites zoom range and data version in every meta.json from the
+// tiles on disk, without touching the network. It is what a checkout of new
+// imagery needs: the version stamp is what makes browsers drop cached tiles.
+func fixMeta(out string) error {
+	entries, err := os.ReadDir(out)
+	if err != nil {
+		return err
+	}
+
+	updated := 0
+	for _, e := range entries {
+		if !e.IsDir() {
+			continue
+		}
+		dir := filepath.Join(out, e.Name())
+		path := filepath.Join(dir, "meta.json")
+		raw, err := os.ReadFile(path)
+		if err != nil {
+			continue
+		}
+
+		var meta metaFile
+		if err := json.Unmarshal(raw, &meta); err != nil {
+			fmt.Fprintf(os.Stderr, "  skipping %s: %v\n", path, err)
+			continue
+		}
+		minZoom, maxZoom, ok := detectZooms(dir)
+		if !ok {
+			fmt.Fprintf(os.Stderr, "  skipping %s: no tiles\n", path)
+			continue
+		}
+		version := dataVersion(dir)
+		if meta.MinZoom == minZoom && meta.MaxZoom == maxZoom && meta.Version == version {
+			continue
+		}
+		meta.MinZoom, meta.MaxZoom, meta.Version = minZoom, maxZoom, version
+		if err := writeMeta(path, &meta); err != nil {
+			return err
+		}
+		updated++
+	}
+
+	fmt.Printf("updated the metadata of %d map(s) in %s\n", updated, out)
+	return nil
+}
+
+// dataVersion is a short fingerprint of the tiles in dir: paths and sizes are
+// enough to notice that the imagery was regenerated, and they do not depend on
+// checkout times the way modification stamps do.
+func dataVersion(dir string) string {
+	h := sha256.New()
+	err := filepath.WalkDir(dir, func(p string, d os.DirEntry, err error) error {
+		if err != nil || d.IsDir() || filepath.Base(p) == "meta.json" {
+			return nil
+		}
+		info, err := d.Info()
+		if err != nil {
+			return nil
+		}
+		rel, err := filepath.Rel(dir, p)
+		if err != nil {
+			return nil
+		}
+		fmt.Fprintf(h, "%s:%d\n", filepath.ToSlash(rel), info.Size())
+		return nil
+	})
+	if err != nil {
+		return ""
+	}
+	return hex.EncodeToString(h.Sum(nil))[:12]
 }
 
 func parseZooms(raw string) ([]int, error) {
