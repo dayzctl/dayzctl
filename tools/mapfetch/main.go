@@ -26,15 +26,16 @@ import (
 
 func main() {
 	var (
-		mapID   = flag.String("map", "", "map id as used on the map host (nasdara, chernarusplus, livonia, …)")
-		all     = flag.Bool("all", false, "fetch every map the host publishes")
-		list    = flag.Bool("list", false, "print the published map ids and exit")
-		zooms   = flag.String("zooms", "3", "comma-separated zoom levels to download (0-7)")
-		out     = flag.String("out", "web/log-analyzer/maps", "output directory")
-		force   = flag.Bool("force", false, "re-download tiles that already exist")
-		workers = flag.Int("workers", 2, "parallel requests inside one map")
-		par     = flag.Int("parallel", 3, "maps fetched concurrently")
-		rename  = flag.Bool("fixnames", false, "rewrite meta.json display names from the local map ids (no network)")
+		mapID    = flag.String("map", "", "map id as used on the map host (nasdara, chernarusplus, livonia, …)")
+		all      = flag.Bool("all", false, "fetch every map the host publishes")
+		official = flag.Bool("official", false, "fetch only the bundled maps (Chernarus, Livonia, Sakhal, Namalsk, Deer Isle, Banov)")
+		list     = flag.Bool("list", false, "print the published map ids and exit")
+		zooms    = flag.String("zooms", "3", "comma-separated zoom levels to download (0-7)")
+		out      = flag.String("out", "web/log-analyzer/maps", "output directory")
+		force    = flag.Bool("force", false, "re-download tiles that already exist")
+		workers  = flag.Int("workers", 2, "parallel requests inside one map")
+		par      = flag.Int("parallel", 3, "maps fetched concurrently")
+		rename   = flag.Bool("fixnames", false, "rewrite meta.json display names from the local map ids (no network)")
 	)
 	flag.Parse()
 
@@ -43,15 +44,28 @@ func main() {
 		return
 	}
 
-	levels, err := parseZooms(*zooms)
+	// The bundled maps carry a deep pyramid; the default -zooms (3) is the
+	// coarse overview other maps get.
+	zoomsGiven := false
+	flag.Visit(func(f *flag.Flag) {
+		if f.Name == "zooms" {
+			zoomsGiven = true
+		}
+	})
+	sheetZooms := *zooms
+	if *official && !zoomsGiven {
+		sheetZooms = "3,4,5"
+	}
+
+	levels, err := parseZooms(sheetZooms)
 	if err != nil {
 		fail(err)
 	}
 
 	src := newSource(*workers)
 
-	if *list || *all {
-		ids, err := src.mapIDs()
+	if *list || *all || *official {
+		ids, err := targets(src, *official)
 		if err != nil {
 			fail(err)
 		}
@@ -66,9 +80,29 @@ func main() {
 	}
 
 	if *mapID == "" {
-		fail(fmt.Errorf("nothing to do: pass -map <id>, -all, or -list"))
+		fail(fmt.Errorf("nothing to do: pass -map <id>, -official, -all, or -list"))
 	}
 	fail(fetchOne(src, *mapID, levels, *out, *force))
+}
+
+// officialMaps is the set bundled with the binary: the terrains most servers
+// run, shipped with a deeper zoom pyramid than the rest of the catalogue. Every
+// other map the host publishes can still be fetched with -map.
+var officialMaps = []string{
+	"chernarusplus",
+	"livonia",
+	"sakhal",
+	"namalsk",
+	"deerisle",
+	"banov",
+}
+
+// targets resolves which map ids a batch run covers.
+func targets(src *source, official bool) ([]string, error) {
+	if official {
+		return officialMaps, nil
+	}
+	return src.mapIDs()
 }
 
 // fetchAll downloads every published map, skipping the ones already complete.

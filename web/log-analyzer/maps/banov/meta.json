@@ -5,7 +5,7 @@
   "format": "webp",
   "tileSize": 256,
   "minZoom": 3,
-  "maxZoom": 3,
+  "maxZoom": 5,
   "names": [
     {
       "name": "Dubnicka",
@@ -92,7 +92,7 @@
       "kind": "hill"
     },
     {
-      "name": "Hrabice",
+      "name": "Redfalcon Airfield",
       "x": 1998.4,
       "y": 11792.1,
       "kind": "bordercrossing"
@@ -362,7 +362,7 @@
       "kind": "bordercrossing"
     },
     {
-      "name": "Fort Leroy",
+      "name": "Eichkaters Lodge",
       "x": 14790.2,
       "y": 13893.4,
       "kind": "hill"
@@ -410,7 +410,7 @@
       "kind": "hill"
     },
     {
-      "name": "Lake Shadow",
+      "name": "Lake Azury",
       "x": 4857.9,
       "y": 9332.4,
       "kind": "marine"

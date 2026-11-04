@@ -7,11 +7,13 @@ then in `/usr/local/share/dayzctl/maps`, then in `/usr/share/dayzctl/maps` (see
 the root `README.md`). The web service never downloads map data while it runs,
 so the Map tab works without internet access.
 
-46 maps ship here (33 MB): the vanilla terrains plus the community maps
-published on the map host — Chernarus, Livonia, Sakhal, Namalsk, Deer Isle,
-Esseker, Banov, Namalsk, Pripyat, Takistan Plus and the rest. Each map carries
-its own world size and place names, so an instance only needs
-`map: <id>` in the config.
+**Six maps ship here**: Chernarus, Livonia, Sakhal, Namalsk, Deer Isle and
+Banov. Each carries its own world size and place names, so an instance only
+needs `map: <id>` in the config. The rest of the catalogue the map host
+publishes is deliberately *not* bundled: the space buys depth on the maps people
+actually play. Any other map can still be generated locally with
+`go run ./tools/mapfetch -map <id> -zooms 3` and dropped into the maps directory
+the server reads (see below).
 
 Layout:
 
@@ -26,29 +28,41 @@ Tiles are WebP where the map host serves WebP and JPEG where it serves JPEG;
 ## Regenerating
 
 ```sh
-go run ./tools/mapfetch -list                     # ids the map host publishes
-go run ./tools/mapfetch -all -zooms 3             # every map, 64 tiles each
-go run ./tools/mapfetch -map nasdara -zooms 3,4   # one map, extra detail
-# or: make maps-all ZOOMS=3   /   make maps MAP=chernarusplus ZOOMS=3,4
+go run ./tools/mapfetch -list                            # ids the map host publishes
+go run ./tools/mapfetch -official                        # the six bundled maps, z3-z5
+go run ./tools/mapfetch -map chernarusplus -zooms 3,4,5  # one map, chosen depth
+go run ./tools/mapfetch -all -zooms 3                    # every published map (extra)
+# or: make maps-all   /   make maps MAP=chernarusplus ZOOMS=3,4,5
 ```
 
-The generator resolves each map's current version, converts the published place
-names to DayZ world metres and writes the tiles. It skips anything already
-present, so an interrupted run resumes; `-force` re-downloads. Removing a map is
-just deleting its directory — `meta.json` is what the server offers.
+`-official` fetches the bundled six and defaults to `-zooms 3,4,5`; every other
+mode uses `-zooms` (default `3`). The generator resolves each map's current
+version, converts the published place names to DayZ world metres and writes the
+tiles. It skips anything already present, so an interrupted run resumes;
+`-force` re-downloads. Removing a map is just deleting its directory —
+`meta.json` is what the server offers.
+
+To add a map without shipping it in the binary, generate it into your install's
+maps directory instead (for example
+`go run ./tools/mapfetch -map namalsk -out /usr/local/share/dayzctl/maps`) and
+restart `dayzctl web`: the on-disk copy wins over the embedded one.
 
 ## Zoom levels
 
-One zoom level costs `4^z` tiles. For a 16 km map:
+One zoom level costs `4^z` tiles. For a 16 km map, as served by the map host:
 
 | zooms | tiles | size | detail |
 | --- | --- | --- | --- |
-| `3` | 64 | ~1 MB | 8 m per pixel — fine for a full-map view |
-| `3,4` | 320 | ~5 MB | 4 m per pixel — sharp when zoomed in |
-| `3,4,5` | 1344 | ~22 MB | only worth it on very large displays |
+| `3` | 64 | ~0.7 MB | 7.5 m per pixel — fine for the whole map at once |
+| `3,4` | 320 | ~3 MB | 3.7 m per pixel — roads stay thin when zoomed |
+| `3,4,5` | 1344 | ~11 MB | 1.9 m per pixel — street level, what the bundled maps ship |
 
-The UI picks the zoom that matches the canvas size and clamps it to the range in
-`meta.json`, so a map shipped at zoom 3 alone still renders correctly.
+The deeper levels matter because the imagery is the host's own raster, which has
+its road network already drawn in at each zoom: the more levels we ship, the
+longer roads stay crisp instead of being blown up from the coarse overview. The
+UI picks the zoom that matches the canvas size, clamps it to the range in
+`meta.json` and stops a few steps past the deepest level, so a map shipped at
+zoom 3 still renders correctly — it just cannot be zoomed in as far.
 
 ## Provenance
 

@@ -168,8 +168,11 @@ by `dayzctl` itself:
 | `GET /api/maps/{map}/tiles/{z}/{x}/{y}` | one pyramid tile |
 
 The map is chosen with `instances[].map` and **defaults to the instance name**,
-so an instance called `nasdara` shows Nasdara with no configuration at all.
-Only maps bundled with the binary are offered.
+so an instance called `chernarusplus` shows Chernarus with no configuration at
+all. Six maps ship with the binary — Chernarus, Livonia, Sakhal, Namalsk, Deer
+Isle and Banov — each with zoom levels 3 to 5, so roads stay thin and crisp when
+you zoom in (the imagery is the map host's own raster, which has the road
+network drawn in at every level).
 
 **Nothing is downloaded at runtime.** Map data is generated ahead of time and
 committed under `web/log-analyzer/maps/<map>/`, then embedded into the binary —
@@ -177,14 +180,19 @@ so the service works with no internet access and never depends on a third-party
 host being up. To refresh a map (or add another one), regenerate the files:
 
 ```sh
-go run ./tools/mapfetch -map nasdara -zooms 3,4      # ~5.6 MB, 320 tiles
-go run ./tools/mapfetch -map chernarusplus -zooms 3,4
+go run ./tools/mapfetch -official                    # the six shipped maps, z3–z5
+go run ./tools/mapfetch -map chernarusplus -zooms 3,4,5
 ```
 
 The generator converts each map's place names to DayZ world metres and writes
 `meta.json` plus the tiles. It skips tiles that already exist, so an interrupted
 run resumes; pass `-force` to re-download. Commit the result and rebuild —
 `go:embed` picks the files up automatically.
+
+Community maps can be added without touching the binary: generate them into the
+maps directory the server reads (`-out /usr/local/share/dayzctl/maps`, or
+`$DAYZCTL_MAPS_DIR`), restart the service, and they appear in the picker — the
+on-disk copy wins over the embedded one.
 
 To use your own picture instead, set `instances[].map_image` (relative to
 `paths.install_dir`, an absolute path, or an `http(s)://` URL the service

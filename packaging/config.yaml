@@ -11,7 +11,8 @@ paths:
   install_dir: "/srv/dayz/server"
 
 # One entry per DayZ server. `map` must be a directory name from
-# /usr/share/dayzctl/maps (nasdara, chernarusplus, livonia, …); it defaults to
+# /usr/share/dayzctl/maps (chernarusplus, livonia, sakhal, namalsk, deerisle,
+# banov); it defaults to
 # the instance name.
 instances:
   # - name: main

@@ -40,8 +40,8 @@ Releases publish two assets:
 
 | Asset | Contents |
 | --- | --- |
-| `dayzctl_<version>_<os>_<arch>.tar.gz` | the binary with the map data compiled in (~28 MB) |
-| `dayzctl-maps.tar.gz` | the same map data as files, for every platform (25 MB) |
+| `dayzctl_<version>_<os>_<arch>.tar.gz` | the binary with the map data compiled in (~67 MB) |
+| `dayzctl-maps.tar.gz` | the same map data as files, for every platform (51 MB) |
 
 The binary works on its own — download it and the Map tab has terrain. The maps
 archive exists so an installed server can keep the imagery as plain files and
@@ -57,7 +57,7 @@ stays lean:
 | Path | Contents |
 | --- | --- |
 | `/usr/bin/dayzctl` | the binary, built with `-tags nomaps` (no tiles, 11 MB) |
-| `/usr/share/dayzctl/maps/` | 46 maps (tiles + place names), ~33 MB |
+| `/usr/share/dayzctl/maps/` | 6 maps, Chernarus/Livonia/Sakhal/Namalsk/Deer Isle/Banov (tiles + place names), ~69 MB |
 | `/etc/dayzctl/config.yaml` | starter configuration (conffile) |
 
 The package ships **no** systemd units. `dayzctl apply` is the only thing that

@@ -71,16 +71,22 @@ deps: ## Download and tidy dependencies
 	$(GOMOD) download
 	$(GOTIDY)
 .PHONY: maps
-maps: ## (Re)generate the bundled map imagery, e.g. make maps MAP=nasdara ZOOMS=3,4
-	@echo "$(GREEN)Fetching map $(or $(MAP),nasdara)...$(NC)"
-	go run ./tools/mapfetch -map $(or $(MAP),nasdara) -zooms $(or $(ZOOMS),3)
+maps: ## (Re)generate one bundled map, e.g. make maps MAP=chernarusplus ZOOMS=3,4,5
+	@echo "$(GREEN)Fetching map $(or $(MAP),chernarusplus)...$(NC)"
+	go run ./tools/mapfetch -map $(or $(MAP),chernarusplus) -zooms $(or $(ZOOMS),3,4,5)
 	@echo "$(GREEN)Done - commit web/log-analyzer/maps and rebuild$(NC)"
 
 .PHONY: maps-all
-maps-all: ## Fetch every published map, e.g. make maps-all ZOOMS=3
-	@echo "$(GREEN)Fetching every map (zoom $(or $(ZOOMS),3))...$(NC)"
-	go run ./tools/mapfetch -all -zooms $(or $(ZOOMS),3)
+maps-all: ## Fetch the six bundled maps at full detail (about 25 minutes)
+	@echo "$(GREEN)Fetching the bundled maps (zoom $(or $(ZOOMS),3,4,5))...$(NC)"
+	go run ./tools/mapfetch -official -zooms $(or $(ZOOMS),3,4,5)
 	@echo "$(GREEN)Done - commit web/log-analyzer/maps and rebuild$(NC)"
+
+.PHONY: maps-catalogue
+maps-catalogue: ## Fetch every map the host publishes at zoom 3 (not bundled)
+	@echo "$(GREEN)Fetching the whole catalogue (zoom 3)...$(NC)"
+	go run ./tools/mapfetch -all -zooms 3
+	@echo "$(GREEN)Done - these are extra maps, keep them out of the repo$(NC)"
 
 .PHONY: deb
 deb: ## Build a Debian package (linux/amd64) with the maps as files

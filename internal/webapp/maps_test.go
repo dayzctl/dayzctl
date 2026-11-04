@@ -32,7 +32,7 @@ func TestBundledMapsAreListed(t *testing.T) {
 
 	var found bool
 	for _, m := range payload.Maps {
-		if m.ID != "nasdara" {
+		if m.ID != "chernarusplus" {
 			continue
 		}
 		found = true
@@ -47,7 +47,7 @@ func TestBundledMapsAreListed(t *testing.T) {
 		}
 	}
 	if !found {
-		t.Error("nasdara is missing from the bundled map list")
+		t.Error("chernarusplus is missing from the bundled map list")
 	}
 }
 

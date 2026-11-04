@@ -1360,14 +1360,16 @@ export function renderMapPanel(panel, report, state, relayout) {
   };
 
   // Zooming in past the deepest tile level just stretches pixels, so the
-  // ceiling follows the map's own pyramid (about 4x upscaling at most). Zoom 1
-  // already fits the map's width to the canvas.
+  // ceiling follows the map's own pyramid. Two and a half steps of upscaling is
+  // the point where roads and buildings stop being legible; going further only
+  // makes the map blurry, which is exactly what a tile viewer should avoid.
+  // Zoom 1 already fits the map's width to the canvas.
   const zoomCeiling = () => {
     const vp = view.viewport;
     const tileMax = state.mapMeta?.maxZoom;
     if (!vp) return MAX_MAP_ZOOM;
     if (!tileMax) return 16; // no imagery: the grid has nothing to resolve
-    const limit = (4 * 2 ** tileMax * 256) / Math.max(1, vp.width);
+    const limit = (2.5 * 2 ** tileMax * 256) / Math.max(1, vp.width);
     return Math.max(2, Math.min(MAX_MAP_ZOOM, limit));
   };
 
