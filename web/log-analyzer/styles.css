@@ -501,6 +501,7 @@ details.samples pre {
   background: #0a0d10;
 }
 #map-canvas { display: block; width: 100%; height: auto; cursor: grab; }
+#map-canvas.over-dot { cursor: pointer; }
 #map-canvas.dragging { cursor: grabbing; }
 
 /* Tooltip for the event dots on the map */

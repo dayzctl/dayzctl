@@ -1302,13 +1302,17 @@ export function renderMapPanel(panel, report, state, relayout) {
     tooltip.style.top = `${Math.min(Math.max(8, spot.y - tooltip.offsetHeight - 12), maxY)}px`;
   };
 
+  // Generous radius: the dots are small, and asking for a pixel-perfect hit
+  // makes the tooltip feel broken on a trackpad.
+  const HOVER_RADIUS = 18;
+
   const hoverAt = (clientX, clientY) => {
     const list = view.hotspots || [];
     const rect = canvas.getBoundingClientRect();
     const x = clientX - rect.left;
     const y = clientY - rect.top;
     let best = null;
-    let bestDist = 13 * 13;
+    let bestDist = HOVER_RADIUS * HOVER_RADIUS;
     for (const spot of list) {
       const dist = (spot.x - x) ** 2 + (spot.y - y) ** 2;
       if (dist <= bestDist) {
@@ -1317,6 +1321,7 @@ export function renderMapPanel(panel, report, state, relayout) {
       }
     }
     const key = best ? best.key : null;
+    canvas.classList.toggle('over-dot', Boolean(best));
     if (key !== mapState.hoverKey) {
       mapState.hoverKey = key;
       view.hoverKey = key;
@@ -1448,6 +1453,7 @@ export function renderMapPanel(panel, report, state, relayout) {
   canvas.addEventListener('pointerleave', () => {
     endDrag();
     tooltip.hidden = true;
+    canvas.classList.remove('over-dot');
     if (mapState.hoverKey) {
       mapState.hoverKey = null;
       view.hoverKey = null;

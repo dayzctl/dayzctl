@@ -164,6 +164,38 @@ function drawNames(ctx, names, width, world, toX, toY) {
   void world;
 }
 
+/* ── event markers ──────────────────────────────────────────
+ * Events are drawn in screen space: a dark halo, a coloured core and a light
+ * rim, so a dot stays legible on the dark satellite imagery at any zoom. Keep
+ * the colours in step with the legend in ui.js.
+ */
+const MARKER = {
+  kill: { color: '#e5484d', size: 5.5 },
+  build: { color: '#5ac8dc', size: 5, shape: 'square' },
+  jump: { color: '#d9a53b', size: 5 },
+};
+
+function drawMarker(ctx, x, y, kind) {
+  const m = MARKER[kind] || MARKER.kill;
+  const path = (r) => {
+    ctx.beginPath();
+    if (m.shape === 'square') ctx.rect(x - r, y - r, r * 2, r * 2);
+    else ctx.arc(x, y, r, 0, Math.PI * 2);
+  };
+
+  // Halo first: it separates the dot from whatever is underneath it.
+  path(m.size + 2);
+  ctx.fillStyle = 'rgba(4, 7, 10, 0.65)';
+  ctx.fill();
+
+  path(m.size);
+  ctx.fillStyle = m.color;
+  ctx.fill();
+  ctx.lineWidth = 1.2;
+  ctx.strokeStyle = 'rgba(255, 255, 255, 0.92)';
+  ctx.stroke();
+}
+
 /**
  * Nearest recorded position of `key` at or before `at`.
  * Positions are {x: east, y: north, z: altitude}, matching DayZ's pos=<x, y, z>.
@@ -369,20 +401,22 @@ export function renderMap(canvas, report, state) {
   const hotspots = new Map();
   const addHotspot = (pos, item) => {
     if (!pos) return;
-    const key = `${Math.round(pos.x / 25)}:${Math.round(pos.y / 25)}`;
-    const spot = hotspots.get(key) || { key, x: px(pos.x), y: py(pos.y), items: [] };
+    const x = px(pos.x);
+    const y = py(pos.y);
+    // Group in screen space, not in metres: dots that would overlap at the
+    // current zoom become one dot that lists everything that happened there.
+    const key = `${Math.round(x / 8)}:${Math.round(y / 8)}`;
+    const size = (MARKER[item.kind] || MARKER.kill).size;
+    const spot = hotspots.get(key) || { key, x, y, size, items: [] };
     spot.items.push(item);
     hotspots.set(key, spot);
   };
 
   // ── base building ────────────────────────────────────────
   if (layers.builds) {
-    ctx.fillStyle = 'rgba(90, 200, 220, 0.85)';
     for (const b of adm.builds) {
       if (!b.pos || !inWindow(b.at) || !involves(b.playerKey)) continue;
-      const x = px(b.pos.x);
-      const y = py(b.pos.y);
-      ctx.fillRect(x - 2.5, y - 2.5, 5, 5);
+      drawMarker(ctx, px(b.pos.x), py(b.pos.y), 'build');
       addHotspot(b.pos, {
         kind: 'build',
         at: b.at,
@@ -394,14 +428,19 @@ export function renderMap(canvas, report, state) {
 
   // ── connections ──────────────────────────────────────────
   if (layers.connects) {
-    ctx.fillStyle = 'rgba(120, 190, 120, 0.55)';
     for (const p of adm.players) {
       if (!involves(p.key)) continue;
       const spot = lastSampled(p);
       if (!spot) continue;
+      const x = px(spot.x);
+      const y = py(spot.y);
       ctx.beginPath();
-      ctx.arc(px(spot.x), py(spot.y), 2, 0, Math.PI * 2);
+      ctx.arc(x, y, 3.4, 0, Math.PI * 2);
+      ctx.fillStyle = 'rgba(120, 190, 120, 0.95)';
       ctx.fill();
+      ctx.lineWidth = 1.2;
+      ctx.strokeStyle = 'rgba(4, 7, 10, 0.7)';
+      ctx.stroke();
     }
   }
 
@@ -453,10 +492,7 @@ export function renderMap(canvas, report, state) {
         ctx.stroke();
       }
 
-      ctx.fillStyle = 'rgba(229, 72, 77, 0.95)';
-      ctx.beginPath();
-      ctx.arc(vx, vy, 3, 0, Math.PI * 2);
-      ctx.fill();
+      drawMarker(ctx, vx, vy, 'kill');
 
       addHotspot(k.pos, {
         kind: 'kill',
@@ -480,12 +516,12 @@ export function renderMap(canvas, report, state) {
       ctx.stroke();
       ctx.setLineDash([]);
 
+      // The origin is a plain dot; the destination is the hoverable marker.
+      ctx.beginPath();
+      ctx.arc(px(s.from.x), py(s.from.y), 2.6, 0, Math.PI * 2);
       ctx.fillStyle = 'rgba(217, 165, 59, 0.9)';
-      for (const end of [s.from, s.to]) {
-        ctx.beginPath();
-        ctx.arc(px(end.x), py(end.y), 2.5, 0, Math.PI * 2);
-        ctx.fill();
-      }
+      ctx.fill();
+      drawMarker(ctx, px(s.to.x), py(s.to.y), 'jump');
       addHotspot(s.to, {
         kind: 'jump',
         at: s.at,
@@ -499,10 +535,10 @@ export function renderMap(canvas, report, state) {
   state.hotspots = [...hotspots.values()];
   const hovered = state.hoverKey ? hotspots.get(state.hoverKey) : null;
   if (hovered) {
-    ctx.strokeStyle = 'rgba(255, 255, 255, 0.9)';
-    ctx.lineWidth = 1.6;
+    ctx.lineWidth = 2;
+    ctx.strokeStyle = 'rgba(255, 255, 255, 0.95)';
     ctx.beginPath();
-    ctx.arc(hovered.x, hovered.y, 9, 0, Math.PI * 2);
+    ctx.arc(hovered.x, hovered.y, (hovered.size || 5) + 5, 0, Math.PI * 2);
     ctx.stroke();
   }
 
