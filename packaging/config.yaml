@@ -12,7 +12,7 @@ paths:
 
 # One entry per DayZ server. `map` must be a directory name from
 # /usr/share/dayzctl/maps (chernarusplus, livonia, sakhal, namalsk, deerisle,
-# banov); it defaults to
+# banov, nasdara); it defaults to
 # the instance name.
 instances:
   # - name: main

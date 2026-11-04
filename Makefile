@@ -77,7 +77,7 @@ maps: ## (Re)generate one bundled map, e.g. make maps MAP=chernarusplus ZOOMS=3,
 	@echo "$(GREEN)Done - commit web/log-analyzer/maps and rebuild$(NC)"
 
 .PHONY: maps-all
-maps-all: ## Fetch the six bundled maps at full detail (about 25 minutes)
+maps-all: ## Fetch the bundled maps at full detail (about 30 minutes)
 	@echo "$(GREEN)Fetching the bundled maps (zoom $(or $(ZOOMS),3,4,5))...$(NC)"
 	go run ./tools/mapfetch -official -zooms $(or $(ZOOMS),3,4,5)
 	@echo "$(GREEN)Done - commit web/log-analyzer/maps and rebuild$(NC)"

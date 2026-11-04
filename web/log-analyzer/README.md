@@ -169,10 +169,10 @@ by `dayzctl` itself:
 
 The map is chosen with `instances[].map` and **defaults to the instance name**,
 so an instance called `chernarusplus` shows Chernarus with no configuration at
-all. Six maps ship with the binary — Chernarus, Livonia, Sakhal, Namalsk, Deer
-Isle and Banov — each with zoom levels 3 to 5, so roads stay thin and crisp when
-you zoom in (the imagery is the map host's own raster, which has the road
-network drawn in at every level).
+all. Seven maps ship with the binary — Chernarus, Livonia, Sakhal, Namalsk, Deer
+Isle, Banov and Nasdara — each with zoom levels 3 to 5, so roads stay thin and
+crisp when you zoom in (the imagery is the map host's own raster, which has the
+road network drawn in at every level).
 
 **Nothing is downloaded at runtime.** Map data is generated ahead of time and
 committed under `web/log-analyzer/maps/<map>/`, then embedded into the binary —
@@ -180,7 +180,7 @@ so the service works with no internet access and never depends on a third-party
 host being up. To refresh a map (or add another one), regenerate the files:
 
 ```sh
-go run ./tools/mapfetch -official                    # the six shipped maps, z3–z5
+go run ./tools/mapfetch -official                    # the bundled maps, z3–z5
 go run ./tools/mapfetch -map chernarusplus -zooms 3,4,5
 ```
 

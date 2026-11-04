@@ -28,7 +28,7 @@ func main() {
 	var (
 		mapID    = flag.String("map", "", "map id as used on the map host (nasdara, chernarusplus, livonia, …)")
 		all      = flag.Bool("all", false, "fetch every map the host publishes")
-		official = flag.Bool("official", false, "fetch only the bundled maps (Chernarus, Livonia, Sakhal, Namalsk, Deer Isle, Banov)")
+		official = flag.Bool("official", false, "fetch only the bundled maps (Chernarus, Livonia, Sakhal, Namalsk, Deer Isle, Banov, Nasdara)")
 		list     = flag.Bool("list", false, "print the published map ids and exit")
 		zooms    = flag.String("zooms", "3", "comma-separated zoom levels to download (0-7)")
 		out      = flag.String("out", "web/log-analyzer/maps", "output directory")
@@ -95,6 +95,7 @@ var officialMaps = []string{
 	"namalsk",
 	"deerisle",
 	"banov",
+	"nasdara",
 }
 
 // targets resolves which map ids a batch run covers.

@@ -7,8 +7,8 @@ then in `/usr/local/share/dayzctl/maps`, then in `/usr/share/dayzctl/maps` (see
 the root `README.md`). The web service never downloads map data while it runs,
 so the Map tab works without internet access.
 
-**Six maps ship here**: Chernarus, Livonia, Sakhal, Namalsk, Deer Isle and
-Banov. Each carries its own world size and place names, so an instance only
+**Seven maps ship here**: Chernarus, Livonia, Sakhal, Namalsk, Deer Isle, Banov
+and Nasdara. Each carries its own world size and place names, so an instance only
 needs `map: <id>` in the config. The rest of the catalogue the map host
 publishes is deliberately *not* bundled: the space buys depth on the maps people
 actually play. Any other map can still be generated locally with
@@ -29,7 +29,7 @@ Tiles are WebP where the map host serves WebP and JPEG where it serves JPEG;
 
 ```sh
 go run ./tools/mapfetch -list                            # ids the map host publishes
-go run ./tools/mapfetch -official                        # the six bundled maps, z3-z5
+go run ./tools/mapfetch -official                        # the bundled maps, z3-z5
 go run ./tools/mapfetch -map chernarusplus -zooms 3,4,5  # one map, chosen depth
 go run ./tools/mapfetch -all -zooms 3                    # every published map (extra)
 # or: make maps-all   /   make maps MAP=chernarusplus ZOOMS=3,4,5
