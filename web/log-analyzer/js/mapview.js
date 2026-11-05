@@ -25,8 +25,31 @@ export function inferWorldSize(bounds, fallback = 15360) {
   return Math.min(40960, Math.max(1024, rounded));
 }
 
-const HEAT_COLS = 96;
-const HEAT_ROWS = 96;
+/* ── heatmap ramp ──────────────────────────────────────────
+ * Density is drawn as tinted heat (orange → red → deep crimson) with normal
+ * alpha blending: additive light would wash out on the pale desert imagery,
+ * while a saturated tint reads on both the light and the dark maps.
+ */
+const HEAT_RAMP = [
+  [0.0, 255, 110, 40],
+  [0.45, 240, 62, 40],
+  [0.75, 204, 26, 62],
+  [1.0, 132, 8, 44],
+];
+
+/** Colour of the heat ramp at `t` (0 = coldest, 1 = hottest). */
+function heatColor(t) {
+  const v = Math.min(1, Math.max(0, t));
+  for (let i = 1; i < HEAT_RAMP.length; i++) {
+    const [p1, r1, g1, b1] = HEAT_RAMP[i];
+    if (v <= p1) {
+      const [p0, r0, g0, b0] = HEAT_RAMP[i - 1];
+      const f = p1 === p0 ? 0 : (v - p0) / (p1 - p0);
+      return [r0 + (r1 - r0) * f, g0 + (g1 - g0) * f, b0 + (b1 - b0) * f];
+    }
+  }
+  return HEAT_RAMP.at(-1).slice(1);
+}
 
 /** Hard ceiling for the canvas zoom, independent of the tile pyramid. */
 export const MAX_MAP_ZOOM = 64;
@@ -414,40 +437,66 @@ export function renderMap(canvas, report, state) {
   };
 
   // ── heatmap ──────────────────────────────────────────────
+  // A density field rather than a grid of coloured squares: every sample drops a
+  // soft radial blob and the blobs are added together, so busy places glow from
+  // ember to a white core instead of showing large blocks. The grid lives in
+  // screen space, so the field stays smooth while zooming and panning.
   if (layers.heat) {
-    const grid = new Float32Array(HEAT_COLS * HEAT_ROWS);
-    let max = 0;
-    const addPoint = (east, north) => {
-      const cx = Math.min(HEAT_COLS - 1, Math.max(0, Math.floor((east / world) * HEAT_COLS)));
-      // Row 0 is the north edge of the canvas.
-      const cz = Math.min(HEAT_ROWS - 1, Math.max(0, Math.floor((1 - north / world) * HEAT_ROWS)));
-      const idx = cz * HEAT_COLS + cx;
-      grid[idx] += 1;
-      if (grid[idx] > max) max = grid[idx];
+    const cell = Math.max(9, Math.min(16, Math.round(cssWidth / 90)));
+    const cols = Math.ceil(cssWidth / cell) + 1;
+    const rows = Math.ceil(cssHeight / cell) + 1;
+    const grid = new Float32Array(cols * rows);
+    const add = (east, north) => {
+      const c = Math.floor(px(east) / cell);
+      const r = Math.floor(py(north) / cell);
+      if (c < 0 || c >= cols || r < 0 || r >= rows) return;
+      grid[r * cols + c] += 1;
     };
 
     for (const p of adm.players) {
       if (!involves(p.key)) continue;
-      for (const s of p.positions) if (inWindow(s.at)) addPoint(s.x, s.y);
+      for (const s of p.positions) if (inWindow(s.at)) add(s.x, s.y);
     }
-    for (const b of adm.builds) if (b.pos && inWindow(b.at) && involves(b.playerKey)) addPoint(b.pos.x, b.pos.y);
+    for (const b of adm.builds) if (b.pos && inWindow(b.at) && involves(b.playerKey)) add(b.pos.x, b.pos.y);
 
-    if (max > 0) {
-      const cellW = world / HEAT_COLS;
-      const cellH = world / HEAT_ROWS;
-      for (let r = 0; r < HEAT_ROWS; r++) {
-        for (let c = 0; c < HEAT_COLS; c++) {
-          const v = grid[r * HEAT_COLS + c];
+    // Contrast reference: the busiest cell, softened to the 97th percentile so a
+    // single camping spot does not wash every other hotspot out.
+    const values = [];
+    for (const v of grid) if (v > 0) values.push(v);
+    if (values.length) {
+      values.sort((a, b) => a - b);
+      const ref = Math.max(1, values[Math.min(values.length - 1, Math.floor(values.length * 0.97))]);
+      const radius = cell * 2.6;
+      const shades = [];
+      for (let i = 0; i <= 12; i++) {
+        const t = i / 12;
+        const [r0, g0, b0] = heatColor(t);
+        const rgb = `${Math.round(r0)}, ${Math.round(g0)}, ${Math.round(b0)}`;
+        const alpha = 0.09 + 0.5 * t ** 1.5;
+        const grad = ctx.createRadialGradient(0, 0, 0, 0, 0, radius);
+        grad.addColorStop(0, `rgba(${rgb}, ${alpha.toFixed(3)})`);
+        grad.addColorStop(0.5, `rgba(${rgb}, ${(alpha * 0.55).toFixed(3)})`);
+        grad.addColorStop(1, `rgba(${rgb}, 0)`);
+        shades.push(grad);
+      }
+
+      ctx.save();
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          const v = grid[r * cols + c];
           if (!v) continue;
-          const alpha = Math.min(0.72, (v / max) ** 0.55);
-          ctx.fillStyle = `rgba(228, 92, 60, ${alpha})`;
-          // Cell edges go through px/py so the heatmap zooms and pans with the
-          // rest of the layers instead of staying pinned to the canvas.
-          const gx = px(c * cellW);
-          const gy = py(world - r * cellH);
-          ctx.fillRect(gx, gy, cellW * k + 0.6, cellH * k + 0.6);
+          const t = Math.min(1, (v / ref) ** 0.6);
+          const cx = c * cell + cell / 2;
+          const cy = r * cell + cell / 2;
+          // The gradient is built at the origin once; translating the canvas puts
+          // it over the cell without allocating a gradient per cell.
+          ctx.translate(cx, cy);
+          ctx.fillStyle = shades[Math.min(12, Math.round(t * 12))];
+          ctx.fillRect(-radius, -radius, radius * 2, radius * 2);
+          ctx.translate(-cx, -cy);
         }
       }
+      ctx.restore();
     }
   }
 

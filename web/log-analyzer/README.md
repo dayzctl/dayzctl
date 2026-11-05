@@ -135,7 +135,9 @@ unticked until you select it.
   environmental deaths. Hits from infected are grouped into one dot per attack
   and summarised on hover (*7 infected hits · 34 damage*) instead of piling up
   dozens of dots, and traps draw as magenta squares so they are not read as
-  walls.
+  walls. *Heatmap* is a smooth density field — soft blobs added together and
+  tinted from orange to crimson — scaled to the busiest 3 % of cells, so it
+  shows where players spend their time without covering the roads underneath.
   *Players* is a multi-select list (limited to players with samples inside the
   map's own timeline window, so it only offers what can be drawn): tick any
   number of players and every layer is
