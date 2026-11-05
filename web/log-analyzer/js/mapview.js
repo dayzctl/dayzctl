@@ -171,10 +171,22 @@ function drawNames(ctx, names, width, world, toX, toY) {
  * the colours in step with the legend in ui.js.
  */
 const MARKER = {
-  kill: { color: '#e5484d', size: 5.5 },
-  build: { color: '#5ac8dc', size: 5, shape: 'square' },
-  jump: { color: '#d9a53b', size: 5 },
+  kill: { color: '#e5484d', size: 6.5 },
+  build: { color: '#5ac8dc', size: 6, shape: 'square' },
+  jump: { color: '#d9a53b', size: 6 },
+  // Where an impossible movement started: a smaller dot in the same colour.
+  jumpOrigin: { color: '#d9a53b', size: 4.6 },
+  // Last position / connection: an event dot like the rest, never hidden by
+  // the trail it sits on.
+  connect: { color: '#78be78', size: 5.5 },
 };
+
+/** Trail stroke width in screen pixels: thicker than before, and thicker still
+ *  as the map is zoomed in, but always narrower than a marker's diameter so
+ *  every event dot stays visible on top of the line. */
+function trailWidth(zoom) {
+  return Math.min(6, 3.4 * Math.max(1, Math.sqrt(zoom || 1)));
+}
 
 function drawMarker(ctx, x, y, kind) {
   const m = MARKER[kind] || MARKER.kill;
@@ -413,6 +425,38 @@ export function renderMap(canvas, report, state) {
     hotspots.set(key, spot);
   };
 
+  // ── trails ───────────────────────────────────────────────
+  // Drawn before every marker layer: the trail is the backdrop, the event dots
+  // sit on top of it so a kill, build, jump or last position stays visible even
+  // where the line runs straight through it.
+  if (layers.trails) {
+    const chosen = state.selectedKeys?.length
+      ? adm.players.filter((p) => state.selectedKeys.includes(p.key)).slice(0, 40)
+      : adm.players.slice(0, 12);
+    const width = trailWidth(vp.zoom);
+
+    chosen.forEach((p) => {
+      const pts = p.positions.filter((s) => s.at !== null && s.at !== undefined && inWindow(s.at));
+      if (pts.length < 2) return;
+      ctx.beginPath();
+      // Same colour as the player's row in the picker and the tables, so a
+      // trail can be matched to a name without a legend.
+      ctx.strokeStyle = colorFor(p.name, 0.8);
+      // Round caps keep corners smooth; the width stays readable but does not
+      // swallow the imagery when several trails overlap.
+      ctx.lineWidth = width;
+      ctx.lineJoin = 'round';
+      ctx.lineCap = 'round';
+      pts.forEach((s, idx) => {
+        const x = px(s.x);
+        const y = py(s.y);
+        if (idx === 0) ctx.moveTo(x, y);
+        else ctx.lineTo(x, y);
+      });
+      ctx.stroke();
+    });
+  }
+
   // ── base building ────────────────────────────────────────
   if (layers.builds) {
     for (const b of adm.builds) {
@@ -427,50 +471,22 @@ export function renderMap(canvas, report, state) {
     }
   }
 
-  // ── connections ──────────────────────────────────────────
+  // ── last positions ───────────────────────────────────────
+  // A full marker rather than a bare arc, so it reads as an event dot at that
+  // place and wins against the trail underneath it.
   if (layers.connects) {
     for (const p of adm.players) {
       if (!involves(p.key)) continue;
       const spot = lastSampled(p);
       if (!spot) continue;
-      const x = px(spot.x);
-      const y = py(spot.y);
-      ctx.beginPath();
-      ctx.arc(x, y, 3.4, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(120, 190, 120, 0.95)';
-      ctx.fill();
-      ctx.lineWidth = 1.2;
-      ctx.strokeStyle = 'rgba(4, 7, 10, 0.7)';
-      ctx.stroke();
-    }
-  }
-
-  // ── trails ───────────────────────────────────────────────
-  if (layers.trails) {
-    const chosen = state.selectedKeys?.length
-      ? adm.players.filter((p) => state.selectedKeys.includes(p.key)).slice(0, 40)
-      : adm.players.slice(0, 12);
-
-    chosen.forEach((p) => {
-      const pts = p.positions.filter((s) => s.at !== null && s.at !== undefined && inWindow(s.at));
-      if (pts.length < 2) return;
-      ctx.beginPath();
-      // Same colour as the player's row in the picker and the tables, so a
-      // trail can be matched to a name without a legend.
-      ctx.strokeStyle = colorFor(p.name, 0.8);
-      // Round caps keep corners smooth; the width stays readable but does not
-      // swallow the imagery when several trails overlap.
-      ctx.lineWidth = 1.8;
-      ctx.lineJoin = 'round';
-      ctx.lineCap = 'round';
-      pts.forEach((s, idx) => {
-        const x = px(s.x);
-        const y = py(s.y);
-        if (idx === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
+      drawMarker(ctx, px(spot.x), py(spot.y), 'connect');
+      addHotspot(spot, {
+        kind: 'connect',
+        at: spot.at ?? null,
+        players: [p.name],
+        text: `${p.name} last position`,
       });
-      ctx.stroke();
-    });
+    }
   }
 
   // ── kills (shot lines) ───────────────────────────────────
@@ -517,11 +533,9 @@ export function renderMap(canvas, report, state) {
       ctx.stroke();
       ctx.setLineDash([]);
 
-      // The origin is a plain dot; the destination is the hoverable marker.
-      ctx.beginPath();
-      ctx.arc(px(s.from.x), py(s.from.y), 2.6, 0, Math.PI * 2);
-      ctx.fillStyle = 'rgba(217, 165, 59, 0.9)';
-      ctx.fill();
+      // Both ends are event dots: the origin is smaller, the destination is
+      // the hoverable marker with the details.
+      drawMarker(ctx, px(s.from.x), py(s.from.y), 'jumpOrigin');
       drawMarker(ctx, px(s.to.x), py(s.to.y), 'jump');
       addHotspot(s.to, {
         kind: 'jump',
@@ -552,7 +566,7 @@ export function renderMap(canvas, report, state) {
     ctx.strokeStyle = 'rgba(255,255,255,0.8)';
     ctx.lineWidth = 1.5;
     ctx.beginPath();
-    ctx.arc(px(spot.x), py(spot.y), 8, 0, Math.PI * 2);
+    ctx.arc(px(spot.x), py(spot.y), 10, 0, Math.PI * 2);
     ctx.stroke();
   }
 }

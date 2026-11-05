@@ -116,8 +116,10 @@ unticked until you select it.
   normalised timeline, or for whichever players are ticked. A trail uses the
   same colour as its player's name everywhere else in the UI (Players, Kills,
   Base building, Suspicious and the *Players* picker), so a line can be matched
-  to a name without a legend. Kills, build actions
-  and position jumps leave a dot; hovering one names the event (time, players,
+  to a name without a legend. Trails are painted under the event dots and are
+  thick enough to trace at any zoom. Kills, build actions,
+  position jumps and last positions leave a dot that is always larger than the
+  trail it sits on; hovering one names the event (time, players,
   item), and a dot shared by several events lists the players involved.
   *Players* is a multi-select list (limited to players with samples inside the
   map's own timeline window, so it only offers what can be drawn): tick any
