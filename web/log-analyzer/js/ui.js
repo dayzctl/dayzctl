@@ -1291,16 +1291,39 @@ export function renderMapPanel(panel, report, state, relayout) {
   // happened there, and a shared dot lists the players instead.
   const secondsOfDay = (at) => (Number.isFinite(at) ? ((at % 86400) + 86400) % 86400 : null);
 
+  // Session events tell one story together: DayZ writes EmoteSitA right before
+  // a clean logout, so the combination at a dot says whether the player logged
+  // in, logged out or simply dropped. Marker kinds differ from sample kinds
+  // (`login`/`logout` come from the Logins layer, `connect`/`disconnect` from the
+  // position dots), so both spellings are session events.
+  const SESSION_KINDS = new Set(['connect', 'login', 'disconnect', 'logout', 'logoutCrash', 'emote', 'state', 'last']);
+
+  const sessionVerdict = (kinds) => {
+    const emote = kinds.has('emote') || kinds.has('state');
+    const connect = kinds.has('connect') || kinds.has('login');
+    const disconnect = kinds.has('disconnect') || kinds.has('logout') || kinds.has('logoutCrash');
+    if (disconnect && connect) return emote ? 'login' : 'crash';
+    if (disconnect) return emote ? (kinds.has('last') ? 'last position' : 'logout') : 'crash';
+    if (connect) return 'login';
+    return null;
+  };
+
   const describeSpot = (spot) => {
     if (spot.items.length === 1) {
       const item = spot.items[0];
       const tod = secondsOfDay(item.at);
       return tod === null ? item.text : `${fmtClock(tod)} · ${item.text}`;
     }
-    // A shared dot lists what happened instead of only who was involved: a
-    // login and the logout beside it are two different events.
-    const details = [...new Set(spot.items.map((i) => i.text).filter(Boolean))];
     const names = [...new Set(spot.items.flatMap((i) => i.players).filter(Boolean))];
+
+    // A dot made only of session events is one story, not a list of events.
+    if (spot.items.every((i) => SESSION_KINDS.has(i.kind))) {
+      const verdict = sessionVerdict(new Set(spot.items.map((i) => i.kind)));
+      if (verdict) return `${names.join(', ')} — ${verdict}`;
+    }
+
+    // Otherwise list what happened instead of only who was involved.
+    const details = [...new Set(spot.items.map((i) => i.text).filter(Boolean))];
     if (details.length) {
       // One player's events repeat the name in every entry; show it once.
       const solo = names.length === 1 ? names[0] : null;

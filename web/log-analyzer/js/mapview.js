@@ -207,6 +207,8 @@ const MARKER = {
   // Last position / connection: an event dot like the rest, never hidden by
   // the trail it sits on.
   connect: { color: '#78be78', size: 5.5 },
+  // The player's last recorded spot: same dot, different meaning for the tally.
+  last: { color: '#78be78', size: 5.5 },
   // Logins layer: where a session started and where it ended. The logout is a
   // ring wide enough to stay visible around the login dot it usually shares a
   // position with.
@@ -705,7 +707,7 @@ export function renderMap(canvas, report, state) {
       if (sampleKinds && layers.logins) continue;
       const label = spot.kind ? spot.text || spot.kind : 'last position';
       addHotspot(spot, {
-        kind: 'connect',
+        kind: 'last',
         at: spot.at ?? null,
         players: [p.name],
         text: `${p.name} ${label}`,

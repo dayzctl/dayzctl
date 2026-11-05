@@ -133,8 +133,10 @@ unticked until you select it.
   trail can be matched to the session that produced it. A disconnect is only a
   logout when the player sat down first (`EmoteSitA` within two minutes of it);
   otherwise the ring is red and the tooltip says *connection lost* — or
-  *kicked* when the log also has a kick line. That is how a crash loop, a
-  timeout or an admin kick stands out from a player logging off.
+  *kicked* when the log also has a kick line. **A dot that holds only session
+  events is summarised instead of listed**: `emote + disconnect + connect` is a
+  *login*, `emote + disconnect` a *logout* (or *last position*), and
+  `disconnect + connect` or a bare `disconnect` a *crash*.
   *Dead* marks every place a player died (triangle), from PvP kills and from
   environmental deaths. Hits from infected are grouped into one dot per attack
   and summarised on hover (*7 infected hits · 34 damage*) instead of piling up
