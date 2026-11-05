@@ -127,6 +127,8 @@ unticked until you select it.
   what happened there — *hit by Infected into Torso for 7.2 damage*, *emote
   EmoteSitA*, *disconnected*. A trail is split at respawns and reconnects, so it
   never draws a line across the map between two unrelated lives.
+  *Logins* adds a dot at every connect (green) and disconnect (grey ring), so a
+  trail can be matched to the session that produced it.
   *Players* is a multi-select list (limited to players with samples inside the
   map's own timeline window, so it only offers what can be drawn): tick any
   number of players and every layer is

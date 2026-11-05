@@ -117,6 +117,29 @@ func TestRealAdmTrailCoverageAndBreaks(t *testing.T) {
 	}
 }
 
+// A login and the logout that follows it can share coordinates. Both dots are
+// meaningful in the Logins layer, so neither may be deduplicated away.
+func TestLoginAndLogoutAtTheSameSpot(t *testing.T) {
+	lines := []string{
+		`AdminLog started on 2026-11-03 at 00:00:00`,
+		`10:00:00 | Player "Bob" (id=abc123DEF pos=<10.0, 20.0, 30.0>) is connected`,
+		`10:00:30 | Player "Bob" (id=abc123DEF pos=<10.0, 20.0, 30.0>) has been disconnected`,
+	}
+	parser := &AdmParser{}
+	for _, line := range lines {
+		parser.Feed(line)
+	}
+	report := AnalyzeAdm(parser.Events, DefaultOptions())
+	positions := report.Players[0].Positions
+	if len(positions) != 2 {
+		t.Fatalf("positions = %d, want 2 (login and logout)", len(positions))
+	}
+	if positions[0].Kind != KindConnect || positions[1].Kind != KindDisconnect {
+		t.Fatalf("kinds = %q, %q; want %q, %q",
+			positions[0].Kind, positions[1].Kind, KindConnect, KindDisconnect)
+	}
+}
+
 // A player hit every few seconds must not lose the rest of the day when the
 // per-player sample cap is reached: the newest positions are always kept.
 func TestDenseTrailKeepsCoveringThePeriod(t *testing.T) {

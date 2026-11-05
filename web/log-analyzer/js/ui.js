@@ -1284,6 +1284,14 @@ export function renderMapPanel(panel, report, state, relayout) {
       const tod = secondsOfDay(item.at);
       return tod === null ? item.text : `${fmtClock(tod)} · ${item.text}`;
     }
+    // A shared dot lists what happened instead of only who was involved: a
+    // login and the logout beside it are two different events.
+    const details = [...new Set(spot.items.map((i) => i.text).filter(Boolean))];
+    if (details.length) {
+      const shown = details.slice(0, 3).join('; ');
+      const more = details.length > 3 ? `; +${details.length - 3} more` : '';
+      return `${fmtInt(spot.items.length)} events · ${shown}${more}`;
+    }
     const names = [...new Set(spot.items.flatMap((i) => i.players).filter(Boolean))];
     return `${fmtInt(spot.items.length)} events · ${names.join(', ')}`;
   };
@@ -1829,6 +1837,7 @@ export function renderMapPanel(panel, report, state, relayout) {
         layerToggle('builds', 'Bases'),
         layerToggle('heat', 'Heatmap'),
         layerToggle('connects', 'Last positions'),
+        layerToggle('logins', 'Logins'),
         layerToggle('jumps', 'Position jumps'),
       ),
       stage,
@@ -1837,6 +1846,8 @@ export function renderMapPanel(panel, report, state, relayout) {
         { class: 'legend' },
         el('span', {}, el('i', { style: 'background:#e5484d' }), 'Kill position'),
         el('span', {}, el('i', { style: 'background:#5ac8dc' }), 'Build action'),
+        el('span', {}, el('i', { style: 'background:#4cc38a' }), 'Login'),
+        el('span', {}, el('i', { style: 'background:#a7b4c4' }), 'Logout'),
         el('span', {}, el('i', { style: 'background:var(--warning)' }), 'Impossible movement'),
       ),
       el('p', { class: 'small faint map-hint', text: mapHint(mapMeta, mapState, state) }),

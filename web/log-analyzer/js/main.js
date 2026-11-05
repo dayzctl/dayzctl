@@ -103,6 +103,7 @@ const state = {
       builds: true,
       heat: false,
       connects: false,
+      logins: false,
       jumps: true,
     },
   },

@@ -288,10 +288,12 @@ func (p *playerState) pushPosition(at *float64, pos *Position, limit int, kind, 
 	if len(sample.Text) > 70 {
 		sample.Text = sample.Text[:67] + "…"
 	}
-	// A line already sitting on this spot adds nothing to the trail.
+	// A line already sitting on this spot adds nothing to the trail, but a
+	// different event there does: a login and the logout that follows it can
+	// share coordinates and both must stay, or the map loses the dot.
 	if len(p.positions) > 0 {
 		last := p.positions[len(p.positions)-1]
-		if last.X == sample.X && last.Y == sample.Y {
+		if last.X == sample.X && last.Y == sample.Y && last.Kind == sample.Kind {
 			return
 		}
 	}

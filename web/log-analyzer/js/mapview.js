@@ -179,11 +179,16 @@ const MARKER = {
   // Last position / connection: an event dot like the rest, never hidden by
   // the trail it sits on.
   connect: { color: '#78be78', size: 5.5 },
+  // Logins layer: where a session started and where it ended. The logout is a
+  // ring wide enough to stay visible around the login dot it usually shares a
+  // position with.
+  login: { color: '#4cc38a', size: 5.6 },
+  logout: { color: '#a7b4c4', size: 8, shape: 'ring' },
 };
 
 /** Events drawn by a layer of their own: their trail dot must not add a second
  *  hotspot for the same thing. */
-const MARKED_KINDS = new Set(['kill', 'build', 'place', 'connect', 'jump']);
+const MARKED_KINDS = new Set(['kill', 'build', 'place', 'connect', 'disconnect', 'jump']);
 
 /** Trail stroke width in screen pixels: thicker than before, and thicker still
  *  as the map is zoomed in, but always narrower than a marker's diameter so
@@ -199,6 +204,23 @@ function drawMarker(ctx, x, y, kind) {
     if (m.shape === 'square') ctx.rect(x - r, y - r, r * 2, r * 2);
     else ctx.arc(x, y, r, 0, Math.PI * 2);
   };
+
+  // A ring marks an ending (a logout): stroked only, so a login dot underneath
+  // it keeps showing through.
+  if (m.shape === 'ring') {
+    ctx.save();
+    path(m.size);
+    ctx.lineCap = 'butt';
+    ctx.lineWidth = 4;
+    ctx.strokeStyle = 'rgba(4, 7, 10, 0.7)';
+    ctx.stroke();
+    path(m.size);
+    ctx.lineWidth = 2.2;
+    ctx.strokeStyle = m.color;
+    ctx.stroke();
+    ctx.restore();
+    return;
+  }
 
   // Halo first: it separates the dot from whatever is underneath it.
   path(m.size + 2);
@@ -490,8 +512,8 @@ export function renderMap(canvas, report, state) {
       for (let i = 0; i < pts.length; i += stride) dot(pts[i]);
       if ((pts.length - 1) % stride !== 0) dot(pts[pts.length - 1]);
 
-      // Dots without a layer of their own (hits, emotes, chat, logouts, deaths)
-      // name the event that happened there when hovered.
+      // Dots without a layer of their own (hits, emotes, chat, deaths) name the
+      // event that happened there when hovered.
       for (const s of pts) {
         if (!s.kind || MARKED_KINDS.has(s.kind)) continue;
         addHotspot(
@@ -505,6 +527,31 @@ export function renderMap(canvas, report, state) {
         );
       }
     });
+  }
+
+  // ── logins ───────────────────────────────────────────────
+  // A dot wherever a session started or ended: green for a connect, grey for a
+  // disconnect. Reading a trail against these dots shows which part of the line
+  // belongs to which session.
+  if (layers.logins) {
+    for (const p of adm.players) {
+      if (!involves(p.key)) continue;
+      for (const s of p.positions) {
+        if (s.kind !== 'connect' && s.kind !== 'disconnect') continue;
+        if (!inWindow(s.at)) continue;
+        const login = s.kind === 'connect';
+        drawMarker(ctx, px(s.x), py(s.y), login ? 'login' : 'logout');
+        addHotspot(
+          { x: s.x, y: s.y },
+          {
+            kind: login ? 'login' : 'logout',
+            at: s.at ?? null,
+            players: [p.name],
+            text: `${p.name} ${login ? 'connected' : 'disconnected'}`,
+          },
+        );
+      }
+    }
   }
 
   // ── base building ────────────────────────────────────────
