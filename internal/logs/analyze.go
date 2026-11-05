@@ -3,6 +3,7 @@ package logs
 import (
 	"regexp"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -59,6 +60,13 @@ type PosSample struct {
 	X  float64  `json:"x"`
 	Y  float64  `json:"y"`
 	Z  float64  `json:"z"`
+	// Break marks the first sample after a respawn or reconnect. The map must
+	// start a new trail segment here instead of drawing a line across the world.
+	Break bool `json:"break,omitempty"`
+	// Kind and Text say what happened at this spot (a hit, a build, an emote,
+	// a logout), so a dot on the map can be explained on hover.
+	Kind string `json:"kind,omitempty"`
+	Text string `json:"text,omitempty"`
 }
 
 // WeaponUse is a kill count for one weapon.
@@ -254,13 +262,89 @@ func (p *playerState) touch(at *float64) {
 	}
 }
 
-func (p *playerState) pushPosition(at *float64, pos *Position, limit int) {
+func (p *playerState) pushPosition(at *float64, pos *Position, limit int, kind, text string) {
 	if pos == nil {
 		return
 	}
 	p.lastKnown = pos
-	if len(p.positions) < limit {
-		p.positions = append(p.positions, PosSample{At: at, X: pos.X, Y: pos.Y, Z: pos.Z})
+	if limit > 4 && len(p.positions) >= limit {
+		// Dense logs (a player hit every few seconds) would otherwise stop the
+		// trail at the cap, so the rest of the day has no trail at all. Halve the
+		// trail instead, keeping every other sample and the newest one: detail
+		// drops, coverage of the whole period does not.
+		kept := p.positions[:0]
+		for i := 0; i < len(p.positions); i += 2 {
+			kept = append(kept, p.positions[i])
+		}
+		if (len(p.positions)-1)%2 == 1 {
+			kept = append(kept, p.positions[len(p.positions)-1])
+		}
+		p.positions = kept
+	}
+	if len(p.positions) >= limit {
+		return
+	}
+	sample := PosSample{At: at, X: pos.X, Y: pos.Y, Z: pos.Z, Kind: kind, Text: text}
+	if len(sample.Text) > 70 {
+		sample.Text = sample.Text[:67] + "…"
+	}
+	// A line already sitting on this spot adds nothing to the trail.
+	if len(p.positions) > 0 {
+		last := p.positions[len(p.positions)-1]
+		if last.X == sample.X && last.Y == sample.Y {
+			return
+		}
+	}
+	p.positions = append(p.positions, sample)
+}
+
+// sampleText is the one-line description the map shows for an event dot.
+func sampleText(e Event) string {
+	switch e.Kind {
+	case KindHit:
+		if e.Other != "" {
+			text := "hit by " + e.Other
+			if e.Weapon != "" {
+				text += " (" + e.Weapon + ")"
+			}
+			return text
+		}
+		if tail := strings.TrimSpace(e.Text); tail != "" {
+			return "hit by " + tail
+		}
+		return "took damage"
+	case KindEmote:
+		return "emote " + e.Text
+	case KindState:
+		return e.Text
+	case KindConnect:
+		return "connected"
+	case KindDisconnect:
+		return "disconnected"
+	case KindChat:
+		return "chat: " + e.Text
+	case KindBuild:
+		return "built " + e.Text
+	case KindPlace:
+		return "placed " + e.Text
+	case KindDeath:
+		return "died"
+	case KindKill:
+		return "killed " + e.Other
+	}
+	return ""
+}
+
+// markTrailBreaks flags the first sample after each respawn or reconnect. The
+// two sides of a break must not be joined: that would draw a straight line
+// across the map and read as an impossible movement.
+func (p *playerState) markTrailBreaks() {
+	for i := 1; i < len(p.positions); i++ {
+		a, b := p.positions[i-1], p.positions[i]
+		if a.At == nil || b.At == nil {
+			continue
+		}
+		p.positions[i].Break = hasBreakBetween(p.breaks, *a.At, *b.At)
 	}
 }
 
@@ -376,6 +460,13 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 			getPlayer(e.PlayerKey, e.Player).ids[e.ID] = struct{}{}
 		}
 
+		// Every event that carries coordinates feeds the trail: a build action, a
+		// hit, an emote or a disconnect is a place the player really was, and
+		// skipping any of them leaves gaps in the trail.
+		if e.Pos != nil && e.PlayerKey != "" {
+			getPlayer(e.PlayerKey, e.Player).pushPosition(at, e.Pos, opts.MaxPositionsPerPlayer, e.Kind, sampleText(e))
+		}
+
 		switch e.Kind {
 		case KindConnect:
 			if e.PlayerKey == "" {
@@ -383,9 +474,6 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 			}
 			p := getPlayer(e.PlayerKey, e.Player)
 			p.touch(at)
-			if e.Pos != nil {
-				p.pushPosition(at, e.Pos, opts.MaxPositionsPerPlayer)
-			}
 
 			// DayZ writes several "is connected" lines per join (Steam
 			// handshake, then the spawn line carrying the position). Only the
@@ -490,7 +578,7 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 				s.Deaths++
 			}
 			if killPos != nil {
-				victim.pushPosition(at, killPos, opts.MaxPositionsPerPlayer)
+				victim.pushPosition(at, killPos, opts.MaxPositionsPerPlayer, KindKill, "killed by "+killer.name)
 			}
 
 			killer.kills++
@@ -526,9 +614,6 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 			}
 			p := getPlayer(e.PlayerKey, e.Player)
 			p.touch(at)
-			if e.Pos != nil {
-				p.pushPosition(at, e.Pos, opts.MaxPositionsPerPlayer)
-			}
 
 			// A bare "(DEAD)" line is only a marker: the cause line follows.
 			if e.Marker {
@@ -560,9 +645,6 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 			victim := getPlayer(e.PlayerKey, e.Player)
 			victim.hitsTaken++
 			victim.touch(at)
-			if e.Pos != nil {
-				victim.pushPosition(at, e.Pos, opts.MaxPositionsPerPlayer)
-			}
 			if e.OtherKey == "" {
 				// Environmental damage (infected, falls, vehicles) is not combat,
 				// so it must not feed the combat-log heuristic.
@@ -605,8 +687,14 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 				continue
 			}
 			p := getPlayer(e.PlayerKey, e.Player)
-			p.pushPosition(at, e.Pos, opts.MaxPositionsPerPlayer)
 			p.touch(at)
+
+		case KindEmote, KindState:
+			// Positions were already recorded above; the emote/state itself is a
+			// gameplay event, not a log line to drop.
+			if e.PlayerKey != "" {
+				getPlayer(e.PlayerKey, e.Player).touch(at)
+			}
 
 		case KindKick, KindBan:
 			if e.PlayerKey == "" {
@@ -731,6 +819,7 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 	list := make([]Player, 0, len(players))
 	totals := Totals{}
 	for _, p := range players {
+		p.markTrailBreaks()
 		player := Player{
 			Key:           p.key,
 			Name:          p.name,

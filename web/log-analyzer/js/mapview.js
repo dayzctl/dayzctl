@@ -181,6 +181,10 @@ const MARKER = {
   connect: { color: '#78be78', size: 5.5 },
 };
 
+/** Events drawn by a layer of their own: their trail dot must not add a second
+ *  hotspot for the same thing. */
+const MARKED_KINDS = new Set(['kill', 'build', 'place', 'connect', 'jump']);
+
 /** Trail stroke width in screen pixels: thicker than before, and thicker still
  *  as the map is zoomed in, but always narrower than a marker's diameter so
  *  every event dot stays visible on top of the line. */
@@ -434,26 +438,72 @@ export function renderMap(canvas, report, state) {
       ? adm.players.filter((p) => state.selectedKeys.includes(p.key)).slice(0, 40)
       : adm.players.slice(0, 12);
     const width = trailWidth(vp.zoom);
+    // Event dots are always wider than the line they sit on, so a recorded
+    // event never disappears under its own trail.
+    const dotRadius = Math.max(2.4, width / 2 + 1.6);
 
     chosen.forEach((p) => {
       const pts = p.positions.filter((s) => s.at !== null && s.at !== undefined && inWindow(s.at));
-      if (pts.length < 2) return;
-      ctx.beginPath();
+      if (!pts.length) return;
       // Same colour as the player's row in the picker and the tables, so a
       // trail can be matched to a name without a legend.
-      ctx.strokeStyle = colorFor(p.name, 0.8);
+      const color = colorFor(p.name, 0.8);
+      ctx.strokeStyle = color;
       // Round caps keep corners smooth; the width stays readable but does not
       // swallow the imagery when several trails overlap.
       ctx.lineWidth = width;
       ctx.lineJoin = 'round';
       ctx.lineCap = 'round';
-      pts.forEach((s, idx) => {
-        const x = px(s.x);
-        const y = py(s.y);
-        if (idx === 0) ctx.moveTo(x, y);
-        else ctx.lineTo(x, y);
-      });
-      ctx.stroke();
+
+      // One path per segment: a recorded break (respawn, reconnect) starts a new
+      // one, so the trail never draws a straight line across the map.
+      let segment = [];
+      const flush = () => {
+        if (segment.length > 1) {
+          ctx.beginPath();
+          segment.forEach((s, idx) => {
+            const x = px(s.x);
+            const y = py(s.y);
+            if (idx === 0) ctx.moveTo(x, y);
+            else ctx.lineTo(x, y);
+          });
+          ctx.stroke();
+        }
+        segment = [];
+      };
+      for (const s of pts) {
+        if (s.break && segment.length) flush();
+        segment.push(s);
+      }
+      flush();
+
+      // A dot on every recorded position: ADM only logs event positions, so the
+      // dots are what the trail actually joins, and each one marks where an
+      // event happened. Strided on very long trails to keep the repaint cheap.
+      const stride = Math.max(1, Math.ceil(pts.length / 600));
+      ctx.fillStyle = colorFor(p.name, 0.95);
+      const dot = (s) => {
+        ctx.beginPath();
+        ctx.arc(px(s.x), py(s.y), dotRadius, 0, Math.PI * 2);
+        ctx.fill();
+      };
+      for (let i = 0; i < pts.length; i += stride) dot(pts[i]);
+      if ((pts.length - 1) % stride !== 0) dot(pts[pts.length - 1]);
+
+      // Dots without a layer of their own (hits, emotes, chat, logouts, deaths)
+      // name the event that happened there when hovered.
+      for (const s of pts) {
+        if (!s.kind || MARKED_KINDS.has(s.kind)) continue;
+        addHotspot(
+          { x: s.x, y: s.y },
+          {
+            kind: s.kind,
+            at: s.at ?? null,
+            players: [p.name],
+            text: s.text || s.kind,
+          },
+        );
+      }
     });
   }
 

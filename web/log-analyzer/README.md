@@ -121,6 +121,12 @@ unticked until you select it.
   position jumps and last positions leave a dot that is always larger than the
   trail it sits on; hovering one names the event (time, players,
   item), and a dot shared by several events lists the players involved.
+  Every recorded position also leaves a dot: ADM only writes a position when
+  something happened (a hit, a build, an emote, a logout), so those dots are the
+  places a player really was and the line only joins them. Hovering one names
+  what happened there — *hit by Infected into Torso for 7.2 damage*, *emote
+  EmoteSitA*, *disconnected*. A trail is split at respawns and reconnects, so it
+  never draws a line across the map between two unrelated lives.
   *Players* is a multi-select list (limited to players with samples inside the
   map's own timeline window, so it only offers what can be drawn): tick any
   number of players and every layer is

@@ -40,6 +40,8 @@ const (
 	KindChat       = "chat"
 	KindBuild      = "build"
 	KindPlace      = "place"
+	KindEmote      = "emote"
+	KindState      = "state"
 	KindKick       = "kick"
 	KindBan        = "ban"
 	KindPosition   = "position"

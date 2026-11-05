@@ -53,23 +53,28 @@ var (
 	reDamage     = regexp.MustCompile(`(?i)\bfor\s+([\d.]+)\s+damage\b`)
 	reHitbox     = regexp.MustCompile(`(?i)\binto\s+(\w+)(?:\((-?\d+)\))?`)
 
-	reChat1 = regexp.MustCompile(`(?i)^Player "([^"]+)"(?: \([^)]*\))*\s+said in chat:\s*(.*)$`)
-	reChat2 = regexp.MustCompile(`(?i)^Player "([^"]+)"(?: \([^)]*\))*\s+\(chat\):\s*(.*)$`)
-	reChat3 = regexp.MustCompile(`(?i)^Player "([^"]+)"(?: \([^)]*\))*\s+said:\s*(.*)$`)
+	reChat1 = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s*said in chat:\s*(.*)$`)
+	reChat2 = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s*\(chat\):\s*(.*)$`)
+	reChat3 = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s*said:\s*(.*)$`)
 	reChat4 = regexp.MustCompile(`(?i)^\[Chat\]\s*"?([^":]+)"?\s*:\s*(.*)$`)
 	reChat5 = regexp.MustCompile(`(?i)^\(Direct\)\s*"([^"]+)":\s*(.*)$`)
 
-	reKicked        = regexp.MustCompile(`(?i)^Player "([^"]+)"[^"]*(?:has been|was)\s+kicked\b(.*)$`)
-	reBanned        = regexp.MustCompile(`(?i)^Player "([^"]+)"[^"]*(?:has been|was)\s+banned\b(.*)$`)
-	reKill          = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s+killed by Player "([^"]+)"(.*)$`)
-	reKillAny       = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s+killed by (.+)$`)
-	reSuicide       = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s+(?:committed suicide|bled out|\bdied\b)`)
-	reHit           = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + hpTag + `\s+hit by Player "([^"]+)"(.*)$`)
-	reHitAny        = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + hpTag + `\s+hit by (.+)$`)
-	reBuilt         = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s+built\s+(.+)$`)
-	rePlaced        = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s+(?:placed|deployed|constructed|packed)\s+(.+)$`)
-	reConnect       = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s+(?:is\s+)?connected\b(.*)$`)
-	reDisc          = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s+(?:has been\s+|has\s+)?disconnected\b(.*)$`)
+	reKicked = regexp.MustCompile(`(?i)^Player "([^"]+)"[^"]*(?:has been|was)\s+kicked\b(.*)$`)
+	reBanned = regexp.MustCompile(`(?i)^Player "([^"]+)"[^"]*(?:has been|was)\s+banned\b(.*)$`)
+	// Real logs write the verb straight after the position group, with no
+	// space (`…pos=<1, 2, 3>)Built door1_metal on  with Hatchet`), so every verb
+	// that follows `parenGroup` allows zero whitespace.
+	reKill          = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s*killed by Player "([^"]+)"(.*)$`)
+	reKillAny       = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s*killed by (.+)$`)
+	reSuicide       = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s*(?:committed suicide|bled out|\bdied\b)`)
+	reHit           = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + hpTag + `\s*hit by Player "([^"]+)"(.*)$`)
+	reHitAny        = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + hpTag + `\s*hit by (.+)$`)
+	reBuilt         = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s*built\s+(.+)$`)
+	rePlaced        = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s*(?:placed|deployed|constructed|packed)\s+(.+)$`)
+	reEmote         = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s*performed\s+(.+)$`)
+	reState         = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s*(is unconscious|regained consciousness)\b(.*)$`)
+	reConnect       = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s*(?:is\s+)?connected\b(.*)$`)
+	reDisc          = regexp.MustCompile(`(?i)^Player "([^"]+)"` + parenGroup + `\s*(?:has been\s+|has\s+)?disconnected\b(.*)$`)
 	reAdmin         = regexp.MustCompile(`(?i)^(?:Admin|\[Admin\])\s+([^:]+):\s*(.*)$`)
 	reDead          = regexp.MustCompile(`(?i)^Player "([^"]+)"\s+\(DEAD\)`)
 	rePlayer        = regexp.MustCompile(`(?i)^Player "([^"]+)"`)
@@ -178,6 +183,20 @@ func stripPositionSuffix(text string) string {
 	return cleaned
 }
 
+// DayZ writes `Built door1_metal on  with Hatchet` (object, parent, tool). When
+// the parent is empty a dangling "on" is left behind, and the tool is not part
+// of the object's name, so both are dropped.
+var (
+	reTrailingWith = regexp.MustCompile(`(?i)\s+with\s+[^,]*$`)
+	reTrailingOn   = regexp.MustCompile(`(?i)\s+on\s*$`)
+)
+
+func cleanObjectText(text string) string {
+	cleaned := reTrailingWith.ReplaceAllString(stripPositionSuffix(text), "")
+	cleaned = reTrailingOn.ReplaceAllString(cleaned, "")
+	return strings.TrimSpace(cleaned)
+}
+
 type admMessage struct {
 	Kind     string
 	Player   string
@@ -243,16 +262,28 @@ func ParseAdmMessage(message string) admMessage {
 			hitboxName = hitbox[1]
 		}
 		return admMessage{
-			Kind: KindHit, Player: m[1],
+			Kind: KindHit, Player: m[1], Text: strings.TrimSpace(m[2]),
 			Hitbox: hitboxName, Damage: hitDamage(m[2], hitbox),
 		}
 	}
 
 	if m := reBuilt.FindStringSubmatch(msg); m != nil {
-		return admMessage{Kind: KindBuild, Player: m[1], Text: stripPositionSuffix(m[2])}
+		return admMessage{Kind: KindBuild, Player: m[1], Text: cleanObjectText(m[2])}
 	}
 	if m := rePlaced.FindStringSubmatch(msg); m != nil {
-		return admMessage{Kind: KindPlace, Player: m[1], Text: stripPositionSuffix(m[2])}
+		return admMessage{Kind: KindPlace, Player: m[1], Text: cleanObjectText(m[2])}
+	}
+	// Emotes and consciousness changes carry a position and are real events,
+	// not anonymous position samples.
+	if m := reEmote.FindStringSubmatch(msg); m != nil {
+		return admMessage{Kind: KindEmote, Player: m[1], Text: cleanObjectText(m[2])}
+	}
+	if m := reState.FindStringSubmatch(msg); m != nil {
+		text := strings.TrimSpace(m[2])
+		if tail := strings.TrimSpace(m[3]); tail != "" {
+			text += " " + tail
+		}
+		return admMessage{Kind: KindState, Player: m[1], Text: text}
 	}
 
 	if m := reConnect.FindStringSubmatch(msg); m != nil {
