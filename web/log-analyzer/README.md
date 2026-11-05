@@ -130,7 +130,11 @@ unticked until you select it.
   EmoteSitA*, *disconnected*. A trail is split at respawns and reconnects, so it
   never draws a line across the map between two unrelated lives.
   *Logins* adds a dot at every connect (green) and disconnect (grey ring), so a
-  trail can be matched to the session that produced it.
+  trail can be matched to the session that produced it. A disconnect is only a
+  logout when the player sat down first (`EmoteSitA` within two minutes of it);
+  otherwise the ring is red and the tooltip says *connection lost* — or
+  *kicked* when the log also has a kick line. That is how a crash loop, a
+  timeout or an admin kick stands out from a player logging off.
   *Dead* marks every place a player died (triangle), from PvP kills and from
   environmental deaths. Hits from infected are grouped into one dot per attack
   and summarised on hover (*7 infected hits · 34 damage*) instead of piling up

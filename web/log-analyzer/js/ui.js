@@ -1871,6 +1871,7 @@ export function renderMapPanel(panel, report, state, relayout) {
         el('span', {}, el('i', { style: 'background:#d46bd8' }), 'Trap'),
         el('span', {}, el('i', { style: 'background:#4cc38a' }), 'Login'),
         el('span', {}, el('i', { style: 'background:#a7b4c4' }), 'Logout'),
+        el('span', {}, el('i', { style: 'background:#e5484d' }), 'Lost connection'),
         el('span', {}, el('i', { style: 'background:var(--warning)' }), 'Impossible movement'),
       ),
       el('p', { class: 'small faint map-hint', text: mapHint(mapMeta, mapState, state) }),

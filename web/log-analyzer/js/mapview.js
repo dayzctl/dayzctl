@@ -212,6 +212,9 @@ const MARKER = {
   // position with.
   login: { color: '#4cc38a', size: 5.6 },
   logout: { color: '#a7b4c4', size: 8, shape: 'ring' },
+  // A disconnect with no logout emote before it: the session ended on its own
+  // or was cut by a kick. Red ring, same shape as a normal logout.
+  logoutCrash: { color: '#e5484d', size: 8, shape: 'ring' },
   // One infected attack: a run of hits from zombies at nearly the same spot.
   infected: { color: '#e0803f', size: 6 },
   infectedSwarm: { color: '#e0803f', size: 8.5 },
@@ -654,14 +657,15 @@ export function renderMap(canvas, report, state) {
         if (s.kind !== 'connect' && s.kind !== 'disconnect') continue;
         if (!inWindow(s.at)) continue;
         const login = s.kind === 'connect';
-        drawMarker(ctx, px(s.x), py(s.y), login ? 'login' : 'logout');
+        const crash = !login && s.crash;
+        drawMarker(ctx, px(s.x), py(s.y), login ? 'login' : crash ? 'logoutCrash' : 'logout');
         addHotspot(
           { x: s.x, y: s.y },
           {
-            kind: login ? 'login' : 'logout',
+            kind: login ? 'login' : crash ? 'logoutCrash' : 'logout',
             at: s.at ?? null,
             players: [p.name],
-            text: `${p.name} ${login ? 'connected' : 'disconnected'}`,
+            text: `${p.name} ${s.text || (login ? 'connected' : 'disconnected')}`,
           },
         );
       }
@@ -699,7 +703,7 @@ export function renderMap(canvas, report, state) {
       // say the same thing twice — so it keeps the event's own verb.
       const sampleKinds = spot.kind === 'connect' || spot.kind === 'disconnect';
       if (sampleKinds && layers.logins) continue;
-      const label = spot.kind === 'connect' ? 'connected' : spot.kind === 'disconnect' ? 'disconnected' : 'last position';
+      const label = spot.kind ? spot.text || spot.kind : 'last position';
       addHotspot(spot, {
         kind: 'connect',
         at: spot.at ?? null,

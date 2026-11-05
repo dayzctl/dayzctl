@@ -180,6 +180,52 @@ func TestTrapsAndHitSources(t *testing.T) {
 	}
 }
 
+// DayZ players sit (EmoteSitA) right before logging off. A disconnect with no
+// emote in the window before it ended on its own or was cut by a kick, and the
+// map must say so instead of calling it a logout.
+func TestDisconnectClassification(t *testing.T) {
+	lines := []string{
+		`AdminLog started on 2026-11-03 at 00:00:00`,
+		`10:00:00 | Player "Bob" (id=abc123DEF pos=<10.0, 20.0, 30.0>) is connected`,
+		`10:05:00 | Player "Bob" (id=abc123DEF pos=<11.0, 20.0, 30.0>) performed EmoteSitA`,
+		`10:05:13 | Player "Bob" (id=abc123DEF pos=<11.5, 20.0, 30.0>) has been disconnected`,
+		`10:20:00 | Player "Bob" (id=abc123DEF pos=<12.0, 20.0, 30.0>) is connected`,
+		`10:40:00 | Player "Bob" (id=abc123DEF pos=<13.0, 20.0, 30.0>) has been disconnected`,
+		`11:00:00 | Player "Bob" (id=abc123DEF pos=<14.0, 20.0, 30.0>) is connected`,
+		`11:01:00 | Player "Bob" (id=abc123DEF pos=<15.0, 20.0, 30.0>) has been kicked by BattlEye: Client not responding`,
+		`11:01:05 | Player "Bob" (id=abc123DEF pos=<16.0, 20.0, 30.0>) has been disconnected`,
+	}
+
+	parser := &AdmParser{}
+	for _, line := range lines {
+		parser.Feed(line)
+	}
+	report := AnalyzeAdm(parser.Events, DefaultOptions())
+
+	var disconnects []PosSample
+	for _, s := range report.Players[0].Positions {
+		if s.Kind == KindDisconnect {
+			disconnects = append(disconnects, s)
+		}
+	}
+	if len(disconnects) != 3 {
+		t.Fatalf("disconnects = %d, want 3", len(disconnects))
+	}
+
+	if disconnects[0].Crash || disconnects[0].Text != "disconnected" {
+		t.Errorf("after EmoteSitA: crash=%v text=%q, want a clean logout",
+			disconnects[0].Crash, disconnects[0].Text)
+	}
+	if !disconnects[1].Crash || disconnects[1].Text != "connection lost" {
+		t.Errorf("without emote: crash=%v text=%q, want a lost connection",
+			disconnects[1].Crash, disconnects[1].Text)
+	}
+	if !disconnects[2].Crash || disconnects[2].Text != "kicked" {
+		t.Errorf("after a kick: crash=%v text=%q, want a kick",
+			disconnects[2].Crash, disconnects[2].Text)
+	}
+}
+
 // A login and the logout that follows it can share coordinates. Both dots are
 // meaningful in the Logins layer, so neither may be deduplicated away.
 func TestLoginAndLogoutAtTheSameSpot(t *testing.T) {
