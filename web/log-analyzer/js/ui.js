@@ -1300,12 +1300,19 @@ export function renderMapPanel(panel, report, state, relayout) {
     // A shared dot lists what happened instead of only who was involved: a
     // login and the logout beside it are two different events.
     const details = [...new Set(spot.items.map((i) => i.text).filter(Boolean))];
-    if (details.length) {
-      const shown = details.slice(0, 3).join('; ');
-      const more = details.length > 3 ? `; +${details.length - 3} more` : '';
-      return `${fmtInt(spot.items.length)} events · ${shown}${more}`;
-    }
     const names = [...new Set(spot.items.flatMap((i) => i.players).filter(Boolean))];
+    if (details.length) {
+      // One player's events repeat the name in every entry; show it once.
+      const solo = names.length === 1 ? names[0] : null;
+      const lines =
+        solo !== null
+          ? details.map((d) => (d.startsWith(`${solo} `) ? d.slice(solo.length + 1) : d))
+          : details;
+      const shown = lines.slice(0, 3).join('; ');
+      const more = lines.length > 3 ? `; +${lines.length - 3} more` : '';
+      const who = solo !== null ? `${solo}: ` : '';
+      return `${fmtInt(spot.items.length)} events · ${who}${shown}${more}`;
+    }
     return `${fmtInt(spot.items.length)} events · ${names.join(', ')}`;
   };
 

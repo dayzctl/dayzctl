@@ -694,11 +694,17 @@ export function renderMap(canvas, report, state) {
       const spot = lastSampled(p);
       if (!spot) continue;
       drawMarker(ctx, px(spot.x), py(spot.y), 'connect');
+      // The newest sample is usually the join or the logout line itself. Naming
+      // it "last position" would hide that event and, with the Logins layer on,
+      // say the same thing twice — so it keeps the event's own verb.
+      const sampleKinds = spot.kind === 'connect' || spot.kind === 'disconnect';
+      if (sampleKinds && layers.logins) continue;
+      const label = spot.kind === 'connect' ? 'connected' : spot.kind === 'disconnect' ? 'disconnected' : 'last position';
       addHotspot(spot, {
         kind: 'connect',
         at: spot.at ?? null,
         players: [p.name],
-        text: `${p.name} last position`,
+        text: `${p.name} ${label}`,
       });
     }
   }
