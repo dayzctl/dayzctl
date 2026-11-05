@@ -173,6 +173,11 @@ function drawNames(ctx, names, width, world, toX, toY) {
 const MARKER = {
   kill: { color: '#e5484d', size: 6.5 },
   build: { color: '#5ac8dc', size: 6, shape: 'square' },
+  // Deployables (bear trap, land mine, tripwire) are build events, but they are
+  // not structures, so they get their own shape and colour.
+  trap: { color: '#d46bd8', size: 6, shape: 'square' },
+  // Where a player died. A triangle so it reads differently from a kill dot.
+  death: { color: '#dfe5ec', size: 7, shape: 'triangle' },
   jump: { color: '#d9a53b', size: 6 },
   // Where an impossible movement started: a smaller dot in the same colour.
   jumpOrigin: { color: '#d9a53b', size: 4.6 },
@@ -184,11 +189,18 @@ const MARKER = {
   // position with.
   login: { color: '#4cc38a', size: 5.6 },
   logout: { color: '#a7b4c4', size: 8, shape: 'ring' },
+  // One infected attack: a run of hits from zombies at nearly the same spot.
+  infected: { color: '#e0803f', size: 6 },
+  infectedSwarm: { color: '#e0803f', size: 8.5 },
 };
 
 /** Events drawn by a layer of their own: their trail dot must not add a second
  *  hotspot for the same thing. */
-const MARKED_KINDS = new Set(['kill', 'build', 'place', 'connect', 'disconnect', 'jump']);
+const MARKED_KINDS = new Set(['kill', 'build', 'place', 'connect', 'disconnect', 'jump', 'death']);
+
+/** Hits from the same source this close in time and space belong to one attack. */
+const ATTACK_LINK_SECONDS = 90;
+const ATTACK_LINK_METRES = 120;
 
 /** Trail stroke width in screen pixels: thicker than before, and thicker still
  *  as the map is zoomed in, but always narrower than a marker's diameter so
@@ -202,7 +214,12 @@ function drawMarker(ctx, x, y, kind) {
   const path = (r) => {
     ctx.beginPath();
     if (m.shape === 'square') ctx.rect(x - r, y - r, r * 2, r * 2);
-    else ctx.arc(x, y, r, 0, Math.PI * 2);
+    else if (m.shape === 'triangle') {
+      ctx.moveTo(x, y - r * 1.15);
+      ctx.lineTo(x + r, y + r * 0.8);
+      ctx.lineTo(x - r, y + r * 0.8);
+      ctx.closePath();
+    } else ctx.arc(x, y, r, 0, Math.PI * 2);
   };
 
   // A ring marks an ending (a logout): stroked only, so a login dot underneath
@@ -499,6 +516,33 @@ export function renderMap(canvas, report, state) {
       }
       flush();
 
+      // ── infected attacks ──
+      // A zombie attack is a burst of hits (sometimes dozens in one second),
+      // all from the same source at nearly the same place. Grouping them into
+      // one dot keeps the map readable and lets the tooltip tell the story:
+      // "7 infected hits · 34 damage".
+      const grouped = new Set();
+      const attacks = [];
+      let running = null;
+      for (const s of pts) {
+        if (s.kind !== 'hit' || !/infected/i.test(s.source || '')) {
+          running = null;
+          continue;
+        }
+        if (running) {
+          const prev = running[running.length - 1];
+          const dt = (s.at ?? 0) - (prev.at ?? 0);
+          const away = Math.hypot(s.x - prev.x, s.y - prev.y);
+          if (dt <= ATTACK_LINK_SECONDS && away <= ATTACK_LINK_METRES) {
+            running.push(s);
+            continue;
+          }
+        }
+        running = [s];
+        attacks.push(running);
+      }
+      attacks.forEach((group) => group.forEach((s) => grouped.add(s)));
+
       // A dot on every recorded position: ADM only logs event positions, so the
       // dots are what the trail actually joins, and each one marks where an
       // event happened. Strided on very long trails to keep the repaint cheap.
@@ -509,13 +553,34 @@ export function renderMap(canvas, report, state) {
         ctx.arc(px(s.x), py(s.y), dotRadius, 0, Math.PI * 2);
         ctx.fill();
       };
-      for (let i = 0; i < pts.length; i += stride) dot(pts[i]);
-      if ((pts.length - 1) % stride !== 0) dot(pts[pts.length - 1]);
+      for (let i = 0; i < pts.length; i += stride) {
+        if (!grouped.has(pts[i])) dot(pts[i]);
+      }
+      if ((pts.length - 1) % stride !== 0 && !grouped.has(pts[pts.length - 1])) {
+        dot(pts[pts.length - 1]);
+      }
+
+      for (const group of attacks) {
+        const n = group.length;
+        const cx = group.reduce((sum, s) => sum + s.x, 0) / n;
+        const cy = group.reduce((sum, s) => sum + s.y, 0) / n;
+        const damage = group.reduce((sum, s) => sum + (s.damage || 0), 0);
+        drawMarker(ctx, px(cx), py(cy), n > 3 ? 'infectedSwarm' : 'infected');
+        addHotspot(
+          { x: cx, y: cy },
+          {
+            kind: 'infected',
+            at: group[n - 1].at ?? null,
+            players: [p.name],
+            text: `${n} infected hit${n === 1 ? '' : 's'}${damage > 0 ? ` · ${Math.round(damage)} damage` : ''}`,
+          },
+        );
+      }
 
       // Dots without a layer of their own (hits, emotes, chat, deaths) name the
       // event that happened there when hovered.
       for (const s of pts) {
-        if (!s.kind || MARKED_KINDS.has(s.kind)) continue;
+        if (!s.kind || MARKED_KINDS.has(s.kind) || grouped.has(s)) continue;
         addHotspot(
           { x: s.x, y: s.y },
           {
@@ -558,12 +623,15 @@ export function renderMap(canvas, report, state) {
   if (layers.builds) {
     for (const b of adm.builds) {
       if (!b.pos || !inWindow(b.at) || !involves(b.playerKey)) continue;
-      drawMarker(ctx, px(b.pos.x), py(b.pos.y), 'build');
+      // Traps are deployed, not built: same layer, different marker, so a bear
+      // trap is not mistaken for a wall.
+      const isTrap = Boolean(b.trap);
+      drawMarker(ctx, px(b.pos.x), py(b.pos.y), isTrap ? 'trap' : 'build');
       addHotspot(b.pos, {
-        kind: 'build',
+        kind: isTrap ? 'trap' : 'build',
         at: b.at,
         players: [b.player],
-        text: `${b.kind === 'place' ? 'Placed' : 'Built'} ${b.object}`,
+        text: isTrap ? `Trap: ${b.object}` : `${b.kind === 'place' ? 'Placed' : 'Built'} ${b.object}`,
       });
     }
   }
@@ -639,6 +707,32 @@ export function renderMap(canvas, report, state) {
         at: s.at,
         players: [s.player],
         text: `Impossible movement — ${s.detail}`,
+      });
+    }
+  }
+
+  // ── deaths ───────────────────────────────────────────────
+  // Every place a player died. ADM records PvP kills and environmental deaths in
+  // different lists, so both are folded into one layer.
+  if (layers.deaths) {
+    for (const k of adm.kills) {
+      if (!k.pos || !inWindow(k.at) || !involves(k.killerKey, k.victimKey)) continue;
+      drawMarker(ctx, px(k.pos.x), py(k.pos.y), 'death');
+      addHotspot(k.pos, {
+        kind: 'death',
+        at: k.at,
+        players: [k.victim, k.killer],
+        text: `${k.victim} died — killed by ${k.killer}`,
+      });
+    }
+    for (const d of adm.deaths) {
+      if (!d.pos || !inWindow(d.at) || !involves(d.playerKey)) continue;
+      drawMarker(ctx, px(d.pos.x), py(d.pos.y), 'death');
+      addHotspot(d.pos, {
+        kind: 'death',
+        at: d.at,
+        players: [d.player],
+        text: `${d.player} died${d.cause ? ` — ${d.cause}` : ''}`,
       });
     }
   }

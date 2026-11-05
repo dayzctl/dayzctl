@@ -105,7 +105,9 @@ unticked until you select it.
   those players. Players with no activity inside the Timeline window are left
   out of the list, with a one-click *Show the whole log* to undo it.
 - **Kills** — PvP kills with weapon and distance; sort by time or longest shot.
-- **Base building** — build/place actions with coordinates.
+- **Base building** — build/place actions with coordinates, split by a *Type*
+  column into structures and *traps* (bear traps, land mines, claymores,
+  tripwires), which are deployables rather than base parts.
 - **Suspicious** — combat logging, impossible movement, shared ids, short
   sessions, kicks and bans.
 - **Timeline** — activity per hour of day, with a *From*/*to* window so a night
@@ -129,6 +131,11 @@ unticked until you select it.
   never draws a line across the map between two unrelated lives.
   *Logins* adds a dot at every connect (green) and disconnect (grey ring), so a
   trail can be matched to the session that produced it.
+  *Dead* marks every place a player died (triangle), from PvP kills and from
+  environmental deaths. Hits from infected are grouped into one dot per attack
+  and summarised on hover (*7 infected hits · 34 damage*) instead of piling up
+  dozens of dots, and traps draw as magenta squares so they are not read as
+  walls.
   *Players* is a multi-select list (limited to players with samples inside the
   map's own timeline window, so it only offers what can be drawn): tick any
   number of players and every layer is

@@ -117,6 +117,69 @@ func TestRealAdmTrailCoverageAndBreaks(t *testing.T) {
 	}
 }
 
+// Deployables are build events too, but the map and the tables split them from
+// structures, and repeated hits carry the attacker so they can be grouped.
+func TestTrapsAndHitSources(t *testing.T) {
+	lines := []string{
+		`AdminLog started on 2026-11-03 at 00:00:00`,
+		`10:00:00 | Player "Bob" (id=abc123DEF pos=<100.0, 100.0, 10.0>) is connected`,
+		`10:01:00 | Player "Bob" (id=abc123DEF pos=<110.0, 100.0, 10.0>)Built BearTrap on  with Hands`,
+		`10:02:00 | Player "Bob" (id=abc123DEF pos=<120.0, 100.0, 10.0>)Built wall1_wood on  with Hammer`,
+		`10:03:00 | Player "Bob" (id=abc123DEF pos=<130.0, 100.0, 10.0>)Built LandMineTrap on  with Hands`,
+		`10:04:00 | Player "Bob" (id=abc123DEF pos=<140.0, 100.0, 10.0>)[HP: 80] hit by Infected into Torso(1) for 5.5 damage (MeleeInfected)`,
+		`10:04:01 | Player "Bob" (id=abc123DEF pos=<141.0, 100.0, 10.0>)[HP: 74] hit by Infected into LeftArm(18) for 6 damage (MeleeInfected)`,
+		`10:20:00 | Player "Bob" (id=abc123DEF pos=<150.0, 100.0, 10.0>) killed by Infected from 2.4 meters`,
+	}
+
+	parser := &AdmParser{}
+	for _, line := range lines {
+		parser.Feed(line)
+	}
+	report := AnalyzeAdm(parser.Events, DefaultOptions())
+
+	traps := 0
+	for _, b := range report.Builds {
+		if b.Trap {
+			traps++
+		}
+	}
+	if len(report.Builds) != 3 {
+		t.Fatalf("builds = %d, want 3", len(report.Builds))
+	}
+	if traps != 2 {
+		t.Errorf("traps = %d, want 2 (BearTrap, LandMineTrap)", traps)
+	}
+	if report.Totals.Traps != 2 {
+		t.Errorf("totals.traps = %d, want 2", report.Totals.Traps)
+	}
+
+	player := report.Players[0]
+	var hits []PosSample
+	for _, s := range player.Positions {
+		if s.Kind == KindHit {
+			hits = append(hits, s)
+		}
+	}
+	if len(hits) != 2 {
+		t.Fatalf("hit samples = %d, want 2", len(hits))
+	}
+	for _, h := range hits {
+		if h.Source != "Infected" {
+			t.Errorf("hit source = %q, want Infected", h.Source)
+		}
+		if h.Damage == 0 {
+			t.Errorf("hit damage = 0, want the logged damage")
+		}
+	}
+
+	if len(report.Deaths) != 1 {
+		t.Fatalf("deaths = %d, want 1", len(report.Deaths))
+	}
+	if report.Deaths[0].Pos == nil {
+		t.Error("the death must keep its position so the map can mark it")
+	}
+}
+
 // A login and the logout that follows it can share coordinates. Both dots are
 // meaningful in the Logins layer, so neither may be deduplicated away.
 func TestLoginAndLogoutAtTheSameSpot(t *testing.T) {

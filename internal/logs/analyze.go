@@ -67,6 +67,11 @@ type PosSample struct {
 	// a logout), so a dot on the map can be explained on hover.
 	Kind string `json:"kind,omitempty"`
 	Text string `json:"text,omitempty"`
+	// Source is who or what caused a hit ("Infected", "FallDamageHealth",
+	// "NO DRIVER", a player name). The map groups repeated hits from the same
+	// source into one dot.
+	Source string `json:"source,omitempty"`
+	Damage int    `json:"damage,omitempty"`
 }
 
 // WeaponUse is a kill count for one weapon.
@@ -134,7 +139,8 @@ type Chat struct {
 	Text      string   `json:"text"`
 }
 
-// Build is a build/place action.
+// Build is a build/place action. Trap separates the deployables a player drops
+// (bear traps, land mines, tripwires) from structures.
 type Build struct {
 	At        *float64  `json:"at"`
 	Player    string    `json:"player"`
@@ -142,6 +148,7 @@ type Build struct {
 	Object    string    `json:"object"`
 	Pos       *Position `json:"pos"`
 	Kind      string    `json:"kind"`
+	Trap      bool      `json:"trap,omitempty"`
 }
 
 // Suspicion is one flagged event.
@@ -186,6 +193,7 @@ type Totals struct {
 	Deaths     int `json:"deaths"`
 	Chats      int `json:"chats"`
 	Builds     int `json:"builds"`
+	Traps      int `json:"traps"`
 	Suspicious int `json:"suspicious"`
 }
 
@@ -262,7 +270,24 @@ func (p *playerState) touch(at *float64) {
 	}
 }
 
-func (p *playerState) pushPosition(at *float64, pos *Position, limit int, kind, text string) {
+// sampleDetails describes what happened at a recorded position.
+type sampleDetails struct {
+	kind   string
+	text   string
+	source string
+	damage int
+}
+
+func detailsFromEvent(e Event) sampleDetails {
+	return sampleDetails{
+		kind:   e.Kind,
+		text:   sampleText(e),
+		source: sampleSource(e),
+		damage: sampleDamage(e),
+	}
+}
+
+func (p *playerState) pushPosition(at *float64, pos *Position, limit int, d sampleDetails) {
 	if pos == nil {
 		return
 	}
@@ -284,7 +309,10 @@ func (p *playerState) pushPosition(at *float64, pos *Position, limit int, kind, 
 	if len(p.positions) >= limit {
 		return
 	}
-	sample := PosSample{At: at, X: pos.X, Y: pos.Y, Z: pos.Z, Kind: kind, Text: text}
+	sample := PosSample{
+		At: at, X: pos.X, Y: pos.Y, Z: pos.Z,
+		Kind: d.kind, Text: d.text, Source: d.source, Damage: d.damage,
+	}
 	if len(sample.Text) > 70 {
 		sample.Text = sample.Text[:67] + "…"
 	}
@@ -299,6 +327,39 @@ func (p *playerState) pushPosition(at *float64, pos *Position, limit int, kind, 
 	}
 	p.positions = append(p.positions, sample)
 }
+
+// sampleSource names who or what caused a hit, so repeated hits from the same
+// attacker (an infected, a crash) can be grouped on the map.
+func sampleSource(e Event) string {
+	if e.Kind != KindHit {
+		return ""
+	}
+	if e.Other != "" {
+		return e.Other
+	}
+	tail := strings.TrimSpace(e.Text)
+	if i := strings.Index(strings.ToLower(tail), " into "); i > 0 {
+		tail = tail[:i]
+	}
+	if len(tail) > 48 {
+		tail = tail[:45] + "…"
+	}
+	return tail
+}
+
+func sampleDamage(e Event) int {
+	if e.Kind != KindHit || e.Damage == nil {
+		return 0
+	}
+	return *e.Damage
+}
+
+// trapObject matches the deployables DayZ logs as "Built …": bear traps, land
+// mines, claymores and tripwires. They are build events, but they belong in
+// their own category on the map and in the tables.
+var trapObject = regexp.MustCompile(`(?i)trap|land_?mine|claymore|tripwire|explosive`)
+
+func isTrapObject(name string) bool { return trapObject.MatchString(name) }
 
 // sampleText is the one-line description the map shows for an event dot.
 func sampleText(e Event) string {
@@ -466,7 +527,7 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 		// hit, an emote or a disconnect is a place the player really was, and
 		// skipping any of them leaves gaps in the trail.
 		if e.Pos != nil && e.PlayerKey != "" {
-			getPlayer(e.PlayerKey, e.Player).pushPosition(at, e.Pos, opts.MaxPositionsPerPlayer, e.Kind, sampleText(e))
+			getPlayer(e.PlayerKey, e.Player).pushPosition(at, e.Pos, opts.MaxPositionsPerPlayer, detailsFromEvent(e))
 		}
 
 		switch e.Kind {
@@ -580,7 +641,10 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 				s.Deaths++
 			}
 			if killPos != nil {
-				victim.pushPosition(at, killPos, opts.MaxPositionsPerPlayer, KindKill, "killed by "+killer.name)
+				victim.pushPosition(at, killPos, opts.MaxPositionsPerPlayer, sampleDetails{
+					kind: KindKill,
+					text: "killed by " + killer.name,
+				})
 			}
 
 			killer.kills++
@@ -679,6 +743,7 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 			builds = append(builds, Build{
 				At: at, Player: p.name, PlayerKey: p.key,
 				Object: e.Text, Pos: e.Pos, Kind: e.Kind,
+				Trap: isTrapObject(e.Text),
 			})
 			if e.Pos != nil {
 				p.lastKnown = e.Pos
@@ -899,6 +964,11 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 	totals.Deaths = len(kills) + aiDeaths
 	totals.Chats = len(chats)
 	totals.Builds = len(builds)
+	for _, b := range builds {
+		if b.Trap {
+			totals.Traps++
+		}
+	}
 	totals.Suspicious = len(suspicious)
 
 	return &AdmReport{

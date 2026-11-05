@@ -731,6 +731,7 @@ export function renderBase(panel, report) {
     .slice(0, 20)
     .map(([name, n]) => el('tr', {}, el('td', { text: name }), el('td', { class: 'num', text: fmtInt(n) })));
 
+  const traps = adm.builds.filter((b) => b.trap).length;
   const rows = adm.builds
     .slice()
     .reverse()
@@ -741,6 +742,7 @@ export function renderBase(panel, report) {
         {},
         el('td', { text: b.at === null ? '—' : fmtTime(b.at) }),
         el('td', {}, el('span', { style: `color:${colorFor(b.player)}`, text: b.player })),
+        el('td', { text: b.trap ? 'Trap' : 'Build' }),
         el('td', { text: truncate(b.object, 90) }),
         el('td', {
           class: 'faint small',
@@ -751,8 +753,19 @@ export function renderBase(panel, report) {
 
   panel.append(
     card(
-      `Build actions (${fmtInt(adm.builds.length)})`,
-      table([{ label: 'Time' }, { label: 'Player' }, { label: 'Object' }, { label: 'Position' }], rows),
+      `Build actions (${fmtInt(adm.builds.length)}${
+        traps ? ` — ${fmtInt(traps)} trap${traps === 1 ? '' : 's'}` : ''
+      })`,
+      table(
+        [
+          { label: 'Time' },
+          { label: 'Player' },
+          { label: 'Type' },
+          { label: 'Object' },
+          { label: 'Position' },
+        ],
+        rows,
+      ),
     ),
     card('Most built objects', table([{ label: 'Object' }, { label: 'Count', num: true }], objectRows)),
   );
@@ -1833,6 +1846,7 @@ export function renderMapPanel(panel, report, state, relayout) {
         'div',
         { class: 'filters' },
         layerToggle('kills', 'Kills'),
+        layerToggle('deaths', 'Dead'),
         layerToggle('trails', 'Trails'),
         layerToggle('builds', 'Bases'),
         layerToggle('heat', 'Heatmap'),
@@ -1845,7 +1859,9 @@ export function renderMapPanel(panel, report, state, relayout) {
         'div',
         { class: 'legend' },
         el('span', {}, el('i', { style: 'background:#e5484d' }), 'Kill position'),
+        el('span', {}, el('i', { style: 'background:#dfe5ec' }), 'Death'),
         el('span', {}, el('i', { style: 'background:#5ac8dc' }), 'Build action'),
+        el('span', {}, el('i', { style: 'background:#d46bd8' }), 'Trap'),
         el('span', {}, el('i', { style: 'background:#4cc38a' }), 'Login'),
         el('span', {}, el('i', { style: 'background:#a7b4c4' }), 'Logout'),
         el('span', {}, el('i', { style: 'background:var(--warning)' }), 'Impossible movement'),

@@ -99,6 +99,7 @@ const state = {
     windowTo: null,
     layers: {
       kills: true,
+      deaths: false,
       trails: true,
       builds: true,
       heat: false,
