@@ -74,6 +74,21 @@ export async function fetchMaps() {
 }
 
 /**
+ * Run one RCON action for a player from the analysed log. The server resolves
+ * the live session id (kick/ban) or the ban-list entry (unban) itself.
+ * @param {'kick'|'ban'|'unban'} action
+ * @param {{name: string, ids?: string[], minutes?: number, reason?: string}} payload
+ * @returns {Promise<{action: string, player: string, message: string}>}
+ */
+export async function playerAction(instance, action, payload) {
+  return requestJSON(`/api/instances/${encodeURIComponent(instance)}/players/${encodeURIComponent(action)}`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(payload),
+  });
+}
+
+/**
  * Analyse a selection (or everything when `files` is empty).
  * @returns {Promise<object>} the report the views expect
  */

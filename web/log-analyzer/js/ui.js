@@ -5,7 +5,7 @@
 
 import { fmtInt, fmtDuration, fmtTime, fmtClock, fmtDistance, truncate, colorFor } from './format.js';
 import { renderMap, inferWorldSize, clampView, MAX_MAP_ZOOM } from './mapview.js';
-import { fetchMapMeta } from './api.js';
+import { fetchMapMeta, playerAction } from './api.js';
 
 /** Kill count per weapon, used by the overview card. */
 function topWeapons(kills, limit = 8) {
@@ -177,6 +177,204 @@ export function renderOverview(panel, report, actions) {
   }
 }
 
+/* ── Player actions (RCON) ───────────────────────────────── */
+
+const STEAM_ID = /^7656119\d{10}$/;
+
+/** Small transient message in the bottom-right corner. */
+function notify(message, tone = 'info') {
+  let stack = document.querySelector('.toast-stack');
+  if (!stack) {
+    stack = el('div', { class: 'toast-stack', role: 'status', 'aria-live': 'polite' });
+    document.body.append(stack);
+  }
+  const toast = el('div', { class: `toast ${tone}`, onClick: () => toast.remove() }, el('span', { text: message }));
+  stack.append(toast);
+  setTimeout(() => toast.remove(), 7000);
+}
+
+/**
+ * Modal confirmation. Resolves to {ok, values} once dismissed; `values` holds
+ * the optional form fields. Every destructive RCON action goes through here.
+ */
+function actionDialog({ title, description, confirmLabel = 'Confirm', danger = true, fields = [] }) {
+  return new Promise((resolve) => {
+    const inputs = new Map();
+    const fieldNodes = fields.map((field) => {
+      const control = field.options
+        ? el(
+            'select',
+            { class: 'modal-input', name: field.name },
+            field.options.map((opt) =>
+              el('option', {
+                value: opt.value,
+                text: opt.label,
+                selected: String(opt.value) === String(field.value) ? true : null,
+              }),
+            ),
+          )
+        : el('input', {
+            class: 'modal-input',
+            type: 'text',
+            name: field.name,
+            placeholder: field.placeholder ?? '',
+            value: field.value ?? '',
+            autocomplete: 'off',
+          });
+      inputs.set(field.name, control);
+      return el('label', { class: 'modal-field' }, el('span', { class: 'modal-label', text: field.label }), control);
+    });
+
+    let settled = false;
+    const finish = (ok) => {
+      if (settled) return;
+      settled = true;
+      const values = Object.fromEntries([...inputs].map(([name, node]) => [name, node.value]));
+      resolve({ ok, values });
+      if (dialog.open) dialog.close();
+      dialog.remove();
+    };
+
+    const dialog = el(
+      'dialog',
+      {
+        class: 'modal',
+        onCancel: (event) => {
+          event.preventDefault();
+          finish(false);
+        },
+        onClose: () => finish(false),
+      },
+      el('h3', { class: 'modal-title', text: title }),
+      el('p', { class: 'modal-text', text: description }),
+      ...fieldNodes,
+      el(
+        'div',
+        { class: 'modal-actions' },
+        el('button', { type: 'button', class: 'btn', text: 'Cancel', onClick: () => finish(false) }),
+        el('button', {
+          type: 'button',
+          class: `btn${danger ? ' danger' : ' primary'}`,
+          text: confirmLabel,
+          onClick: () => finish(true),
+        }),
+      ),
+    );
+
+    // Enter confirms from a field; a focused button still activates normally.
+    dialog.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter' && event.target.tagName !== 'BUTTON') {
+        event.preventDefault();
+        finish(true);
+      }
+    });
+
+    document.body.append(dialog);
+    dialog.showModal();
+    (dialog.querySelector('.btn.primary, .btn.danger') ?? dialog).focus();
+  });
+}
+
+/** Confirmation copy, and optional inputs, for one action. */
+function actionSpec(action, player) {
+  if (action === 'kick') {
+    return {
+      title: `Kick ${player.name}?`,
+      description:
+        'Disconnects the player now. The RCON session list is used to find them, so this only works while they are connected.',
+      confirmLabel: 'Kick',
+      fields: [{ name: 'reason', label: 'Reason (optional)', placeholder: 'e.g. behaviour' }],
+    };
+  }
+  if (action === 'ban') {
+    return {
+      title: `Ban ${player.name}?`,
+      description: 'Bans the player and disconnects them immediately. The entry is written to the server ban list.',
+      confirmLabel: 'Ban',
+      fields: [
+        {
+          name: 'minutes',
+          label: 'Duration',
+          value: '0',
+          options: [
+            { value: '0', label: 'Permanent' },
+            { value: '60', label: '1 hour' },
+            { value: '1440', label: '1 day' },
+            { value: '10080', label: '7 days' },
+            { value: '43200', label: '30 days' },
+          ],
+        },
+        { name: 'reason', label: 'Reason (optional)', placeholder: 'e.g. cheating' },
+      ],
+    };
+  }
+  return {
+    title: `Unban ${player.name}?`,
+    description:
+      "Removes the active ban that matches this player's SteamID. The SteamID comes from the analysed ADM log, so this works even while the player is offline.",
+    confirmLabel: 'Unban',
+    danger: false,
+    fields: [],
+  };
+}
+
+async function runPlayerAction(state, player, action) {
+  if (!state.instance) return;
+
+  const { ok, values } = await actionDialog(actionSpec(action, player));
+  if (!ok) return;
+
+  const payload = { name: player.name, ids: (player.ids ?? []).filter((id) => STEAM_ID.test(id)) };
+  if (action === 'kick') payload.reason = values.reason ?? '';
+  if (action === 'ban') {
+    payload.minutes = Number.parseInt(values.minutes, 10) || 0;
+    payload.reason = values.reason ?? '';
+  }
+
+  try {
+    const result = await playerAction(state.instance, action, payload);
+    state.playerNotices.set(player.key, { action, at: Date.now() });
+    // A kick or ban ends the session, so the row must stop claiming "online" —
+    // the analysed log still ends while the player was connected.
+    state.actions.setState({});
+    notify(result?.message || `${action} sent for ${player.name}.`, 'ok');
+  } catch (err) {
+    notify(`${action} failed for ${player.name}: ${err.message}`, 'error');
+  }
+}
+
+function actionBadge(notice) {
+  return el(
+    'span',
+    {
+      class: `action-badge ${notice.action}`,
+      title: `${notice.action} sent at ${new Date(notice.at).toLocaleTimeString()}`,
+    },
+    notice.action,
+  );
+}
+
+/** Actions column: kick/ban while online, unban for anyone. */
+function playerActionsCell(state, player, online) {
+  const button = (label, className, action) =>
+    el('button', {
+      type: 'button',
+      class: `btn tiny ${className}`,
+      text: label,
+      title: `${label} ${player.name} via RCON`,
+      onClick: (event) => {
+        // The row itself toggles selection; an action must not do both.
+        event.stopPropagation();
+        runPlayerAction(state, player, action);
+      },
+    });
+
+  const buttons = [];
+  if (online) buttons.push(button('Kick', 'ghost', 'kick'), button('Ban', 'danger', 'ban'));
+  buttons.push(button('Unban', 'ghost', 'unban'));
+  return el('td', { class: 'actions' }, ...buttons);
+}
+
 /* ── Players ─────────────────────────────────────────────── */
 
 export function renderPlayers(panel, report, state) {
@@ -200,7 +398,19 @@ export function renderPlayers(panel, report, state) {
 
   const matches = inTimeline.filter((p) => !query || p.name.toLowerCase().includes(query));
   const players = onlySelected ? matches.filter((p) => selected.has(p.key)) : matches;
-  const onlineCount = players.filter(isOnline).length;
+
+  // RCON actions need a configured RCON port/password on the instance.
+  const rconReady = Boolean(state.instanceInfo?.rcon);
+  const notices = state.playerNotices ?? new Map();
+
+  // A kick or ban sent from this page ends the session, so the row must stop
+  // claiming "online" even though the log still ends mid-session.
+  const isLive = (p) => {
+    const notice = notices.get(p.key);
+    if (notice && (notice.action === 'kick' || notice.action === 'ban')) return false;
+    return isOnline(p);
+  };
+  const onlineCount = players.filter(isLive).length;
 
   const toggle = (key, on) => {
     if (on) selected.add(key);
@@ -267,7 +477,8 @@ export function renderPlayers(panel, report, state) {
   }
 
   const rows = players.slice(0, 500).map((p) => {
-    const online = isOnline(p);
+    const online = isLive(p);
+    const notice = notices.get(p.key);
     return el(
       'tr',
       {
@@ -291,6 +502,7 @@ export function renderPlayers(panel, report, state) {
         {},
         el('span', { style: `color:${colorFor(p.name)}`, text: p.name }),
         online ? onlineBadge() : null,
+        notice ? actionBadge(notice) : null,
       ),
       el('td', { class: 'num', text: fmtInt(p.connects) }),
       el('td', { class: 'num', text: fmtDuration(p.playtime) }),
@@ -300,6 +512,7 @@ export function renderPlayers(panel, report, state) {
       el('td', { class: 'num', text: fmtInt(p.chats) }),
       el('td', { class: 'num', text: fmtInt(p.builds) }),
       el('td', { class: 'num', text: p.suspicion ? fmtInt(p.suspicion) : '' }),
+      rconReady ? playerActionsCell(state, p, online) : null,
     );
   });
 
@@ -319,6 +532,7 @@ export function renderPlayers(panel, report, state) {
               { label: 'Chat', num: true },
               { label: 'Builds', num: true },
               { label: 'Flags', num: true },
+              ...(rconReady ? [{ label: 'Actions' }] : []),
             ],
             rows,
           )

@@ -49,6 +49,9 @@ const state = {
   // Several players can be inspected at once.
   selectedPlayers: new Set(),
   playersOnlySelected: false,
+  // RCON actions sent from this page, keyed by player key. Kept per report so a
+  // kicked/banned player stops reading as "online".
+  playerNotices: new Map(),
   killQuery: '',
   killsSort: 'time',
   suspiciousFilter: 'all',
@@ -311,6 +314,7 @@ function resetViewState() {
   state.playerQuery = '';
   state.selectedPlayers = new Set();
   state.playersOnlySelected = false;
+  state.playerNotices = new Map();
   state.killQuery = '';
   state.killsSort = 'time';
   state.suspiciousFilter = 'all';

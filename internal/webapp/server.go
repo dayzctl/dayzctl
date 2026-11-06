@@ -82,6 +82,7 @@ func New(cfg *config.ServerConfig) (*Server, error) {
 	mux.HandleFunc("GET /api/maps/{map}/meta", s.handleMapMeta)
 	mux.HandleFunc("GET /api/maps/{map}/tiles/{z}/{x}/{y}", s.handleMapTile)
 	mux.HandleFunc("POST /api/instances/{instance}/analyze", s.handleAnalyze)
+	mux.HandleFunc("POST /api/instances/{instance}/players/{action}", s.handlePlayerAction)
 	mux.HandleFunc("GET /login", s.handleLoginForm)
 	mux.HandleFunc("POST /login", s.handleLogin)
 	mux.HandleFunc("POST /logout", s.handleLogout)
@@ -144,7 +145,10 @@ type instanceView struct {
 	Latest      *time.Time `json:"latest,omitempty"`
 	MapImage    string     `json:"mapImage,omitempty"`
 	Map         string     `json:"map,omitempty"`
-	Error       string     `json:"error,omitempty"`
+	// RCON reports whether the player actions (kick/ban/unban) can work for
+	// this instance, so the UI can leave the buttons out otherwise.
+	RCON  bool   `json:"rcon"`
+	Error string `json:"error,omitempty"`
 }
 
 func (s *Server) handleInstances(w http.ResponseWriter, r *http.Request) {
@@ -153,6 +157,7 @@ func (s *Server) handleInstances(w http.ResponseWriter, r *http.Request) {
 		inst := &s.cfg.Instances[i]
 		view := instanceView{
 			Name:        inst.Name,
+			RCON:        inst.RCON.Enabled && inst.RCON.Port > 0 && inst.RCON.Password != "",
 			Port:        inst.Port,
 			Enabled:     inst.Enabled,
 			ProfilesDir: s.service.ProfilesDir(inst.Name),

@@ -324,9 +324,120 @@ func (c *Client) Ban(playerID int, minutes int, reason string) (string, error) {
 	return c.Send(fmt.Sprintf("ban %d %d", playerID, minutes))
 }
 
-// Unban unbans a player by ID
-func (c *Client) Unban(playerID int) (string, error) {
-	return c.Send(fmt.Sprintf("unban %d", playerID))
+// Bans returns the server's ban list.
+func (c *Client) Bans() ([]Ban, error) {
+	resp, err := c.Send("bans")
+	if err != nil {
+		return nil, err
+	}
+	logger.Debug("RCON Bans: raw response", "resp", resp)
+
+	lines := strings.Split(strings.TrimSpace(resp), "\n")
+
+	// Find the start of the ban table (if present).
+	start := 0
+	for i, l := range lines {
+		if strings.Contains(l, "Bans on server:") {
+			start = i + 1
+			break
+		}
+	}
+
+	var bans []Ban
+	for _, line := range lines[start:] {
+		if b, ok := parseBanLine(line); ok {
+			bans = append(bans, b)
+		}
+	}
+	return bans, nil
+}
+
+// parseBanLine parses a single line of `bans` output into a Ban. The columns
+// seen in the wild are "#", "GUID/IP", "time left" and "reason" in that order,
+// but the time-left column is free-form ("0 (perm)", "1440", "12:00"), so the
+// numbers are picked out rather than read positionally.
+func parseBanLine(line string) (Ban, bool) {
+	line = strings.TrimSpace(line)
+	if line == "" || strings.Contains(line, "[#]") || strings.Contains(line, "---") {
+		return Ban{}, false
+	}
+
+	fields := strings.Fields(line)
+	if len(fields) < 2 {
+		return Ban{}, false
+	}
+
+	id, err := strconv.Atoi(fields[0])
+	if err != nil {
+		return Ban{}, false
+	}
+
+	ban := Ban{ID: id}
+	var reason []string
+	haveTime := false
+
+	for _, field := range fields[1:] {
+		switch {
+		case isGUID(field):
+			ban.GUID = field
+		case isIP(field):
+			ban.IP = field
+		case strings.Contains(strings.ToLower(field), "perm"):
+			ban.Minutes = 0
+			haveTime = true
+		case isNumber(field) && !haveTime:
+			ban.Minutes, _ = strconv.Atoi(field)
+			haveTime = true
+		default:
+			reason = append(reason, field)
+		}
+	}
+
+	ban.Reason = strings.Join(reason, " ")
+	return ban, true
+}
+
+// isGUID reports whether a field looks like a 64-bit Steam account id.
+func isGUID(field string) bool {
+	return len(field) >= 17 && strings.HasPrefix(field, "7656119") && isNumber(field)
+}
+
+// isIP reports whether a field looks like an IPv4 address, with or without a
+// port suffix.
+func isIP(field string) bool {
+	host := field
+	if i := strings.LastIndexByte(host, ':'); i >= 0 {
+		host = host[:i]
+	}
+	parts := strings.Split(host, ".")
+	if len(parts) != 4 {
+		return false
+	}
+	for _, part := range parts {
+		n, err := strconv.Atoi(part)
+		if err != nil || n < 0 || n > 255 {
+			return false
+		}
+	}
+	return true
+}
+
+func isNumber(field string) bool {
+	if field == "" {
+		return false
+	}
+	for _, r := range field {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
+}
+
+// Unban removes a ban by its ban-list id (the first column of `bans`), not by
+// the player's session id.
+func (c *Client) Unban(banID int) (string, error) {
+	return c.Send(fmt.Sprintf("unban %d", banID))
 }
 
 // Say sends a message to all players
@@ -350,4 +461,17 @@ type Player struct {
 	Ping string
 	GUID string
 	Name string
+}
+
+// Ban represents one entry of the server ban list.
+type Ban struct {
+	// ID is the ban's index, which is what `unban` takes.
+	ID int
+	// GUID is the banned SteamID when the ban was placed on one.
+	GUID string
+	// IP is set when the ban was placed on an address instead.
+	IP string
+	// Minutes is the time left; 0 means permanent.
+	Minutes int
+	Reason  string
 }
