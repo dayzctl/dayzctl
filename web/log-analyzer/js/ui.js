@@ -75,9 +75,13 @@ function card(title, ...children) {
 
 /* ── File chips ──────────────────────────────────────────── */
 
+// A folder with months of rotated logs produces hundreds of names; the chip row
+// is a summary of what was parsed, not a picker.
+const MAX_FILE_CHIPS = 10;
+
 export function renderChips(container, files) {
   clear(container);
-  for (const f of files) {
+  for (const f of files.slice(0, MAX_FILE_CHIPS)) {
     container.append(
       el(
         'div',
@@ -86,6 +90,15 @@ export function renderChips(container, files) {
         el('span', { class: 'chip-name', text: f.name }),
         el('span', { class: 'chip-meta', text: f.error ? 'skipped' : `${fmtInt(f.lines)} lines` }),
       ),
+    );
+  }
+  if (files.length > MAX_FILE_CHIPS) {
+    container.append(
+      el('div', {
+        class: 'chip',
+        title: files.slice(MAX_FILE_CHIPS).map((f) => f.name).join('\n'),
+        text: `+${fmtInt(files.length - MAX_FILE_CHIPS)} more`,
+      }),
     );
   }
 }
@@ -127,7 +140,7 @@ export function renderOverview(panel, report, actions) {
 
     panel.append(card('Problems found', el('p', { class: 'muted small', text: headline }), kpis));
   } else {
-    panel.append(card('Problems found', emptyState('No RPT loaded — drop an .RPT file to see error analysis.')));
+    panel.append(card('Problems found', emptyState('No RPT log in this profiles folder, so there are no engine messages to analyse.')));
   }
 
   // Activity
@@ -183,7 +196,7 @@ export function renderOverview(panel, report, actions) {
   } else if (adm) {
     panel.append(card('Activity (ADM)', emptyState('No player events recognised in the ADM lines.')));
   } else {
-    panel.append(card('Activity (ADM)', emptyState('No ADM loaded — drop an .ADM file to see players, kills and bases.')));
+    panel.append(card('Activity (ADM)', emptyState('No ADM log in this profiles folder, so there are no players, kills or bases to show.')));
   }
 
   // Log state
@@ -289,7 +302,7 @@ export function renderProblems(panel, report, state) {
   clear(panel);
 
   if (!report.rpt) {
-    panel.append(card('', emptyState('No RPT loaded. Drop an .RPT file to analyse engine messages.')));
+    panel.append(card('', emptyState('No RPT log in this profiles folder. Engine messages come from the RPT files DayZ writes next to the ADM log.')));
     return;
   }
 
@@ -1795,6 +1808,23 @@ export function renderMapPanel(panel, report, state, relayout) {
 
     paint();
 
+    // One click back to "just now": the window opens on the last six hours,
+    // and these presets are the quickest way to widen or narrow it again.
+    const preset = (label, span, title) =>
+      el('button', {
+        type: 'button',
+        class: 'filter',
+        text: label,
+        title,
+        onClick: () => {
+          mapState.windowTo = hi;
+          mapState.windowFrom = span === null ? lo : Math.max(lo, hi - span);
+          paint();
+          fillPicker();
+          repaintMap();
+        },
+      });
+
     return el(
       'div',
       { class: 'map-window' },
@@ -1807,19 +1837,14 @@ export function renderMapPanel(panel, report, state, relayout) {
         toInput,
       ),
       valueText,
-      el('button', {
-        type: 'button',
-        class: 'filter',
-        text: 'Whole period',
-        title: 'Reset the window to the whole analysed period',
-        onClick: () => {
-          mapState.windowFrom = lo;
-          mapState.windowTo = hi;
-          paint();
-          fillPicker();
-          repaintMap();
-        },
-      }),
+      el(
+        'div',
+        { class: 'map-window-presets' },
+        preset('Last 1h', 3600, 'Show the last hour of the log'),
+        preset('6h', 21600, 'Show the last 6 hours of the log'),
+        preset('24h', 86400, 'Show the last 24 hours of the log'),
+        preset('Whole period', null, 'Reset the window to the whole analysed period'),
+      ),
     );
   })();
 

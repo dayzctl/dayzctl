@@ -6,8 +6,8 @@
  * UI state and fetch calls.
  */
 
-import { fetchHealth, fetchInstances, fetchLogs, analyze, fetchMapMeta, fetchMaps } from './api.js';
-import { fmtInt, fmtBytes } from './format.js';
+import { fetchHealth, fetchInstances, analyze, fetchMapMeta, fetchMaps } from './api.js';
+import { fmtInt } from './format.js';
 import { renderMap } from './mapview.js';
 import {
   el,
@@ -24,24 +24,16 @@ import {
 
 const dom = {
   connect: document.getElementById('connect'),
-  files: document.getElementById('files'),
+  loading: document.getElementById('loading'),
+  loadingLabel: document.getElementById('loading-label'),
   results: document.getElementById('results'),
   instances: document.getElementById('instances'),
   connectError: document.getElementById('connect-error'),
-  filesTitle: document.getElementById('files-title'),
-  filesDir: document.getElementById('files-dir'),
-  fileList: document.getElementById('file-list'),
-  fileTypeFilters: document.getElementById('file-type-filters'),
-  filesEmpty: document.getElementById('files-empty'),
-  refresh: document.getElementById('btn-refresh'),
-  back: document.getElementById('btn-back'),
-  analyzeSelected: document.getElementById('btn-analyze-sel'),
-  toggleAll: document.getElementById('btn-toggle-all'),
-  progress: document.getElementById('progress'),
-  progressLabel: document.getElementById('progress-label'),
-  progressFill: document.getElementById('progress-fill'),
   intakeError: document.getElementById('intake-error'),
+  refresh: document.getElementById('btn-refresh'),
+  scope: document.getElementById('analysis-scope'),
   chips: document.getElementById('file-chips'),
+  reload: document.getElementById('btn-reload'),
   newAnalysis: document.getElementById('btn-new'),
   tabs: document.getElementById('tabs'),
   panels: document.getElementById('panels'),
@@ -51,12 +43,9 @@ const dom = {
 
 const state = {
   report: null,
+  // Instance name (what the API takes) and the entry from /api/instances.
   instance: null,
-  files: [],
-  selected: new Set(),
-  // "all" or a file type (RPT, ADM): servers rotate hundreds of files, and the
-  // ADM event log is what the analysis is built on, so that is the default.
-  fileTypeFilter: 'ADM',
+  instanceInfo: null,
 
   activeTab: 'overview',
   problemFilter: 'all',
@@ -71,6 +60,8 @@ const state = {
   // Time-of-day window for the timeline ("HH:MM", empty means open-ended).
   timelineFrom: '',
   timelineTo: '',
+  // One-line description of the map's default time window, shown above the tabs.
+  windowHint: '',
   mapImageUrl: '',
   // Community map (tiles + place names) for the selected instance.
   mapId: '',
@@ -141,16 +132,12 @@ function hideError(node) {
 }
 
 function showProgress(label) {
-  dom.progress.hidden = false;
-  dom.progress.classList.add('indeterminate');
-  dom.progressLabel.textContent = label;
-  dom.progressFill.style.width = '35%';
+  dom.loadingLabel.textContent = label;
+  dom.loading.hidden = false;
 }
 
 function hideProgress() {
-  dom.progress.hidden = true;
-  dom.progress.classList.remove('indeterminate');
-  dom.progressFill.style.width = '0%';
+  dom.loading.hidden = true;
 }
 
 /* ── Instances ───────────────────────────────────────────── */
@@ -165,16 +152,21 @@ async function boot() {
   } catch {
     dom.serverStatus.textContent = 'API unreachable';
   }
-  await loadInstances();
+  await loadInstances({ autoOpen: true });
 }
 
-async function loadInstances() {
+async function loadInstances({ autoOpen = false } = {}) {
   hideError(dom.connectError);
   dom.instances.replaceChildren(el('p', { class: 'empty', text: 'Loading instances…' }));
 
   try {
     const instances = await fetchInstances();
     renderInstances(instances);
+    // A single instance means there is nothing to choose: open it and start
+    // analysing right away.
+    if (autoOpen && instances.length === 1 && !instances[0].error) {
+      await openInstance(instances[0]);
+    }
   } catch (err) {
     dom.instances.replaceChildren();
     showError(dom.connectError, err.message);
@@ -207,16 +199,18 @@ function renderInstances(instances) {
   dom.instances.replaceChildren(...cards);
 }
 
-/* ── File selection ──────────────────────────────────────── */
+/* ── Analysis ────────────────────────────────────────────── */
 
+/**
+ * Open an instance and analyse everything in it. There is no file picker: the
+ * service parses every ADM and RPT log in the instance's profiles folder, and
+ * the views narrow the result down afterwards (the map opens on the last 6 h).
+ */
 async function openInstance(inst) {
   hideError(dom.connectError);
   hideError(dom.intakeError);
   state.instance = inst.name;
-  state.files = [];
-  state.selected = new Set();
-  // ADM is the default view; openInstance settles it once the folder is read.
-  state.fileTypeFilter = 'ADM';
+  state.instanceInfo = inst;
 
   // A map image served for this instance is picked up by the map tab.
   state.mapImageUrl = inst.mapImage || '';
@@ -249,176 +243,57 @@ async function openInstance(inst) {
 
   dom.connect.hidden = true;
   dom.results.hidden = true;
-  dom.files.hidden = false;
-  dom.filesTitle.textContent = `${inst.name} — choose logs`;
-  dom.filesDir.textContent = inst.profilesDir;
-  dom.fileList.replaceChildren(el('p', { class: 'empty', text: 'Loading log files…' }));
-
-  try {
-    const { files } = await fetchLogs(inst.name);
-    state.files = files;
-
-    // Start on the ADM filter (the event log the analysis is built on), and
-    // preselect nothing except the newest file in view, so a fresh analysis
-    // never picks up a whole rotated folder by accident.
-    const hasADM = files.some((f) => String(f.type).toUpperCase() === 'ADM');
-    state.fileTypeFilter = hasADM ? 'ADM' : 'all';
-
-    const newest = visibleFiles().reduce((best, f) => {
-      if (!best) return f;
-      return Date.parse(f.modTime) > Date.parse(best.modTime) ? f : best;
-    }, null);
-    state.selected = new Set(newest ? [newest.name] : []);
-    renderFileList();
-  } catch (err) {
-    dom.fileList.replaceChildren();
-    showError(dom.connectError, err.message);
-  }
+  await analyseInstance(inst);
 }
 
-function renderFileList() {
-  renderFileTypeFilters();
+/** No file list in the body: the service analyses every log in the folder. */
+async function analyseInstance(inst) {
+  if (!state.instance) return;
 
-  const visible = visibleFiles();
-  dom.filesEmpty.hidden = visible.length > 0;
-  dom.filesEmpty.textContent = state.files.length && !visible.length
-    ? `No ${state.fileTypeFilter} files in this profiles folder.`
-    : 'No log files in this profiles folder yet.';
-
-  dom.fileList.replaceChildren(...visible.map(fileRow));
-  updateSelectionControls(visible);
-}
-
-/** Files matching the active type filter. */
-function visibleFiles() {
-  if (state.fileTypeFilter === 'all') return state.files;
-  return state.files.filter((f) => String(f.type).toUpperCase() === state.fileTypeFilter);
-}
-
-function renderFileTypeFilters() {
-  const counts = new Map();
-  for (const f of state.files) {
-    const type = String(f.type).toUpperCase();
-    counts.set(type, (counts.get(type) ?? 0) + 1);
-  }
-
-  const chip = (value, label, count) =>
-    el('button', {
-      type: 'button',
-      class: `filter${state.fileTypeFilter === value ? ' active' : ''}`,
-      text: `${label} (${fmtInt(count)})`,
-      'aria-pressed': state.fileTypeFilter === value ? 'true' : 'false',
-      onClick: () => {
-        state.fileTypeFilter = value;
-        renderFileList();
-      },
-    });
-
-  // Only offer types that exist, so a folder of pure RPT logs has no dead chip.
-  const types = [...counts.keys()].sort((a, b) => (a === 'RPT' ? -1 : b === 'RPT' ? 1 : a.localeCompare(b)));
-  dom.fileTypeFilters.replaceChildren(
-    chip('all', 'All', state.files.length),
-    ...types.map((type) => chip(type, type, counts.get(type))),
-  );
-  dom.fileTypeFilters.hidden = state.files.length === 0;
-}
-
-function fileRow(file) {
-  const checkbox = el('input', {
-    type: 'checkbox',
-    checked: state.selected.has(file.name) ? true : null,
-    onChange: (event) => {
-      if (event.target.checked) state.selected.add(file.name);
-      else state.selected.delete(file.name);
-      updateSelectionControls();
-    },
-  });
-
-  return el(
-    'label',
-    { class: 'file-row' },
-    checkbox,
-    el('span', { class: `chip-type ${String(file.type).toLowerCase()}`, text: file.type }),
-    el(
-      'span',
-      { class: 'grow' },
-      el('div', { text: file.name }),
-      el('div', {
-        class: 'small faint',
-        text: `${fmtBytes(file.size)} · ${new Date(file.modTime).toLocaleString()}`,
-      }),
-    ),
-  );
-}
-
-function updateSelectionControls(visible = visibleFiles()) {
-  const count = state.selected.size;
-  dom.analyzeSelected.disabled = count === 0;
-  dom.analyzeSelected.textContent = count ? `Analyze selected (${count})` : 'Analyze selected';
-
-  const shownSelected = visible.filter((f) => state.selected.has(f.name)).length;
-  dom.toggleAll.textContent =
-    visible.length > 0 && shownSelected === visible.length
-      ? state.fileTypeFilter === 'all' ? 'Select none' : 'Unselect shown'
-      : state.fileTypeFilter === 'all' ? 'Select all' : 'Select shown';
-  dom.toggleAll.disabled = visible.length === 0;
-}
-
-dom.toggleAll.addEventListener('click', () => {
-  const visible = visibleFiles();
-  const allSelected = visible.length > 0 && visible.every((f) => state.selected.has(f.name));
-  for (const f of visible) {
-    if (allSelected) state.selected.delete(f.name);
-    else state.selected.add(f.name);
-  }
-  renderFileList();
-});
-
-/* ── Analysis ────────────────────────────────────────────── */
-
-async function runAnalysis() {
-  if (!state.instance || state.selected.size === 0) return;
-
-  const files = [...state.selected];
   hideError(dom.intakeError);
-  showProgress(`Analysing ${files.length} file${files.length === 1 ? '' : 's'} in ${state.instance}…`);
+  showProgress(`Analysing every log in ${inst.name}…`);
 
   try {
-    const report = await analyze(state.instance, files);
+    const report = await analyze(inst.name);
     state.report = report;
     resetViewState();
     hideProgress();
     showResults();
   } catch (err) {
     hideProgress();
+    dom.results.hidden = true;
+    dom.connect.hidden = false;
     showError(dom.intakeError, err.message);
   }
 }
 
-dom.analyzeSelected.addEventListener('click', runAnalysis);
-dom.refresh.addEventListener('click', loadInstances);
-dom.back.addEventListener('click', showInstances);
-dom.newAnalysis.addEventListener('click', showInstances);
-
 function showInstances() {
   state.report = null;
   state.instance = null;
+  state.instanceInfo = null;
   state.mapImageUrl = '';
   state.mapId = '';
   state.instanceMapId = '';
   state.mapMeta = null;
   state.mapMetaFailed = false;
   dom.results.hidden = true;
-  dom.files.hidden = true;
   dom.connect.hidden = false;
-  dom.fileList.replaceChildren();
   hideProgress();
   hideError(dom.intakeError);
   window.scrollTo({ top: 0, behavior: 'smooth' });
   if (!dom.instances.childElementCount) loadInstances();
 }
 
+dom.reload.addEventListener('click', () => {
+  if (state.instanceInfo) openInstance(state.instanceInfo);
+});
+dom.refresh.addEventListener('click', () => loadInstances());
+dom.newAnalysis.addEventListener('click', showInstances);
+
 /* ── Results ─────────────────────────────────────────────── */
+
+/** How much of the analysed period the map shows when a report opens. */
+const DEFAULT_WINDOW_SECONDS = 6 * 3600;
 
 function resetViewState() {
   const report = state.report;
@@ -433,15 +308,40 @@ function resetViewState() {
   state.suspiciousFilter = 'all';
   state.timelineFrom = '';
   state.timelineTo = '';
+
+  // A rotated profiles folder can span weeks, so the map's Timeline opens on
+  // the last six hours instead of the whole period. Shorter logs start at
+  // their own beginning; the "Whole period" button undoes it.
+  const period = report.adm?.period;
+  const canTrim =
+    period?.hasTime &&
+    Number.isFinite(period.from) &&
+    Number.isFinite(period.to) &&
+    period.to - period.from > DEFAULT_WINDOW_SECONDS;
+  state.map.windowFrom = canTrim ? period.to - DEFAULT_WINDOW_SECONDS : null;
+  state.map.windowTo = canTrim ? period.to : null;
+  state.windowHint = canTrim ? 'map opens on the last 6 hours' : 'map shows the whole period';
 }
 
 function showResults() {
   dom.connect.hidden = true;
-  dom.files.hidden = true;
   dom.results.hidden = false;
+  hideProgress();
   renderChips(dom.chips, state.report.files);
+  dom.scope.textContent = scopeText(state.report);
   setTab(state.activeTab);
   window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/** "server-1 · 12 ADM + 3 RPT · map opens on the last 6 hours" */
+function scopeText(report) {
+  const counts = new Map();
+  for (const file of report.files ?? []) {
+    const type = String(file.type).toUpperCase();
+    counts.set(type, (counts.get(type) ?? 0) + 1);
+  }
+  const files = [...counts.entries()].map(([type, n]) => `${fmtInt(n)} ${type}`).join(' + ');
+  return [state.instance, files || 'no files', state.windowHint].filter(Boolean).join(' · ');
 }
 
 function setTab(tab) {

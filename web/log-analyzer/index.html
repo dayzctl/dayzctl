@@ -39,45 +39,21 @@
         </div>
         <p class="muted small" style="margin-top:-4px">
           Logs are read by the dayzctl service from each instance's
-          <code>profiles</code> folder. Nothing is uploaded anywhere.
+          <code>profiles</code> folder. Nothing is uploaded anywhere, and opening
+          an instance analyses every ADM and RPT log it holds.
         </p>
         <div id="instances" class="instances"></div>
         <p id="connect-error" class="alert" hidden></p>
       </div>
     </section>
 
-    <!-- ── Log selection ──────────────────────────────────────── -->
-    <section id="files" hidden aria-label="Choose logs">
-      <div class="card">
-        <div class="panel-head">
-          <h2 id="files-title">Logs</h2>
-          <button type="button" class="btn tiny" id="btn-back">Back</button>
-        </div>
-        <p id="files-dir" class="small faint"></p>
-
-        <div class="filters">
-          <button type="button" class="btn primary" id="btn-analyze-sel">Analyze selected</button>
-          <button type="button" class="btn" id="btn-toggle-all">Select all</button>
-        </div>
-
-        <div
-          class="filters"
-          id="file-type-filters"
-          role="group"
-          aria-label="Filter files by type"
-        ></div>
-
-        <!-- Progress sits directly above the list it describes. -->
-        <section id="progress" class="progress" hidden>
-          <div class="progress-head">
-            <span id="progress-label">Analysing…</span>
-          </div>
-          <div class="bar"><div class="bar-fill" id="progress-fill"></div></div>
-        </section>
-
-        <div id="file-list" class="file-list" tabindex="0"></div>
-        <p id="files-empty" class="empty" hidden>No log files in this profiles folder yet.</p>
-      </div>
+    <!-- ── Analysis in flight ─────────────────────────────────── -->
+    <section id="loading" class="card progress indeterminate" hidden aria-live="polite">
+      <h2 class="small muted" id="loading-label" style="margin:0 0 10px">Analysing logs…</h2>
+      <div class="bar"><div class="bar-fill"></div></div>
+      <p class="small faint" style="margin:10px 0 0">
+        Parsed by <code>dayzctl</code> on this host; the browser only renders the result.
+      </p>
     </section>
 
     <p id="intake-error" class="alert" hidden></p>
@@ -85,8 +61,14 @@
     <!-- ── Results ────────────────────────────────────────────── -->
     <section id="results" hidden>
       <div class="filebar">
-        <div id="file-chips" class="chips"></div>
-        <button type="button" class="btn" id="btn-new">New analysis</button>
+        <div>
+          <p id="analysis-scope" class="small faint" style="margin:0 0 6px"></p>
+          <div id="file-chips" class="chips"></div>
+        </div>
+        <div class="filebar-actions">
+          <button type="button" class="btn" id="btn-reload">Re-analyse</button>
+          <button type="button" class="btn" id="btn-new">Change instance</button>
+        </div>
       </div>
 
       <nav id="tabs" class="tabs" aria-label="Analysis sections">

@@ -82,16 +82,15 @@ are gzipped when the client accepts it.
 File names are validated against `filepath.Base`, so a request cannot walk out
 of the instance's profiles folder.
 
-A server keeps months of rotated logs, so the file picker scrolls instead of
-growing the page; the progress bar sits directly above the list it describes.
-The **All / RPT / ADM** chips filter the list by type, and *Select all* acts on
-whatever the filter is showing, so you can analyse every ADM of a week without
-clicking through the RPT files.
+There is no file picker: opening an instance analyses **every log file** in its
+profiles folder — the ADM event logs and the RPT engine logs together — and goes
+straight to the report. A rotated folder of hundreds of files is therefore one
+click, and repeat visits are served from the server's signature-based cache.
 
-The picker opens on the **ADM** filter with only the newest file ticked, so a
-fresh analysis starts from the latest events instead of the whole folder. The
-folder falls back to *All* when it holds no ADM, and every other file stays
-unticked until you select it.
+The results header names the instance and summarises what was parsed (`12 ADM +
+3 RPT`); the first ten files are listed as chips and the rest collapse into a
+`+N more` chip. *Re-analyse* re-reads the folder and *Change instance* goes back
+to the list.
 
 ## Tabs
 
@@ -152,7 +151,10 @@ unticked until you select it.
   limited to them — heatmap, kills (either side of the fight), bases, last
   positions and jumps, not just the trails. The set is shared with the Players
   tab. The *Timeline* window under the toolbar narrows every layer to a
-  from/until span, so a busy day can be cut down to a single fight.
+  from/until span, so a busy day can be cut down to a single fight. It opens on
+  the **last 6 hours** of the analysed period — a rotated folder can span weeks,
+  and what just happened is what an admin looks at — with *Last 1h*, *6h*,
+  *24h* and *Whole period* presets to move it in one click.
 
 ## Coordinates
 

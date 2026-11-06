@@ -349,7 +349,12 @@ func dataVersion(dir string) string {
 		if err != nil {
 			return nil
 		}
-		fmt.Fprintf(h, "%s:%d\n", filepath.ToSlash(rel), info.Size())
+		// A hash never fails to accept a write, but the error must still be
+		// handled: returning it aborts the walk instead of hashing a partial
+		// file list.
+		if _, err := fmt.Fprintf(h, "%s:%d\n", filepath.ToSlash(rel), info.Size()); err != nil {
+			return err
+		}
 		return nil
 	})
 	if err != nil {
