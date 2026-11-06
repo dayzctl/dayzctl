@@ -1585,6 +1585,23 @@ export function renderMapPanel(panel, report, state, relayout) {
     );
     valueText.style.minWidth = `${Math.ceil(widestLabel)}px`;
 
+    // Both thumbs share one track, so they may not touch: the upper input
+    // swallows the drag where they overlap, leaving the lower thumb
+    // ungrabbable, and a drag would otherwise cross the other side. The window
+    // is therefore kept a thumb wide, in slider units, at all times.
+    const THUMB_PX = 18;
+    const minGap = () => {
+      const width = fromInput.getBoundingClientRect().width;
+      if (!width) return step;
+      return Math.max(step, Math.ceil(((THUMB_PX / width) * (hi - lo)) / step) * step);
+    };
+    const keepApart = () => {
+      const gap = minGap();
+      if (mapState.windowTo - mapState.windowFrom >= gap) return;
+      mapState.windowTo = Math.min(hi, mapState.windowFrom + gap);
+      mapState.windowFrom = Math.max(lo, mapState.windowTo - gap);
+    };
+
     const paint = () => {
       const a = pct(mapState.windowFrom);
       const b = pct(mapState.windowTo);
@@ -1608,7 +1625,8 @@ export function renderMapPanel(panel, report, state, relayout) {
       step: String(step),
       'aria-label': 'Timeline from',
       onInput: () => {
-        mapState.windowFrom = Math.min(Number(fromInput.value), mapState.windowTo);
+        // Stops at the other thumb instead of sliding under it.
+        mapState.windowFrom = Math.min(Number(fromInput.value), mapState.windowTo - minGap());
         paint();
         fillPicker();
         repaintMap();
@@ -1622,13 +1640,15 @@ export function renderMapPanel(panel, report, state, relayout) {
       step: String(step),
       'aria-label': 'Timeline until',
       onInput: () => {
-        mapState.windowTo = Math.max(Number(toInput.value), mapState.windowFrom);
+        // Stops at the other thumb instead of sliding under it.
+        mapState.windowTo = Math.max(Number(toInput.value), mapState.windowFrom + minGap());
         paint();
         fillPicker();
         repaintMap();
       },
     });
 
+    keepApart();
     paint();
 
     // One click back to "just now": the window opens on the last six hours,
@@ -1642,6 +1662,7 @@ export function renderMapPanel(panel, report, state, relayout) {
         onClick: () => {
           mapState.windowTo = hi;
           mapState.windowFrom = span === null ? lo : Math.max(lo, hi - span);
+          keepApart();
           paint();
           fillPicker();
           repaintMap();
