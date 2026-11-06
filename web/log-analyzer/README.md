@@ -90,10 +90,9 @@ signature-based cache.
 Only the ADM admin log is read. RPT engine logs are larger, mostly per-second
 FPS/memory telemetry, and are not parsed at all.
 
-The results header names the instance and summarises what was parsed (`12 ADM`);
-the first ten files are listed as chips and the rest collapse into a
-`+N more` chip. *Re-analyse* re-reads the folder and *Change instance* goes back
-to the list.
+The results header names the instance, how many ADM logs were parsed and which
+time window the map opens on. *Re-analyse* re-reads the folder and *Change
+instance* goes back to the list.
 
 ## Tabs
 

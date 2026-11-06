@@ -68,36 +68,6 @@ function card(title, ...children) {
   return el('div', { class: 'card' }, title ? el('h3', { text: title }) : null, ...body);
 }
 
-/* ── File chips ──────────────────────────────────────────── */
-
-// A folder with months of rotated logs produces hundreds of names; the chip row
-// is a summary of what was parsed, not a picker.
-const MAX_FILE_CHIPS = 10;
-
-export function renderChips(container, files) {
-  clear(container);
-  for (const f of files.slice(0, MAX_FILE_CHIPS)) {
-    container.append(
-      el(
-        'div',
-        { class: 'chip', title: f.error ? `${f.name} — ${f.error}` : `${f.name} · ${fmtInt(f.lines)} lines` },
-        el('span', { class: `chip-type ${String(f.type).toLowerCase()}`, text: f.type }),
-        el('span', { class: 'chip-name', text: f.name }),
-        el('span', { class: 'chip-meta', text: f.error ? 'skipped' : `${fmtInt(f.lines)} lines` }),
-      ),
-    );
-  }
-  if (files.length > MAX_FILE_CHIPS) {
-    container.append(
-      el('div', {
-        class: 'chip',
-        title: files.slice(MAX_FILE_CHIPS).map((f) => f.name).join('\n'),
-        text: `+${fmtInt(files.length - MAX_FILE_CHIPS)} more`,
-      }),
-    );
-  }
-}
-
 /* ── Overview ────────────────────────────────────────────── */
 
 export function renderOverview(panel, report, actions) {

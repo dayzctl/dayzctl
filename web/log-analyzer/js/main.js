@@ -11,7 +11,6 @@ import { fmtInt } from './format.js';
 import { renderMap } from './mapview.js';
 import {
   el,
-  renderChips,
   renderOverview,
   renderPlayers,
   renderKills,
@@ -31,7 +30,6 @@ const dom = {
   intakeError: document.getElementById('intake-error'),
   refresh: document.getElementById('btn-refresh'),
   scope: document.getElementById('analysis-scope'),
-  chips: document.getElementById('file-chips'),
   reload: document.getElementById('btn-reload'),
   newAnalysis: document.getElementById('btn-new'),
   tabs: document.getElementById('tabs'),
@@ -337,7 +335,6 @@ function showResults() {
   dom.connect.hidden = true;
   dom.results.hidden = false;
   hideProgress();
-  renderChips(dom.chips, state.report.files);
   dom.scope.textContent = scopeText(state.report);
   setTab(state.activeTab);
   window.scrollTo({ top: 0, behavior: 'smooth' });

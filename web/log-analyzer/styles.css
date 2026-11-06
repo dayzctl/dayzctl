@@ -209,19 +209,6 @@ main { padding: 28px 20px 56px; }
 
 .filebar-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
-.chips { display: flex; gap: 8px; flex-wrap: wrap; }
-
-.chip {
-  display: inline-flex;
-  align-items: center;
-  gap: 8px;
-  border: 1px solid var(--border);
-  background: var(--bg-raised);
-  border-radius: 999px;
-  padding: 5px 12px 5px 6px;
-  font-size: 12.5px;
-}
-
 .chip-type {
   font-size: 10.5px;
   font-weight: 700;
@@ -234,9 +221,6 @@ main { padding: 28px 20px 56px; }
 }
 .chip-type.adm { background: #1d2a38; color: #86bce8; }
 .chip-type.crash { background: #2f1a1d; color: #eb9498; }
-
-.chip-name { color: var(--text); }
-.chip-meta { color: var(--text-faint); font-size: 11.5px; }
 
 /* ── Tabs ───────────────────────────────────────────────── */
 
