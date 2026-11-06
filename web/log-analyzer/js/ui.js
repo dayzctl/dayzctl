@@ -1564,6 +1564,27 @@ export function renderMapPanel(panel, report, state, relayout) {
     const valueText = el('span', { class: 'map-window-value' });
     const pct = (t) => ((t - lo) / (hi - lo || 1)) * 100;
 
+    // The duration text changes length from one slider step to the next
+    // ("(6h 2m)" → "(5h 55m)" → "(59m 59s)"), and it is the flexible slider
+    // track beside it that absorbs the difference — the track would visibly
+    // shrink and grow while a thumb is dragged. Reserving the width of the
+    // longest label this period can print keeps it still: minutes and seconds
+    // are always two digits, and the hours can reach the whole period.
+    const measureLabel = (text) => {
+      const probe = el('span', { class: 'map-window-value', text });
+      probe.style.cssText = 'position:absolute;left:-10000px;top:0;white-space:nowrap;';
+      document.body.append(probe);
+      const width = probe.getBoundingClientRect().width;
+      probe.remove();
+      return width;
+    };
+    const hourDigits = '9'.repeat(String(Math.floor((hi - lo) / 3600)).length);
+    const widestLabel = Math.max(
+      measureLabel(`${stamp(lo)} → ${stamp(hi)} (59m 59s)`),
+      measureLabel(`${stamp(lo)} → ${stamp(hi)} (${hourDigits}h 59m)`),
+    );
+    valueText.style.minWidth = `${Math.ceil(widestLabel)}px`;
+
     const paint = () => {
       const a = pct(mapState.windowFrom);
       const b = pct(mapState.windowTo);
