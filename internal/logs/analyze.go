@@ -568,6 +568,18 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 		if e.Pos != nil && e.PlayerKey != "" {
 			getPlayer(e.PlayerKey, e.Player).pushPosition(at, e.Pos, opts.MaxPositionsPerPlayer, detailsFromEvent(e))
 		}
+		// Many disconnect lines carry the -3.4e38 sentinel instead of a position
+		// (DayZ does not always know where the player was). Pin the logout to the
+		// last known spot, otherwise the session ends nowhere on the map and the
+		// emote beside it is the only dot left.
+		if e.Kind == KindDisconnect && e.Pos == nil && e.PlayerKey != "" {
+			if p := getPlayer(e.PlayerKey, e.Player); p.lastKnown != nil {
+				p.pushPosition(at, p.lastKnown, opts.MaxPositionsPerPlayer, sampleDetails{
+					kind: KindDisconnect,
+					text: "disconnected",
+				})
+			}
+		}
 
 		switch e.Kind {
 		case KindConnect:

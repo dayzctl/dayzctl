@@ -180,6 +180,35 @@ func TestTrapsAndHitSources(t *testing.T) {
 	}
 }
 
+// A disconnect line often carries the -3.4e38 sentinel instead of a position.
+// The session still has to end at the last place the player was seen, or the
+// map loses the dot and the emote beside it is all that is left.
+func TestPositionlessDisconnectUsesLastKnownSpot(t *testing.T) {
+	lines := []string{
+		`AdminLog started on 2026-11-03 at 00:00:00`,
+		`10:00:00 | Player "Bob" (id=abc123DEF pos=<10.0, 20.0, 30.0>) is connected`,
+		`10:05:00 | Player "Bob" (id=abc123DEF pos=<11.0, 21.0, 30.0>) performed EmoteSitA`,
+		`10:05:13 | Player "Bob" (id=abc123DEF pos=<-340282346638528859811704183484516925440.0, -340282346638528859811704183484516925440.0, -340282346638528859811704183484516925440.0>) has been disconnected`,
+	}
+
+	parser := &AdmParser{}
+	for _, line := range lines {
+		parser.Feed(line)
+	}
+	report := AnalyzeAdm(parser.Events, DefaultOptions())
+	positions := report.Players[0].Positions
+	if len(positions) != 3 {
+		t.Fatalf("positions = %d, want 3 (connect, emote, disconnect)", len(positions))
+	}
+	last := positions[len(positions)-1]
+	if last.Kind != KindDisconnect {
+		t.Fatalf("last sample kind = %q, want %q", last.Kind, KindDisconnect)
+	}
+	if last.X != 11 || last.Y != 21 {
+		t.Errorf("disconnect pinned to (%.0f, %.0f), want the last known spot (11, 21)", last.X, last.Y)
+	}
+}
+
 // Only a kick line changes how a disconnect is labelled. A missing logout emote
 // proves nothing — logging off inside a vehicle writes no EmoteSitA — so every
 // other disconnect stays a plain disconnect.

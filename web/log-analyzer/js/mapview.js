@@ -222,9 +222,28 @@ const MARKER = {
   infectedSwarm: { color: '#e0803f', size: 8.5 },
 };
 
-/** Events drawn by a layer of their own: their trail dot must not add a second
- *  hotspot for the same thing. */
-const MARKED_KINDS = new Set(['kill', 'build', 'place', 'connect', 'disconnect', 'jump', 'death']);
+/** Events a dedicated layer already turns into a hoverable marker. When that
+ *  layer is off, the position dot has to explain itself instead — otherwise the
+ *  emote on a logout spot would be the only thing a tooltip reports. */
+function coveredByLayer(kind, layers) {
+  switch (kind) {
+    case 'connect':
+    case 'disconnect':
+      return Boolean(layers.logins);
+    case 'kill':
+      return Boolean(layers.kills);
+    case 'build':
+    case 'place':
+    case 'trap':
+      return Boolean(layers.builds);
+    case 'death':
+      return Boolean(layers.deaths);
+    case 'jump':
+      return Boolean(layers.jumps);
+    default:
+      return false;
+  }
+}
 
 /** Hits from the same source this close in time and space belong to one attack. */
 const ATTACK_LINK_SECONDS = 90;
@@ -634,7 +653,7 @@ export function renderMap(canvas, report, state) {
       // Dots without a layer of their own (hits, emotes, chat, deaths) name the
       // event that happened there when hovered.
       for (const s of pts) {
-        if (!s.kind || MARKED_KINDS.has(s.kind) || grouped.has(s)) continue;
+        if (!s.kind || grouped.has(s) || coveredByLayer(s.kind, layers)) continue;
         addHotspot(
           { x: s.x, y: s.y },
           {

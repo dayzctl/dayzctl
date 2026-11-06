@@ -131,12 +131,14 @@ unticked until you select it.
   never draws a line across the map between two unrelated lives.
   *Logins* adds a dot at every connect (green) and disconnect (grey ring), so a
   trail can be matched to the session that produced it; a disconnect that came
-  with a kick/ban line is a red ring and reads *kicked*. A missing logout emote
-  proves nothing — logging off inside a vehicle writes no `EmoteSitA` — so such a
-  disconnect is not called a crash. **A dot that holds only session events is
-  summarised instead of listed**: `emote + disconnect` is a *logout* (or *last
-  position* when it is the player's final spot), and a dot with both a
-  disconnect and a connect is a *login*.
+  with a kick/ban line is a red ring and reads *kicked*. A disconnect line with
+  no usable position (DayZ often writes the `-3.4e38` sentinel) is pinned to the
+  last place the player was seen, so the session still ends on the map. A missing
+  logout emote proves nothing — logging off inside a vehicle writes no
+  `EmoteSitA` — so such a disconnect is not called a crash. **A dot that holds
+  only session events is summarised instead of listed**: `emote + disconnect` is
+  a *logout* (or *last position* when it is the player's final spot), and a dot
+  with a connect after a disconnect is a *login*.
   *Dead* marks every place a player died (triangle), from PvP kills and from
   environmental deaths. Hits from infected are grouped into one dot per attack
   and summarised on hover (*7 infected hits · 34 damage*) instead of piling up
