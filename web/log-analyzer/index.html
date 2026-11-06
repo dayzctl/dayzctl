@@ -3,8 +3,8 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>DayZ Log Analyzer — ADM &amp; RPT</title>
-  <meta name="description" content="Analyze DayZ server ADM and RPT logs entirely in your browser. Errors explained, players, kills, base building and suspicious activity." />
+  <title>DayZ Log Analyzer — ADM</title>
+  <meta name="description" content="Analyze DayZ server ADM logs entirely in your browser: players, kills, base building, suspicious activity, a timeline and a map." />
   <link rel="stylesheet" href="./styles.css" />
 </head>
 <body>
@@ -14,7 +14,7 @@
         <span class="brand-mark" aria-hidden="true">◆</span>
         <div>
           <h1>DayZ Log Analyzer</h1>
-          <p class="tagline">ADM &amp; RPT, read from your server</p>
+          <p class="tagline">ADM logs, read from your server</p>
         </div>
       </div>
       <div class="header-actions">
@@ -40,7 +40,7 @@
         <p class="muted small" style="margin-top:-4px">
           Logs are read by the dayzctl service from each instance's
           <code>profiles</code> folder. Nothing is uploaded anywhere, and opening
-          an instance analyses every ADM and RPT log it holds.
+          an instance analyses every ADM log it holds.
         </p>
         <div id="instances" class="instances"></div>
         <p id="connect-error" class="alert" hidden></p>
@@ -66,10 +66,6 @@
           <div id="file-chips" class="chips"></div>
         </div>
         <div class="filebar-actions">
-          <label class="filter" style="display:inline-flex;gap:6px;align-items:center;cursor:pointer"
-                 title="Also parse the RPT engine logs. They are about 40× larger than the ADM log, so this is much slower.">
-            <input type="checkbox" id="opt-rpt" /> Include RPT
-          </label>
           <button type="button" class="btn" id="btn-reload">Re-analyse</button>
           <button type="button" class="btn" id="btn-new">Change instance</button>
         </div>
@@ -77,7 +73,6 @@
 
       <nav id="tabs" class="tabs" aria-label="Analysis sections">
         <button type="button" data-tab="overview" class="tab active">Overview</button>
-        <button type="button" data-tab="problems" class="tab">Problems</button>
         <button type="button" data-tab="players" class="tab">Players</button>
         <button type="button" data-tab="kills" class="tab">Kills</button>
         <button type="button" data-tab="base" class="tab">Base building</button>
@@ -88,7 +83,6 @@
 
       <div id="panels">
         <section class="panel active" data-panel="overview"></section>
-        <section class="panel" data-panel="problems"></section>
         <section class="panel" data-panel="players"></section>
         <section class="panel" data-panel="kills"></section>
         <section class="panel" data-panel="base"></section>

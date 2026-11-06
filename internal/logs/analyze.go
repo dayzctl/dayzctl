@@ -1118,8 +1118,6 @@ type Report struct {
 	Instance    string      `json:"instance,omitempty"`
 	Files       []FileInfo  `json:"files"`
 	Adm         *AdmReport  `json:"adm"`
-	Rpt         *RptResult  `json:"rpt"`
-	RptOrigin   RPTOrigin   `json:"rptOrigin"`
 	Stats       ReportStats `json:"stats"`
 	GeneratedAt time.Time   `json:"generatedAt"`
 	FromCache   bool        `json:"fromCache"`
@@ -1137,7 +1135,6 @@ type FileInfo struct {
 // ReportStats are diagnostics about the run.
 type ReportStats struct {
 	AdmFiles     int `json:"admFiles"`
-	RptFiles     int `json:"rptFiles"`
 	AdmEvents    int `json:"admEvents"`
 	AdmUnmatched int `json:"admUnmatched"`
 }

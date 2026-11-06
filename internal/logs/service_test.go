@@ -20,7 +20,6 @@ func fixtureInstall(t *testing.T) string {
 
 	pairs := map[string]string{
 		"testdata/sample.ADM": filepath.Join(profiles, "script_2024-03-15_18-02-11.ADM"),
-		"testdata/sample.RPT": filepath.Join(profiles, "script_2024-03-15_17-55-01.RPT"),
 	}
 	for src, dst := range pairs {
 		data, err := os.ReadFile(src)
@@ -43,17 +42,11 @@ func TestAnalyzeSamples(t *testing.T) {
 		t.Fatalf("Analyze: %v", err)
 	}
 
-	if len(report.Files) != 2 {
-		t.Fatalf("expected 2 files, got %d", len(report.Files))
+	if len(report.Files) != 1 {
+		t.Fatalf("expected 1 file, got %d", len(report.Files))
 	}
 	if report.Adm == nil {
 		t.Fatal("expected an ADM report")
-	}
-	if report.Rpt == nil {
-		t.Fatal("expected an RPT report")
-	}
-	if report.RptOrigin != OriginServer {
-		t.Errorf("rptOrigin = %s, want server", report.RptOrigin)
 	}
 
 	// ── ADM ──────────────────────────────────────────────
@@ -128,36 +121,6 @@ func TestAnalyzeSamples(t *testing.T) {
 	if byType["teleport"] != 2 {
 		t.Errorf("teleport = %d, want 2 (%v)", byType["teleport"], byType)
 	}
-
-	// ── RPT ──────────────────────────────────────────────
-	if report.Rpt.Counts.Critical != 1 {
-		t.Errorf("critical = %d, want 1", report.Rpt.Counts.Critical)
-	}
-	if report.Rpt.Counts.Error != 9 {
-		t.Errorf("errors = %d, want 9", report.Rpt.Counts.Error)
-	}
-	if report.Rpt.Counts.Warning != 3 {
-		t.Errorf("warnings = %d, want 3", report.Rpt.Counts.Warning)
-	}
-	if report.Rpt.ProblemCount != 13 {
-		t.Errorf("problem count = %d, want 13", report.Rpt.ProblemCount)
-	}
-	if report.Rpt.ProblemGroupCount != 10 {
-		t.Errorf("problem groups = %d, want 10", report.Rpt.ProblemGroupCount)
-	}
-	if report.Rpt.EndState != "clean" {
-		t.Errorf("endState = %s, want clean", report.Rpt.EndState)
-	}
-
-	var sawVanilla bool
-	for _, g := range report.Rpt.Groups {
-		if g.RuleID == "strange-convex" && g.Vanilla {
-			sawVanilla = true
-		}
-	}
-	if !sawVanilla {
-		t.Error("expected the harmless geometry warning to be marked vanilla")
-	}
 }
 
 func TestAnalyzeUsesCacheUntilFilesChange(t *testing.T) {
@@ -181,7 +144,7 @@ func TestAnalyzeUsesCacheUntilFilesChange(t *testing.T) {
 	}
 
 	// Touching a file invalidates the entry.
-	target := filepath.Join(dir, "profiles", "test", "script_2024-03-15_17-55-01.RPT")
+	target := filepath.Join(dir, "profiles", "test", "script_2024-03-15_18-02-11.ADM")
 	stamp := time.Now().Add(2 * time.Hour)
 	if err := os.Chtimes(target, stamp, stamp); err != nil {
 		t.Fatalf("chtimes: %v", err)
@@ -223,10 +186,7 @@ func TestListFilesNewestFirst(t *testing.T) {
 	if err != nil {
 		t.Fatalf("ListFiles: %v", err)
 	}
-	if len(files) != 2 {
-		t.Fatalf("expected 2 files, got %d", len(files))
-	}
-	if !files[0].ModTime.After(files[1].ModTime) && !files[0].ModTime.Equal(files[1].ModTime) {
-		t.Error("expected files sorted newest first")
+	if len(files) != 1 {
+		t.Fatalf("expected 1 file, got %d", len(files))
 	}
 }

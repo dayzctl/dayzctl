@@ -4,7 +4,6 @@
  */
 
 import { fmtInt, fmtDuration, fmtTime, fmtClock, fmtDistance, fmtBytes, truncate, colorFor } from './format.js';
-import { SEVERITY, SEVERITY_LABEL, SEVERITY_ORDER } from './severity.js';
 import { renderMap, inferWorldSize, clampView, MAX_MAP_ZOOM } from './mapview.js';
 import { fetchMapMeta } from './api.js';
 
@@ -48,10 +47,6 @@ function kpi(label, value, sub, tone) {
     el('div', { class: 'value', text: value }),
     sub ? el('div', { class: 'sub', text: sub }) : null,
   );
-}
-
-function sevPill(severity) {
-  return el('span', { class: `sev ${severity}`, text: SEVERITY_LABEL[severity] ?? severity });
 }
 
 function table(headers, rows) {
@@ -107,41 +102,7 @@ export function renderChips(container, files) {
 
 export function renderOverview(panel, report, actions) {
   clear(panel);
-  const { adm, rpt, files } = report;
-
-  // Problems
-  if (rpt) {
-    const counts = rpt.counts;
-    const kpis = el(
-      'div',
-      { class: 'kpis' },
-      ...SEVERITY_ORDER.map((sev) =>
-        el(
-          'button',
-          {
-            class: 'kpi',
-            style: 'text-align:left;cursor:pointer;font:inherit;color:inherit',
-            onClick: () => actions.goTab('problems', { problemFilter: sev }),
-          },
-          el('div', { class: 'label', text: SEVERITY_LABEL[sev] }),
-          el('div', {
-            class: `value ${counts[sev] ? (sev === SEVERITY.INFO ? '' : 'bad') : ''}`,
-            text: fmtInt(counts[sev]),
-          }),
-          el('div', { class: 'sub', text: counts[sev] === 1 ? 'occurrence' : 'occurrences' }),
-        ),
-      ),
-    );
-
-    const headline =
-      rpt.problemCount === 0
-        ? 'No problems found. Only harmless standard messages.'
-        : `${fmtInt(rpt.problemCount)} message${rpt.problemCount === 1 ? '' : 's'} worth reviewing, in ${fmtInt(rpt.problemGroupCount)} distinct pattern${rpt.problemGroupCount === 1 ? '' : 's'}.`;
-
-    panel.append(card('Problems found', el('p', { class: 'muted small', text: headline }), kpis));
-  } else {
-    panel.append(card('Problems found', emptyState('No RPT log in this profiles folder, so there are no engine messages to analyse.')));
-  }
+  const { adm, files } = report;
 
   // Activity
   if (adm && adm.totals.players > 0) {
@@ -197,24 +158,6 @@ export function renderOverview(panel, report, actions) {
     panel.append(card('Activity (ADM)', emptyState('No player events recognised in the ADM lines.')));
   } else {
     panel.append(card('Activity (ADM)', emptyState('No ADM log in this profiles folder, so there are no players, kills or bases to show.')));
-  }
-
-  // Log state
-  if (rpt) {
-    const endText =
-      rpt.endState === 'clean'
-        ? 'Clean shutdown marker found at the end of the log.'
-        : rpt.endState === 'crash'
-          ? 'The log contains a crash marker — the process died instead of shutting down.'
-          : 'No shutdown in the log (still running, killed or restarted hard).';
-
-    const rows = [
-      el('div', { class: 'small muted' }, el('strong', { text: 'End of log: ' }), endText),
-      el('div', { class: 'small muted' }, el('strong', { text: 'Origin: ' }), originText(report)),
-      el('div', { class: 'small muted' }, el('strong', { text: 'Mods: ' }), rpt.mods.length ? rpt.mods.join(', ') : 'none detected (vanilla)'),
-    ];
-
-    panel.append(card('Engine log', ...rows));
   }
 
   // Leaders
@@ -287,122 +230,6 @@ export function renderOverview(panel, report, actions) {
       ),
     ),
   );
-}
-
-function originText(report) {
-  if (!report.rpt) return '—';
-  if (report.rptOrigin === 'server') return 'server RPT (dedicated server output)';
-  if (report.rptOrigin === 'client') return 'game client log — this is your own session, not the server';
-  return 'could not be determined';
-}
-
-/* ── Problems ────────────────────────────────────────────── */
-
-export function renderProblems(panel, report, state) {
-  clear(panel);
-
-  if (!report.rpt) {
-    panel.append(card('', emptyState('No RPT log in this profiles folder. Engine messages come from the RPT files DayZ writes next to the ADM log.')));
-    return;
-  }
-
-  const filter = state.problemFilter;
-  const query = state.problemQuery.trim().toLowerCase();
-
-  const chips = el(
-    'div',
-    { class: 'filters' },
-    ...[['all', 'All'], ...SEVERITY_ORDER.map((s) => [s, SEVERITY_LABEL[s]])].map(([value, label]) =>
-      el('button', {
-        class: `filter${filter === value ? ' active' : ''}`,
-        text: value === 'all' ? label : `${label} (${fmtInt(report.rpt.counts[value] ?? 0)})`,
-        onClick: () => state.actions.setState({ problemFilter: value }),
-      }),
-    ),
-    el('input', {
-      type: 'search',
-      placeholder: 'Filter messages …',
-      value: state.problemQuery,
-      class: 'filter',
-      style: 'min-width:200px;border-radius:8px',
-      'data-focus': 'problem-query',
-      onInput: (e) => {
-        state.problemQuery = e.target.value;
-        state.actions.setState({ problemQuery: e.target.value });
-      },
-    }),
-  );
-
-  panel.append(chips);
-
-  const groups = report.rpt.groups.filter((g) => {
-    if (filter !== 'all' && g.severity !== filter) return false;
-    if (!query) return true;
-    return `${g.title} ${g.sample} ${g.category}`.toLowerCase().includes(query);
-  });
-
-  if (!groups.length) {
-    panel.append(card('', emptyState('Nothing matches this filter.')));
-    return;
-  }
-
-  if (report.rpt.overflowGroups > 0) {
-    panel.append(
-      el('p', {
-        class: 'alert',
-        text: `${fmtInt(report.rpt.overflowGroups)} additional rare patterns were collapsed to keep memory bounded.`,
-      }),
-    );
-  }
-
-  for (const g of groups.slice(0, 400)) {
-    const timeRange =
-      g.firstTod === null
-        ? ''
-        : g.firstTod === g.lastTod
-          ? `at ${fmtTime(g.firstTod)}`
-          : `${fmtTime(g.firstTod)} – ${fmtTime(g.lastTod)}`;
-
-    panel.append(
-      el(
-        'div',
-        { class: `problem ${g.severity}` },
-        el(
-          'div',
-          { class: 'problem-head' },
-          el(
-            'div',
-            {},
-            el('div', { class: 'problem-title', text: g.title }),
-            el('div', {
-              class: 'small faint',
-              text: [g.category, `${fmtInt(g.count)}×`, timeRange].filter(Boolean).join(' · '),
-            }),
-          ),
-          el(
-            'div',
-            { style: 'display:flex;gap:6px;align-items:center' },
-            g.vanilla ? el('span', { class: 'tag vanilla', text: 'also vanilla' }) : null,
-            sevPill(g.severity),
-          ),
-        ),
-        el(
-          'div',
-          { class: 'problem-body' },
-          el('p', { text: g.explain }),
-          g.fix ? el('p', { class: 'fix' }, el('strong', { text: 'Fix: ' }), g.fix) : null,
-          g.samples.length
-            ? el(
-                'details',
-                { class: 'samples' },
-                el('summary', { text: `Show ${g.samples.length} example line${g.samples.length === 1 ? '' : 's'}` }),
-                el('pre', { text: g.samples.join('\n') }),
-              )
-            : null,
-        ),
-      ),
-    );
-  }
 }
 
 /* ── Players ─────────────────────────────────────────────── */
@@ -1958,5 +1785,3 @@ export function renderMapPanel(panel, report, state, relayout) {
     if (canvas.isConnected) renderMap(canvas, report, view);
   }, 60);
 }
-
-export { SEVERITY };

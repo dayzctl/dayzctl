@@ -1,8 +1,8 @@
 /**
  * Application wiring: pick an instance → let the server analyse its ADM logs
- * (RPT on request) → render the report.
+ * → render the report.
  *
- * There is no parsing here. `dayzctl web` owns the parsers; this file is only
+ * There is no parsing here. `dayzctl web` owns the parser; this file is only
  * UI state and fetch calls.
  */
 
@@ -13,7 +13,6 @@ import {
   el,
   renderChips,
   renderOverview,
-  renderProblems,
   renderPlayers,
   renderKills,
   renderBase,
@@ -33,7 +32,6 @@ const dom = {
   refresh: document.getElementById('btn-refresh'),
   scope: document.getElementById('analysis-scope'),
   chips: document.getElementById('file-chips'),
-  includeRpt: document.getElementById('opt-rpt'),
   reload: document.getElementById('btn-reload'),
   newAnalysis: document.getElementById('btn-new'),
   tabs: document.getElementById('tabs'),
@@ -47,13 +45,8 @@ const state = {
   // Instance name (what the API takes) and the entry from /api/instances.
   instance: null,
   instanceInfo: null,
-  // ADM is the event log the analysis is built on and is small; RPT holds the
-  // engine messages but is roughly 40x larger, so it is opt-in.
-  includeRpt: false,
 
   activeTab: 'overview',
-  problemFilter: 'all',
-  problemQuery: '',
   playerQuery: '',
   // Several players can be inspected at once.
   selectedPlayers: new Set(),
@@ -207,8 +200,8 @@ function renderInstances(instances) {
 
 /**
  * Open an instance and analyse its logs. There is no file picker: every ADM log
- * in the profiles folder is parsed (RPT only when the toggle is on), and the
- * views narrow the result down afterwards (the map opens on the last 6 h).
+ * in the profiles folder is parsed, and the views narrow the result down
+ * afterwards (the map opens on the last 6 h).
  */
 async function openInstance(inst) {
   hideError(dom.connectError);
@@ -250,13 +243,12 @@ async function openInstance(inst) {
   await analyseInstance(inst);
 }
 
-/** Log types that feed the report: ADM always, RPT only when asked for. */
-function isAnalysable(file, includeRpt = state.includeRpt) {
-  const type = String(file.type).toUpperCase();
-  return type === 'ADM' || (includeRpt && type === 'RPT');
+/** The analyser only understands the ADM admin log. */
+function isAnalysable(file) {
+  return String(file.type).toUpperCase() === 'ADM';
 }
 
-/** Send only the ADM file names (plus RPT when the toggle is on). */
+/** Send only the ADM file names. */
 async function analyseInstance(inst) {
   if (!state.instance) return;
 
@@ -269,18 +261,10 @@ async function analyseInstance(inst) {
     const { files } = await fetchLogs(inst.name);
     const wanted = files.filter((file) => isAnalysable(file));
     if (!wanted.length) {
-      throw new Error(
-        state.includeRpt
-          ? `No ADM or RPT log in ${inst.profilesDir || 'this profiles folder'}.`
-          : `No ADM log in ${inst.profilesDir || 'this profiles folder'}. Tick “Include RPT” to analyse the engine logs instead.`,
-      );
+      throw new Error(`No ADM log in ${inst.profilesDir || 'this profiles folder'}.`);
     }
 
-    const adm = wanted.filter((file) => String(file.type).toUpperCase() === 'ADM').length;
-    const label = adm === wanted.length
-      ? `${wanted.length} ADM log${wanted.length === 1 ? '' : 's'}`
-      : `${adm} ADM + ${wanted.length - adm} RPT log${wanted.length - adm === 1 ? '' : 's'}`;
-    showProgress(`Analysing ${label} in ${inst.name}…`);
+    showProgress(`Analysing ${wanted.length} ADM log${wanted.length === 1 ? '' : 's'} in ${inst.name}…`);
 
     const report = await analyze(inst.name, wanted.map((file) => file.name));
     state.report = report;
@@ -315,10 +299,6 @@ function showInstances() {
 dom.reload.addEventListener('click', () => {
   if (state.instanceInfo) openInstance(state.instanceInfo);
 });
-dom.includeRpt.addEventListener('change', () => {
-  state.includeRpt = dom.includeRpt.checked;
-  if (state.instanceInfo) openInstance(state.instanceInfo);
-});
 dom.refresh.addEventListener('click', () => loadInstances());
 dom.newAnalysis.addEventListener('click', showInstances);
 
@@ -329,9 +309,7 @@ const DEFAULT_WINDOW_SECONDS = 6 * 3600;
 
 function resetViewState() {
   const report = state.report;
-  state.activeTab = report.rpt && !report.adm ? 'problems' : 'overview';
-  state.problemFilter = 'all';
-  state.problemQuery = '';
+  state.activeTab = 'overview';
   state.playerQuery = '';
   state.selectedPlayers = new Set();
   state.playersOnlySelected = false;
@@ -365,22 +343,10 @@ function showResults() {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
-/** "server-1 · 12 ADM + 3 RPT · map opens on the last 6 hours" */
+/** "server-1 · 12 ADM · map opens on the last 6 hours" */
 function scopeText(report) {
-  const counts = new Map();
-  for (const file of report.files ?? []) {
-    const type = String(file.type).toUpperCase();
-    counts.set(type, (counts.get(type) ?? 0) + 1);
-  }
-  // ADM first: it is what the report is mostly built on.
-  const order = ['ADM', 'RPT'];
-  const types = [...counts.keys()].sort((a, b) => {
-    const ia = order.indexOf(a);
-    const ib = order.indexOf(b);
-    return (ia < 0 ? order.length : ia) - (ib < 0 ? order.length : ib);
-  });
-  const files = types.map((type) => `${fmtInt(counts.get(type))} ${type}`).join(' + ');
-  return [state.instance, files || 'no files', state.windowHint].filter(Boolean).join(' · ');
+  const adm = (report.files ?? []).filter((file) => String(file.type).toUpperCase() === 'ADM').length;
+  return [state.instance, `${fmtInt(adm)} ADM`, state.windowHint].filter(Boolean).join(' · ');
 }
 
 function setTab(tab) {
@@ -449,9 +415,6 @@ function renderActivePanel() {
     case 'overview':
       renderOverview(panel, report, state.actions);
       break;
-    case 'problems':
-      renderProblems(panel, report, state);
-      break;
     case 'players':
       renderPlayers(panel, report, state);
       break;
@@ -482,7 +445,6 @@ function renderActivePanel() {
 
 function updateTabBadges(report) {
   const badges = {
-    problems: report.rpt ? report.rpt.problemCount : 0,
     players: report.adm ? report.adm.totals.players : 0,
     suspicious: report.adm ? report.adm.totals.suspicious : 0,
   };

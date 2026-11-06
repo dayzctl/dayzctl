@@ -1,11 +1,11 @@
 # DayZ Log Analyzer (web UI)
 
-The browser front end of `dayzctl web`. It renders ADM/RPT analysis produced by
+The browser front end of `dayzctl web`. It renders the ADM analysis produced by
 the Go backend — it does not parse anything itself.
 
 ```
-browser ──GET /api/instances──▶ dayzctl web ──▶ <install>/profiles/<instance>/*.ADM|*.RPT
-        ──POST /analyze───────▶            ──▶ internal/logs (parser + rules + aggregate)
+browser ──GET /api/instances──▶ dayzctl web ──▶ <install>/profiles/<instance>/*.ADM
+        ──POST /analyze───────▶            ──▶ internal/logs (parser + aggregate)
         ◀──report JSON────────            ◀── cached by file signature
 ```
 
@@ -87,10 +87,8 @@ profiles folder and goes straight to the report. A rotated folder of hundreds of
 files is therefore one click, and repeat visits are served from the server's
 signature-based cache.
 
-RPT logs are opt-in through the **Include RPT** toggle in the results header.
-They carry the engine messages the *Problems* tab explains, but one day of RPT
-is about 40× the size of the same day's ADM (roughly 97 % of it is per-second
-FPS/memory telemetry), so parsing them all is far slower than the ADM pass.
+Only the ADM admin log is read. RPT engine logs are larger, mostly per-second
+FPS/memory telemetry, and are not parsed at all.
 
 The results header names the instance and summarises what was parsed (`12 ADM`);
 the first ten files are listed as chips and the rest collapse into a
@@ -99,10 +97,8 @@ to the list.
 
 ## Tabs
 
-- **Overview** — problem counts by severity, activity KPIs, log origin
-  (server vs. game client), end-of-log state, mods, top players, weapons.
-- **Problems** — every distinct RPT pattern with an explanation, a concrete fix,
-  and an `also vanilla` tag for stock-server noise.
+- **Overview** — activity KPIs (period, players, deaths, suspicious events,
+  chat, build actions), top players, weapons used and the parsed files.
 - **Players** — sessions, playtime, kills, deaths, K/D, chat, builds, flags.
   Tick several players to compare them: their details stack below the table, and
   *Show selected only* narrows the list to them. The Map tab can then draw just
@@ -277,7 +273,7 @@ prefix) and marked as unrecognised, so nothing is silently dropped.
 ## Layout
 
 ```
-index.html          shell: instance picker, log picker, tabs
+index.html          shell: instance picker, tabs
 styles.css          dark theme
 js/
   main.js           UI flow and state
@@ -285,13 +281,12 @@ js/
   ui.js             rendering for every tab
   mapview.js        canvas map renderer
   format.js         number/time helpers
-  severity.js       severity vocabulary
 ```
 
 Backend counterpart:
 
 ```
-internal/logs/      ADM/RPT parsers, rules, aggregation, file discovery, cache
+internal/logs/      ADM parser, aggregation, file discovery, cache
 internal/webapp/    HTTP handlers, gzip, static asset serving
 web/assets.go       go:embed of this folder
 cmd/dayzctl/commands/web.go   `dayzctl web`
@@ -299,28 +294,23 @@ cmd/dayzctl/commands/web.go   `dayzctl web`
 
 ## What real server logs look like
 
-Measured against a production server (1,039,290 RPT lines / 44 MB for one day,
-185 ADM lines):
+Measured against a production server (1,039,290 RPT lines / 44 MB and 185 ADM
+lines for one day; only the ADM is parsed):
 
-- About **97 % of an RPT is telemetry** — `Average server FPS`, `Used memory` and
-  `Players: … in total` written once per second. They collapse into one group.
-- A single day produced **7 distinct warning/error patterns** from 15,085
-  occurrences, mostly `ENTITY (W)` model warnings that stock DayZ maps emit on
-  every start (marked `also vanilla`).
-- `[CE]` loot-economy lines repeat thousands of times; a genuine XML parse
-  failure is separated out as critical.
 - ADM positions can be the float sentinel `-3.4e38`; those are dropped instead
   of being plotted at the edge of the world.
 - ADM writes `is connecting` (handshake, ignored) as well as `is connected`, and
   a respawn re-uses the `is connected` line.
+- One day of RPT is about 40× the size of the same day's ADM, and about 97 % of
+  it is per-second telemetry — which is why RPT logs are not read at all.
 
-Cold analysis of that day takes ~4 s; the result is cached until a file's size
-or mtime changes, after which the dashboard reloads instantly.
+Cold analysis of that day's ADM takes milliseconds; the result is cached until a
+file's size or mtime changes, after which the dashboard reloads instantly.
 
 ## Known limits
 
-- One analysis request at a time per instance selection; results are cached
-  (last 8 selections) until a file's size or mtime changes.
+- One analysis request at a time per instance; results are cached (last 8
+  selections) until a file's size or mtime changes.
 - Messages beyond 4 000 distinct normalised patterns are collapsed to bound memory.
 - Position samples are capped per player (1 500) — enough for trails, not for
   every heartbeat of a very long session.

@@ -233,8 +233,6 @@ main { padding: 28px 20px 56px; }
   color: var(--text-dim);
 }
 .chip-type.adm { background: #1d2a38; color: #86bce8; }
-.chip-type.rpt { background: #2b2318; color: #e0bb7a; }
-.chip-type.script { background: #22282f; color: #a9b6c4; }
 .chip-type.crash { background: #2f1a1d; color: #eb9498; }
 
 .chip-name { color: var(--text); }
@@ -326,33 +324,6 @@ main { padding: 28px 20px 56px; }
 .kpi.warn .value { color: var(--warning); }
 .kpi.bad .value { color: var(--critical); }
 
-/* ── Severity pills ─────────────────────────────────────── */
-
-.sev {
-  display: inline-block;
-  font-size: 10.5px;
-  font-weight: 700;
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-  padding: 2px 7px;
-  border-radius: 999px;
-}
-.sev.critical { background: rgba(229, 72, 77, 0.16); color: var(--critical); }
-.sev.error { background: rgba(224, 123, 57, 0.16); color: var(--error); }
-.sev.warning { background: rgba(217, 165, 59, 0.16); color: var(--warning); }
-.sev.info { background: rgba(79, 143, 214, 0.16); color: var(--info); }
-
-.tag {
-  display: inline-block;
-  font-size: 11px;
-  padding: 2px 7px;
-  border-radius: 5px;
-  background: #1e252d;
-  color: var(--text-dim);
-  border: 1px solid var(--border-soft);
-}
-.tag.vanilla { background: rgba(71, 168, 106, 0.12); color: #7fc79a; border-color: rgba(71, 168, 106, 0.25); }
-
 /* ── Tables ─────────────────────────────────────────────── */
 
 .table-wrap { overflow-x: auto; border: 1px solid var(--border-soft); border-radius: var(--radius-sm); }
@@ -388,34 +359,6 @@ td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
   color: var(--text-dim);
   word-break: break-word;
 }
-
-/* ── Problem entries ────────────────────────────────────── */
-
-.problem {
-  border: 1px solid var(--border-soft);
-  border-left: 3px solid var(--border);
-  border-radius: var(--radius-sm);
-  background: var(--bg-raised-2);
-  padding: 13px 15px;
-  margin-bottom: 10px;
-}
-.problem.critical { border-left-color: var(--critical); }
-.problem.error { border-left-color: var(--error); }
-.problem.warning { border-left-color: var(--warning); }
-.problem.info { border-left-color: var(--info); }
-
-.problem-head {
-  display: flex;
-  align-items: flex-start;
-  gap: 10px;
-  justify-content: space-between;
-  flex-wrap: wrap;
-}
-.problem-title { font-weight: 600; font-size: 14px; }
-.problem-body { margin-top: 8px; font-size: 13px; color: var(--text-dim); }
-.problem-body p { margin: 0 0 6px; }
-.problem-body .fix { color: #b9c4d0; }
-.problem-body .fix strong { color: var(--text); }
 
 .filters { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
 .filter {

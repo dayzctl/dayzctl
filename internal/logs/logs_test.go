@@ -201,16 +201,17 @@ func TestDetectType(t *testing.T) {
 		want   FileType
 	}{
 		{"script_2024.ADM", nil, FileADM},
-		{"script_2024.RPT", nil, FileRPT},
+		// RPT logs are neither listed nor parsed any more.
+		{"script_2024.RPT", nil, FileUnknown},
 		{"crash.mdmp", nil, FileCrash},
 		{"unknown.log", []string{`18:02:11 | Player "Bob" is connected (id=1)`}, FileADM},
-		// A generic "Warning:" line must NOT turn an unrelated .log into an RPT.
+		// A generic "Warning:" line must NOT turn an unrelated .log into a log.
 		{"unknown.log", []string{`17:29:58 Warning: something broke`}, FileUnknown},
 		{"unknown.log", []string{`ERROR: nvidia-installer failed`}, FileUnknown},
-		// Real DayZ server RPT markers.
-		{"unknown.log", []string{`Exe timestamp: 2026/10/21 11:43:16`, `Average server FPS: 612.00 (measured interval: 1 s)`}, FileRPT},
-		{"unknown.log", []string{`10:00:00    ENTITY    (W): Door 'door1' is missing geometry components`}, FileRPT},
-		{"unknown.log", []string{`SCRIPT       : (E): Error in expression`}, FileScript},
+		// RPT-style engine noise is not an ADM log.
+		{"unknown.log", []string{`Exe timestamp: 2026/10/21 11:43:16`, `Average server FPS: 612.00 (measured interval: 1 s)`}, FileUnknown},
+		{"unknown.log", []string{`10:00:00    ENTITY    (W): Door 'door1' is missing geometry components`}, FileUnknown},
+		{"unknown.log", []string{`SCRIPT       : (E): Error in expression`}, FileUnknown},
 	}
 	for _, tc := range cases {
 		if got := DetectType(tc.name, tc.sample); got != tc.want {
@@ -220,8 +221,8 @@ func TestDetectType(t *testing.T) {
 }
 
 func TestIsCandidateEntry(t *testing.T) {
-	yes := []string{"script_1.ADM", "script_1.RPT", "script.log", "notes.txt", "crash.mdmp"}
-	no := []string{"", "dir/", ".hidden", "storage_1.bin", "serverDZ.cfg"}
+	yes := []string{"script_1.ADM", "script.log", "notes.txt", "crash.mdmp"}
+	no := []string{"", "dir/", ".hidden", "storage_1.bin", "serverDZ.cfg", "script_1.RPT"}
 
 	for _, name := range yes {
 		if !IsCandidateEntry(name) {
@@ -232,17 +233,5 @@ func TestIsCandidateEntry(t *testing.T) {
 		if IsCandidateEntry(name) {
 			t.Errorf("%q should not be a candidate", name)
 		}
-	}
-}
-
-func TestNormalizeMessageCollapsesVolatileParts(t *testing.T) {
-	a := NormalizeMessage(`Cannot open object mymod\objects\wall1.p3d`)
-	b := NormalizeMessage(`Cannot open object mymod\objects\wall2.p3d`)
-
-	if a != b {
-		t.Fatalf("expected the same group key:\n%s\n%s", a, b)
-	}
-	if !strings.Contains(a, "<path>") {
-		t.Errorf("expected a <path> placeholder, got %q", a)
 	}
 }

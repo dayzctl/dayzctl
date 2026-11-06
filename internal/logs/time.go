@@ -6,26 +6,11 @@ import (
 	"time"
 )
 
-// Severity ranks an engine message by how much an admin should care.
-type Severity string
-
-const (
-	SeverityCritical Severity = "critical"
-	SeverityError    Severity = "error"
-	SeverityWarning  Severity = "warning"
-	SeverityInfo     Severity = "info"
-)
-
-// SeverityOrder is the display order used by the UI.
-var SeverityOrder = []Severity{SeverityCritical, SeverityError, SeverityWarning, SeverityInfo}
-
 // FileType identifies which parser a log file needs.
 type FileType string
 
 const (
 	FileADM     FileType = "ADM"
-	FileRPT     FileType = "RPT"
-	FileScript  FileType = "SCRIPT"
 	FileCrash   FileType = "CRASH"
 	FileUnknown FileType = "UNKNOWN"
 )

@@ -329,10 +329,10 @@ Installed-Size: %d
 Section: admin
 Priority: optional
 Homepage: https://github.com/dayzctl/dayzctl
-Description: DayZ server manager and ADM/RPT log analyzer
+Description: DayZ server manager and ADM log analyzer
  dayzctl installs and configures DayZ dedicated servers, then analyses their
- ADM and RPT logs: engine errors with explanations, players, kills, base
- building, suspicious activity and a map view with bundled map imagery.
+ ADM logs: players, kills, base building, suspicious activity and a map view
+ with bundled map imagery.
  .
  The package ships the server binary plus the map data under
  /usr/share/dayzctl/maps, so the analyzer reads imagery from disk at runtime

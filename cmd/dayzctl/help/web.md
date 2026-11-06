@@ -4,14 +4,12 @@ Usage:
   dayzctl web [options]
 
 The web UI reads the DayZ logs from every configured instance and serves them
-as an analyser: RPT errors explained in plain words, ADM players, kills, base
-building, suspicious activity, a timeline and a map. Parsing happens on the
-server; the browser only renders the result. Nothing is ever written to the
-DayZ install.
+as an analyser: players, kills, base building, suspicious activity, a timeline
+and a map. Parsing happens on the server; the browser only renders the result.
+Nothing is ever written to the DayZ install.
 
 Logs come from the profiles folder the instance unit already uses:
   <install_dir>/profiles/<instance>/script_*.ADM
-  <install_dir>/profiles/<instance>/script_*.RPT
 
 Options:
   -a, --addr <address>  Listen address (default: web.address, else 127.0.0.1)

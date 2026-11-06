@@ -17,7 +17,7 @@ func realFixture(t *testing.T) string {
 		t.Fatalf("mkdir: %v", err)
 	}
 
-	for _, name := range []string{"real.ADM", "real.RPT"} {
+	for _, name := range []string{"real.ADM"} {
 		data, err := os.ReadFile(filepath.Join("testdata", name))
 		if err != nil {
 			t.Fatalf("read fixture %s: %v", name, err)
@@ -38,10 +38,6 @@ func TestAnalyzeRealDayZLogs(t *testing.T) {
 	report, err := svc.Analyze("real", nil)
 	if err != nil {
 		t.Fatalf("Analyze: %v", err)
-	}
-
-	if report.RptOrigin != OriginServer {
-		t.Errorf("rptOrigin = %s, want server", report.RptOrigin)
 	}
 
 	adm := report.Adm
@@ -98,41 +94,6 @@ func TestAnalyzeRealDayZLogs(t *testing.T) {
 
 	if adm.Totals.Deaths < 3 {
 		t.Errorf("deaths = %d, want at least 3 (vehicle, suicide, infected)", adm.Totals.Deaths)
-	}
-
-	// ── RPT ──────────────────────────────────────────────
-	rpt := report.Rpt
-	if rpt == nil {
-		t.Fatal("expected an RPT report")
-	}
-
-	byRule := map[string]RptGroup{}
-	for _, g := range rpt.Groups {
-		byRule[g.RuleID] = g
-	}
-
-	telemetry, ok := byRule["server-telemetry"]
-	if !ok {
-		t.Fatal("expected the per-second FPS/memory/players lines to be grouped")
-	}
-	if telemetry.Count < 100 {
-		t.Errorf("telemetry group count = %d, want the whole run grouped together", telemetry.Count)
-	}
-	if !telemetry.Vanilla {
-		t.Error("telemetry should be marked as vanilla noise")
-	}
-
-	entity, ok := byRule["entity-warning"]
-	if !ok {
-		t.Fatal("expected ENTITY (W) lines to be recognised")
-	}
-	if entity.Severity != SeverityWarning || !entity.Vanilla {
-		t.Errorf("entity warning = %s vanilla=%v", entity.Severity, entity.Vanilla)
-	}
-
-	// Grouping must keep a million-line file readable.
-	if rpt.GroupCount > 2000 {
-		t.Errorf("groups = %d, expected far fewer distinct patterns", rpt.GroupCount)
 	}
 }
 
@@ -298,45 +259,5 @@ func TestAdmReportBounds(t *testing.T) {
 	}
 	if bounds.MaxX > maxCoord || bounds.MaxY > maxCoord {
 		t.Errorf("bounds = %+v, want within map limits", *bounds)
-	}
-}
-
-func TestRealRptSeverityAndGrouping(t *testing.T) {
-	parser := NewRptParser()
-	for _, line := range []string{
-		` 9:59:59 Players: 1 in total`,
-		`10:00:00 ENTITY    (W): dz\structures_bliss\industrial\power\power_vhv_tower_noproxy.p3d: house, config class missing`,
-		`10:00:00 Average server FPS: 612.00 (measured interval: 1 s)`,
-		`10:00:00 Used memory: 3348068 KB`,
-		`10:00:56 [CE][Links] found 294 total links between groups, of 299`,
-		`18:20:00 !!! [CE][LoadPrototype] 3 Errors during XML parse`,
-	} {
-		parser.Feed(line)
-	}
-	result := parser.Finish()
-
-	counts := result.Counts
-	if counts.Warning != 1 {
-		t.Errorf("warnings = %d, want 1 (the ENTITY (W) line)", counts.Warning)
-	}
-	if counts.Critical != 1 {
-		t.Errorf("critical = %d, want 1 (XML parse errors)", counts.Critical)
-	}
-	if counts.Info != 4 {
-		t.Errorf("info = %d, want 4", counts.Info)
-	}
-
-	byRule := map[string]RptGroup{}
-	for _, g := range result.Groups {
-		byRule[g.RuleID] = g
-	}
-	if _, ok := byRule["entity-warning"]; !ok {
-		t.Error("ENTITY (W) was not classified")
-	}
-	if _, ok := byRule["central-economy-trace"]; !ok {
-		t.Error("[CE] bookkeeping was not classified")
-	}
-	if _, ok := byRule["central-economy"]; !ok {
-		t.Error("XML parse errors should be critical")
 	}
 }

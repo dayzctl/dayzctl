@@ -24,7 +24,6 @@ func newTestServer(t *testing.T) *Server {
 
 	pairs := map[string]string{
 		"../logs/testdata/sample.ADM": filepath.Join(profiles, "script_2024-03-15_18-02-11.ADM"),
-		"../logs/testdata/sample.RPT": filepath.Join(profiles, "script_2024-03-15_17-55-01.RPT"),
 	}
 	for src, dst := range pairs {
 		data, err := os.ReadFile(src)
@@ -100,8 +99,8 @@ func TestInstancesListsLogCounts(t *testing.T) {
 	}
 
 	test := payload.Instances[0]
-	if test.Name != "test" || test.LogFiles != 2 {
-		t.Errorf("test instance = %+v, want 2 log files", test)
+	if test.Name != "test" || test.LogFiles != 1 {
+		t.Errorf("test instance = %+v, want 1 log file", test)
 	}
 	if test.Latest == nil {
 		t.Error("expected a latest timestamp")
@@ -135,8 +134,8 @@ func TestLogsEndpoint(t *testing.T) {
 	if payload.Instance != "test" {
 		t.Errorf("instance = %q", payload.Instance)
 	}
-	if len(payload.Files) != 2 {
-		t.Fatalf("files = %d, want 2", len(payload.Files))
+	if len(payload.Files) != 1 {
+		t.Fatalf("files = %d, want 1", len(payload.Files))
 	}
 	types := map[string]bool{}
 	for _, f := range payload.Files {
@@ -145,8 +144,8 @@ func TestLogsEndpoint(t *testing.T) {
 			t.Errorf("%s has zero size", f.Name)
 		}
 	}
-	if !types["ADM"] || !types["RPT"] {
-		t.Errorf("expected ADM and RPT types, got %v", types)
+	if !types["ADM"] {
+		t.Errorf("expected an ADM type, got %v", types)
 	}
 }
 
@@ -171,10 +170,6 @@ func TestAnalyzeEndpoint(t *testing.T) {
 				PvPKills int `json:"pvpKills"`
 			} `json:"totals"`
 		} `json:"adm"`
-		Rpt *struct {
-			ProblemCount int `json:"problemCount"`
-		} `json:"rpt"`
-		RptOrigin string `json:"rptOrigin"`
 	}
 	if err := json.Unmarshal(rec.Body.Bytes(), &report); err != nil {
 		t.Fatalf("decode: %v", err)
@@ -183,20 +178,14 @@ func TestAnalyzeEndpoint(t *testing.T) {
 	if report.Instance != "test" {
 		t.Errorf("instance = %q", report.Instance)
 	}
-	if report.Adm == nil || report.Rpt == nil {
-		t.Fatal("expected both ADM and RPT reports")
+	if report.Adm == nil {
+		t.Fatal("expected an ADM report")
 	}
 	if report.Adm.Totals.Players != 4 {
 		t.Errorf("players = %d, want 4", report.Adm.Totals.Players)
 	}
 	if report.Adm.Totals.PvPKills != 2 {
 		t.Errorf("pvp kills = %d, want 2", report.Adm.Totals.PvPKills)
-	}
-	if report.Rpt.ProblemCount != 13 {
-		t.Errorf("problem count = %d, want 13", report.Rpt.ProblemCount)
-	}
-	if report.RptOrigin != "server" {
-		t.Errorf("rptOrigin = %q, want server", report.RptOrigin)
 	}
 }
 
@@ -213,7 +202,6 @@ func TestAnalyzeRespectsFileSelection(t *testing.T) {
 		Files []struct {
 			Type string `json:"type"`
 		} `json:"files"`
-		Rpt any `json:"rpt"`
 		Adm any `json:"adm"`
 	}
 	if err := json.Unmarshal(rec.Body.Bytes(), &report); err != nil {
@@ -221,9 +209,6 @@ func TestAnalyzeRespectsFileSelection(t *testing.T) {
 	}
 	if len(report.Files) != 1 || report.Files[0].Type != "ADM" {
 		t.Fatalf("expected only the ADM file, got %+v", report.Files)
-	}
-	if report.Rpt != nil {
-		t.Error("expected no RPT section when only an ADM was selected")
 	}
 	if report.Adm == nil {
 		t.Error("expected an ADM section")

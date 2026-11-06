@@ -136,7 +136,7 @@ Environment variables:
 
 ## Web UI
 
-`dayzctl web` serves an ADM/RPT log analyzer from the server itself and exposes a
+`dayzctl web` serves an ADM log analyzer from the server itself and exposes
 a small JSON API. Parsing happens in Go (`internal/logs`), so the browser only
 renders the report and no log ever leaves the host.
 
@@ -148,8 +148,8 @@ sudo dayzctl web --addr 0.0.0.0 --port 8081
 The generated config enables it (`web.enabled: true`, loopback only), and
 `dayzctl apply` writes and enables `dayz-web.service` from it. Set
 `web.enabled: false` to have apply remove and disable the unit again; apply says
-which of the two it did. See `web/log-analyzer/README.md` for the API, the
-analysis tabs and how to extend the RPT rule set.
+which of the two it did. See `web/log-analyzer/README.md` for the API and the
+analysis tabs.
 
 ### Login switch
 
@@ -193,7 +193,7 @@ Top-level commands (run `dayzctl <command> --help` for extended embedded help):
 - `steam-login` — Interactive Steam login for workshop operations
 - `version` — Print version information
 - `mods` — Manage mods for an instance (`dayzctl mods <instance> <command>`)
-- `web` — Serve the ADM/RPT log analyzer UI and its JSON API (`dayzctl web`)
+- `web` — Serve the ADM log analyzer UI and its JSON API (`dayzctl web`)
 
 Example: show embedded help for `mods`:
 

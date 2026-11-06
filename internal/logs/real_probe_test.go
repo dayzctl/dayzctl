@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
-	"sort"
 	"testing"
 	"time"
 )
@@ -13,13 +12,13 @@ import (
 // TestProbeRealLogs analyses a real profiles folder for manual inspection.
 //
 // It is skipped unless DAYZCTL_REAL_LOGS points at a directory containing real
-// .ADM/.RPT files, so the normal suite stays self-contained and fast:
+// .ADM files, so the normal suite stays self-contained and fast:
 //
 //	DAYZCTL_REAL_LOGS=~/Downloads go test ./internal/logs -run TestProbeRealLogs -v
 func TestProbeRealLogs(t *testing.T) {
 	src := os.Getenv("DAYZCTL_REAL_LOGS")
 	if src == "" {
-		t.Skip("set DAYZCTL_REAL_LOGS to a folder with real .ADM/.RPT files")
+		t.Skip("set DAYZCTL_REAL_LOGS to a folder with real .ADM files")
 	}
 
 	entries, err := os.ReadDir(src)
@@ -87,18 +86,6 @@ func TestProbeRealLogs(t *testing.T) {
 			types[s.Type]++
 		}
 		t.Logf("  suspicious: %v", types)
-	}
-
-	if rpt := report.Rpt; rpt != nil {
-		t.Logf("RPT counts: %+v problems=%d groups=%d end=%s origin=%s", rpt.Counts, rpt.ProblemCount, rpt.GroupCount, rpt.EndState, report.RptOrigin)
-		groups := append([]RptGroup(nil), rpt.Groups...)
-		sort.SliceStable(groups, func(i, j int) bool { return groups[i].Count > groups[j].Count })
-		for i, g := range groups {
-			if i >= 20 {
-				break
-			}
-			t.Logf("  %-8s %8dx %-58s %q", g.Severity, g.Count, truncateStr(g.Title, 58), truncateStr(g.Sample, 70))
-		}
 	}
 
 	// Surface the ADM lines the parser does not understand, so gaps are visible.

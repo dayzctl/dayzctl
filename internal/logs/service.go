@@ -51,8 +51,8 @@ func NewService(installDir string, opts Options) *Service {
 	}
 }
 
-// ProfilesDir is where DayZ writes script_*.ADM / script_*.RPT for an
-// instance. It matches the -profiles= value written into the systemd unit.
+// ProfilesDir is where DayZ writes script_*.ADM for an instance. It matches the
+// -profiles= value written into the systemd unit.
 func (s *Service) ProfilesDir(instance string) string {
 	return filepath.Join(s.installDir, "profiles", instance)
 }
@@ -227,8 +227,6 @@ func cacheKey(instance string, files []resolvedFile) string {
 
 func (s *Service) analyze(instance string, files []resolvedFile) (*Report, error) {
 	adm := &AdmParser{}
-	var rptResults []RptResult
-	var rptSamples []string
 
 	report := &Report{
 		Instance:    instance,
@@ -261,52 +259,36 @@ func (s *Service) analyze(instance string, files []resolvedFile) (*Report, error
 		}
 
 		detected := DetectType(file.name, head)
-		if detected == FileUnknown {
+		if detected != FileADM {
 			info.Type = FileUnknown
-			info.Error = "unrecognised file — skipped"
+			info.Error = "not an ADM log — skipped"
 			_ = f.Close()
 			report.Files = append(report.Files, info)
 			continue
 		}
 		info.Type = detected
 
-		switch detected {
-		case FileADM:
-			report.Stats.AdmFiles++
-			// Anchor this file to its own day, so a profiles folder holding
-			// several rotated logs merges on a real timeline.
-			if day, ok := baseDateFor(file.name, head); ok {
-				adm.SetBaseDate(day)
-			}
-			before := adm.LineCount
-			for _, line := range head {
-				adm.Feed(line)
-			}
-			for sc.Scan() {
-				adm.Feed(sc.Text())
-			}
-			info.Lines = adm.LineCount - before
-
-		case FileRPT, FileScript:
-			report.Stats.RptFiles++
-			parser := NewRptParser()
-			for _, line := range head {
-				parser.Feed(line)
-			}
-			for sc.Scan() {
-				parser.Feed(sc.Text())
-			}
-			info.Lines = parser.LineCount
-			rptResults = append(rptResults, parser.Finish())
-			rptSamples = append(rptSamples, strings.Join(head, "\n"))
+		report.Stats.AdmFiles++
+		// Anchor this file to its own day, so a profiles folder holding
+		// several rotated logs merges on a real timeline.
+		if day, ok := baseDateFor(file.name, head); ok {
+			adm.SetBaseDate(day)
 		}
+		before := adm.LineCount
+		for _, line := range head {
+			adm.Feed(line)
+		}
+		for sc.Scan() {
+			adm.Feed(sc.Text())
+		}
+		info.Lines = adm.LineCount - before
 
 		if err := sc.Err(); err != nil {
 			info.Error = err.Error()
 		}
 		_ = f.Close()
 
-		if info.Lines == 0 && detected != FileADM {
+		if info.Lines == 0 {
 			info.Lines = len(head)
 		}
 		report.Files = append(report.Files, info)
@@ -319,14 +301,6 @@ func (s *Service) analyze(instance string, files []resolvedFile) (*Report, error
 		opts := s.opts
 		report.Adm = AnalyzeAdm(adm.Events, opts)
 		report.Adm.Period.HasDate = adm.HasDate
-	}
-
-	if len(rptResults) > 0 {
-		merged := MergeRpt(rptResults)
-		report.Rpt = &merged
-		report.RptOrigin = ClassifyRPTOrigin(strings.Join(rptSamples, "\n"))
-	} else {
-		report.RptOrigin = OriginUnknown
 	}
 
 	return report, nil
