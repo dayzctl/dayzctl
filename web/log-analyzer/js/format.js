@@ -40,19 +40,6 @@ export function fmtClock(tod) {
   return fmtTime(tod).slice(0, 5);
 }
 
-export function fmtBytes(n) {
-  if (!Number.isFinite(n) || n <= 0) return '0 B';
-  const units = ['B', 'KB', 'MB', 'GB'];
-  let i = 0;
-  let value = n;
-  while (value >= 1024 && i < units.length - 1) {
-    value /= 1024;
-    i++;
-  }
-  const digits = value >= 100 || i === 0 ? 0 : 1;
-  return `${value.toFixed(digits)} ${units[i]}`;
-}
-
 export function fmtDistance(meters) {
   if (!Number.isFinite(meters)) return '—';
   return `${meters.toFixed(meters < 10 ? 1 : 0)} m`;

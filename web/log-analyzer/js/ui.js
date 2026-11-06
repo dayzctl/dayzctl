@@ -3,7 +3,7 @@
  * (log lines are untrusted text and are always set via textContent).
  */
 
-import { fmtInt, fmtDuration, fmtTime, fmtClock, fmtDistance, fmtBytes, truncate, colorFor } from './format.js';
+import { fmtInt, fmtDuration, fmtTime, fmtClock, fmtDistance, truncate, colorFor } from './format.js';
 import { renderMap, inferWorldSize, clampView, MAX_MAP_ZOOM } from './mapview.js';
 import { fetchMapMeta } from './api.js';
 
@@ -72,7 +72,7 @@ function card(title, ...children) {
 
 export function renderOverview(panel, report, actions) {
   clear(panel);
-  const { adm, files } = report;
+  const { adm } = report;
 
   // Activity
   if (adm && adm.totals.players > 0) {
@@ -175,31 +175,6 @@ export function renderOverview(panel, report, actions) {
       ),
     );
   }
-
-  // Files
-  const fileRows = files.map((f) =>
-    el(
-      'tr',
-      {},
-      el('td', {}, el('span', { class: `chip-type ${String(f.type).toLowerCase()}`, text: f.type })),
-      el('td', { text: f.name }),
-      el('td', { class: 'num', text: fmtInt(f.lines) }),
-      el('td', { class: 'num', text: fmtBytes(f.bytes) }),
-      el('td', { class: 'faint small', text: f.error ?? '' }),
-    ),
-  );
-
-  panel.append(
-    el(
-      'div',
-      { class: 'card' },
-      el('h3', { text: 'Files' }),
-      table(
-        [{ label: 'Type' }, { label: 'Name' }, { label: 'Lines', num: true }, { label: 'Size', num: true }, { label: 'Note' }],
-        fileRows,
-      ),
-    ),
-  );
 }
 
 /* ── Players ─────────────────────────────────────────────── */

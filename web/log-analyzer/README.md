@@ -97,7 +97,7 @@ instance* goes back to the list.
 ## Tabs
 
 - **Overview** — activity KPIs (period, players, deaths, suspicious events,
-  chat, build actions), top players, weapons used and the parsed files.
+  chat, build actions), top players and weapons used.
 - **Players** — sessions, playtime, kills, deaths, K/D, chat, builds, flags.
   Tick several players to compare them: their details stack below the table, and
   *Show selected only* narrows the list to them. The Map tab can then draw just
