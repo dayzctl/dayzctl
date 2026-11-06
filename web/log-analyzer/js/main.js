@@ -52,6 +52,11 @@ const state = {
   // RCON actions sent from this page, keyed by player key. Kept per report so a
   // kicked/banned player stops reading as "online".
   playerNotices: new Map(),
+  // Live RCON ban list: "Unban" is only offered for players that carry one.
+  bans: [],
+  bansLoaded: false,
+  bansLoading: false,
+  bansError: '',
   killQuery: '',
   killsSort: 'time',
   suspiciousFilter: 'all',
@@ -315,6 +320,10 @@ function resetViewState() {
   state.selectedPlayers = new Set();
   state.playersOnlySelected = false;
   state.playerNotices = new Map();
+  state.bans = [];
+  state.bansLoaded = false;
+  state.bansLoading = false;
+  state.bansError = '';
   state.killQuery = '';
   state.killsSort = 'time';
   state.suspiciousFilter = 'all';

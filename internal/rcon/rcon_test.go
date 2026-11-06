@@ -2,8 +2,78 @@ package rcon
 
 import (
 	"encoding/binary"
+	"net"
 	"testing"
+	"time"
 )
+
+// fakeUDPServer answers the login with success and the next command with the
+// given response packets.
+func fakeUDPServer(t *testing.T, packets [][]byte) (*Client, <-chan string) {
+	t.Helper()
+
+	addr, err := net.ResolveUDPAddr("udp", "127.0.0.1:0")
+	if err != nil {
+		t.Fatalf("resolve: %v", err)
+	}
+	conn, err := net.ListenUDP("udp", addr)
+	if err != nil {
+		t.Fatalf("listen: %v", err)
+	}
+	t.Cleanup(func() { _ = conn.Close() })
+
+	commands := make(chan string, 1)
+	go func() {
+		buf := make([]byte, 4096)
+		server := New(0, "")
+
+		// Login: reply type 0x00, status 0x01 (success).
+		if _, from, err := conn.ReadFromUDP(buf); err == nil {
+			_, _ = conn.WriteToUDP(server.buildPacket([]byte{0x00, 0x01}), from)
+		}
+
+		// Command: capture it, then send the canned fragments.
+		n, from, err := conn.ReadFromUDP(buf)
+		if err != nil {
+			return
+		}
+		payload := buf[7:n]
+		commands <- string(payload[2:])
+		for _, pkt := range packets {
+			_, _ = conn.WriteToUDP(server.buildPacket(pkt), from)
+		}
+	}()
+
+	c := New(conn.LocalAddr().(*net.UDPAddr).Port, "secret")
+	return c, commands
+}
+
+func TestSendCommandAssemblesFragmentedResponse(t *testing.T) {
+	c, commands := fakeUDPServer(t, [][]byte{
+		append([]byte{0x02, 0x00}, []byte("Players on server:\n")...),
+		append([]byte{0x02, 0x00}, []byte("0  127.0.0.1:2304  42  76561198000000005  Mira\n")...),
+		append([]byte{0x01, 0x00}, []byte("(1 players in total)")...),
+	})
+
+	resp, err := c.Send("players")
+	if err != nil {
+		t.Fatalf("Send: %v", err)
+	}
+
+	want := "Players on server:\n0  127.0.0.1:2304  42  76561198000000005  Mira\n(1 players in total)"
+	if resp != want {
+		t.Fatalf("response = %q, want %q", resp, want)
+	}
+
+	select {
+	case cmd := <-commands:
+		if cmd != "players" {
+			t.Errorf("command = %q, want %q", cmd, "players")
+		}
+	case <-time.After(2 * time.Second):
+		t.Fatal("server never received the command")
+	}
+}
 
 func TestBuildPacketAndVerifyHeader(t *testing.T) {
 	c := New(2302, "secret")

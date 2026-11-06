@@ -91,7 +91,17 @@ func (c *Client) Login() error {
 	return nil
 }
 
-// SendCommand sends a command and returns the response
+// maxResponsePackets bounds a fragmented RCON response so a misbehaving
+// server cannot make the client spin forever.
+const maxResponsePackets = 1024
+
+// SendCommand sends a command and returns the response.
+//
+// BattlEye may split a response over several datagrams: every packet except
+// the last carries type 0x02, the last one carries 0x01. Reading a single
+// datagram (as this used to) silently dropped the whole `players`/`bans`
+// output whenever the server fragmented it, which is why a kick by id worked
+// from the CLI while a kick by name from the web UI could not find the player.
 func (c *Client) SendCommand(command string) (string, error) {
 	payload := append([]byte{0x01, c.seq}, []byte(command)...)
 	c.seq++
@@ -101,31 +111,47 @@ func (c *Client) SendCommand(command string) (string, error) {
 		return "", fmt.Errorf("failed to send command: %w", err)
 	}
 
+	var out strings.Builder
 	buf := make([]byte, 4096)
-	n, err := c.conn.Read(buf)
-	if err != nil {
-		return "", fmt.Errorf("failed to read response: %w", err)
+	for packets := 0; ; packets++ {
+		// A server that never sends the final 0x01 packet must not hang the
+		// handler or grow memory without bound.
+		if packets >= maxResponsePackets {
+			return "", fmt.Errorf("response too large (%d packets)", packets)
+		}
+		// The connection deadline set in Connect only covers the login; a
+		// fragmented response can span several reads.
+		if err := c.conn.SetReadDeadline(time.Now().Add(3 * time.Second)); err != nil {
+			return "", fmt.Errorf("failed to set deadline: %w", err)
+		}
+
+		n, err := c.conn.Read(buf)
+		if err != nil {
+			return "", fmt.Errorf("failed to read response: %w", err)
+		}
+
+		if !c.verifyHeader(buf[:n]) {
+			return "", fmt.Errorf("invalid packet header")
+		}
+
+		if n < 8 {
+			return "", fmt.Errorf("response too short")
+		}
+
+		response := buf[7:n]
+		if len(response) < 2 {
+			return "", fmt.Errorf("invalid response")
+		}
+
+		out.Write(response[2:])
+
+		// 0x01 marks the last packet, 0x02 that more will follow.
+		if response[0] != 0x02 {
+			break
+		}
 	}
 
-	if !c.verifyHeader(buf[:n]) {
-		return "", fmt.Errorf("invalid packet header")
-	}
-
-	if n < 8 {
-		return "", fmt.Errorf("response too short")
-	}
-
-	response := buf[7:n]
-	if len(response) < 3 {
-		logger.Debug("RCON SendCommand: response too short", "cmd", command, "len", len(response))
-		return "", nil
-	}
-
-	if response[0] == 0x02 {
-		return "", nil
-	}
-
-	respStr := string(response[2:])
+	respStr := out.String()
 	logger.Debug("RCON SendCommand: raw response", "cmd", command, "resp", respStr)
 	return respStr, nil
 }
@@ -466,12 +492,12 @@ type Player struct {
 // Ban represents one entry of the server ban list.
 type Ban struct {
 	// ID is the ban's index, which is what `unban` takes.
-	ID int
+	ID int `json:"id"`
 	// GUID is the banned SteamID when the ban was placed on one.
-	GUID string
+	GUID string `json:"guid,omitempty"`
 	// IP is set when the ban was placed on an address instead.
-	IP string
+	IP string `json:"ip,omitempty"`
 	// Minutes is the time left; 0 means permanent.
-	Minutes int
-	Reason  string
+	Minutes int    `json:"minutes"`
+	Reason  string `json:"reason,omitempty"`
 }

@@ -104,6 +104,48 @@ func TestKickOfflinePlayer(t *testing.T) {
 	}
 }
 
+// The ADM name can be stale (the player renamed since), but the SteamID comes
+// from the log and the RCON session list prints it too.
+func TestKickPlayerActionMatchesSteamID(t *testing.T) {
+	fake := &fakeRCON{players: []intrcon.Player{
+		{ID: 9, GUID: "76561198000000005", Name: "Renamed"},
+	}}
+	srv := newRCONTestServer(t, fake)
+
+	rec := postAction(t, srv, "kick", map[string]any{
+		"name": "Mira",
+		"ids":  []string{"76561198000000005"},
+	})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	if fake.kickID != 9 {
+		t.Errorf("kick id = %d, want 9", fake.kickID)
+	}
+}
+
+func TestBansEndpoint(t *testing.T) {
+	fake := &fakeRCON{bans: []intrcon.Ban{
+		{ID: 3, GUID: "76561198000000005", Minutes: 60, Reason: "cheating"},
+	}}
+	srv := newRCONTestServer(t, fake)
+
+	rec := do(t, srv, http.MethodGet, "/api/instances/test/bans", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+
+	var payload struct {
+		Bans []intrcon.Ban `json:"bans"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if len(payload.Bans) != 1 || payload.Bans[0].GUID != "76561198000000005" {
+		t.Fatalf("bans = %+v", payload.Bans)
+	}
+}
+
 func TestBanPlayerAction(t *testing.T) {
 	fake := &fakeRCON{players: []intrcon.Player{{ID: 3, Name: "Mira"}}}
 	srv := newRCONTestServer(t, fake)

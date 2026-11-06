@@ -74,6 +74,16 @@ export async function fetchMaps() {
 }
 
 /**
+ * The instance's live RCON ban list. The Players tab uses it to offer "Unban"
+ * only for players whose SteamID is actually banned.
+ * @returns {Promise<Array<{id: number, guid?: string, ip?: string, minutes: number, reason?: string}>>}
+ */
+export async function fetchBans(instance) {
+  const payload = await requestJSON(`/api/instances/${encodeURIComponent(instance)}/bans`);
+  return payload?.bans ?? [];
+}
+
+/**
  * Run one RCON action for a player from the analysed log. The server resolves
  * the live session id (kick/ban) or the ban-list entry (unban) itself.
  * @param {'kick'|'ban'|'unban'} action

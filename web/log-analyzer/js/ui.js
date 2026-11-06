@@ -5,7 +5,7 @@
 
 import { fmtInt, fmtDuration, fmtTime, fmtClock, fmtDistance, truncate, colorFor } from './format.js';
 import { renderMap, inferWorldSize, clampView, MAX_MAP_ZOOM } from './mapview.js';
-import { fetchMapMeta, playerAction } from './api.js';
+import { fetchMapMeta, fetchBans, playerAction } from './api.js';
 
 /** Kill count per weapon, used by the overview card. */
 function topWeapons(kills, limit = 8) {
@@ -334,6 +334,10 @@ async function runPlayerAction(state, player, action) {
   try {
     const result = await playerAction(state.instance, action, payload);
     state.playerNotices.set(player.key, { action, at: Date.now() });
+    // A ban adds an entry and an unban removes one, so the cached ban list is
+    // stale either way: drop it and let the next render fetch it again.
+    state.bansLoaded = false;
+    state.bansError = '';
     // A kick or ban ends the session, so the row must stop claiming "online" —
     // the analysed log still ends while the player was connected.
     state.actions.setState({});
@@ -354,14 +358,37 @@ function actionBadge(notice) {
   );
 }
 
-/** Actions column: kick/ban while online, unban for anyone. */
-function playerActionsCell(state, player, online) {
-  const button = (label, className, action) =>
+/** There is only one ban list per instance; fetch it once per report. */
+function ensureBanList(state) {
+  if (!state.instance || state.bansLoaded || state.bansLoading) return;
+
+  state.bansLoading = true;
+  fetchBans(state.instance)
+    .then((bans) => {
+      state.bans = bans;
+      state.bansError = '';
+    })
+    .catch((err) => {
+      state.bans = [];
+      state.bansError = err.message;
+    })
+    .finally(() => {
+      // Mark it as tried even on failure so a broken RCON does not turn every
+      // render into another request.
+      state.bansLoaded = true;
+      state.bansLoading = false;
+      state.actions.setState({});
+    });
+}
+
+/** Actions column: kick/ban while online, unban only when actually banned. */
+function playerActionsCell(state, player, online, ban) {
+  const button = (label, className, action, title) =>
     el('button', {
       type: 'button',
       class: `btn tiny ${className}`,
       text: label,
-      title: `${label} ${player.name} via RCON`,
+      title: title ?? `${label} ${player.name} via RCON`,
       onClick: (event) => {
         // The row itself toggles selection; an action must not do both.
         event.stopPropagation();
@@ -371,7 +398,11 @@ function playerActionsCell(state, player, online) {
 
   const buttons = [];
   if (online) buttons.push(button('Kick', 'ghost', 'kick'), button('Ban', 'danger', 'ban'));
-  buttons.push(button('Unban', 'ghost', 'unban'));
+  if (ban) {
+    const why = ban.reason ? ` — ${ban.reason}` : '';
+    const left = ban.minutes > 0 ? `, ${ban.minutes} min left` : ', permanent';
+    buttons.push(button('Unban', 'ghost', 'unban', `Lift this ban (${ban.guid || ban.ip}${left}${why})`));
+  }
   return el('td', { class: 'actions' }, ...buttons);
 }
 
@@ -402,6 +433,22 @@ export function renderPlayers(panel, report, state) {
   // RCON actions need a configured RCON port/password on the instance.
   const rconReady = Boolean(state.instanceInfo?.rcon);
   const notices = state.playerNotices ?? new Map();
+
+  // The ban list decides which rows get an Unban button; fetch it on first
+  // render of this report. A player is banned when any SteamID from the log is
+  // in the list (the ADM `id=` is a session token, not a SteamID).
+  if (rconReady) ensureBanList(state);
+  const banByGUID = new Map();
+  for (const ban of state.bans ?? []) {
+    if (ban.guid) banByGUID.set(String(ban.guid).toLowerCase(), ban);
+  }
+  const banFor = (p) => {
+    for (const id of p.ids ?? []) {
+      const ban = banByGUID.get(String(id).toLowerCase());
+      if (ban) return ban;
+    }
+    return null;
+  };
 
   // A kick or ban sent from this page ends the session, so the row must stop
   // claiming "online" even though the log still ends mid-session.
@@ -460,6 +507,16 @@ export function renderPlayers(panel, report, state) {
     ),
   );
 
+  if (rconReady && state.bansError) {
+    panel.append(
+      el(
+        'p',
+        { class: 'small faint', style: 'margin:-4px 0 12px' },
+        `Ban list unavailable, so no Unban buttons are shown: ${state.bansError}`,
+      ),
+    );
+  }
+
   if (hiddenCount > 0) {
     panel.append(
       el(
@@ -512,7 +569,7 @@ export function renderPlayers(panel, report, state) {
       el('td', { class: 'num', text: fmtInt(p.chats) }),
       el('td', { class: 'num', text: fmtInt(p.builds) }),
       el('td', { class: 'num', text: p.suspicion ? fmtInt(p.suspicion) : '' }),
-      rconReady ? playerActionsCell(state, p, online) : null,
+      rconReady ? playerActionsCell(state, p, online, banFor(p)) : null,
     );
   });
 
