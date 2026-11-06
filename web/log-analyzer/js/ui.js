@@ -488,7 +488,19 @@ function renderBansCard(panel, state) {
     );
   }
 
-  panel.append(card(`Active bans${state.bansLoaded && !state.bansError ? ` (${fmtInt(bans.length)})` : ''}`, body));
+  panel.append(
+    card(
+      `Active bans${state.bansLoaded && !state.bansError ? ` (${fmtInt(bans.length)})` : ''}`,
+      state.bansLoaded && !state.bansError && bans.length
+        ? el(
+            'p',
+            { class: 'small faint', style: 'margin:-4px 0 10px' },
+            'Every ban on the server, read live over RCON. A ban cannot always be linked to a player row, so lift it here.',
+          )
+        : null,
+      body,
+    ),
+  );
 }
 
 /* ── Players ─────────────────────────────────────────────── */
@@ -648,9 +660,24 @@ export function renderPlayers(panel, report, state) {
     );
   });
 
+  // Bans first: a ban entry cannot always be linked to a log row (the ban list
+  // uses BattlEye GUIDs that the ADM never records), so this card is the
+  // reliable place to unban somebody. It must be impossible to miss.
+  if (rconReady) renderBansCard(panel, state);
+
+  const banCount = state.bans?.length ?? 0;
   panel.append(
     card(
       `Players (${fmtInt(players.length)})${onlineCount ? ` \u00b7 ${fmtInt(onlineCount)} online` : ''}`,
+      banCount
+        ? el(
+            'p',
+            { class: 'small faint', style: 'margin:-4px 0 10px' },
+            `${fmtInt(banCount)} active ban${banCount === 1 ? '' : 's'} — use the Active bans card above to lift ` +
+              (banCount === 1 ? 'it' : 'them') +
+              '.',
+          )
+        : null,
       players.length
         ? table(
             [
@@ -671,8 +698,6 @@ export function renderPlayers(panel, report, state) {
         : emptyState(onlySelected ? 'No selected players match this search.' : 'No players match this search.'),
     ),
   );
-
-  if (rconReady) renderBansCard(panel, state);
 
   // Details for every selected player, newest selection last.
   for (const key of selected) {
