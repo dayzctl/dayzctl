@@ -180,9 +180,9 @@ func TestTrapsAndHitSources(t *testing.T) {
 	}
 }
 
-// DayZ players sit (EmoteSitA) right before logging off. A disconnect with no
-// emote in the window before it ended on its own or was cut by a kick, and the
-// map must say so instead of calling it a logout.
+// Only a kick line changes how a disconnect is labelled. A missing logout emote
+// proves nothing — logging off inside a vehicle writes no EmoteSitA — so every
+// other disconnect stays a plain disconnect.
 func TestDisconnectClassification(t *testing.T) {
 	lines := []string{
 		`AdminLog started on 2026-11-03 at 00:00:00`,
@@ -212,17 +212,19 @@ func TestDisconnectClassification(t *testing.T) {
 		t.Fatalf("disconnects = %d, want 3", len(disconnects))
 	}
 
-	if disconnects[0].Crash || disconnects[0].Text != "disconnected" {
-		t.Errorf("after EmoteSitA: crash=%v text=%q, want a clean logout",
-			disconnects[0].Crash, disconnects[0].Text)
+	if disconnects[0].Kicked || disconnects[0].Text != "disconnected" {
+		t.Errorf("after EmoteSitA: kicked=%v text=%q, want a plain disconnect",
+			disconnects[0].Kicked, disconnects[0].Text)
 	}
-	if !disconnects[1].Crash || disconnects[1].Text != "connection lost" {
-		t.Errorf("without emote: crash=%v text=%q, want a lost connection",
-			disconnects[1].Crash, disconnects[1].Text)
+	// No emote (logged off in a vehicle, crashed, timed out): still just a
+	// disconnect — the log does not say why.
+	if disconnects[1].Kicked || disconnects[1].Text != "disconnected" {
+		t.Errorf("without emote: kicked=%v text=%q, want a plain disconnect",
+			disconnects[1].Kicked, disconnects[1].Text)
 	}
-	if !disconnects[2].Crash || disconnects[2].Text != "kicked" {
-		t.Errorf("after a kick: crash=%v text=%q, want a kick",
-			disconnects[2].Crash, disconnects[2].Text)
+	if !disconnects[2].Kicked || disconnects[2].Text != "kicked" {
+		t.Errorf("after a kick: kicked=%v text=%q, want a kick",
+			disconnects[2].Kicked, disconnects[2].Text)
 	}
 }
 

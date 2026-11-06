@@ -72,10 +72,10 @@ type PosSample struct {
 	// source into one dot.
 	Source string `json:"source,omitempty"`
 	Damage int    `json:"damage,omitempty"`
-	// Crash marks a disconnect that was not preceded by a logout emote: the
-	// player did not sit to log off, so the session ended on its own (timeout,
-	// lost connection) or was cut by a kick.
-	Crash bool `json:"crash,omitempty"`
+	// Kicked marks a disconnect that came with a kick/ban line. A missing logout
+	// emote is NOT a hint: logging off inside a vehicle writes no EmoteSitA, so
+	// only the kick line itself is evidence.
+	Kicked bool `json:"kicked,omitempty"`
 }
 
 // WeaponUse is a kill count for one weapon.
@@ -249,9 +249,8 @@ type playerState struct {
 	// breaks mark positions that must not be compared with the previous
 	// sample: respawns and reconnects legitimately relocate a player.
 	breaks []float64
-	// emoteAts and kickAts decide whether a disconnect was a clean logout.
-	emoteAts []float64
-	kickAts  []float64
+	// kickAts lets a disconnect be tied to the kick that caused it.
+	kickAts []float64
 }
 
 func newPlayerState(key, name string) *playerState {
@@ -401,45 +400,39 @@ func sampleText(e Event) string {
 		return "died"
 	case KindKill:
 		return "killed " + e.Other
+	case KindKick:
+		return "kicked"
+	case KindBan:
+		return "banned"
 	}
 	return ""
 }
 
-// logoutEmoteWindow is how long before a disconnect an emote still counts as
-// "the player sat down to log off". Real logs show EmoteSitA about 13 s before
-// the disconnect line.
-const logoutEmoteWindow = 120
+// kickWindow is how long after a kick line a disconnect still counts as that
+// kick's disconnect.
+const kickWindow = 120
 
-// classifyDisconnects separates a clean logout from a lost connection. DayZ
-// players sit (EmoteSitA) right before logging off; a disconnect with no emote
-// shortly before it is a crash, a timeout or a kick, not a logout.
+// classifyDisconnects names the disconnect a kick caused. Everything else stays
+// a plain disconnect: DayZ writes no logout emote when the player logs off while
+// inside a vehicle, so a missing EmoteSitA says nothing about how a session
+// ended.
 func (p *playerState) classifyDisconnects() {
 	if len(p.positions) == 0 {
 		return
-	}
-	within := func(times []float64, t float64) bool {
-		for _, at := range times {
-			if at <= t && t-at <= logoutEmoteWindow {
-				return true
-			}
-		}
-		return false
 	}
 	for i := range p.positions {
 		s := &p.positions[i]
 		if s.Kind != KindDisconnect || s.At == nil {
 			continue
 		}
-		switch {
-		case within(p.emoteAts, *s.At):
-			s.Text = "disconnected"
-			s.Crash = false
-		case within(p.kickAts, *s.At):
-			s.Text = "kicked"
-			s.Crash = true
-		default:
-			s.Text = "connection lost"
-			s.Crash = true
+		s.Kicked = false
+		s.Text = "disconnected"
+		for _, at := range p.kickAts {
+			if at <= *s.At && *s.At-at <= kickWindow {
+				s.Kicked = true
+				s.Text = "kicked"
+				break
+			}
 		}
 	}
 }
@@ -806,11 +799,7 @@ func AnalyzeAdm(events []Event, opts Options) *AdmReport {
 			// Positions were already recorded above; the emote/state itself is a
 			// gameplay event, not a log line to drop.
 			if e.PlayerKey != "" {
-				p := getPlayer(e.PlayerKey, e.Player)
-				p.touch(at)
-				if e.Kind == KindEmote && e.Tod != nil {
-					p.emoteAts = append(p.emoteAts, e.T)
-				}
+				getPlayer(e.PlayerKey, e.Player).touch(at)
 			}
 
 		case KindKick, KindBan:

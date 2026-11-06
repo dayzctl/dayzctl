@@ -1292,19 +1292,42 @@ export function renderMapPanel(panel, report, state, relayout) {
   const secondsOfDay = (at) => (Number.isFinite(at) ? ((at % 86400) + 86400) % 86400 : null);
 
   // Session events tell one story together: DayZ writes EmoteSitA right before
-  // a clean logout, so the combination at a dot says whether the player logged
-  // in, logged out or simply dropped. Marker kinds differ from sample kinds
-  // (`login`/`logout` come from the Logins layer, `connect`/`disconnect` from the
-  // position dots), so both spellings are session events.
-  const SESSION_KINDS = new Set(['connect', 'login', 'disconnect', 'logout', 'logoutCrash', 'emote', 'state', 'last']);
+  // a normal logout, so the combination at a dot says whether the player logged
+  // out here or came back to this spot. A missing emote proves nothing — logging
+  // off inside a vehicle writes none — so a bare disconnect stays a disconnect.
+  // Marker kinds differ from sample kinds (`login`/`logout` come from the Logins
+  // layer, `connect`/`disconnect` from the position dots), so both spellings are
+  // session events.
+  const SESSION_KINDS = new Set([
+    'connect',
+    'login',
+    'disconnect',
+    'logout',
+    'logoutKick',
+    'kick',
+    'emote',
+    'state',
+    'last',
+  ]);
 
-  const sessionVerdict = (kinds) => {
+  const sessionVerdict = (items) => {
+    const kinds = new Set(items.map((i) => i.kind));
+    // A kick is the one end-of-session cause the log states outright.
+    if (kinds.has('kick') || kinds.has('logoutKick')) return 'kicked';
+
+    const times = (match) =>
+      items.filter((i) => match(i.kind) && Number.isFinite(i.at)).map((i) => i.at);
+    const connects = times((k) => k === 'connect' || k === 'login');
+    const disconnects = times((k) => k === 'disconnect' || k === 'logout' || k === 'logoutKick');
     const emote = kinds.has('emote') || kinds.has('state');
-    const connect = kinds.has('connect') || kinds.has('login');
-    const disconnect = kinds.has('disconnect') || kinds.has('logout') || kinds.has('logoutCrash');
-    if (disconnect && connect) return emote ? 'login' : 'crash';
-    if (disconnect) return emote ? (kinds.has('last') ? 'last position' : 'logout') : 'crash';
-    if (connect) return 'login';
+
+    // A connect after a disconnect means the player came back to this spot.
+    const cameBack =
+      connects.length > 0 && disconnects.length > 0 && Math.max(...connects) > Math.min(...disconnects);
+    if (cameBack) return 'login';
+    // Emote then disconnect is the classic logout.
+    if (disconnects.length) return emote ? (kinds.has('last') ? 'last position' : 'logout') : 'disconnect';
+    if (connects.length) return 'login';
     return null;
   };
 
@@ -1318,7 +1341,7 @@ export function renderMapPanel(panel, report, state, relayout) {
 
     // A dot made only of session events is one story, not a list of events.
     if (spot.items.every((i) => SESSION_KINDS.has(i.kind))) {
-      const verdict = sessionVerdict(new Set(spot.items.map((i) => i.kind)));
+      const verdict = sessionVerdict(spot.items);
       if (verdict) return `${names.join(', ')} — ${verdict}`;
     }
 
@@ -1894,7 +1917,7 @@ export function renderMapPanel(panel, report, state, relayout) {
         el('span', {}, el('i', { style: 'background:#d46bd8' }), 'Trap'),
         el('span', {}, el('i', { style: 'background:#4cc38a' }), 'Login'),
         el('span', {}, el('i', { style: 'background:#a7b4c4' }), 'Logout'),
-        el('span', {}, el('i', { style: 'background:#e5484d' }), 'Lost connection'),
+        el('span', {}, el('i', { style: 'background:#e5484d' }), 'Kicked'),
         el('span', {}, el('i', { style: 'background:var(--warning)' }), 'Impossible movement'),
       ),
       el('p', { class: 'small faint map-hint', text: mapHint(mapMeta, mapState, state) }),

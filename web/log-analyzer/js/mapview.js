@@ -214,9 +214,9 @@ const MARKER = {
   // position with.
   login: { color: '#4cc38a', size: 5.6 },
   logout: { color: '#a7b4c4', size: 8, shape: 'ring' },
-  // A disconnect with no logout emote before it: the session ended on its own
-  // or was cut by a kick. Red ring, same shape as a normal logout.
-  logoutCrash: { color: '#e5484d', size: 8, shape: 'ring' },
+  // A disconnect that came with a kick/ban line: red ring, same shape as a
+  // normal logout.
+  logoutKick: { color: '#e5484d', size: 8, shape: 'ring' },
   // One infected attack: a run of hits from zombies at nearly the same spot.
   infected: { color: '#e0803f', size: 6 },
   infectedSwarm: { color: '#e0803f', size: 8.5 },
@@ -659,12 +659,12 @@ export function renderMap(canvas, report, state) {
         if (s.kind !== 'connect' && s.kind !== 'disconnect') continue;
         if (!inWindow(s.at)) continue;
         const login = s.kind === 'connect';
-        const crash = !login && s.crash;
-        drawMarker(ctx, px(s.x), py(s.y), login ? 'login' : crash ? 'logoutCrash' : 'logout');
+        const kicked = !login && s.kicked;
+        drawMarker(ctx, px(s.x), py(s.y), login ? 'login' : kicked ? 'logoutKick' : 'logout');
         addHotspot(
           { x: s.x, y: s.y },
           {
-            kind: login ? 'login' : crash ? 'logoutCrash' : 'logout',
+            kind: login ? 'login' : kicked ? 'logoutKick' : 'logout',
             at: s.at ?? null,
             players: [p.name],
             text: `${p.name} ${s.text || (login ? 'connected' : 'disconnected')}`,
