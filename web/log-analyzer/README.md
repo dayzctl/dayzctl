@@ -82,13 +82,18 @@ are gzipped when the client accepts it.
 File names are validated against `filepath.Base`, so a request cannot walk out
 of the instance's profiles folder.
 
-There is no file picker: opening an instance analyses **every log file** in its
-profiles folder — the ADM event logs and the RPT engine logs together — and goes
-straight to the report. A rotated folder of hundreds of files is therefore one
-click, and repeat visits are served from the server's signature-based cache.
+There is no file picker: opening an instance analyses **every ADM log** in its
+profiles folder and goes straight to the report. A rotated folder of hundreds of
+files is therefore one click, and repeat visits are served from the server's
+signature-based cache.
 
-The results header names the instance and summarises what was parsed (`12 ADM +
-3 RPT`); the first ten files are listed as chips and the rest collapse into a
+RPT logs are opt-in through the **Include RPT** toggle in the results header.
+They carry the engine messages the *Problems* tab explains, but one day of RPT
+is about 40× the size of the same day's ADM (roughly 97 % of it is per-second
+FPS/memory telemetry), so parsing them all is far slower than the ADM pass.
+
+The results header names the instance and summarises what was parsed (`12 ADM`);
+the first ten files are listed as chips and the rest collapse into a
 `+N more` chip. *Re-analyse* re-reads the folder and *Change instance* goes back
 to the list.
 

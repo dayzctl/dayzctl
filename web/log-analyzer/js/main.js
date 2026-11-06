@@ -1,12 +1,12 @@
 /**
- * Application wiring: pick an instance → pick logs → let the server analyse
- * them → render the report.
+ * Application wiring: pick an instance → let the server analyse its ADM logs
+ * (RPT on request) → render the report.
  *
  * There is no parsing here. `dayzctl web` owns the parsers; this file is only
  * UI state and fetch calls.
  */
 
-import { fetchHealth, fetchInstances, analyze, fetchMapMeta, fetchMaps } from './api.js';
+import { fetchHealth, fetchInstances, fetchLogs, analyze, fetchMapMeta, fetchMaps } from './api.js';
 import { fmtInt } from './format.js';
 import { renderMap } from './mapview.js';
 import {
@@ -33,6 +33,7 @@ const dom = {
   refresh: document.getElementById('btn-refresh'),
   scope: document.getElementById('analysis-scope'),
   chips: document.getElementById('file-chips'),
+  includeRpt: document.getElementById('opt-rpt'),
   reload: document.getElementById('btn-reload'),
   newAnalysis: document.getElementById('btn-new'),
   tabs: document.getElementById('tabs'),
@@ -46,6 +47,9 @@ const state = {
   // Instance name (what the API takes) and the entry from /api/instances.
   instance: null,
   instanceInfo: null,
+  // ADM is the event log the analysis is built on and is small; RPT holds the
+  // engine messages but is roughly 40x larger, so it is opt-in.
+  includeRpt: false,
 
   activeTab: 'overview',
   problemFilter: 'all',
@@ -202,9 +206,9 @@ function renderInstances(instances) {
 /* ── Analysis ────────────────────────────────────────────── */
 
 /**
- * Open an instance and analyse everything in it. There is no file picker: the
- * service parses every ADM and RPT log in the instance's profiles folder, and
- * the views narrow the result down afterwards (the map opens on the last 6 h).
+ * Open an instance and analyse its logs. There is no file picker: every ADM log
+ * in the profiles folder is parsed (RPT only when the toggle is on), and the
+ * views narrow the result down afterwards (the map opens on the last 6 h).
  */
 async function openInstance(inst) {
   hideError(dom.connectError);
@@ -246,15 +250,39 @@ async function openInstance(inst) {
   await analyseInstance(inst);
 }
 
-/** No file list in the body: the service analyses every log in the folder. */
+/** Log types that feed the report: ADM always, RPT only when asked for. */
+function isAnalysable(file, includeRpt = state.includeRpt) {
+  const type = String(file.type).toUpperCase();
+  return type === 'ADM' || (includeRpt && type === 'RPT');
+}
+
+/** Send only the ADM file names (plus RPT when the toggle is on). */
 async function analyseInstance(inst) {
   if (!state.instance) return;
 
   hideError(dom.intakeError);
-  showProgress(`Analysing every log in ${inst.name}…`);
+  dom.connect.hidden = true;
+  dom.results.hidden = true;
+  showProgress(`Reading the profiles folder of ${inst.name}…`);
 
   try {
-    const report = await analyze(inst.name);
+    const { files } = await fetchLogs(inst.name);
+    const wanted = files.filter((file) => isAnalysable(file));
+    if (!wanted.length) {
+      throw new Error(
+        state.includeRpt
+          ? `No ADM or RPT log in ${inst.profilesDir || 'this profiles folder'}.`
+          : `No ADM log in ${inst.profilesDir || 'this profiles folder'}. Tick “Include RPT” to analyse the engine logs instead.`,
+      );
+    }
+
+    const adm = wanted.filter((file) => String(file.type).toUpperCase() === 'ADM').length;
+    const label = adm === wanted.length
+      ? `${wanted.length} ADM log${wanted.length === 1 ? '' : 's'}`
+      : `${adm} ADM + ${wanted.length - adm} RPT log${wanted.length - adm === 1 ? '' : 's'}`;
+    showProgress(`Analysing ${label} in ${inst.name}…`);
+
+    const report = await analyze(inst.name, wanted.map((file) => file.name));
     state.report = report;
     resetViewState();
     hideProgress();
@@ -285,6 +313,10 @@ function showInstances() {
 }
 
 dom.reload.addEventListener('click', () => {
+  if (state.instanceInfo) openInstance(state.instanceInfo);
+});
+dom.includeRpt.addEventListener('change', () => {
+  state.includeRpt = dom.includeRpt.checked;
   if (state.instanceInfo) openInstance(state.instanceInfo);
 });
 dom.refresh.addEventListener('click', () => loadInstances());
@@ -340,7 +372,14 @@ function scopeText(report) {
     const type = String(file.type).toUpperCase();
     counts.set(type, (counts.get(type) ?? 0) + 1);
   }
-  const files = [...counts.entries()].map(([type, n]) => `${fmtInt(n)} ${type}`).join(' + ');
+  // ADM first: it is what the report is mostly built on.
+  const order = ['ADM', 'RPT'];
+  const types = [...counts.keys()].sort((a, b) => {
+    const ia = order.indexOf(a);
+    const ib = order.indexOf(b);
+    return (ia < 0 ? order.length : ia) - (ib < 0 ? order.length : ib);
+  });
+  const files = types.map((type) => `${fmtInt(counts.get(type))} ${type}`).join(' + ');
   return [state.instance, files || 'no files', state.windowHint].filter(Boolean).join(' · ');
 }
 

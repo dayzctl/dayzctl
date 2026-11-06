@@ -66,6 +66,10 @@
           <div id="file-chips" class="chips"></div>
         </div>
         <div class="filebar-actions">
+          <label class="filter" style="display:inline-flex;gap:6px;align-items:center;cursor:pointer"
+                 title="Also parse the RPT engine logs. They are about 40× larger than the ADM log, so this is much slower.">
+            <input type="checkbox" id="opt-rpt" /> Include RPT
+          </label>
           <button type="button" class="btn" id="btn-reload">Re-analyse</button>
           <button type="button" class="btn" id="btn-new">Change instance</button>
         </div>
