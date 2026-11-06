@@ -43,6 +43,7 @@ type Server struct {
 	maps     *gamemap.Store
 	auth     config.WebAuth
 	sessions *sessions
+	banHints *banHints
 	handler  http.Handler
 }
 
@@ -57,6 +58,7 @@ func New(cfg *config.ServerConfig) (*Server, error) {
 		service:  logs.NewService(cfg.GetInstallDir(), logs.DefaultOptions()),
 		auth:     cfg.Web.Auth,
 		sessions: newSessions(cfg.Web.Auth.SessionDuration()),
+		banHints: newBanHints(banHintsPath(cfg)),
 	}
 
 	ui, err := fs.Sub(webassets.Assets, "log-analyzer")

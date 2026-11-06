@@ -197,6 +197,38 @@ func TestUnbanByBanIDMissing(t *testing.T) {
 	}
 }
 
+// A ban issued from the UI remembers the player behind the GUID, so the ban
+// list can put Unban beside that player's row.
+func TestBanRecordsPlayerHintForBanList(t *testing.T) {
+	fake := &fakeRCON{players: []intrcon.Player{
+		{ID: 0, GUID: "93ac90ba57a8ba55d46e4f0903c4b2d8", Name: "Mira"},
+	}}
+	srv := newRCONTestServer(t, fake)
+
+	if rec := postAction(t, srv, "ban", map[string]any{"name": "Mira", "minutes": 60}); rec.Code != http.StatusOK {
+		t.Fatalf("ban status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+
+	fake.bans = []intrcon.Ban{{ID: 0, GUID: "93ac90ba57a8ba55d46e4f0903c4b2d8", Minutes: 59, Reason: "dssds"}}
+	rec := do(t, srv, http.MethodGet, "/api/instances/test/bans", nil)
+	if rec.Code != http.StatusOK {
+		t.Fatalf("bans status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+
+	var payload struct {
+		Bans []struct {
+			intrcon.Ban
+			Player string `json:"player"`
+		} `json:"bans"`
+	}
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if len(payload.Bans) != 1 || payload.Bans[0].Player != "Mira" {
+		t.Fatalf("bans = %+v, want player Mira", payload.Bans)
+	}
+}
+
 func TestBansEndpoint(t *testing.T) {
 	fake := &fakeRCON{bans: []intrcon.Ban{
 		{ID: 3, GUID: "76561198000000005", Minutes: 60, Reason: "cheating"},

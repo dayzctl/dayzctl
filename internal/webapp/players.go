@@ -79,11 +79,19 @@ func (s *Server) handleBans(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadGateway, "RCON ban list failed: "+err.Error())
 		return
 	}
-	if bans == nil {
-		bans = []intrcon.Ban{}
+
+	// The ban list has no names, so attach the one we know from when the ban
+	// was issued (the UI puts Unban on that player's row).
+	type banView struct {
+		intrcon.Ban
+		Player string `json:"player,omitempty"`
+	}
+	views := make([]banView, 0, len(bans))
+	for _, ban := range bans {
+		views = append(views, banView{Ban: ban, Player: s.banHints.player(ban.GUID)})
 	}
 
-	writeJSON(w, http.StatusOK, map[string]any{"bans": bans})
+	writeJSON(w, http.StatusOK, map[string]any{"bans": views})
 }
 
 // handlePlayerAction runs one RCON action (kick, ban, unban) for a player name
@@ -158,6 +166,10 @@ func (s *Server) kickPlayer(w http.ResponseWriter, inst *config.Instance, client
 		return
 	}
 
+	// Knowing GUID → name is what lets the Players tab put the Unban button on
+	// the right row after a later ban.
+	s.banHints.remember(player.GUID, name)
+
 	if _, err := client.Kick(player.ID, reason); err != nil {
 		if errors.Is(err, intrcon.ErrNoResponse) {
 			writeSentUnconfirmed(w, "Kick", name, err)
@@ -188,6 +200,11 @@ func (s *Server) banPlayer(w http.ResponseWriter, inst *config.Instance, client 
 		writeRCONError(w, err)
 		return
 	}
+
+	// The ban list keeps no name, so remember the GUID → name link now: it is
+	// what lets the UI show Unban beside this player instead of in a lonely
+	// "ban list" card.
+	s.banHints.remember(player.GUID, name)
 
 	if _, err := client.Ban(player.ID, minutes, reason); err != nil {
 		if errors.Is(err, intrcon.ErrNoResponse) {
@@ -256,6 +273,7 @@ func (s *Server) unbanPlayer(w http.ResponseWriter, inst *config.Instance, clien
 
 	logger.Info("Unbanned player from the web UI",
 		"player", name, "banId", ban.ID, "guid", ban.GUID, "instance", inst.Name)
+	s.banHints.forget(ban.GUID)
 
 	writeJSON(w, http.StatusOK, playerActionResponse{
 		Action:  "unban",

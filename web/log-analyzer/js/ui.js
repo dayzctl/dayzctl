@@ -374,7 +374,7 @@ function actionBadge(notice) {
 
 /** Unban one entry of the live ban list, by its ban-list id. */
 async function runUnbanEntry(state, ban) {
-  const who = ban.guid || ban.ip || `ban #${ban.id}`;
+  const who = ban.player || ban.guid || ban.ip || `ban #${ban.id}`;
   const { ok } = await actionDialog({
     title: `Unban ${who}?`,
     description: ban.reason ? `Removes ban #${ban.id} — "${ban.reason}".` : `Removes ban #${ban.id} from the server.`,
@@ -444,12 +444,11 @@ function playerActionsCell(state, player, online, ban) {
 }
 
 /**
- * The server's actual ban list. Ban entries carry BattlEye GUIDs, which do not
- * always appear in the ADM log, so this card is what makes every ban removable
- * independently of the player rows above it.
+ * Fallback for bans that cannot be attached to a player row. The ban list only
+ * carries BattlEye GUIDs, which the ADM log never records, so a ban issued
+ * outside this UI has no row to sit on.
  */
-function renderBansCard(panel, state) {
-  const bans = state.bans ?? [];
+function renderBansCard(panel, state, bans) {
   let body;
 
   if (!state.bansLoaded) {
@@ -457,7 +456,8 @@ function renderBansCard(panel, state) {
   } else if (state.bansError) {
     body = emptyState(`Ban list unavailable: ${state.bansError}`);
   } else if (!bans.length) {
-    body = emptyState('No active bans.');
+    // Every ban already sits on its player row: no need for a second list.
+    return;
   } else {
     const rows = bans.map((ban) =>
       el(
@@ -490,12 +490,12 @@ function renderBansCard(panel, state) {
 
   panel.append(
     card(
-      `Active bans${state.bansLoaded && !state.bansError ? ` (${fmtInt(bans.length)})` : ''}`,
+      `Bans without a player row${state.bansLoaded && !state.bansError ? ` (${fmtInt(bans.length)})` : ''}`,
       state.bansLoaded && !state.bansError && bans.length
         ? el(
             'p',
             { class: 'small faint', style: 'margin:-4px 0 10px' },
-            'Every ban on the server, read live over RCON. A ban cannot always be linked to a player row, so lift it here.',
+            'These bans exist on the server but their GUID is not in the analysed ADM log, so they cannot be shown on a player row.',
           )
         : null,
       body,
@@ -532,20 +532,37 @@ export function renderPlayers(panel, report, state) {
   const notices = state.playerNotices ?? new Map();
 
   // The ban list decides which rows get an Unban button; fetch it on first
-  // render of this report. A player is banned when any SteamID from the log is
-  // in the list (the ADM `id=` is a session token, not a SteamID).
+  // render of this report. A ban is linked to a row when its GUID appears in
+  // the player's ids, or when this server issued it and remembers the name.
   if (rconReady) ensureBanList(state);
   const banByGUID = new Map();
+  const bansByName = new Map();
   for (const ban of state.bans ?? []) {
     if (ban.guid) banByGUID.set(String(ban.guid).toLowerCase(), ban);
+    if (ban.player) {
+      const key = ban.player.trim().toLowerCase();
+      bansByName.set(key, [...(bansByName.get(key) ?? []), ban]);
+    }
   }
   const banFor = (p) => {
     for (const id of p.ids ?? []) {
       const ban = banByGUID.get(String(id).toLowerCase());
       if (ban) return ban;
     }
-    return null;
+    // The ban list only carries BattlEye GUIDs, which the ADM does not record;
+    // for bans issued from this UI the name was remembered with the GUID.
+    const named = bansByName.get(p.name.trim().toLowerCase());
+    return named && named.length === 1 ? named[0] : null;
   };
+
+  // Anything that did not land on a visible row stays in the fallback card, so
+  // there is always a way to lift a ban.
+  const linked = new Set();
+  for (const p of players) {
+    const ban = banFor(p);
+    if (ban) linked.add(ban.id);
+  }
+  const unlinkedBans = (state.bans ?? []).filter((ban) => !linked.has(ban.id));
 
   // A kick or ban sent from this page ends the session, so the row must stop
   // claiming "online" even though the log still ends mid-session.
@@ -660,12 +677,7 @@ export function renderPlayers(panel, report, state) {
     );
   });
 
-  // Bans first: a ban entry cannot always be linked to a log row (the ban list
-  // uses BattlEye GUIDs that the ADM never records), so this card is the
-  // reliable place to unban somebody. It must be impossible to miss.
-  if (rconReady) renderBansCard(panel, state);
-
-  const banCount = state.bans?.length ?? 0;
+  const banCount = unlinkedBans.length;
   panel.append(
     card(
       `Players (${fmtInt(players.length)})${onlineCount ? ` \u00b7 ${fmtInt(onlineCount)} online` : ''}`,
@@ -673,7 +685,7 @@ export function renderPlayers(panel, report, state) {
         ? el(
             'p',
             { class: 'small faint', style: 'margin:-4px 0 10px' },
-            `${fmtInt(banCount)} active ban${banCount === 1 ? '' : 's'} — use the Active bans card above to lift ` +
+            `${fmtInt(banCount)} active ban${banCount === 1 ? '' : 's'} could not be linked to a player row — use the card below to lift ` +
               (banCount === 1 ? 'it' : 'them') +
               '.',
           )
@@ -698,6 +710,10 @@ export function renderPlayers(panel, report, state) {
         : emptyState(onlySelected ? 'No selected players match this search.' : 'No players match this search.'),
     ),
   );
+
+  // Bans that could not be attached to a visible row still need an Unban
+  // control, so they keep their own card below the table.
+  if (rconReady) renderBansCard(panel, state, unlinkedBans);
 
   // Details for every selected player, newest selection last.
   for (const key of selected) {
