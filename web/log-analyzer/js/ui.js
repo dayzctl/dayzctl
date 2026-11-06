@@ -200,6 +200,7 @@ export function renderPlayers(panel, report, state) {
 
   const matches = inTimeline.filter((p) => !query || p.name.toLowerCase().includes(query));
   const players = onlySelected ? matches.filter((p) => selected.has(p.key)) : matches;
+  const onlineCount = players.filter(isOnline).length;
 
   const toggle = (key, on) => {
     if (on) selected.add(key);
@@ -265,11 +266,12 @@ export function renderPlayers(panel, report, state) {
     );
   }
 
-  const rows = players.slice(0, 500).map((p) =>
-    el(
+  const rows = players.slice(0, 500).map((p) => {
+    const online = isOnline(p);
+    return el(
       'tr',
       {
-        class: selected.has(p.key) ? 'selected' : '',
+        class: [selected.has(p.key) ? 'selected' : '', online ? 'online' : ''].filter(Boolean).join(' '),
         onClick: (event) => {
           // Clicking anywhere on the row toggles it, so several players can be
           // picked without reaching for the checkbox.
@@ -284,7 +286,12 @@ export function renderPlayers(panel, report, state) {
         'aria-label': `Select ${p.name}`,
         onChange: (e) => toggle(p.key, e.target.checked),
       })),
-      el('td', {}, el('span', { style: `color:${colorFor(p.name)}`, text: p.name })),
+      el(
+        'td',
+        {},
+        el('span', { style: `color:${colorFor(p.name)}`, text: p.name }),
+        online ? onlineBadge() : null,
+      ),
       el('td', { class: 'num', text: fmtInt(p.connects) }),
       el('td', { class: 'num', text: fmtDuration(p.playtime) }),
       el('td', { class: 'num', text: fmtInt(p.kills) }),
@@ -293,12 +300,12 @@ export function renderPlayers(panel, report, state) {
       el('td', { class: 'num', text: fmtInt(p.chats) }),
       el('td', { class: 'num', text: fmtInt(p.builds) }),
       el('td', { class: 'num', text: p.suspicion ? fmtInt(p.suspicion) : '' }),
-    ),
-  );
+    );
+  });
 
   panel.append(
     card(
-      `Players (${fmtInt(players.length)})`,
+      `Players (${fmtInt(players.length)})${onlineCount ? ` \u00b7 ${fmtInt(onlineCount)} online` : ''}`,
       players.length
         ? table(
             [
@@ -358,8 +365,8 @@ function playerDetail(report, p) {
 
   return el(
     'div',
-    { class: 'card' },
-    el('h3', { text: p.name }),
+    { class: `card${isOnline(p) ? ' online' : ''}` },
+    el('h3', {}, p.name, isOnline(p) ? onlineBadge() : null),
     el(
       'div',
       { class: 'kpis', style: 'margin-bottom:14px' },
@@ -704,6 +711,29 @@ function activeInTimeline(player, window) {
   if (player.positions?.some((s) => window.inside(todOf(s.at)))) return true;
   return (player.sessions ?? []).some(
     (s) => window.inside(todOf(s.start)) || window.inside(todOf(s.end)),
+  );
+}
+
+/**
+ * A player is online when their last session was never closed: the log stopped
+ * while they were still connected. Sessions arrive in time order, so the last
+ * one carries the current state.
+ */
+function isOnline(player) {
+  const sessions = player.sessions ?? [];
+  const last = sessions[sessions.length - 1];
+  return Boolean(last) && last.end === null;
+}
+
+function onlineBadge() {
+  return el(
+    'span',
+    {
+      class: 'online-badge',
+      title: 'Still connected when the log ends \u2014 the last session was never closed',
+    },
+    el('span', { class: 'dot' }),
+    'online',
   );
 }
 

@@ -322,6 +322,36 @@ tbody td {
 tbody tr:last-child td { border-bottom: none; }
 tbody tr:hover { background: #151b22; }
 
+/* A player still connected when the log ends. Tinted row plus a left rule, so
+   it reads at a glance without competing with the per-player accent colours. */
+tbody tr.online { background: rgba(71, 168, 106, 0.06); }
+tbody tr.online:hover { background: rgba(71, 168, 106, 0.12); }
+tbody tr.online > td:first-child { box-shadow: inset 2px 0 0 var(--ok); }
+tbody tr.selected { background: #1b2129; }
+tbody tr.selected:hover { background: #202730; }
+tbody tr.selected.online { background: rgba(71, 168, 106, 0.1); }
+
+.online-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  margin-left: 8px;
+  font-size: 10.5px;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+  color: var(--ok);
+  vertical-align: 1px;
+}
+.online-badge .dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--ok);
+  box-shadow: 0 0 0 3px rgba(71, 168, 106, 0.16);
+}
+
+.card.online { border-color: rgba(71, 168, 106, 0.45); }
+
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }
 
 .raw {

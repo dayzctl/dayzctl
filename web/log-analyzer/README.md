@@ -99,10 +99,12 @@ instance* goes back to the list.
 - **Overview** — activity KPIs (period, players, deaths, suspicious events,
   chat, build actions), top players and weapons used.
 - **Players** — sessions, playtime, kills, deaths, K/D, chat, builds, flags.
-  Tick several players to compare them: their details stack below the table, and
-  *Show selected only* narrows the list to them. The Map tab can then draw just
-  those players. Players with no activity inside the Timeline window are left
-  out of the list, with a one-click *Show the whole log* to undo it.
+  Players whose last session was never closed were still connected when the log
+  ends: their row is tinted green, marked *online* and counted in the card
+  title. Tick several players to compare them: their details stack below the
+  table, and *Show selected only* narrows the list to them. The Map tab can then
+  draw just those players. Players with no activity inside the Timeline window
+  are left out of the list, with a one-click *Show the whole log* to undo it.
 - **Kills** — PvP kills with weapon and distance; sort by time or longest shot.
 - **Base building** — build/place actions with coordinates, split by a *Type*
   column into structures and *traps* (bear traps, land mines, claymores,
