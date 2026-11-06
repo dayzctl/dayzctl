@@ -179,7 +179,9 @@ export function renderOverview(panel, report, actions) {
 
 /* ── Player actions (RCON) ───────────────────────────────── */
 
-const STEAM_ID = /^7656119\d{10}$/;
+// A player GUID is either the 64-bit SteamID that `players` reports or the
+// 32-hex BattlEye GUID that the ban list prints.
+const PLAYER_GUID = /^(7656119\d{10}|[0-9a-f]{32})$/i;
 
 /** Small transient message in the bottom-right corner. */
 function notify(message, tone = 'info') {
@@ -311,7 +313,7 @@ function actionSpec(action, player) {
   return {
     title: `Unban ${player.name}?`,
     description:
-      "Removes the active ban that matches this player's SteamID. The SteamID comes from the analysed ADM log, so this works even while the player is offline.",
+      "Removes the active ban that matches this player's GUID. The GUID comes from the analysed ADM log, so this works even while the player is offline.",
     confirmLabel: 'Unban',
     danger: false,
     fields: [],
@@ -324,7 +326,7 @@ async function runPlayerAction(state, player, action) {
   const { ok, values } = await actionDialog(actionSpec(action, player));
   if (!ok) return;
 
-  const payload = { name: player.name, ids: (player.ids ?? []).filter((id) => STEAM_ID.test(id)) };
+  const payload = { name: player.name, ids: (player.ids ?? []).filter((id) => PLAYER_GUID.test(id)) };
   if (action === 'kick') payload.reason = values.reason ?? '';
   if (action === 'ban') {
     payload.minutes = Number.parseInt(values.minutes, 10) || 0;
@@ -368,6 +370,29 @@ function actionBadge(notice) {
     },
     notice.action,
   );
+}
+
+/** Unban one entry of the live ban list, by its ban-list id. */
+async function runUnbanEntry(state, ban) {
+  const who = ban.guid || ban.ip || `ban #${ban.id}`;
+  const { ok } = await actionDialog({
+    title: `Unban ${who}?`,
+    description: ban.reason ? `Removes ban #${ban.id} — "${ban.reason}".` : `Removes ban #${ban.id} from the server.`,
+    confirmLabel: 'Unban',
+    danger: false,
+  });
+  if (!ok) return;
+
+  try {
+    const result = await playerAction(state.instance, 'unban', { name: who, banId: ban.id });
+    // Whatever happened, the list on screen is now stale.
+    state.bansLoaded = false;
+    state.bansError = '';
+    state.actions.setState({});
+    notify(result?.message || `Ban #${ban.id} removed.`, result?.warning ? 'warn' : 'ok');
+  } catch (err) {
+    notify(`unban failed for ${who}: ${err.message}`, 'error');
+  }
 }
 
 /** There is only one ban list per instance; fetch it once per report. */
@@ -416,6 +441,54 @@ function playerActionsCell(state, player, online, ban) {
     buttons.push(button('Unban', 'ghost', 'unban', `Lift this ban (${ban.guid || ban.ip}${left}${why})`));
   }
   return el('td', { class: 'actions' }, ...buttons);
+}
+
+/**
+ * The server's actual ban list. Ban entries carry BattlEye GUIDs, which do not
+ * always appear in the ADM log, so this card is what makes every ban removable
+ * independently of the player rows above it.
+ */
+function renderBansCard(panel, state) {
+  const bans = state.bans ?? [];
+  let body;
+
+  if (!state.bansLoaded) {
+    body = emptyState('Reading the ban list…');
+  } else if (state.bansError) {
+    body = emptyState(`Ban list unavailable: ${state.bansError}`);
+  } else if (!bans.length) {
+    body = emptyState('No active bans.');
+  } else {
+    const rows = bans.map((ban) =>
+      el(
+        'tr',
+        {},
+        el('td', { class: 'raw', text: ban.guid || ban.ip || '—' }),
+        el('td', { class: 'num', text: ban.minutes > 0 ? `${fmtInt(ban.minutes)} min` : 'permanent' }),
+        el('td', { text: ban.reason || '—' }),
+        el(
+          'td',
+          { class: 'actions' },
+          el('button', {
+            type: 'button',
+            class: 'btn tiny ghost',
+            text: 'Unban',
+            title: `Lift ban #${ban.id}`,
+            onClick: (event) => {
+              event.stopPropagation();
+              runUnbanEntry(state, ban);
+            },
+          }),
+        ),
+      ),
+    );
+    body = table(
+      [{ label: 'GUID / IP' }, { label: 'Time left', num: true }, { label: 'Reason' }, { label: 'Actions' }],
+      rows,
+    );
+  }
+
+  panel.append(card(`Active bans${state.bansLoaded && !state.bansError ? ` (${fmtInt(bans.length)})` : ''}`, body));
 }
 
 /* ── Players ─────────────────────────────────────────────── */
@@ -519,16 +592,6 @@ export function renderPlayers(panel, report, state) {
     ),
   );
 
-  if (rconReady && state.bansError) {
-    panel.append(
-      el(
-        'p',
-        { class: 'small faint', style: 'margin:-4px 0 12px' },
-        `Ban list unavailable, so no Unban buttons are shown: ${state.bansError}`,
-      ),
-    );
-  }
-
   if (hiddenCount > 0) {
     panel.append(
       el(
@@ -608,6 +671,8 @@ export function renderPlayers(panel, report, state) {
         : emptyState(onlySelected ? 'No selected players match this search.' : 'No players match this search.'),
     ),
   );
+
+  if (rconReady) renderBansCard(panel, state);
 
   // Details for every selected player, newest selection last.
   for (const key of selected) {

@@ -33,21 +33,23 @@ var newRCONClient = func(port int, password string) rconClient {
 	return intrcon.New(port, password)
 }
 
-// realSteamID matches a 64-bit Steam account id. This is the only key the ADM
-// log and the RCON session/ban lists have in common, so it is how a connected
-// player is found and how an unban matches a ban entry.
-var realSteamID = regexp.MustCompile(`^7656119\d{10}$`)
+// playerGUID matches either the 64-bit SteamID that `players` reports or the
+// 32-hex BattlEye GUID that the ban list prints. The ADM log may carry either
+// (older builds write the SteamID, newer ones a session token that matches
+// neither), so this is a best-effort link between the log and RCON.
+var playerGUID = regexp.MustCompile(`^(7656119\d{10}|[0-9a-fA-F]{32})$`)
 
 // errPlayerOffline means the name is not in the RCON session list, so there is
 // nothing to kick or ban right now.
 var errPlayerOffline = errors.New("player not connected")
 
 // playerActionRequest is the body of a kick/ban/unban request. IDs carries the
-// SteamIDs the ADM log recorded for that player; it decides which live player
-// to act on and which ban entry to remove.
+// GUIDs the ADM log recorded for that player; BanID targets exactly one entry
+// of the ban list (what the "Active bans" card sends).
 type playerActionRequest struct {
 	Name    string   `json:"name"`
 	IDs     []string `json:"ids,omitempty"`
+	BanID   *int     `json:"banId,omitempty"`
 	Minutes int      `json:"minutes,omitempty"`
 	Reason  string   `json:"reason,omitempty"`
 }
@@ -130,7 +132,7 @@ func (s *Server) handlePlayerAction(w http.ResponseWriter, r *http.Request) {
 	case "ban":
 		s.banPlayer(w, inst, client, name, req.IDs, req.Minutes, reason)
 	case "unban":
-		s.unbanPlayer(w, inst, client, name, req.IDs)
+		s.unbanPlayer(w, inst, client, name, req.IDs, req.BanID)
 	}
 }
 
@@ -215,11 +217,11 @@ func (s *Server) banPlayer(w http.ResponseWriter, inst *config.Instance, client 
 	})
 }
 
-func (s *Server) unbanPlayer(w http.ResponseWriter, inst *config.Instance, client rconClient, name string, ids []string) {
-	guids := steamIDs(ids)
-	if len(guids) == 0 {
+func (s *Server) unbanPlayer(w http.ResponseWriter, inst *config.Instance, client rconClient, name string, ids []string, banID *int) {
+	guids := playerGUIDs(ids)
+	if banID == nil && len(guids) == 0 {
 		writeError(w, http.StatusUnprocessableEntity,
-			"the analysed ADM log has no SteamID for "+name+
+			"the analysed ADM log has no GUID for "+name+
 				", so there is nothing to match the ban list against")
 		return
 	}
@@ -230,7 +232,13 @@ func (s *Server) unbanPlayer(w http.ResponseWriter, inst *config.Instance, clien
 		return
 	}
 
-	ban, ok := findBan(bans, guids)
+	var ban intrcon.Ban
+	var ok bool
+	if banID != nil {
+		ban, ok = findBanByID(bans, *banID)
+	} else {
+		ban, ok = findBan(bans, guids)
+	}
 	if !ok {
 		writeError(w, http.StatusNotFound,
 			fmt.Sprintf("no ban on this server matches %s (%s)", name, strings.Join(guids, ", ")))
@@ -266,7 +274,7 @@ func findOnlinePlayer(client rconClient, name string, ids []string) (intrcon.Pla
 		return intrcon.Player{}, err
 	}
 
-	guids := steamIDs(ids)
+	guids := playerGUIDs(ids)
 	for _, p := range players {
 		for _, guid := range guids {
 			if strings.EqualFold(strings.TrimSpace(p.GUID), guid) {
@@ -356,22 +364,34 @@ func normalizePlayerName(s string) string {
 	return strings.ToLower(s)
 }
 
-// steamIDs keeps only the values that are real Steam account ids.
-func steamIDs(ids []string) []string {
+// playerGUIDs keeps only values that look like a player GUID (SteamID or
+// 32-hex BattlEye GUID), deduplicated and in their original spelling.
+func playerGUIDs(ids []string) []string {
 	out := make([]string, 0, len(ids))
 	seen := make(map[string]struct{}, len(ids))
 	for _, id := range ids {
 		id = strings.TrimSpace(id)
-		if !realSteamID.MatchString(id) {
+		if !playerGUID.MatchString(id) {
 			continue
 		}
-		if _, ok := seen[id]; ok {
+		key := strings.ToLower(id)
+		if _, ok := seen[key]; ok {
 			continue
 		}
-		seen[id] = struct{}{}
+		seen[key] = struct{}{}
 		out = append(out, id)
 	}
 	return out
+}
+
+// findBanByID returns the ban with the given ban-list id.
+func findBanByID(bans []intrcon.Ban, id int) (intrcon.Ban, bool) {
+	for _, ban := range bans {
+		if ban.ID == id {
+			return ban, true
+		}
+	}
+	return intrcon.Ban{}, false
 }
 
 // findBan returns the first ban whose GUID is one of the given SteamIDs.

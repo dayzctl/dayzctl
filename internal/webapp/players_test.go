@@ -168,6 +168,35 @@ func TestKickWithoutReplyIsReportedAsSent(t *testing.T) {
 	}
 }
 
+// The ban list often carries a GUID that never appears in the ADM log, so the
+// "Active bans" card unbans by ban-list id instead of by player.
+func TestUnbanByBanID(t *testing.T) {
+	fake := &fakeRCON{bans: []intrcon.Ban{
+		{ID: 0, GUID: "93ac90ba57a8ba55d46e4f0903c4b2d8", Minutes: 59, Reason: "dssds"},
+	}}
+	srv := newRCONTestServer(t, fake)
+
+	rec := postAction(t, srv, "unban", map[string]any{
+		"name":  "93ac90ba57a8ba55d46e4f0903c4b2d8",
+		"banId": 0,
+	})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	if fake.unbanID != 0 {
+		t.Errorf("unban id = %d, want 0", fake.unbanID)
+	}
+}
+
+func TestUnbanByBanIDMissing(t *testing.T) {
+	srv := newRCONTestServer(t, &fakeRCON{bans: []intrcon.Ban{{ID: 1, GUID: "93ac90ba57a8ba55d46e4f0903c4b2d8"}}})
+
+	rec := postAction(t, srv, "unban", map[string]any{"name": "x", "banId": 7})
+	if rec.Code != http.StatusNotFound {
+		t.Fatalf("status = %d, want 404; body = %s", rec.Code, rec.Body.String())
+	}
+}
+
 func TestBansEndpoint(t *testing.T) {
 	fake := &fakeRCON{bans: []intrcon.Ban{
 		{ID: 3, GUID: "76561198000000005", Minutes: 60, Reason: "cheating"},

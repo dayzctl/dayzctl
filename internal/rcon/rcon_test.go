@@ -126,6 +126,16 @@ func TestParseBanLine(t *testing.T) {
 			wantWhy:  "cheating",
 		},
 		{
+			// DayZ ban lists print BattlEye's 32-hex GUID, not a SteamID.
+			name:     "battleye hex guid",
+			line:     `0  93ac90ba57a8ba55d46e4f0903c4b2d8  59  dssds`,
+			wantOK:   true,
+			wantID:   0,
+			wantGUID: "93ac90ba57a8ba55d46e4f0903c4b2d8",
+			wantMin:  59,
+			wantWhy:  "dssds",
+		},
+		{
 			name:    "timed ip ban",
 			line:    `4  203.0.113.9:2304  1440  griefing`,
 			wantOK:  true,
