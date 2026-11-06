@@ -7,6 +7,7 @@ import (
 	"io"
 	"net/http"
 	"regexp"
+	"strconv"
 	"strings"
 
 	"github.com/dayzctl/dayzctl/internal/config"
@@ -17,7 +18,10 @@ import (
 // rconClient is the subset of the BattlEye client the player actions need.
 // Declaring it as an interface keeps the handlers testable without UDP.
 type rconClient interface {
+	Open() error
+	Close() error
 	Players() ([]intrcon.Player, error)
+	PlayersRaw() (string, error)
 	Bans() ([]intrcon.Ban, error)
 	Kick(id int, reason string) (string, error)
 	Ban(id int, minutes int, reason string) (string, error)
@@ -55,6 +59,9 @@ type playerActionResponse struct {
 	ID      int    `json:"id,omitempty"`
 	Minutes int    `json:"minutes,omitempty"`
 	Message string `json:"message"`
+	// Warning marks a command the server never acknowledged: it was written to
+	// the socket, but BattlEye may have ignored it.
+	Warning bool `json:"warning,omitempty"`
 }
 
 // handleBans lists the server's bans so the UI can offer "Unban" only on the
@@ -106,6 +113,15 @@ func (s *Server) handlePlayerAction(w http.ResponseWriter, r *http.Request) {
 	}
 
 	client := newRCONClient(inst.RCON.Port, inst.RCON.Password)
+	// One session for the whole action: looking the player up and kicking them
+	// must not use two short-lived connections, because some servers only
+	// answer the session they just authenticated.
+	if err := client.Open(); err != nil {
+		writeError(w, http.StatusBadGateway, "RCON login failed: "+err.Error())
+		return
+	}
+	defer func() { _ = client.Close() }()
+
 	reason := strings.TrimSpace(req.Reason)
 
 	switch action {
@@ -141,6 +157,10 @@ func (s *Server) kickPlayer(w http.ResponseWriter, inst *config.Instance, client
 	}
 
 	if _, err := client.Kick(player.ID, reason); err != nil {
+		if errors.Is(err, intrcon.ErrNoResponse) {
+			writeSentUnconfirmed(w, "Kick", name, err)
+			return
+		}
 		writeError(w, http.StatusBadGateway, "RCON kick failed: "+err.Error())
 		return
 	}
@@ -168,6 +188,10 @@ func (s *Server) banPlayer(w http.ResponseWriter, inst *config.Instance, client 
 	}
 
 	if _, err := client.Ban(player.ID, minutes, reason); err != nil {
+		if errors.Is(err, intrcon.ErrNoResponse) {
+			writeSentUnconfirmed(w, "Ban", name, err)
+			return
+		}
 		writeError(w, http.StatusBadGateway, "RCON ban failed: "+err.Error())
 		return
 	}
@@ -214,6 +238,10 @@ func (s *Server) unbanPlayer(w http.ResponseWriter, inst *config.Instance, clien
 	}
 
 	if _, err := client.Unban(ban.ID); err != nil {
+		if errors.Is(err, intrcon.ErrNoResponse) {
+			writeSentUnconfirmed(w, "Unban", name, err)
+			return
+		}
 		writeError(w, http.StatusBadGateway, "RCON unban failed: "+err.Error())
 		return
 	}
@@ -254,6 +282,21 @@ func findOnlinePlayer(client rconClient, name string, ids []string) (intrcon.Pla
 		}
 	}
 
+	// No rows parsed at all: the server's `players` layout may differ from the
+	// columns this parser expects. Fall back to the raw text so a kick still
+	// lands, and report what the server actually said when even that fails.
+	var raw string
+	if len(players) == 0 {
+		if text, errRaw := client.PlayersRaw(); errRaw == nil {
+			raw = text
+			logger.Info("RCON players returned no parseable rows", "player", name, "raw", raw)
+			if p, ok := playerFromRaw(raw, name); ok {
+				logger.Info("Resolved player from the raw RCON output", "player", name, "id", p.ID)
+				return p, nil
+			}
+		}
+	}
+
 	connected := make([]string, 0, len(players))
 	for _, p := range players {
 		connected = append(connected, p.Name)
@@ -262,7 +305,47 @@ func findOnlinePlayer(client rconClient, name string, ids []string) (intrcon.Pla
 	if len(connected) > 0 {
 		list = strings.Join(connected, ", ")
 	}
-	return intrcon.Player{}, fmt.Errorf("%w: %s (connected right now: %s)", errPlayerOffline, name, list)
+
+	suffix := ""
+	if excerpt := summarizeRaw(raw); excerpt != "" {
+		suffix = " \u2014 the server's players reply was: " + excerpt
+	}
+	return intrcon.Player{}, fmt.Errorf("%w: %s (connected right now: %s)%s", errPlayerOffline, name, list, suffix)
+}
+
+// playerFromRaw finds the first line that mentions the name and uses the first
+// number on it as the player id. It only runs when the column parser found
+// nothing, so it cannot silently pick a player out of a well-formed list.
+func playerFromRaw(raw, name string) (intrcon.Player, bool) {
+	want := normalizePlayerName(name)
+	if want == "" {
+		return intrcon.Player{}, false
+	}
+	for _, line := range strings.Split(raw, "\n") {
+		if !strings.Contains(strings.ToLower(line), want) {
+			continue
+		}
+		for _, field := range strings.Fields(line) {
+			if id, err := strconv.Atoi(field); err == nil {
+				return intrcon.Player{ID: id, Name: name}, true
+			}
+		}
+	}
+	return intrcon.Player{}, false
+}
+
+// summarizeRaw flattens an RCON reply into a short, single-line quote.
+func summarizeRaw(raw string) string {
+	raw = strings.TrimSpace(raw)
+	if raw == "" {
+		return ""
+	}
+	raw = strings.Join(strings.Fields(raw), " ")
+	const limit = 300
+	if len(raw) > limit {
+		raw = raw[:limit] + "\u2026"
+	}
+	return fmt.Sprintf("%q", raw)
 }
 
 // normalizePlayerName trims and drops the quotes some builds put around the
@@ -301,6 +384,19 @@ func findBan(bans []intrcon.Ban, guids []string) (intrcon.Ban, bool) {
 		}
 	}
 	return intrcon.Ban{}, false
+}
+
+// writeSentUnconfirmed reports a command the server never acknowledged. UDP has
+// no delivery guarantee and some BattlEye builds do not answer kick/ban, so the
+// command may well have run: say so instead of pretending it failed.
+func writeSentUnconfirmed(w http.ResponseWriter, action, name string, err error) {
+	logger.Warn("RCON command sent without a reply", "action", action, "player", name, "error", err)
+	writeJSON(w, http.StatusOK, playerActionResponse{
+		Action:  strings.ToLower(action),
+		Player:  name,
+		Message: action + " sent for " + name + ", but the server did not confirm it",
+		Warning: true,
+	})
 }
 
 // writeRCONError maps the RCON failures to statuses the UI can act on.

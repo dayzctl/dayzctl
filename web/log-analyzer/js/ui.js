@@ -333,6 +333,18 @@ async function runPlayerAction(state, player, action) {
 
   try {
     const result = await playerAction(state.instance, action, payload);
+
+    // The command was written but the server never acknowledged it. Do not
+    // claim the player is offline; refresh the ban list, which may have
+    // changed anyway, and let the admin check the server.
+    if (result?.warning) {
+      state.bansLoaded = false;
+      state.bansError = '';
+      state.actions.setState({});
+      notify(result.message || `${action} sent for ${player.name}, but the server did not confirm it.`, 'warn');
+      return;
+    }
+
     state.playerNotices.set(player.key, { action, at: Date.now() });
     // A ban adds an entry and an unban removes one, so the cached ban list is
     // stale either way: drop it and let the next render fetch it again.

@@ -2,6 +2,7 @@ package rcon
 
 import (
 	"encoding/binary"
+	"errors"
 	"fmt"
 	"net"
 	"strconv"
@@ -10,6 +11,11 @@ import (
 
 	"github.com/dayzctl/dayzctl/internal/logger"
 )
+
+// ErrNoResponse means the command was written but the server sent nothing
+// back. BattlEye gives no delivery guarantee over UDP, and some builds simply
+// do not answer kick/ban, so callers may treat this as "sent, unconfirmed".
+var ErrNoResponse = errors.New("server did not respond")
 
 // Client implements BattlEye RCon protocol matching bercon-cli
 type Client struct {
@@ -50,8 +56,25 @@ func (c *Client) Connect(port int) error {
 
 // Close closes the connection
 func (c *Client) Close() error {
-	if c.conn != nil {
-		return c.conn.Close()
+	if c.conn == nil {
+		return nil
+	}
+	err := c.conn.Close()
+	c.conn = nil
+	return err
+}
+
+// Open connects and logs in, leaving the session open so several commands can
+// run on it. Use it when one action needs more than one command (the web UI
+// looks a player up and then kicks them): some servers only answer commands
+// reliably within the session that was just authenticated.
+func (c *Client) Open() error {
+	if err := c.Connect(c.port); err != nil {
+		return fmt.Errorf("connection failed: %w", err)
+	}
+	if err := c.Login(); err != nil {
+		_ = c.Close()
+		return fmt.Errorf("login failed: %w", err)
 	}
 	return nil
 }
@@ -127,6 +150,10 @@ func (c *Client) SendCommand(command string) (string, error) {
 
 		n, err := c.conn.Read(buf)
 		if err != nil {
+			var netErr net.Error
+			if errors.As(err, &netErr) && netErr.Timeout() {
+				return "", fmt.Errorf("%w: %v", ErrNoResponse, err)
+			}
 			return "", fmt.Errorf("failed to read response: %w", err)
 		}
 
@@ -143,6 +170,14 @@ func (c *Client) SendCommand(command string) (string, error) {
 			return "", fmt.Errorf("invalid response")
 		}
 
+		// Type 0x00 is a login-style packet, never a command answer. A
+		// leftover one (some servers answer the login twice) must not be
+		// mistaken for the command output — that used to make `players` look
+		// empty even though the kick itself worked.
+		if response[0] == 0x00 {
+			continue
+		}
+
 		out.Write(response[2:])
 
 		// 0x01 marks the last packet, 0x02 that more will follow.
@@ -156,10 +191,10 @@ func (c *Client) SendCommand(command string) (string, error) {
 	return respStr, nil
 }
 
-// Send sends a command (simplified interface)
+// Send runs one command on a short-lived session.
 func (c *Client) Send(command string) (string, error) {
-	if err := c.Connect(c.port); err != nil {
-		return "", fmt.Errorf("connection failed: %w", err)
+	if err := c.Open(); err != nil {
+		return "", err
 	}
 	defer func() {
 		if err := c.Close(); err != nil {
@@ -167,11 +202,16 @@ func (c *Client) Send(command string) (string, error) {
 		}
 	}()
 
-	if err := c.Login(); err != nil {
-		return "", fmt.Errorf("login failed: %w", err)
-	}
-
 	return c.SendCommand(command)
+}
+
+// exec runs a command on the open session when there is one, otherwise on a
+// short-lived connection (the CLI's one-command-per-client behaviour).
+func (c *Client) exec(command string) (string, error) {
+	if c.conn != nil {
+		return c.SendCommand(command)
+	}
+	return c.Send(command)
 }
 
 // buildPacket builds a packet with BE header matching bercon-cli
@@ -231,14 +271,28 @@ func crc32(data []byte) uint32 {
 // HIGH-LEVEL RCON COMMANDS
 // ============================================================================
 
-// Players returns the list of connected players
+// Players returns the list of connected players.
 func (c *Client) Players() ([]Player, error) {
-	resp, err := c.Send("players")
+	resp, err := c.PlayersRaw()
 	if err != nil {
 		return nil, err
 	}
-	logger.Debug("RCON Players: raw response", "resp", resp)
+	return parsePlayers(resp), nil
+}
 
+// PlayersRaw returns the unparsed `players` response. Callers use it to log or
+// tolerate a column layout the parser does not recognise.
+func (c *Client) PlayersRaw() (string, error) {
+	resp, err := c.exec("players")
+	if err != nil {
+		return "", err
+	}
+	logger.Debug("RCON Players: raw response", "resp", resp)
+	return resp, nil
+}
+
+// parsePlayers extracts the player rows from a `players` response.
+func parsePlayers(resp string) []Player {
 	// Normalize and split into lines
 	lines := strings.Split(strings.TrimSpace(resp), "\n")
 	var players []Player
@@ -262,7 +316,7 @@ func (c *Client) Players() ([]Player, error) {
 		}
 	}
 
-	return players, nil
+	return players
 }
 
 // parsePlayerLine parses a single line of `players` output into a Player.
@@ -337,22 +391,22 @@ func parsePlayerLine(line string) (Player, bool) {
 // Kick kicks a player by ID
 func (c *Client) Kick(playerID int, reason string) (string, error) {
 	if reason != "" {
-		return c.Send(fmt.Sprintf("kick %d %s", playerID, reason))
+		return c.exec(fmt.Sprintf("kick %d %s", playerID, reason))
 	}
-	return c.Send(fmt.Sprintf("kick %d", playerID))
+	return c.exec(fmt.Sprintf("kick %d", playerID))
 }
 
 // Ban bans a player by ID
 func (c *Client) Ban(playerID int, minutes int, reason string) (string, error) {
 	if reason != "" {
-		return c.Send(fmt.Sprintf("ban %d %d %s", playerID, minutes, reason))
+		return c.exec(fmt.Sprintf("ban %d %d %s", playerID, minutes, reason))
 	}
-	return c.Send(fmt.Sprintf("ban %d %d", playerID, minutes))
+	return c.exec(fmt.Sprintf("ban %d %d", playerID, minutes))
 }
 
 // Bans returns the server's ban list.
 func (c *Client) Bans() ([]Ban, error) {
-	resp, err := c.Send("bans")
+	resp, err := c.exec("bans")
 	if err != nil {
 		return nil, err
 	}
@@ -463,12 +517,12 @@ func isNumber(field string) bool {
 // Unban removes a ban by its ban-list id (the first column of `bans`), not by
 // the player's session id.
 func (c *Client) Unban(banID int) (string, error) {
-	return c.Send(fmt.Sprintf("unban %d", banID))
+	return c.exec(fmt.Sprintf("unban %d", banID))
 }
 
 // Say sends a message to all players
 func (c *Client) Say(message string) (string, error) {
-	return c.Send(fmt.Sprintf("say -1 %s", message))
+	return c.exec(fmt.Sprintf("say -1 %s", message))
 }
 
 // Shutdown requests a graceful server shutdown via the BattlEye "#shutdown"
@@ -476,7 +530,7 @@ func (c *Client) Say(message string) (string, error) {
 // systemd), this lets the DayZ server save the world/player state and exit
 // cleanly before the process terminates.
 func (c *Client) Shutdown() (string, error) {
-	return c.Send("#shutdown")
+	return c.exec("#shutdown")
 }
 
 // Player represents a connected player

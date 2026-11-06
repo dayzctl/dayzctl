@@ -12,8 +12,10 @@ import (
 
 // fakeRCON records the action it was asked to perform.
 type fakeRCON struct {
-	players []intrcon.Player
-	bans    []intrcon.Ban
+	players    []intrcon.Player
+	rawPlayers string
+	bans       []intrcon.Ban
+	kickErr    error
 
 	kickID  int
 	kickWhy string
@@ -25,12 +27,16 @@ type fakeRCON struct {
 	unbanID int
 }
 
+func (f *fakeRCON) Open() error  { return nil }
+func (f *fakeRCON) Close() error { return nil }
+
 func (f *fakeRCON) Players() ([]intrcon.Player, error) { return f.players, nil }
+func (f *fakeRCON) PlayersRaw() (string, error)        { return f.rawPlayers, nil }
 func (f *fakeRCON) Bans() ([]intrcon.Ban, error)       { return f.bans, nil }
 
 func (f *fakeRCON) Kick(id int, reason string) (string, error) {
 	f.kickID, f.kickWhy = id, reason
-	return "", nil
+	return "", f.kickErr
 }
 
 func (f *fakeRCON) Ban(id, minutes int, reason string) (string, error) {
@@ -121,6 +127,44 @@ func TestKickPlayerActionMatchesSteamID(t *testing.T) {
 	}
 	if fake.kickID != 9 {
 		t.Errorf("kick id = %d, want 9", fake.kickID)
+	}
+}
+
+// A `players` layout the column parser does not recognise must still resolve
+// the player from the raw reply instead of failing the kick.
+func TestKickFallsBackToRawPlayers(t *testing.T) {
+	fake := &fakeRCON{rawPlayers: "Players on server:\nMira  id 7  42 ping\n(1 players in total)"}
+	srv := newRCONTestServer(t, fake)
+
+	rec := postAction(t, srv, "kick", map[string]any{"name": "Mira", "reason": "afk"})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+	if fake.kickID != 7 {
+		t.Errorf("kick id = %d, want 7", fake.kickID)
+	}
+}
+
+// A kick that produced no reply was still sent: report it as unconfirmed
+// instead of as a failure, because some BattlEye builds never answer kick.
+func TestKickWithoutReplyIsReportedAsSent(t *testing.T) {
+	fake := &fakeRCON{
+		players: []intrcon.Player{{ID: 3, Name: "Mira"}},
+		kickErr: intrcon.ErrNoResponse,
+	}
+	srv := newRCONTestServer(t, fake)
+
+	rec := postAction(t, srv, "kick", map[string]any{"name": "Mira"})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, body = %s", rec.Code, rec.Body.String())
+	}
+
+	var payload map[string]any
+	if err := json.Unmarshal(rec.Body.Bytes(), &payload); err != nil {
+		t.Fatalf("decode: %v", err)
+	}
+	if payload["warning"] != true {
+		t.Errorf("warning = %v, want true (payload %v)", payload["warning"], payload)
 	}
 }
 

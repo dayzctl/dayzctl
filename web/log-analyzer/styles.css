@@ -444,6 +444,7 @@ td.actions .btn + .btn { margin-left: 6px; }
   cursor: pointer;
 }
 .toast.ok { border-color: rgba(71, 168, 106, 0.5); }
+.toast.warn { border-color: rgba(217, 165, 59, 0.55); color: #efd39a; }
 .toast.error { border-color: #6b2b30; background: #2a1417; color: #f3b3b7; }
 
 td.num, th.num { text-align: right; font-variant-numeric: tabular-nums; }

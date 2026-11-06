@@ -27,9 +27,12 @@ func fakeUDPServer(t *testing.T, packets [][]byte) (*Client, <-chan string) {
 		buf := make([]byte, 4096)
 		server := New(0, "")
 
-		// Login: reply type 0x00, status 0x01 (success).
+		// Login: reply type 0x00, status 0x01 (success). Sent twice like some
+		// servers do, so the command reader has to skip the leftover.
 		if _, from, err := conn.ReadFromUDP(buf); err == nil {
-			_, _ = conn.WriteToUDP(server.buildPacket([]byte{0x00, 0x01}), from)
+			reply := server.buildPacket([]byte{0x00, 0x01})
+			_, _ = conn.WriteToUDP(reply, from)
+			_, _ = conn.WriteToUDP(reply, from)
 		}
 
 		// Command: capture it, then send the canned fragments.
