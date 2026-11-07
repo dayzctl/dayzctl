@@ -219,34 +219,34 @@ func processSendForInstance(inst *config.Instance, cmd string, clientFactory fun
 	return nil
 }
 
-// KickAction kicks a player by ID
+// KickAction kicks a player by id, GUID, IP or name
 func KickAction(instanceName string, args []string) error {
 	shared.RunCommand(func() error {
 		if instanceName == "" {
 			return fmt.Errorf("instance name required")
 		}
 		if len(args) == 0 {
-			return fmt.Errorf("player id required")
+			return fmt.Errorf("player id, GUID, IP or name required")
 		}
-		id, err := strconv.Atoi(args[0])
-		if err != nil {
-			return fmt.Errorf("invalid player id: %w", err)
+		ref := strings.TrimSpace(args[0])
+		if ref == "" {
+			return fmt.Errorf("player id, GUID, IP or name required")
 		}
 		reason := ""
 		if len(args) > 1 {
 			reason = strings.Join(args[1:], " ")
 		}
 		return forEachInstance(instanceName, func(inst *config.Instance, total int) error {
-			return processKickForInstance(inst, id, reason, newClient, total)
+			return processKickForInstance(inst, ref, reason, newClient, total)
 		})
 	})
 	return nil
 }
 
-// processKickForInstance performs a kick via RCON for a single instance.
-func processKickForInstance(inst *config.Instance, id int, reason string, clientFactory func(int, string) Client, totalInstances int) error {
+// processKickForInstance resolves the player and kicks them.
+func processKickForInstance(inst *config.Instance, ref string, reason string, clientFactory func(int, string) Client, totalInstances int) error {
 	client := clientFactory(inst.RCON.Port, inst.RCON.Password)
-	_, err := client.Kick(id, reason)
+	player, err := resolvePlayerRef(client, ref)
 	if err != nil {
 		if totalInstances > 1 {
 			fmt.Printf("RCON kick failed for instance %s: %v\n", inst.Name, err)
@@ -254,22 +254,30 @@ func processKickForInstance(inst *config.Instance, id int, reason string, client
 		}
 		return err
 	}
-	logger.Info("Kicked player", "id", id, "instance", inst.Name)
+
+	if _, err := client.Kick(player.ID, reason); err != nil {
+		if totalInstances > 1 {
+			fmt.Printf("RCON kick failed for instance %s: %v\n", inst.Name, err)
+			return nil
+		}
+		return err
+	}
+	logger.Info("Kicked player", "player", player.Name, "id", player.ID, "instance", inst.Name)
 	return nil
 }
 
-// BanAction bans a player by ID for minutes
+// BanAction bans a player by id, GUID, IP or name for minutes
 func BanAction(instanceName string, args []string) error {
 	shared.RunCommand(func() error {
 		if instanceName == "" {
 			return fmt.Errorf("instance name required")
 		}
 		if len(args) == 0 {
-			return fmt.Errorf("player id required")
+			return fmt.Errorf("player id, GUID, IP or name required")
 		}
-		id, err := strconv.Atoi(args[0])
-		if err != nil {
-			return fmt.Errorf("invalid player id: %w", err)
+		ref := strings.TrimSpace(args[0])
+		if ref == "" {
+			return fmt.Errorf("player id, GUID, IP or name required")
 		}
 		minutes := 0
 		if len(args) > 1 {
@@ -280,16 +288,16 @@ func BanAction(instanceName string, args []string) error {
 			reason = strings.Join(args[2:], " ")
 		}
 		return forEachInstance(instanceName, func(inst *config.Instance, total int) error {
-			return processBanForInstance(inst, id, minutes, reason, newClient, total)
+			return processBanForInstance(inst, ref, minutes, reason, newClient, total)
 		})
 	})
 	return nil
 }
 
-// processBanForInstance performs a ban via RCON for a single instance.
-func processBanForInstance(inst *config.Instance, id int, minutes int, reason string, clientFactory func(int, string) Client, totalInstances int) error {
+// processBanForInstance resolves the player and bans them.
+func processBanForInstance(inst *config.Instance, ref string, minutes int, reason string, clientFactory func(int, string) Client, totalInstances int) error {
 	client := clientFactory(inst.RCON.Port, inst.RCON.Password)
-	_, err := client.Ban(id, minutes, reason)
+	player, err := resolvePlayerRef(client, ref)
 	if err != nil {
 		if totalInstances > 1 {
 			fmt.Printf("RCON ban failed for instance %s: %v\n", inst.Name, err)
@@ -297,8 +305,66 @@ func processBanForInstance(inst *config.Instance, id int, minutes int, reason st
 		}
 		return err
 	}
-	logger.Info("Banned player", "id", id, "instance", inst.Name)
+
+	if _, err := client.Ban(player.ID, minutes, reason); err != nil {
+		if totalInstances > 1 {
+			fmt.Printf("RCON ban failed for instance %s: %v\n", inst.Name, err)
+			return nil
+		}
+		return err
+	}
+	logger.Info("Banned player", "player", player.Name, "id", player.ID, "instance", inst.Name)
 	return nil
+}
+
+// resolvePlayerRef turns an id, GUID, IP (with or without port) or name into
+// the matching connected player. A number is tried as an id first, then as a
+// GUID, so SteamIDs keep working.
+func resolvePlayerRef(client Client, ref string) (intrcon.Player, error) {
+	players, err := client.Players()
+	if err != nil {
+		return intrcon.Player{}, err
+	}
+
+	ref = strings.TrimSpace(ref)
+	if id, err := strconv.Atoi(ref); err == nil {
+		for _, p := range players {
+			if p.ID == id {
+				return p, nil
+			}
+		}
+	}
+
+	want := normalizePlayerName(ref)
+	for _, p := range players {
+		switch {
+		case strings.EqualFold(strings.TrimSpace(p.GUID), ref):
+			return p, nil
+		case p.IP != "" && strings.EqualFold(p.IP, ref):
+			return p, nil
+		case p.IP != "" && p.Port != "" && strings.EqualFold(p.IP+":"+p.Port, ref):
+			return p, nil
+		case want != "" && normalizePlayerName(p.Name) == want:
+			return p, nil
+		}
+	}
+
+	if len(players) == 0 {
+		return intrcon.Player{}, fmt.Errorf("no player matches %q (nobody is connected)", ref)
+	}
+	names := make([]string, 0, len(players))
+	for _, p := range players {
+		names = append(names, fmt.Sprintf("%s (#%d)", p.Name, p.ID))
+	}
+	return intrcon.Player{}, fmt.Errorf("no player matches %q (online: %s)", ref, strings.Join(names, ", "))
+}
+
+// normalizePlayerName trims and drops the quotes some builds put around the
+// name column, so "Mira" and `"Mira"` compare equal.
+func normalizePlayerName(s string) string {
+	s = strings.TrimSpace(s)
+	s = strings.Trim(s, `"'`)
+	return strings.ToLower(s)
 }
 
 // UnbanAction removes a ban by its ban-list id, or resolves a player GUID or

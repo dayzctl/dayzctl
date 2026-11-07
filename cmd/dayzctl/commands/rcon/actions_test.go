@@ -48,6 +48,8 @@ type fakeClient struct {
 	players  []intrcon.Player
 	bans     []intrcon.Ban
 	sendResp string
+	kickedID int
+	bannedID int
 	unbanned int
 }
 
@@ -55,9 +57,11 @@ func (f *fakeClient) Players() ([]intrcon.Player, error) { return f.players, nil
 func (f *fakeClient) Bans() ([]intrcon.Ban, error)       { return f.bans, nil }
 func (f *fakeClient) Send(cmd string) (string, error)    { return f.sendResp, nil }
 func (f *fakeClient) Kick(id int, reason string) (string, error) {
+	f.kickedID = id
 	return "ok", nil
 }
 func (f *fakeClient) Ban(id int, minutes int, reason string) (string, error) {
+	f.bannedID = id
 	return "ok", nil
 }
 func (f *fakeClient) Unban(banID int) (string, error) {
@@ -156,18 +160,51 @@ func TestKickBanSayActions(t *testing.T) {
 	orig := newClient
 	defer func() { newClient = orig }()
 
-	newClient = func(port int, password string) Client { return &fakeClient{} }
+	fake := &fakeClient{players: []intrcon.Player{
+		{ID: 1, IP: "1.2.3.4", Port: "2302", GUID: "76561198000000001", Name: "PlayerOne"},
+		{ID: 2, IP: "5.6.7.8", Port: "2302", GUID: "76561198000000002", Name: "Other Player"},
+	}}
+	newClient = func(port int, password string) Client { return fake }
 
-	if err := KickAction("testinst", []string{"1"}); err != nil {
-		t.Fatalf("KickAction error: %v", err)
+	// Kick and ban accept any of id, GUID, IP or name.
+	for _, ref := range []string{"1", "76561198000000001", "1.2.3.4", "playerone"} {
+		fake.kickedID = -1
+		if err := KickAction("testinst", []string{ref, "afk"}); err != nil {
+			t.Fatalf("KickAction(%q) error: %v", ref, err)
+		}
+		if fake.kickedID != 1 {
+			t.Fatalf("KickAction(%q) id = %d, want 1", ref, fake.kickedID)
+		}
 	}
-	if err := BanAction("testinst", []string{"1", "10"}); err != nil {
-		t.Fatalf("BanAction error: %v", err)
+
+	for _, ref := range []string{"2", "76561198000000002", "5.6.7.8:2302", "Other Player"} {
+		fake.bannedID = -1
+		if err := BanAction("testinst", []string{ref, "10"}); err != nil {
+			t.Fatalf("BanAction(%q) error: %v", ref, err)
+		}
+		if fake.bannedID != 2 {
+			t.Fatalf("BanAction(%q) id = %d, want 2", ref, fake.bannedID)
+		}
 	}
+
 	if err := SayAction("testinst", []string{"hi"}); err != nil {
 		t.Fatalf("SayAction error: %v", err)
 	}
 	if err := ShutdownAction("testinst", nil); err != nil {
 		t.Fatalf("ShutdownAction error: %v", err)
+	}
+}
+
+func TestResolvePlayerRefUnknown(t *testing.T) {
+	fake := &fakeClient{players: []intrcon.Player{
+		{ID: 1, IP: "1.2.3.4", GUID: "76561198000000001", Name: "PlayerOne"},
+	}}
+
+	_, err := resolvePlayerRef(fake, "Nobody")
+	if err == nil {
+		t.Fatal("expected an error for an unknown player")
+	}
+	if !strings.Contains(err.Error(), "PlayerOne (#1)") {
+		t.Fatalf("error = %q, want it to list online players", err)
 	}
 }
