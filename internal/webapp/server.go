@@ -21,6 +21,7 @@ import (
 	"strings"
 	"time"
 
+	"github.com/dayzctl/dayzctl/internal/banhints"
 	"github.com/dayzctl/dayzctl/internal/config"
 	"github.com/dayzctl/dayzctl/internal/gamemap"
 	"github.com/dayzctl/dayzctl/internal/logger"
@@ -43,7 +44,7 @@ type Server struct {
 	maps     *gamemap.Store
 	auth     config.WebAuth
 	sessions *sessions
-	banHints *banHints
+	banHints *banhints.Store
 	handler  http.Handler
 }
 
@@ -58,7 +59,7 @@ func New(cfg *config.ServerConfig) (*Server, error) {
 		service:  logs.NewService(cfg.GetInstallDir(), logs.DefaultOptions()),
 		auth:     cfg.Web.Auth,
 		sessions: newSessions(cfg.Web.Auth.SessionDuration()),
-		banHints: newBanHints(banHintsPath(cfg)),
+		banHints: banhints.New(banhints.Path(cfg)),
 	}
 
 	ui, err := fs.Sub(webassets.Assets, "log-analyzer")

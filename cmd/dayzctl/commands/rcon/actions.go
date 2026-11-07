@@ -10,6 +10,7 @@ import (
 	"time"
 
 	"github.com/dayzctl/dayzctl/cmd/dayzctl/commands/shared"
+	"github.com/dayzctl/dayzctl/internal/banhints"
 	"github.com/dayzctl/dayzctl/internal/config"
 	"github.com/dayzctl/dayzctl/internal/logger"
 	intrcon "github.com/dayzctl/dayzctl/internal/rcon"
@@ -404,19 +405,19 @@ func normalizePlayerName(s string) string {
 	return strings.ToLower(s)
 }
 
-// UnbanAction removes a ban by its ban-list id, or resolves a player GUID or
-// IP to the matching entry first.
+// UnbanAction removes a ban by its ban-list id, or resolves a player GUID,
+// IP or name to the matching entry first.
 func UnbanAction(instanceName string, args []string) error {
 	shared.RunCommand(func() error {
 		if instanceName == "" {
 			return fmt.Errorf("instance name required")
 		}
 		if len(args) == 0 {
-			return fmt.Errorf("ban id, GUID or IP required")
+			return fmt.Errorf("ban id, GUID, IP or name required")
 		}
 		ref := strings.TrimSpace(args[0])
 		if ref == "" {
-			return fmt.Errorf("ban id, GUID or IP required")
+			return fmt.Errorf("ban id, GUID, IP or name required")
 		}
 		return forEachInstance(instanceName, func(inst *config.Instance, total int) error {
 			return processUnbanForInstance(inst, ref, newClient, total)
@@ -429,8 +430,15 @@ func UnbanAction(instanceName string, args []string) error {
 func processUnbanForInstance(inst *config.Instance, ref string, clientFactory func(int, string) Client, totalInstances int) error {
 	client := clientFactory(inst.RCON.Port, inst.RCON.Password)
 
+	// The web UI records GUID → player name when it places a ban; that is the
+	// only way to reach the ban of a player who is no longer connected.
+	var hints *banhints.Store
+	if shared.Config != nil {
+		hints = banhints.New(banhints.Path(shared.Config))
+	}
+
 	err := withSession(client, func() error {
-		id, label, err := resolveBanID(client, ref)
+		id, label, err := resolveBanID(client, ref, hints)
 		if err != nil {
 			return err
 		}
@@ -460,13 +468,41 @@ func processUnbanForInstance(inst *config.Instance, ref string, clientFactory fu
 	return nil
 }
 
-// resolveBanID turns a ban-list id, GUID or IP into the id `unban` takes.
-func resolveBanID(client Client, ref string) (int, string, error) {
+// resolveBanID turns a ban-list id, GUID, IP or player name into the id
+// `unban` takes. A name is resolved through the live player list (when the
+// player is still connected) and through the GUID → name hints the web UI
+// records when it places a ban.
+func resolveBanID(client Client, ref string, hints *banhints.Store) (int, string, error) {
 	// Ban ids are small indices; anything longer is a GUID, never an id.
 	if len(ref) <= 6 && isDigits(ref) {
 		id, err := strconv.Atoi(ref)
 		if err == nil {
 			return id, fmt.Sprintf("ban #%d", id), nil
+		}
+	}
+
+	candidates := map[string]struct{}{}
+	add := func(value string) {
+		if value = strings.ToLower(strings.TrimSpace(value)); value != "" {
+			candidates[value] = struct{}{}
+		}
+	}
+	add(ref)
+
+	if players, err := client.Players(); err == nil {
+		for _, p := range players {
+			if playerMatchesRef(p, ref) {
+				add(p.GUID)
+				add(p.IP)
+				if p.IP != "" && p.Port != "" {
+					add(p.IP + ":" + p.Port)
+				}
+			}
+		}
+	}
+	if hints != nil {
+		for _, guid := range hints.GUIDSByName(ref) {
+			add(guid)
 		}
 	}
 
@@ -476,11 +512,8 @@ func resolveBanID(client Client, ref string) (int, string, error) {
 	}
 
 	for _, ban := range bans {
-		if strings.EqualFold(strings.TrimSpace(ban.GUID), ref) {
-			return ban.ID, fmt.Sprintf("ban #%d (%s)", ban.ID, ban.GUID), nil
-		}
-		if ban.IP != "" && strings.EqualFold(strings.TrimSpace(ban.IP), ref) {
-			return ban.ID, fmt.Sprintf("ban #%d (%s)", ban.ID, ban.IP), nil
+		if hasCandidate(candidates, ban.GUID) || hasCandidate(candidates, ban.IP) {
+			return ban.ID, banResolvedLabel(ban, hints), nil
 		}
 	}
 
@@ -489,13 +522,72 @@ func resolveBanID(client Client, ref string) (int, string, error) {
 	}
 	known := make([]string, 0, len(bans))
 	for _, ban := range bans {
-		target := ban.GUID
-		if target == "" {
-			target = ban.IP
-		}
-		known = append(known, fmt.Sprintf("#%d %s", ban.ID, target))
+		known = append(known, banLabel(ban, hints))
 	}
 	return 0, "", fmt.Errorf("no ban matches %q; known bans: %s", ref, strings.Join(known, ", "))
+}
+
+// playerMatchesRef reports whether a connected player answers to a name, GUID
+// or IP reference. Session ids are deliberately not matched here: a short
+// number is a ban id in this command.
+func playerMatchesRef(p intrcon.Player, ref string) bool {
+	ref = strings.TrimSpace(ref)
+	if ref == "" {
+		return false
+	}
+	if p.GUID != "" && strings.EqualFold(strings.TrimSpace(p.GUID), ref) {
+		return true
+	}
+	if p.IP != "" {
+		if strings.EqualFold(p.IP, ref) {
+			return true
+		}
+		if p.Port != "" && strings.EqualFold(p.IP+":"+p.Port, ref) {
+			return true
+		}
+	}
+	return normalizePlayerName(p.Name) == normalizePlayerName(ref)
+}
+
+func hasCandidate(set map[string]struct{}, value string) bool {
+	value = strings.ToLower(strings.TrimSpace(value))
+	if value == "" {
+		return false
+	}
+	_, ok := set[value]
+	return ok
+}
+
+// banTarget is the GUID, or the IP for an address ban.
+func banTarget(ban intrcon.Ban) string {
+	if ban.GUID != "" {
+		return ban.GUID
+	}
+	return ban.IP
+}
+
+// banResolvedLabel names the entry the command is about to remove, including
+// the player when the hints know it.
+func banResolvedLabel(ban intrcon.Ban, hints *banhints.Store) string {
+	label := fmt.Sprintf("ban #%d (%s", ban.ID, banTarget(ban))
+	if hints != nil && ban.GUID != "" {
+		if name := hints.Player(ban.GUID); name != "" {
+			label += " — " + name
+		}
+	}
+	return label + ")"
+}
+
+// banLabel is the human-readable form of a ban entry, with the player name
+// when the hints know it.
+func banLabel(ban intrcon.Ban, hints *banhints.Store) string {
+	label := fmt.Sprintf("#%d %s", ban.ID, banTarget(ban))
+	if hints != nil && ban.GUID != "" {
+		if name := hints.Player(ban.GUID); name != "" {
+			label += " (" + name + ")"
+		}
+	}
+	return label
 }
 
 func isDigits(s string) bool {

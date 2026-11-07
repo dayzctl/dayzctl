@@ -4,10 +4,12 @@ import (
 	"bytes"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 	"testing"
 
 	"github.com/dayzctl/dayzctl/cmd/dayzctl/commands/shared"
+	"github.com/dayzctl/dayzctl/internal/banhints"
 	"github.com/dayzctl/dayzctl/internal/config"
 	intrcon "github.com/dayzctl/dayzctl/internal/rcon"
 )
@@ -149,12 +151,37 @@ func TestResolveBanIDReportsKnownBans(t *testing.T) {
 		{ID: 3, GUID: "0123456789abcdef0123456789abcdef"},
 	}}
 
-	_, _, err := resolveBanID(fake, "deadbeef")
+	_, _, err := resolveBanID(fake, "deadbeef", nil)
 	if err == nil {
 		t.Fatal("expected an error for an unknown GUID")
 	}
 	if !strings.Contains(err.Error(), "#3 0123456789abcdef0123456789abcdef") {
 		t.Fatalf("error = %q, want it to list the known ban", err)
+	}
+}
+
+func TestResolveBanIDByName(t *testing.T) {
+	players := []intrcon.Player{{ID: 1, GUID: "0123456789abcdef0123456789abcdef", Name: "Mira"}}
+	bans := []intrcon.Ban{{ID: 3, GUID: "0123456789abcdef0123456789abcdef"}}
+
+	// Connected: the name resolves to the live player's GUID.
+	connected := &fakeClient{players: players, bans: bans}
+	id, label, err := resolveBanID(connected, "mira", nil)
+	if err != nil || id != 3 {
+		t.Fatalf("resolveBanID(connected) = (%d, %q, %v), want ban 3", id, label, err)
+	}
+
+	// Offline: the web UI's GUID → name hint is the only link left.
+	hints := banhints.New(filepath.Join(t.TempDir(), "ban-hints.json"))
+	hints.Remember("0123456789abcdef0123456789abcdef", "Mira")
+
+	offline := &fakeClient{bans: bans}
+	id, label, err = resolveBanID(offline, "MIRA", hints)
+	if err != nil || id != 3 {
+		t.Fatalf("resolveBanID(hint) = (%d, %q, %v), want ban 3", id, label, err)
+	}
+	if !strings.Contains(label, "Mira") {
+		t.Fatalf("label = %q, want the player name", label)
 	}
 }
 

@@ -4,7 +4,6 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
-	"path/filepath"
 	"testing"
 
 	"github.com/dayzctl/dayzctl/internal/config"
@@ -211,7 +210,7 @@ func TestBanRecordsPlayerLink(t *testing.T) {
 		t.Fatalf("status = %d, body = %s", rec.Code, rec.Body.String())
 	}
 
-	name := srv.banHints.player("0123456789abcdef0123456789abcdef")
+	name := srv.banHints.Player("0123456789abcdef0123456789abcdef")
 	if name != "Mira" {
 		t.Fatalf("ban hint = %q, want Mira", name)
 	}
@@ -224,7 +223,7 @@ func TestBansEndpointIncludesPlayerName(t *testing.T) {
 		{ID: 0, GUID: "0123456789abcdef0123456789abcdef", Minutes: 59, Reason: "griefing"},
 	}}
 	srv := newRCONTestServer(t, fake)
-	srv.banHints.remember("0123456789abcdef0123456789abcdef", "Mira")
+	srv.banHints.Remember("0123456789abcdef0123456789abcdef", "Mira")
 
 	rec := do(t, srv, http.MethodGet, "/api/instances/test/bans", nil)
 	if rec.Code != http.StatusOK {
@@ -243,25 +242,6 @@ func TestBansEndpointIncludesPlayerName(t *testing.T) {
 	}
 	if len(payload.Bans) != 1 || payload.Bans[0].Player != "Mira" {
 		t.Fatalf("bans = %+v", payload.Bans)
-	}
-}
-
-func TestBanLinksPersistAndPrune(t *testing.T) {
-	path := filepath.Join(t.TempDir(), "ban-hints.json")
-
-	first := newBanHints(path)
-	first.remember("0123456789ABCDEF0123456789ABCDEF", "Mira")
-	first.remember("76561198000000005", "Ox")
-
-	second := newBanHints(path)
-	if name := second.player("0123456789abcdef0123456789abcdef"); name != "Mira" {
-		t.Fatalf("reloaded hint = %q, want Mira", name)
-	}
-
-	// Only the ban that still exists survives the prune.
-	second.prune(map[string]struct{}{"0123456789abcdef0123456789abcdef": {}})
-	if name := second.player("76561198000000005"); name != "" {
-		t.Fatalf("pruned hint still present: %q", name)
 	}
 }
 

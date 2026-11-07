@@ -10,6 +10,7 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/dayzctl/dayzctl/internal/banhints"
 	"github.com/dayzctl/dayzctl/internal/config"
 	"github.com/dayzctl/dayzctl/internal/logger"
 	intrcon "github.com/dayzctl/dayzctl/internal/rcon"
@@ -101,7 +102,7 @@ func (s *Server) handleBans(w http.ResponseWriter, r *http.Request) {
 	liveNames := map[string]string{}
 	if players, errPlayers := client.Players(); errPlayers == nil {
 		for _, p := range players {
-			if guid := normalizeGUID(p.GUID); guid != "" {
+			if guid := banhints.NormalizeGUID(p.GUID); guid != "" {
 				liveNames[guid] = p.Name
 			}
 		}
@@ -111,24 +112,24 @@ func (s *Server) handleBans(w http.ResponseWriter, r *http.Request) {
 	views := make([]banView, 0, len(bans))
 	for _, ban := range bans {
 		// Bans are normally keyed by GUID; an IP ban has no GUID to key on.
-		key := normalizeGUID(ban.GUID)
+		key := banhints.NormalizeGUID(ban.GUID)
 		if key == "" {
-			key = normalizeGUID(ban.IP)
+			key = banhints.NormalizeGUID(ban.IP)
 		}
 		if key != "" {
 			live[key] = struct{}{}
 		}
 
-		name := s.banHints.player(key)
+		name := s.banHints.Player(key)
 		if name == "" && key != "" {
 			name = liveNames[key]
 			if name != "" {
-				s.banHints.remember(key, name)
+				s.banHints.Remember(key, name)
 			}
 		}
 		views = append(views, banView{Ban: ban, Player: name})
 	}
-	s.banHints.prune(live)
+	s.banHints.Prune(live)
 
 	writeJSON(w, http.StatusOK, map[string]any{"bans": views})
 }
@@ -153,14 +154,14 @@ func (s *Server) handleLinkBan(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	guid := normalizeGUID(req.GUID)
+	guid := banhints.NormalizeGUID(req.GUID)
 	player := strings.TrimSpace(req.Player)
 	if guid == "" || player == "" {
 		writeError(w, http.StatusBadRequest, "guid and player are required")
 		return
 	}
 
-	s.banHints.remember(guid, player)
+	s.banHints.Remember(guid, player)
 	logger.Info("Linked ban to player", "guid", guid, "player", player, "instance", inst.Name)
 	writeJSON(w, http.StatusOK, map[string]any{"guid": guid, "player": player})
 }
@@ -271,7 +272,7 @@ func (s *Server) banPlayer(w http.ResponseWriter, inst *config.Instance, client 
 	if _, err := client.Ban(player.ID, minutes, reason); err != nil {
 		if errors.Is(err, intrcon.ErrNoResponse) {
 			// The command may well have landed, so remember the link too.
-			s.banHints.remember(player.GUID, name)
+			s.banHints.Remember(player.GUID, name)
 			writeSentUnconfirmed(w, "Ban", name, err)
 			return
 		}
@@ -281,7 +282,7 @@ func (s *Server) banPlayer(w http.ResponseWriter, inst *config.Instance, client 
 
 	// The ban entry only keeps the GUID; record which player it belongs to so
 	// the row can offer Unban once the player is offline.
-	s.banHints.remember(player.GUID, name)
+	s.banHints.Remember(player.GUID, name)
 
 	logger.Info("Banned player from the web UI",
 		"player", name, "id", player.ID, "guid", player.GUID, "minutes", minutes, "instance", inst.Name)
@@ -342,7 +343,7 @@ func (s *Server) unbanPlayer(w http.ResponseWriter, inst *config.Instance, clien
 	logger.Info("Unbanned player from the web UI",
 		"player", name, "banId", ban.ID, "guid", ban.GUID, "instance", inst.Name)
 
-	s.banHints.forget(ban.GUID)
+	s.banHints.Forget(ban.GUID)
 
 	writeJSON(w, http.StatusOK, playerActionResponse{
 		Action:  "unban",
