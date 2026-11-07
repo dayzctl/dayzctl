@@ -51,9 +51,15 @@ type fakeClient struct {
 	bans     []intrcon.Ban
 	sendResp string
 	unbanErr error
-	kickedID int
-	bannedID int
-	unbanned int
+	// unbanNoEffect makes `unban <id>` leave the list untouched, like a server
+	// that wants the GUID instead of the list index.
+	unbanNoEffect bool
+	// sendNoEffect makes raw commands (the GUID fallback) do nothing too.
+	sendNoEffect bool
+	sent         []string
+	kickedID     int
+	bannedID     int
+	unbanned     int
 }
 
 func (f *fakeClient) Open() error  { return nil }
@@ -61,7 +67,21 @@ func (f *fakeClient) Close() error { return nil }
 
 func (f *fakeClient) Players() ([]intrcon.Player, error) { return f.players, nil }
 func (f *fakeClient) Bans() ([]intrcon.Ban, error)       { return f.bans, nil }
-func (f *fakeClient) Send(cmd string) (string, error)    { return f.sendResp, nil }
+
+func (f *fakeClient) Send(cmd string) (string, error) { return f.run(cmd) }
+func (f *fakeClient) Run(cmd string) (string, error)  { return f.run(cmd) }
+
+func (f *fakeClient) run(cmd string) (string, error) {
+	f.sent = append(f.sent, cmd)
+	if !f.sendNoEffect && strings.HasPrefix(cmd, "unban ") {
+		ref := strings.TrimSpace(strings.TrimPrefix(cmd, "unban "))
+		f.removeBans(func(b intrcon.Ban) bool {
+			return strings.EqualFold(strings.TrimSpace(b.GUID), ref) || strings.EqualFold(strings.TrimSpace(b.IP), ref)
+		})
+	}
+	return f.sendResp, nil
+}
+
 func (f *fakeClient) Kick(id int, reason string) (string, error) {
 	f.kickedID = id
 	return "ok", nil
@@ -72,10 +92,23 @@ func (f *fakeClient) Ban(id int, minutes int, reason string) (string, error) {
 }
 func (f *fakeClient) Unban(banID int) (string, error) {
 	f.unbanned = banID
+	if !f.unbanNoEffect {
+		f.removeBans(func(b intrcon.Ban) bool { return b.ID == banID })
+	}
 	return "ok", f.unbanErr
 }
 func (f *fakeClient) Say(msg string) (string, error) { return "ok", nil }
 func (f *fakeClient) Shutdown() (string, error)      { return "ok", nil }
+
+func (f *fakeClient) removeBans(match func(intrcon.Ban) bool) {
+	kept := f.bans[:0]
+	for _, ban := range f.bans {
+		if !match(ban) {
+			kept = append(kept, ban)
+		}
+	}
+	f.bans = kept
+}
 
 func TestPlayersAndSendActions(t *testing.T) {
 	_ = setupConfig(t)
@@ -146,12 +179,12 @@ func TestUnbanActionByGUIDAndID(t *testing.T) {
 	}
 }
 
-func TestResolveBanIDReportsKnownBans(t *testing.T) {
+func TestResolveBanReportsKnownBans(t *testing.T) {
 	fake := &fakeClient{bans: []intrcon.Ban{
 		{ID: 3, GUID: "0123456789abcdef0123456789abcdef"},
 	}}
 
-	_, _, err := resolveBanID(fake, "deadbeef", nil)
+	_, _, err := resolveBan(fake, "deadbeef", nil)
 	if err == nil {
 		t.Fatal("expected an error for an unknown GUID")
 	}
@@ -160,15 +193,15 @@ func TestResolveBanIDReportsKnownBans(t *testing.T) {
 	}
 }
 
-func TestResolveBanIDByName(t *testing.T) {
+func TestResolveBanByName(t *testing.T) {
 	players := []intrcon.Player{{ID: 1, GUID: "0123456789abcdef0123456789abcdef", Name: "Mira"}}
 	bans := []intrcon.Ban{{ID: 3, GUID: "0123456789abcdef0123456789abcdef"}}
 
 	// Connected: the name resolves to the live player's GUID.
 	connected := &fakeClient{players: players, bans: bans}
-	id, label, err := resolveBanID(connected, "mira", nil)
-	if err != nil || id != 3 {
-		t.Fatalf("resolveBanID(connected) = (%d, %q, %v), want ban 3", id, label, err)
+	ban, label, err := resolveBan(connected, "mira", nil)
+	if err != nil || ban.ID != 3 {
+		t.Fatalf("resolveBan(connected) = (%d, %q, %v), want ban 3", ban.ID, label, err)
 	}
 
 	// Offline: the web UI's GUID → name hint is the only link left.
@@ -176,9 +209,9 @@ func TestResolveBanIDByName(t *testing.T) {
 	hints.Remember("0123456789abcdef0123456789abcdef", "Mira")
 
 	offline := &fakeClient{bans: bans}
-	id, label, err = resolveBanID(offline, "MIRA", hints)
-	if err != nil || id != 3 {
-		t.Fatalf("resolveBanID(hint) = (%d, %q, %v), want ban 3", id, label, err)
+	ban, label, err = resolveBan(offline, "MIRA", hints)
+	if err != nil || ban.ID != 3 {
+		t.Fatalf("resolveBan(hint) = (%d, %q, %v), want ban 3", ban.ID, label, err)
 	}
 	if !strings.Contains(label, "Mira") {
 		t.Fatalf("label = %q, want the player name", label)
@@ -226,9 +259,9 @@ func TestKickBanSayActions(t *testing.T) {
 	}
 }
 
-// A server that never answers `unban` should not look like a failure: the
-// command was sent, so the CLI warns instead of exiting with an error.
-func TestUnbanNoReplyIsReportedAsSent(t *testing.T) {
+// A server that never answers `unban` but does drop the ban is a success; the
+// list is the authority, not the missing reply.
+func TestUnbanNoReplyConfirmedByBanList(t *testing.T) {
 	cfg := setupConfig(t)
 	inst := &cfg.Instances[0]
 
@@ -242,11 +275,62 @@ func TestUnbanNoReplyIsReportedAsSent(t *testing.T) {
 			t.Fatalf("processUnbanForInstance error: %v", err)
 		}
 	})
-	if !strings.Contains(out, "did not confirm") {
-		t.Fatalf("output = %q, want a no-confirmation warning", out)
+	if !strings.Contains(out, "Removed") {
+		t.Fatalf("output = %q, want a removal", out)
 	}
 	if fake.unbanned != 0 {
 		t.Fatalf("unban id = %d, want 0", fake.unbanned)
+	}
+}
+
+// Some builds ignore `unban <id>`; the GUID form is tried next.
+func TestUnbanFallsBackToGUID(t *testing.T) {
+	cfg := setupConfig(t)
+	inst := &cfg.Instances[0]
+
+	fake := &fakeClient{
+		bans:          []intrcon.Ban{{ID: 0, GUID: "0123456789abcdef0123456789abcdef"}},
+		unbanNoEffect: true,
+	}
+
+	out := captureStdout(func() {
+		if err := processUnbanForInstance(inst, "0123456789abcdef0123456789abcdef", func(int, string) Client { return fake }, 1); err != nil {
+			t.Fatalf("processUnbanForInstance error: %v", err)
+		}
+	})
+	if !strings.Contains(out, "Removed") {
+		t.Fatalf("output = %q, want a removal", out)
+	}
+
+	found := false
+	for _, cmd := range fake.sent {
+		if cmd == "unban 0123456789abcdef0123456789abcdef" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("sent commands = %v, want the GUID fallback", fake.sent)
+	}
+}
+
+// If neither form removes the entry, the command must fail instead of
+// reporting a success that did not happen.
+func TestUnbanReportsBanStillListed(t *testing.T) {
+	cfg := setupConfig(t)
+	inst := &cfg.Instances[0]
+
+	fake := &fakeClient{
+		bans:          []intrcon.Ban{{ID: 0, GUID: "0123456789abcdef0123456789abcdef"}},
+		unbanNoEffect: true,
+		sendNoEffect:  true,
+	}
+
+	err := processUnbanForInstance(inst, "0123456789abcdef0123456789abcdef", func(int, string) Client { return fake }, 1)
+	if err == nil {
+		t.Fatal("expected an error when the ban is still listed")
+	}
+	if !strings.Contains(err.Error(), "still in the ban list") {
+		t.Fatalf("error = %q, want the still-listed message", err)
 	}
 }
 

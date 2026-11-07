@@ -214,6 +214,12 @@ func (c *Client) exec(command string) (string, error) {
 	return c.Send(command)
 }
 
+// Run executes a raw command on the open session. When no session is open it
+// behaves like Send (connect, log in, run, close).
+func (c *Client) Run(command string) (string, error) {
+	return c.exec(command)
+}
+
 // buildPacket builds a packet with BE header matching bercon-cli
 func (c *Client) buildPacket(payload []byte) []byte {
 	packet := make([]byte, 0, 7+len(payload))

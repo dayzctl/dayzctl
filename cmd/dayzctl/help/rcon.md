@@ -4,13 +4,13 @@ Usage:
   dayzctl rcon <instance> <command>
 
 Commands:
-  players                List online players for the instance
-  send <cmd>             Send raw RCON command to instance
+  players                          List online players for the instance
+  send <cmd>                       Send raw RCON command to instance
   kick <id|guid|ip|name> [reason]  Kick a player by id, GUID, IP or name
   ban <id|guid|ip|name> <minutes>  Ban a player by id, GUID, IP or name
   unban <id|guid|ip|name>          Remove a ban by id, GUID, IP or player name
-  say <message>          Send chat message to instance
-  shutdown               Request a graceful server shutdown (saves state, then exits)
+  say <message>                    Send chat message to instance
+  shutdown                         Request a graceful server shutdown (saves state, then exits)
 
 Examples:
   dayzctl rcon myserver players
