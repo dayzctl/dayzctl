@@ -28,7 +28,7 @@ type Client interface {
 	Run(command string) (string, error)
 	Kick(id int, reason string) (string, error)
 	Ban(id int, minutes int, reason string) (string, error)
-	Unban(banID int) (string, error)
+	RemoveBan(ban intrcon.Ban) ([]string, error)
 	Say(msg string) (string, error)
 	Shutdown() (string, error)
 }
@@ -444,35 +444,10 @@ func processUnbanForInstance(inst *config.Instance, ref string, clientFactory fu
 			return err
 		}
 
-		reply, unbanErr := client.Unban(ban.ID)
-		if unbanErr != nil && !errors.Is(unbanErr, intrcon.ErrNoResponse) {
-			return unbanErr
-		}
-
-		// The server may accept `unban <id>` and change nothing (some builds
-		// want the GUID instead), so verify against the list before claiming
-		// success — and fall back to the GUID form when the entry is still
-		// there.
-		gone, verifyErr := unbanGone(client, ban)
-		if verifyErr == nil && !gone && ban.GUID != "" {
-			if fallbackReply, errFallback := client.Run("unban " + ban.GUID); errFallback == nil {
-				reply = fallbackReply
-				gone, verifyErr = unbanGone(client, ban)
-			}
-		}
-
-		switch {
-		case verifyErr != nil:
-			if unbanErr != nil {
-				// The command got no reply and the list cannot be read either:
-				// it was sent, that is all we know.
-				sentWithoutReply("Unban", label, inst.Name, unbanErr)
-				return nil
-			}
-			return fmt.Errorf("cannot verify the unban: %w", verifyErr)
-		case !gone:
-			return fmt.Errorf("%s is still in the ban list (the server replied %q)",
-				label, strings.TrimSpace(reply))
+		attempts, removeErr := client.RemoveBan(ban)
+		if removeErr != nil {
+			return fmt.Errorf("could not remove %s; the server replied:\n  %s\n%w",
+				label, strings.Join(attempts, "\n  "), removeErr)
 		}
 
 		// Some builds keep the change in memory until the ban file is written.
@@ -482,11 +457,7 @@ func processUnbanForInstance(inst *config.Instance, ref string, clientFactory fu
 		if totalInstances > 1 {
 			fmt.Printf("Instance: %s\n", inst.Name)
 		}
-		if unbanErr != nil {
-			fmt.Printf("Removed %s (the server did not answer, but the ban is gone from the list)\n", label)
-		} else {
-			fmt.Printf("Removed %s\n", label)
-		}
+		fmt.Printf("Removed %s\n", label)
 		return nil
 	})
 	if err != nil {
@@ -570,36 +541,6 @@ func findBanByID(bans []intrcon.Ban, id int) (intrcon.Ban, bool) {
 		}
 	}
 	return intrcon.Ban{}, false
-}
-
-// unbanGone reports whether the ban has disappeared from the server's list.
-func unbanGone(client Client, ban intrcon.Ban) (bool, error) {
-	bans, err := client.Bans()
-	if err != nil {
-		return false, err
-	}
-	return !banStillListed(bans, ban), nil
-}
-
-// banStillListed matches by GUID/IP first: after one removal the list indices
-// shift, so an id alone can point at a different ban.
-func banStillListed(bans []intrcon.Ban, target intrcon.Ban) bool {
-	for _, ban := range bans {
-		if target.GUID != "" && strings.EqualFold(strings.TrimSpace(ban.GUID), strings.TrimSpace(target.GUID)) {
-			return true
-		}
-		if target.IP != "" && strings.EqualFold(strings.TrimSpace(ban.IP), strings.TrimSpace(target.IP)) {
-			return true
-		}
-	}
-	if target.GUID == "" && target.IP == "" {
-		for _, ban := range bans {
-			if ban.ID == target.ID {
-				return true
-			}
-		}
-	}
-	return false
 }
 
 // playerMatchesRef reports whether a connected player answers to a name, GUID

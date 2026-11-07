@@ -26,7 +26,10 @@ type rconClient interface {
 	Bans() ([]intrcon.Ban, error)
 	Kick(id int, reason string) (string, error)
 	Ban(id int, minutes int, reason string) (string, error)
-	Unban(banID int) (string, error)
+
+	// RemoveBan tries the unban spellings and verifies each against the ban
+	// list, so a build that does not know `unban` is still handled.
+	RemoveBan(ban intrcon.Ban) ([]string, error)
 }
 
 // newRCONClient dials the instance. Tests replace it with a fake.
@@ -331,12 +334,11 @@ func (s *Server) unbanPlayer(w http.ResponseWriter, inst *config.Instance, clien
 		return
 	}
 
-	if _, err := client.Unban(ban.ID); err != nil {
-		if errors.Is(err, intrcon.ErrNoResponse) {
-			writeSentUnconfirmed(w, "Unban", name, err)
-			return
-		}
-		writeError(w, http.StatusBadGateway, "RCON unban failed: "+err.Error())
+	attempts, removeErr := client.RemoveBan(ban)
+	if removeErr != nil {
+		writeError(w, http.StatusBadGateway,
+			fmt.Sprintf("could not remove ban #%d (%s): %v (the server replied: %s)",
+				ban.ID, ban.GUID, removeErr, strings.Join(attempts, "; ")))
 		return
 	}
 

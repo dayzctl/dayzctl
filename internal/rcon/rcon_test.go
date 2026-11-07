@@ -188,3 +188,77 @@ func TestParseBanLine(t *testing.T) {
 		})
 	}
 }
+
+func TestUnbanCommands(t *testing.T) {
+	ban := Ban{ID: 7, GUID: "0123456789abcdef0123456789abcdef"}
+
+	got := UnbanCommands(ban)
+	want := []string{
+		"unban 7",
+		"#unban 7",
+		"removeBan 7",
+		"unban 0123456789abcdef0123456789abcdef",
+		"#unban 0123456789abcdef0123456789abcdef",
+		"removeBan 0123456789abcdef0123456789abcdef",
+	}
+	if len(got) != len(want) {
+		t.Fatalf("UnbanCommands = %v, want %v", got, want)
+	}
+	for i := range want {
+		if got[i] != want[i] {
+			t.Fatalf("UnbanCommands[%d] = %q, want %q", i, got[i], want[i])
+		}
+	}
+
+	// Without a GUID there is nothing extra to try.
+	if cmds := UnbanCommands(Ban{ID: 2}); len(cmds) != 3 {
+		t.Fatalf("UnbanCommands(no guid) = %v, want 3 attempts", cmds)
+	}
+}
+
+func TestBanStillListed(t *testing.T) {
+	target := Ban{ID: 0, GUID: "0123456789abcdef0123456789abcdef"}
+
+	tests := []struct {
+		name string
+		bans []Ban
+		want bool
+	}{
+		{
+			name: "same guid",
+			bans: []Ban{{ID: 5, GUID: "0123456789ABCDEF0123456789ABCDEF"}},
+			want: true,
+		},
+		{
+			name: "shifted ids but guid gone",
+			bans: []Ban{{ID: 0, GUID: "76561198000000005"}},
+			want: false,
+		},
+		{
+			name: "empty list",
+			bans: nil,
+			want: false,
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			if got := BanStillListed(tc.bans, target); got != tc.want {
+				t.Fatalf("BanStillListed = %v, want %v", got, tc.want)
+			}
+		})
+	}
+
+	// Id-only comparison is used when the target carries no GUID or IP.
+	if !BanStillListed([]Ban{{ID: 3}}, Ban{ID: 3}) {
+		t.Fatal("BanStillListed should match on id when there is no GUID/IP")
+	}
+	if BanStillListed([]Ban{{ID: 4}}, Ban{ID: 3}) {
+		t.Fatal("BanStillListed matched the wrong id")
+	}
+	// ... but a GUID target must not match a different ban that happens to
+	// reuse its old id.
+	if BanStillListed([]Ban{{ID: 0, GUID: "ffffffffffffffffffffffffffffffff"}}, target) {
+		t.Fatal("BanStillListed matched on id although the target has a GUID")
+	}
+}

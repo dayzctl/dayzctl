@@ -2,9 +2,12 @@ package rcon
 
 import (
 	"bytes"
+	"errors"
+	"fmt"
 	"io"
 	"os"
 	"path/filepath"
+	"strconv"
 	"strings"
 	"testing"
 
@@ -54,12 +57,17 @@ type fakeClient struct {
 	// unbanNoEffect makes `unban <id>` leave the list untouched, like a server
 	// that wants the GUID instead of the list index.
 	unbanNoEffect bool
-	// sendNoEffect makes raw commands (the GUID fallback) do nothing too.
+	// sendNoEffect makes raw commands (the GUID/removeBan attempts) do nothing.
 	sendNoEffect bool
-	sent         []string
-	kickedID     int
-	bannedID     int
-	unbanned     int
+	// removeBanWorks makes `removeBan <ref>` remove the ban, like a build that
+	// uses that spelling instead of `unban`.
+	removeBanWorks bool
+	// guidOnly makes the server ignore `unban <id>` and honour the GUID form.
+	guidOnly bool
+	sent     []string
+	kickedID int
+	bannedID int
+	unbanned int
 }
 
 func (f *fakeClient) Open() error  { return nil }
@@ -73,13 +81,27 @@ func (f *fakeClient) Run(cmd string) (string, error)  { return f.run(cmd) }
 
 func (f *fakeClient) run(cmd string) (string, error) {
 	f.sent = append(f.sent, cmd)
-	if !f.sendNoEffect && strings.HasPrefix(cmd, "unban ") {
-		ref := strings.TrimSpace(strings.TrimPrefix(cmd, "unban "))
-		f.removeBans(func(b intrcon.Ban) bool {
-			return strings.EqualFold(strings.TrimSpace(b.GUID), ref) || strings.EqualFold(strings.TrimSpace(b.IP), ref)
-		})
+	if f.sendNoEffect {
+		return f.sendResp, nil
 	}
-	return f.sendResp, nil
+	switch {
+	case strings.HasPrefix(cmd, "unban ") && !f.unbanNoEffect:
+		ref := strings.TrimSpace(strings.TrimPrefix(cmd, "unban "))
+		if _, err := strconv.Atoi(ref); err != nil || !f.guidOnly {
+			f.removeByRef(ref)
+		}
+	case strings.HasPrefix(cmd, "removeBan ") && f.removeBanWorks:
+		f.removeByRef(strings.TrimSpace(strings.TrimPrefix(cmd, "removeBan ")))
+	}
+	return f.sendResp, f.unbanErr
+}
+
+func (f *fakeClient) removeByRef(ref string) {
+	f.removeBans(func(b intrcon.Ban) bool {
+		return strings.EqualFold(strings.TrimSpace(b.GUID), ref) ||
+			strings.EqualFold(strings.TrimSpace(b.IP), ref) ||
+			strconv.Itoa(b.ID) == ref
+	})
 }
 
 func (f *fakeClient) Kick(id int, reason string) (string, error) {
@@ -96,6 +118,26 @@ func (f *fakeClient) Unban(banID int) (string, error) {
 		f.removeBans(func(b intrcon.Ban) bool { return b.ID == banID })
 	}
 	return "ok", f.unbanErr
+}
+
+// RemoveBan mirrors the real client: every spelling is tried, and the result is
+// read back from the (fake) ban list.
+func (f *fakeClient) RemoveBan(ban intrcon.Ban) ([]string, error) {
+	var attempts []string
+	for _, cmd := range intrcon.UnbanCommands(ban) {
+		reply, err := f.run(cmd)
+		attempts = append(attempts, fmt.Sprintf("%s -> %q", cmd, reply))
+		if err != nil && !errors.Is(err, intrcon.ErrNoResponse) {
+			return attempts, err
+		}
+		if !intrcon.BanStillListed(f.bans, ban) {
+			return attempts, nil
+		}
+	}
+	if f.unbanErr != nil {
+		return attempts, fmt.Errorf("%w: %v", intrcon.ErrBanNotRemoved, f.unbanErr)
+	}
+	return attempts, intrcon.ErrBanNotRemoved
 }
 func (f *fakeClient) Say(msg string) (string, error) { return "ok", nil }
 func (f *fakeClient) Shutdown() (string, error)      { return "ok", nil }
@@ -164,18 +206,19 @@ func TestUnbanActionByGUIDAndID(t *testing.T) {
 			t.Fatalf("UnbanAction error: %v", err)
 		}
 	})
-	if fake.unbanned != 3 {
-		t.Fatalf("unban id = %d, want 3", fake.unbanned)
-	}
 	if !strings.Contains(out, "ban #3") {
 		t.Fatalf("output = %q, want the ban label", out)
 	}
+	if len(fake.bans) != 1 || fake.bans[0].ID != 5 {
+		t.Fatalf("bans = %+v, want only ban #5 left", fake.bans)
+	}
 
 	// A plain number is used as the ban id, no list lookup needed.
-	fake.unbanned = -1
-	_ = UnbanAction("testinst", []string{"7"})
-	if fake.unbanned != 7 {
-		t.Fatalf("unban id = %d, want 7", fake.unbanned)
+	if err := UnbanAction("testinst", []string{"5"}); err != nil {
+		t.Fatalf("UnbanAction(5) error: %v", err)
+	}
+	if len(fake.bans) != 0 {
+		t.Fatalf("bans = %+v, want all bans removed", fake.bans)
 	}
 }
 
@@ -289,8 +332,8 @@ func TestUnbanFallsBackToGUID(t *testing.T) {
 	inst := &cfg.Instances[0]
 
 	fake := &fakeClient{
-		bans:          []intrcon.Ban{{ID: 0, GUID: "0123456789abcdef0123456789abcdef"}},
-		unbanNoEffect: true,
+		bans:     []intrcon.Ban{{ID: 0, GUID: "0123456789abcdef0123456789abcdef"}},
+		guidOnly: true,
 	}
 
 	out := captureStdout(func() {
@@ -309,12 +352,63 @@ func TestUnbanFallsBackToGUID(t *testing.T) {
 		}
 	}
 	if !found {
-		t.Fatalf("sent commands = %v, want the GUID fallback", fake.sent)
+		t.Fatalf("sent commands = %v, want the GUID form", fake.sent)
 	}
 }
 
-// If neither form removes the entry, the command must fail instead of
-// reporting a success that did not happen.
+// A build that does not know `unban` is probed with the other spellings until
+// one of them verifiably removes the entry.
+func TestUnbanTriesCommandVariants(t *testing.T) {
+	cfg := setupConfig(t)
+	inst := &cfg.Instances[0]
+
+	fake := &fakeClient{
+		bans:           []intrcon.Ban{{ID: 0, GUID: "0123456789abcdef0123456789abcdef"}},
+		unbanNoEffect:  true,
+		removeBanWorks: true,
+	}
+
+	out := captureStdout(func() {
+		if err := processUnbanForInstance(inst, "0123456789abcdef0123456789abcdef", func(int, string) Client { return fake }, 1); err != nil {
+			t.Fatalf("processUnbanForInstance error: %v", err)
+		}
+	})
+	if !strings.Contains(out, "Removed") {
+		t.Fatalf("output = %q, want a removal", out)
+	}
+
+	found := false
+	for _, cmd := range fake.sent {
+		if cmd == "removeBan 0" {
+			found = true
+		}
+	}
+	if !found {
+		t.Fatalf("sent commands = %v, want the removeBan attempt", fake.sent)
+	}
+}
+
+// If no spelling removes the entry, the failure lists exactly what the server
+// answered for each attempt.
+func TestUnbanReportsAttempts(t *testing.T) {
+	cfg := setupConfig(t)
+	inst := &cfg.Instances[0]
+
+	fake := &fakeClient{
+		bans:          []intrcon.Ban{{ID: 0, GUID: "0123456789abcdef0123456789abcdef"}},
+		unbanNoEffect: true,
+	}
+
+	err := processUnbanForInstance(inst, "0123456789abcdef0123456789abcdef", func(int, string) Client { return fake }, 1)
+	if err == nil {
+		t.Fatal("expected an error when no command removes the ban")
+	}
+	for _, want := range []string{"unban 0 ->", "removeBan 0123456789abcdef0123456789abcdef ->"} {
+		if !strings.Contains(err.Error(), want) {
+			t.Fatalf("error = %q, want it to include %q", err, want)
+		}
+	}
+}
 func TestUnbanReportsBanStillListed(t *testing.T) {
 	cfg := setupConfig(t)
 	inst := &cfg.Instances[0]
@@ -329,7 +423,7 @@ func TestUnbanReportsBanStillListed(t *testing.T) {
 	if err == nil {
 		t.Fatal("expected an error when the ban is still listed")
 	}
-	if !strings.Contains(err.Error(), "still in the ban list") {
+	if !strings.Contains(err.Error(), "could not remove") {
 		t.Fatalf("error = %q, want the still-listed message", err)
 	}
 }

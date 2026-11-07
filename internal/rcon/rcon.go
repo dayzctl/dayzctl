@@ -537,9 +537,98 @@ func isNumber(field string) bool {
 }
 
 // Unban removes a ban by its ban-list id (the first column of `bans`), not by
-// the player's session id.
+// the player's session id. DayZ's BattlEye build answers "Unknown command" to
+// this, so prefer RemoveBan, which verifies the result.
 func (c *Client) Unban(banID int) (string, error) {
 	return c.exec(fmt.Sprintf("unban %d", banID))
+}
+
+// ErrBanNotRemoved means every known unban spelling was sent and the entry was
+// still in the ban list afterwards.
+var ErrBanNotRemoved = errors.New("no known unban command changed the ban list")
+
+// UnbanCommands lists the spellings different BattlEye builds accept for
+// removing a ban: the documented `unban <id>`, DayZ's game-side `#unban`, and
+// `removeBan`, each for the ban-list id and for the player GUID.
+func UnbanCommands(ban Ban) []string {
+	cmds := []string{
+		fmt.Sprintf("unban %d", ban.ID),
+		fmt.Sprintf("#unban %d", ban.ID),
+		fmt.Sprintf("removeBan %d", ban.ID),
+	}
+	if ban.GUID != "" {
+		cmds = append(cmds,
+			"unban "+ban.GUID,
+			"#unban "+ban.GUID,
+			"removeBan "+ban.GUID,
+		)
+	}
+	return cmds
+}
+
+// BanStillListed reports whether the ban list still contains target. GUID and
+// IP are matched first because ban-list ids shift after any removal, so an id
+// alone can point at a different ban.
+func BanStillListed(bans []Ban, target Ban) bool {
+	for _, ban := range bans {
+		if target.GUID != "" && strings.EqualFold(strings.TrimSpace(ban.GUID), strings.TrimSpace(target.GUID)) {
+			return true
+		}
+		if target.IP != "" && strings.EqualFold(strings.TrimSpace(ban.IP), strings.TrimSpace(target.IP)) {
+			return true
+		}
+	}
+	if target.GUID == "" && target.IP == "" {
+		for _, ban := range bans {
+			if ban.ID == target.ID {
+				return true
+			}
+		}
+	}
+	return false
+}
+
+// RemoveBan removes ban from the server, trying the spellings in UnbanCommands
+// until one of them actually changes the ban list. Nothing is reported as
+// removed unless a fresh `bans` read confirms it; a missing reply does not
+// count as failure either, since some builds apply the command silently.
+//
+// It returns the per-attempt replies so the caller can show what the server
+// said, and ErrBanNotRemoved (wrapping any transport error) when nothing
+// worked.
+func (c *Client) RemoveBan(ban Ban) ([]string, error) {
+	var attempts []string
+	var lastErr error
+
+	for _, cmd := range UnbanCommands(ban) {
+		reply, err := c.Run(cmd)
+		switch {
+		case err == nil:
+			attempts = append(attempts, fmt.Sprintf("%s -> %q", cmd, strings.TrimSpace(reply)))
+		case errors.Is(err, ErrNoResponse):
+			attempts = append(attempts, cmd+" -> (no reply)")
+		default:
+			attempts = append(attempts, fmt.Sprintf("%s -> error: %v", cmd, err))
+		}
+
+		// The ban list is the authority, not the reply.
+		bans, listErr := c.Bans()
+		if listErr != nil {
+			lastErr = listErr
+			continue
+		}
+		if !BanStillListed(bans, ban) {
+			return attempts, nil
+		}
+		if err != nil {
+			lastErr = err
+		}
+	}
+
+	if lastErr != nil && !errors.Is(lastErr, ErrNoResponse) {
+		return attempts, fmt.Errorf("%w: %v", ErrBanNotRemoved, lastErr)
+	}
+	return attempts, ErrBanNotRemoved
 }
 
 // Say sends a message to all players

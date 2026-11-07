@@ -4,6 +4,8 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"strconv"
+	"strings"
 	"testing"
 
 	"github.com/dayzctl/dayzctl/internal/config"
@@ -25,6 +27,9 @@ type fakeRCON struct {
 	banWhy  string
 
 	unbanID int
+	// unbanNoEffect makes the server reject every unban spelling, like a build
+	// without a ban-removal command.
+	unbanNoEffect bool
 }
 
 func (f *fakeRCON) Open() error  { return nil }
@@ -46,7 +51,29 @@ func (f *fakeRCON) Ban(id, minutes int, reason string) (string, error) {
 
 func (f *fakeRCON) Unban(banID int) (string, error) {
 	f.unbanID = banID
+	f.removeBans(func(b intrcon.Ban) bool { return b.ID == banID })
 	return "", nil
+}
+
+func (f *fakeRCON) RemoveBan(ban intrcon.Ban) ([]string, error) {
+	f.unbanID = ban.ID
+	if f.unbanNoEffect {
+		return []string{"unban " + strconv.Itoa(ban.ID) + ` -> "Unknown command"`}, intrcon.ErrBanNotRemoved
+	}
+	f.removeBans(func(b intrcon.Ban) bool {
+		return b.ID == ban.ID || (ban.GUID != "" && strings.EqualFold(b.GUID, ban.GUID))
+	})
+	return []string{"unban " + strconv.Itoa(ban.ID)}, nil
+}
+
+func (f *fakeRCON) removeBans(match func(intrcon.Ban) bool) {
+	kept := f.bans[:0]
+	for _, ban := range f.bans {
+		if !match(ban) {
+			kept = append(kept, ban)
+		}
+	}
+	f.bans = kept
 }
 
 // newRCONTestServer builds a server whose instance has RCON configured, and
