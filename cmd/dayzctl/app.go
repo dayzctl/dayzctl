@@ -75,6 +75,8 @@ func rconCommandHandler(c *cli.Context) error {
 		return rcon.KickAction(inst, tail)
 	case "ban":
 		return rcon.BanAction(inst, tail)
+	case "unban":
+		return rcon.UnbanAction(inst, tail)
 	case "say":
 		return rcon.SayAction(inst, tail)
 	case "shutdown":

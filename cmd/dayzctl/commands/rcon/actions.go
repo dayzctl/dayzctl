@@ -19,9 +19,11 @@ import (
 // as an interface to allow tests to inject fakes.
 type Client interface {
 	Players() ([]intrcon.Player, error)
+	Bans() ([]intrcon.Ban, error)
 	Send(command string) (string, error)
 	Kick(id int, reason string) (string, error)
 	Ban(id int, minutes int, reason string) (string, error)
+	Unban(banID int) (string, error)
 	Say(msg string) (string, error)
 	Shutdown() (string, error)
 }
@@ -297,6 +299,106 @@ func processBanForInstance(inst *config.Instance, id int, minutes int, reason st
 	}
 	logger.Info("Banned player", "id", id, "instance", inst.Name)
 	return nil
+}
+
+// UnbanAction removes a ban by its ban-list id, or resolves a player GUID or
+// IP to the matching entry first.
+func UnbanAction(instanceName string, args []string) error {
+	shared.RunCommand(func() error {
+		if instanceName == "" {
+			return fmt.Errorf("instance name required")
+		}
+		if len(args) == 0 {
+			return fmt.Errorf("ban id, GUID or IP required")
+		}
+		ref := strings.TrimSpace(args[0])
+		if ref == "" {
+			return fmt.Errorf("ban id, GUID or IP required")
+		}
+		return forEachInstance(instanceName, func(inst *config.Instance, total int) error {
+			return processUnbanForInstance(inst, ref, newClient, total)
+		})
+	})
+	return nil
+}
+
+// processUnbanForInstance resolves the reference and removes that ban.
+func processUnbanForInstance(inst *config.Instance, ref string, clientFactory func(int, string) Client, totalInstances int) error {
+	client := clientFactory(inst.RCON.Port, inst.RCON.Password)
+
+	id, label, err := resolveBanID(client, ref)
+	if err != nil {
+		if totalInstances > 1 {
+			fmt.Printf("RCON unban failed for instance %s: %v\n", inst.Name, err)
+			return nil
+		}
+		return err
+	}
+
+	if _, err := client.Unban(id); err != nil {
+		if totalInstances > 1 {
+			fmt.Printf("RCON unban failed for instance %s: %v\n", inst.Name, err)
+			return nil
+		}
+		return err
+	}
+
+	logger.Info("Unbanned player", "banId", id, "ref", ref, "instance", inst.Name)
+	if totalInstances > 1 {
+		fmt.Printf("Instance: %s\n", inst.Name)
+	}
+	fmt.Printf("Removed %s\n", label)
+	return nil
+}
+
+// resolveBanID turns a ban-list id, GUID or IP into the id `unban` takes.
+func resolveBanID(client Client, ref string) (int, string, error) {
+	// Ban ids are small indices; anything longer is a GUID, never an id.
+	if len(ref) <= 6 && isDigits(ref) {
+		id, err := strconv.Atoi(ref)
+		if err == nil {
+			return id, fmt.Sprintf("ban #%d", id), nil
+		}
+	}
+
+	bans, err := client.Bans()
+	if err != nil {
+		return 0, "", fmt.Errorf("cannot read the ban list: %w", err)
+	}
+
+	for _, ban := range bans {
+		if strings.EqualFold(strings.TrimSpace(ban.GUID), ref) {
+			return ban.ID, fmt.Sprintf("ban #%d (%s)", ban.ID, ban.GUID), nil
+		}
+		if ban.IP != "" && strings.EqualFold(strings.TrimSpace(ban.IP), ref) {
+			return ban.ID, fmt.Sprintf("ban #%d (%s)", ban.ID, ban.IP), nil
+		}
+	}
+
+	if len(bans) == 0 {
+		return 0, "", fmt.Errorf("no ban matches %q (the ban list is empty)", ref)
+	}
+	known := make([]string, 0, len(bans))
+	for _, ban := range bans {
+		target := ban.GUID
+		if target == "" {
+			target = ban.IP
+		}
+		known = append(known, fmt.Sprintf("#%d %s", ban.ID, target))
+	}
+	return 0, "", fmt.Errorf("no ban matches %q; known bans: %s", ref, strings.Join(known, ", "))
+}
+
+func isDigits(s string) bool {
+	if s == "" {
+		return false
+	}
+	for _, r := range s {
+		if r < '0' || r > '9' {
+			return false
+		}
+	}
+	return true
 }
 
 // SayAction sends a global message

@@ -46,15 +46,26 @@ func setupConfig(t *testing.T) *config.ServerConfig {
 
 type fakeClient struct {
 	players  []intrcon.Player
+	bans     []intrcon.Ban
 	sendResp string
+	unbanned int
 }
 
-func (f *fakeClient) Players() ([]intrcon.Player, error)                     { return f.players, nil }
-func (f *fakeClient) Send(cmd string) (string, error)                        { return f.sendResp, nil }
-func (f *fakeClient) Kick(id int, reason string) (string, error)             { return "ok", nil }
-func (f *fakeClient) Ban(id int, minutes int, reason string) (string, error) { return "ok", nil }
-func (f *fakeClient) Say(msg string) (string, error)                         { return "ok", nil }
-func (f *fakeClient) Shutdown() (string, error)                              { return "ok", nil }
+func (f *fakeClient) Players() ([]intrcon.Player, error) { return f.players, nil }
+func (f *fakeClient) Bans() ([]intrcon.Ban, error)       { return f.bans, nil }
+func (f *fakeClient) Send(cmd string) (string, error)    { return f.sendResp, nil }
+func (f *fakeClient) Kick(id int, reason string) (string, error) {
+	return "ok", nil
+}
+func (f *fakeClient) Ban(id int, minutes int, reason string) (string, error) {
+	return "ok", nil
+}
+func (f *fakeClient) Unban(banID int) (string, error) {
+	f.unbanned = banID
+	return "ok", nil
+}
+func (f *fakeClient) Say(msg string) (string, error) { return "ok", nil }
+func (f *fakeClient) Shutdown() (string, error)      { return "ok", nil }
 
 func TestPlayersAndSendActions(t *testing.T) {
 	_ = setupConfig(t)
@@ -90,6 +101,52 @@ func TestPlayersAndSendActions(t *testing.T) {
 	})
 	if !strings.Contains(out2, "resp ok") {
 		t.Fatalf("SendAction output unexpected: %s", out2)
+	}
+}
+
+func TestUnbanActionByGUIDAndID(t *testing.T) {
+	_ = setupConfig(t)
+
+	orig := newClient
+	defer func() { newClient = orig }()
+
+	fake := &fakeClient{bans: []intrcon.Ban{
+		{ID: 3, GUID: "0123456789abcdef0123456789abcdef"},
+		{ID: 5, GUID: "76561198000000005"},
+	}}
+	newClient = func(port int, password string) Client { return fake }
+
+	out := captureStdout(func() {
+		if err := UnbanAction("testinst", []string{"0123456789ABCDEF0123456789ABCDEF"}); err != nil {
+			t.Fatalf("UnbanAction error: %v", err)
+		}
+	})
+	if fake.unbanned != 3 {
+		t.Fatalf("unban id = %d, want 3", fake.unbanned)
+	}
+	if !strings.Contains(out, "ban #3") {
+		t.Fatalf("output = %q, want the ban label", out)
+	}
+
+	// A plain number is used as the ban id, no list lookup needed.
+	fake.unbanned = -1
+	_ = UnbanAction("testinst", []string{"7"})
+	if fake.unbanned != 7 {
+		t.Fatalf("unban id = %d, want 7", fake.unbanned)
+	}
+}
+
+func TestResolveBanIDReportsKnownBans(t *testing.T) {
+	fake := &fakeClient{bans: []intrcon.Ban{
+		{ID: 3, GUID: "0123456789abcdef0123456789abcdef"},
+	}}
+
+	_, _, err := resolveBanID(fake, "deadbeef")
+	if err == nil {
+		t.Fatal("expected an error for an unknown GUID")
+	}
+	if !strings.Contains(err.Error(), "#3 0123456789abcdef0123456789abcdef") {
+		t.Fatalf("error = %q, want it to list the known ban", err)
 	}
 }
 

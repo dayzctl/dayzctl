@@ -478,7 +478,7 @@ func parseBanLine(line string) (Ban, bool) {
 }
 
 // isGUID reports whether a field looks like a player GUID. DayZ's ban list
-// prints BattlEye's 32-hex GUID (e.g. 93ac90ba57a8ba55d46e4f0903c4b2d8), while
+// prints BattlEye's 32-hex GUID (e.g. 0123456789abcdef0123456789abcdef), while
 // `players` and older ADM logs use a 64-bit SteamID.
 func isGUID(field string) bool {
 	if len(field) == 32 {
