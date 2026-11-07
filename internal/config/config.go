@@ -375,6 +375,20 @@ func (c *ServerConfig) GetInstallDir() string {
 	return filepath.Join(c.GetBaseDir(), "server")
 }
 
+// GetStateDir returns the directory for dayzctl's own small state files.
+// It defaults to <installDir>/.dayzctl so nothing outside the server folder is
+// written unless state_dir is set explicitly.
+func (c *ServerConfig) GetStateDir() string {
+	dir := strings.TrimSpace(c.Paths.StateDir)
+	if dir == "" {
+		return filepath.Join(c.GetInstallDir(), ".dayzctl")
+	}
+	if filepath.IsAbs(dir) {
+		return dir
+	}
+	return filepath.Join(c.GetBaseDir(), dir)
+}
+
 // MapsDirEnv lets a test harness or a wrapper script point at map data without
 // editing the configuration.
 const MapsDirEnv = "DAYZCTL_MAPS_DIR"

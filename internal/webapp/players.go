@@ -66,32 +66,103 @@ type playerActionResponse struct {
 	Warning bool `json:"warning,omitempty"`
 }
 
-// handleBans lists the server's bans so the UI can offer "Unban" only on the
-// players that actually carry one.
+// banView is a ban list entry plus the player it belongs to, when that is
+// known. The ban itself only carries a BattlEye GUID, so the name comes from
+// the ban link map (recorded when the web UI placed the ban) or from a live
+// RCON session with the same GUID.
+type banView struct {
+	intrcon.Ban
+	Player string `json:"player,omitempty"`
+}
+
+// handleBans lists the server's bans and the player each one belongs to when
+// that link is known.
 func (s *Server) handleBans(w http.ResponseWriter, r *http.Request) {
 	inst, ok := s.rconInstance(w, r)
 	if !ok {
 		return
 	}
 
-	bans, err := newRCONClient(inst.RCON.Port, inst.RCON.Password).Bans()
+	client := newRCONClient(inst.RCON.Port, inst.RCON.Password)
+	if err := client.Open(); err != nil {
+		writeError(w, http.StatusBadGateway, "RCON login failed: "+err.Error())
+		return
+	}
+	defer func() { _ = client.Close() }()
+
+	bans, err := client.Bans()
 	if err != nil {
 		writeError(w, http.StatusBadGateway, "RCON ban list failed: "+err.Error())
 		return
 	}
 
-	// The ban list has no names, so attach the one we know from when the ban
-	// was issued (the UI puts Unban on that player's row).
-	type banView struct {
-		intrcon.Ban
-		Player string `json:"player,omitempty"`
-	}
-	views := make([]banView, 0, len(bans))
-	for _, ban := range bans {
-		views = append(views, banView{Ban: ban, Player: s.banHints.player(ban.GUID)})
+	// A live session for a banned GUID is the one chance to learn its name
+	// when the ban was not placed from this UI.
+	liveNames := map[string]string{}
+	if players, errPlayers := client.Players(); errPlayers == nil {
+		for _, p := range players {
+			if guid := normalizeGUID(p.GUID); guid != "" {
+				liveNames[guid] = p.Name
+			}
+		}
 	}
 
+	live := make(map[string]struct{}, len(bans))
+	views := make([]banView, 0, len(bans))
+	for _, ban := range bans {
+		// Bans are normally keyed by GUID; an IP ban has no GUID to key on.
+		key := normalizeGUID(ban.GUID)
+		if key == "" {
+			key = normalizeGUID(ban.IP)
+		}
+		if key != "" {
+			live[key] = struct{}{}
+		}
+
+		name := s.banHints.player(key)
+		if name == "" && key != "" {
+			name = liveNames[key]
+			if name != "" {
+				s.banHints.remember(key, name)
+			}
+		}
+		views = append(views, banView{Ban: ban, Player: name})
+	}
+	s.banHints.prune(live)
+
 	writeJSON(w, http.StatusOK, map[string]any{"bans": views})
+}
+
+type banLinkRequest struct {
+	GUID   string `json:"guid"`
+	Player string `json:"player"`
+}
+
+// handleLinkBan remembers which player a ban belongs to. Bans placed outside
+// this UI carry only a BattlEye GUID, so an admin can attach one to a player
+// from the log; the row then offers Unban like any other ban.
+func (s *Server) handleLinkBan(w http.ResponseWriter, r *http.Request) {
+	inst, ok := s.rconInstance(w, r)
+	if !ok {
+		return
+	}
+
+	var req banLinkRequest
+	if err := json.NewDecoder(io.LimitReader(r.Body, 4<<10)).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "invalid request body: "+err.Error())
+		return
+	}
+
+	guid := normalizeGUID(req.GUID)
+	player := strings.TrimSpace(req.Player)
+	if guid == "" || player == "" {
+		writeError(w, http.StatusBadRequest, "guid and player are required")
+		return
+	}
+
+	s.banHints.remember(guid, player)
+	logger.Info("Linked ban to player", "guid", guid, "player", player, "instance", inst.Name)
+	writeJSON(w, http.StatusOK, map[string]any{"guid": guid, "player": player})
 }
 
 // handlePlayerAction runs one RCON action (kick, ban, unban) for a player name
@@ -166,10 +237,6 @@ func (s *Server) kickPlayer(w http.ResponseWriter, inst *config.Instance, client
 		return
 	}
 
-	// Knowing GUID → name is what lets the Players tab put the Unban button on
-	// the right row after a later ban.
-	s.banHints.remember(player.GUID, name)
-
 	if _, err := client.Kick(player.ID, reason); err != nil {
 		if errors.Is(err, intrcon.ErrNoResponse) {
 			writeSentUnconfirmed(w, "Kick", name, err)
@@ -201,13 +268,10 @@ func (s *Server) banPlayer(w http.ResponseWriter, inst *config.Instance, client 
 		return
 	}
 
-	// The ban list keeps no name, so remember the GUID → name link now: it is
-	// what lets the UI show Unban beside this player instead of in a lonely
-	// "ban list" card.
-	s.banHints.remember(player.GUID, name)
-
 	if _, err := client.Ban(player.ID, minutes, reason); err != nil {
 		if errors.Is(err, intrcon.ErrNoResponse) {
+			// The command may well have landed, so remember the link too.
+			s.banHints.remember(player.GUID, name)
 			writeSentUnconfirmed(w, "Ban", name, err)
 			return
 		}
@@ -215,8 +279,12 @@ func (s *Server) banPlayer(w http.ResponseWriter, inst *config.Instance, client 
 		return
 	}
 
+	// The ban entry only keeps the GUID; record which player it belongs to so
+	// the row can offer Unban once the player is offline.
+	s.banHints.remember(player.GUID, name)
+
 	logger.Info("Banned player from the web UI",
-		"player", name, "id", player.ID, "minutes", minutes, "instance", inst.Name)
+		"player", name, "id", player.ID, "guid", player.GUID, "minutes", minutes, "instance", inst.Name)
 
 	message := fmt.Sprintf("Banned %s", name)
 	if minutes > 0 {
@@ -273,6 +341,7 @@ func (s *Server) unbanPlayer(w http.ResponseWriter, inst *config.Instance, clien
 
 	logger.Info("Unbanned player from the web UI",
 		"player", name, "banId", ban.ID, "guid", ban.GUID, "instance", inst.Name)
+
 	s.banHints.forget(ban.GUID)
 
 	writeJSON(w, http.StatusOK, playerActionResponse{

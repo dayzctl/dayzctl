@@ -4,6 +4,7 @@ import (
 	"encoding/json"
 	"net/http"
 	"net/http/httptest"
+	"path/filepath"
 	"testing"
 
 	"github.com/dayzctl/dayzctl/internal/config"
@@ -197,27 +198,43 @@ func TestUnbanByBanIDMissing(t *testing.T) {
 	}
 }
 
-// A ban issued from the UI remembers the player behind the GUID, so the ban
-// list can put Unban beside that player's row.
-func TestBanRecordsPlayerHintForBanList(t *testing.T) {
+// A ban placed from the web UI records which player it belongs to, so the row
+// can offer Unban once the player is offline (the ban only stores a GUID).
+func TestBanRecordsPlayerLink(t *testing.T) {
 	fake := &fakeRCON{players: []intrcon.Player{
-		{ID: 0, GUID: "93ac90ba57a8ba55d46e4f0903c4b2d8", Name: "Mira"},
+		{ID: 3, GUID: "93ac90ba57a8ba55d46e4f0903c4b2d8", Name: "Mira"},
 	}}
 	srv := newRCONTestServer(t, fake)
 
-	if rec := postAction(t, srv, "ban", map[string]any{"name": "Mira", "minutes": 60}); rec.Code != http.StatusOK {
-		t.Fatalf("ban status = %d, body = %s", rec.Code, rec.Body.String())
+	rec := postAction(t, srv, "ban", map[string]any{"name": "Mira", "minutes": 60})
+	if rec.Code != http.StatusOK {
+		t.Fatalf("status = %d, body = %s", rec.Code, rec.Body.String())
 	}
 
-	fake.bans = []intrcon.Ban{{ID: 0, GUID: "93ac90ba57a8ba55d46e4f0903c4b2d8", Minutes: 59, Reason: "dssds"}}
+	name := srv.banHints.player("93ac90ba57a8ba55d46e4f0903c4b2d8")
+	if name != "Mira" {
+		t.Fatalf("ban hint = %q, want Mira", name)
+	}
+}
+
+// The ban list response carries the player name when the link is known, which
+// is what puts the Unban button on the player's own row.
+func TestBansEndpointIncludesPlayerName(t *testing.T) {
+	fake := &fakeRCON{bans: []intrcon.Ban{
+		{ID: 0, GUID: "93ac90ba57a8ba55d46e4f0903c4b2d8", Minutes: 59, Reason: "dssds"},
+	}}
+	srv := newRCONTestServer(t, fake)
+	srv.banHints.remember("93ac90ba57a8ba55d46e4f0903c4b2d8", "Mira")
+
 	rec := do(t, srv, http.MethodGet, "/api/instances/test/bans", nil)
 	if rec.Code != http.StatusOK {
-		t.Fatalf("bans status = %d, body = %s", rec.Code, rec.Body.String())
+		t.Fatalf("status = %d, body = %s", rec.Code, rec.Body.String())
 	}
 
 	var payload struct {
 		Bans []struct {
-			intrcon.Ban
+			ID     int    `json:"id"`
+			GUID   string `json:"guid"`
 			Player string `json:"player"`
 		} `json:"bans"`
 	}
@@ -225,7 +242,26 @@ func TestBanRecordsPlayerHintForBanList(t *testing.T) {
 		t.Fatalf("decode: %v", err)
 	}
 	if len(payload.Bans) != 1 || payload.Bans[0].Player != "Mira" {
-		t.Fatalf("bans = %+v, want player Mira", payload.Bans)
+		t.Fatalf("bans = %+v", payload.Bans)
+	}
+}
+
+func TestBanLinksPersistAndPrune(t *testing.T) {
+	path := filepath.Join(t.TempDir(), "ban-hints.json")
+
+	first := newBanHints(path)
+	first.remember("93AC90BA57A8BA55D46E4F0903C4B2D8", "Mira")
+	first.remember("76561198000000005", "Ox")
+
+	second := newBanHints(path)
+	if name := second.player("93ac90ba57a8ba55d46e4f0903c4b2d8"); name != "Mira" {
+		t.Fatalf("reloaded hint = %q, want Mira", name)
+	}
+
+	// Only the ban that still exists survives the prune.
+	second.prune(map[string]struct{}{"93ac90ba57a8ba55d46e4f0903c4b2d8": {}})
+	if name := second.player("76561198000000005"); name != "" {
+		t.Fatalf("pruned hint still present: %q", name)
 	}
 }
 

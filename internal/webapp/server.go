@@ -85,6 +85,7 @@ func New(cfg *config.ServerConfig) (*Server, error) {
 	mux.HandleFunc("GET /api/maps/{map}/tiles/{z}/{x}/{y}", s.handleMapTile)
 	mux.HandleFunc("POST /api/instances/{instance}/analyze", s.handleAnalyze)
 	mux.HandleFunc("GET /api/instances/{instance}/bans", s.handleBans)
+	mux.HandleFunc("POST /api/instances/{instance}/bans/link", s.handleLinkBan)
 	mux.HandleFunc("POST /api/instances/{instance}/players/{action}", s.handlePlayerAction)
 	mux.HandleFunc("GET /login", s.handleLoginForm)
 	mux.HandleFunc("POST /login", s.handleLogin)

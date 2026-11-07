@@ -84,6 +84,18 @@ export async function fetchBans(instance) {
 }
 
 /**
+ * Remember which player a ban belongs to (bans only carry a BattlEye GUID).
+ * @returns {Promise<{guid: string, player: string}>}
+ */
+export async function linkBan(instance, guid, player) {
+  return requestJSON(`/api/instances/${encodeURIComponent(instance)}/bans/link`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ guid, player }),
+  });
+}
+
+/**
  * Run one RCON action for a player from the analysed log. The server resolves
  * the live session id (kick/ban) or the ban-list entry (unban) itself.
  * @param {'kick'|'ban'|'unban'} action

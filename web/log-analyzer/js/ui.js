@@ -5,7 +5,7 @@
 
 import { fmtInt, fmtDuration, fmtTime, fmtClock, fmtDistance, truncate, colorFor } from './format.js';
 import { renderMap, inferWorldSize, clampView, MAX_MAP_ZOOM } from './mapview.js';
-import { fetchMapMeta, fetchBans, playerAction } from './api.js';
+import { fetchMapMeta, fetchBans, linkBan, playerAction } from './api.js';
 
 /** Kill count per weapon, used by the overview card. */
 function topWeapons(kills, limit = 8) {
@@ -182,6 +182,9 @@ export function renderOverview(panel, report, actions) {
 // A player GUID is either the 64-bit SteamID that `players` reports or the
 // 32-hex BattlEye GUID that the ban list prints.
 const PLAYER_GUID = /^(7656119\d{10}|[0-9a-f]{32})$/i;
+
+/** Player names compare case-insensitively and without the surrounding quotes. */
+const normalizeName = (value) => String(value ?? '').trim().replace(/^["']+|["']+$/g, '').toLowerCase();
 
 /** Small transient message in the bottom-right corner. */
 function notify(message, tone = 'info') {
@@ -372,9 +375,32 @@ function actionBadge(notice) {
   );
 }
 
+/** Attach a ban to a player from the log; the row then offers Unban. */
+async function runLinkBan(state, ban, players) {
+  const options = players.map((p) => ({ value: p.name, label: p.name }));
+  const { ok, values } = await actionDialog({
+    title: `Link ban #${ban.id} to a player`,
+    description: `The ban list only stores a BattlEye GUID, so pick which player ${ban.guid || ban.ip} belongs to. Unban will then be offered on that player's row.`,
+    confirmLabel: 'Link',
+    danger: false,
+    fields: [{ name: 'player', label: 'Player', value: options[0]?.value, options }],
+  });
+  if (!ok) return;
+
+  try {
+    await linkBan(state.instance, ban.guid || ban.ip, values.player);
+    state.bansLoaded = false;
+    state.bansError = '';
+    state.actions.setState({});
+    notify(`Ban #${ban.id} linked to ${values.player}.`, 'ok');
+  } catch (err) {
+    notify(`linking ban #${ban.id} failed: ${err.message}`, 'error');
+  }
+}
+
 /** Unban one entry of the live ban list, by its ban-list id. */
 async function runUnbanEntry(state, ban) {
-  const who = ban.player || ban.guid || ban.ip || `ban #${ban.id}`;
+  const who = ban.guid || ban.ip || `ban #${ban.id}`;
   const { ok } = await actionDialog({
     title: `Unban ${who}?`,
     description: ban.reason ? `Removes ban #${ban.id} — "${ban.reason}".` : `Removes ban #${ban.id} from the server.`,
@@ -444,20 +470,20 @@ function playerActionsCell(state, player, online, ban) {
 }
 
 /**
- * Fallback for bans that cannot be attached to a player row. The ban list only
- * carries BattlEye GUIDs, which the ADM log never records, so a ban issued
- * outside this UI has no row to sit on.
+ * Bans that could not be attached to a player row. The ban list carries only a
+ * BattlEye GUID, so when the link is unknown the ban would otherwise be
+ * unreachable: this card is the fallback that still lets it be lifted.
  */
-function renderBansCard(panel, state, bans) {
+function renderBansCard(panel, state, bans, players) {
+  // Everything is linked to a row, or there is nothing to show: no card.
+  if (state.bansLoaded && !state.bansError && !bans.length) return;
+
   let body;
 
   if (!state.bansLoaded) {
     body = emptyState('Reading the ban list…');
   } else if (state.bansError) {
     body = emptyState(`Ban list unavailable: ${state.bansError}`);
-  } else if (!bans.length) {
-    // Every ban already sits on its player row: no need for a second list.
-    return;
   } else {
     const rows = bans.map((ban) =>
       el(
@@ -469,6 +495,18 @@ function renderBansCard(panel, state, bans) {
         el(
           'td',
           { class: 'actions' },
+          players.length
+            ? el('button', {
+                type: 'button',
+                class: 'btn tiny ghost',
+                text: 'Link…',
+                title: 'Attach this ban to one of the players in the log',
+                onClick: (event) => {
+                  event.stopPropagation();
+                  runLinkBan(state, ban, players);
+                },
+              })
+            : null,
           el('button', {
             type: 'button',
             class: 'btn tiny ghost',
@@ -490,12 +528,13 @@ function renderBansCard(panel, state, bans) {
 
   panel.append(
     card(
-      `Bans without a player row${state.bansLoaded && !state.bansError ? ` (${fmtInt(bans.length)})` : ''}`,
+      `Active bans${state.bansLoaded && !state.bansError ? ` (${fmtInt(bans.length)})` : ''}`,
       state.bansLoaded && !state.bansError && bans.length
         ? el(
             'p',
             { class: 'small faint', style: 'margin:-4px 0 10px' },
-            'These bans exist on the server but their GUID is not in the analysed ADM log, so they cannot be shown on a player row.',
+            'These bans could not be matched to a player in this log (the ban list only stores a BattlEye GUID). ' +
+              'Use Link to attach one to a player, or lift it here.',
           )
         : null,
       body,
@@ -532,37 +571,35 @@ export function renderPlayers(panel, report, state) {
   const notices = state.playerNotices ?? new Map();
 
   // The ban list decides which rows get an Unban button; fetch it on first
-  // render of this report. A ban is linked to a row when its GUID appears in
-  // the player's ids, or when this server issued it and remembers the name.
+  // render of this report. A ban matches a row when one of the log's ids is
+  // the ban GUID, or when the server recorded which player the ban belongs to
+  // (the ban list itself only stores a BattlEye GUID).
   if (rconReady) ensureBanList(state);
   const banByGUID = new Map();
-  const bansByName = new Map();
+  const banByName = new Map();
   for (const ban of state.bans ?? []) {
     if (ban.guid) banByGUID.set(String(ban.guid).toLowerCase(), ban);
-    if (ban.player) {
-      const key = ban.player.trim().toLowerCase();
-      bansByName.set(key, [...(bansByName.get(key) ?? []), ban]);
-    }
+    if (ban.player) banByName.set(normalizeName(ban.player), ban);
   }
   const banFor = (p) => {
     for (const id of p.ids ?? []) {
       const ban = banByGUID.get(String(id).toLowerCase());
       if (ban) return ban;
     }
-    // The ban list only carries BattlEye GUIDs, which the ADM does not record;
-    // for bans issued from this UI the name was remembered with the GUID.
-    const named = bansByName.get(p.name.trim().toLowerCase());
-    return named && named.length === 1 ? named[0] : null;
+    for (const alias of [p.name, ...(p.aliases ?? [])]) {
+      const ban = banByName.get(normalizeName(alias));
+      if (ban) return ban;
+    }
+    return null;
   };
 
-  // Anything that did not land on a visible row stays in the fallback card, so
-  // there is always a way to lift a ban.
-  const linked = new Set();
-  for (const p of players) {
+  // Only bans that no row can claim need the fallback card.
+  const linkedBanIDs = new Set();
+  for (const p of adm.players) {
     const ban = banFor(p);
-    if (ban) linked.add(ban.id);
+    if (ban) linkedBanIDs.add(ban.id);
   }
-  const unlinkedBans = (state.bans ?? []).filter((ban) => !linked.has(ban.id));
+  const unlinkedBans = (state.bans ?? []).filter((ban) => !linkedBanIDs.has(ban.id));
 
   // A kick or ban sent from this page ends the session, so the row must stop
   // claiming "online" even though the log still ends mid-session.
@@ -677,17 +714,20 @@ export function renderPlayers(panel, report, state) {
     );
   });
 
-  const banCount = unlinkedBans.length;
+  // Bans that no row can claim stay in a card above the table, so they are
+  // still removable; a ban linked to a player lives on that player's row.
+  if (rconReady) renderBansCard(panel, state, unlinkedBans, adm.players);
+
+  const unmatchedCount = unlinkedBans.length;
   panel.append(
     card(
       `Players (${fmtInt(players.length)})${onlineCount ? ` \u00b7 ${fmtInt(onlineCount)} online` : ''}`,
-      banCount
+      unmatchedCount
         ? el(
             'p',
             { class: 'small faint', style: 'margin:-4px 0 10px' },
-            `${fmtInt(banCount)} active ban${banCount === 1 ? '' : 's'} could not be linked to a player row — use the card below to lift ` +
-              (banCount === 1 ? 'it' : 'them') +
-              '.',
+            `${fmtInt(unmatchedCount)} active ban${unmatchedCount === 1 ? '' : 's'} could not be matched to a ` +
+              `player in this log — lift ${unmatchedCount === 1 ? 'it' : 'them'} in the Active bans card above.`,
           )
         : null,
       players.length
@@ -710,10 +750,6 @@ export function renderPlayers(panel, report, state) {
         : emptyState(onlySelected ? 'No selected players match this search.' : 'No players match this search.'),
     ),
   );
-
-  // Bans that could not be attached to a visible row still need an Unban
-  // control, so they keep their own card below the table.
-  if (rconReady) renderBansCard(panel, state, unlinkedBans);
 
   // Details for every selected player, newest selection last.
   for (const key of selected) {

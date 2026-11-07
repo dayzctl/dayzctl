@@ -38,19 +38,17 @@ func newBanHints(path string) *banHints {
 // banHintsPath is the state file, under the configured state dir when there is
 // one, otherwise next to the instance profiles (which the service can write).
 func banHintsPath(cfg *config.ServerConfig) string {
-	dir := strings.TrimSpace(cfg.Paths.StateDir)
-	switch {
-	case dir == "":
-		dir = filepath.Join(cfg.GetInstallDir(), ".dayzctl")
-	case !filepath.IsAbs(dir):
-		dir = filepath.Join(cfg.GetBaseDir(), dir)
-	}
-	return filepath.Join(dir, "ban-hints.json")
+	return filepath.Join(cfg.GetStateDir(), "ban-hints.json")
+}
+
+// normalizeGUID is the key format used by the hint map: lower-case, trimmed.
+func normalizeGUID(guid string) string {
+	return strings.ToLower(strings.TrimSpace(guid))
 }
 
 // player returns the name a ban GUID was last seen with.
 func (h *banHints) player(guid string) string {
-	guid = strings.ToLower(strings.TrimSpace(guid))
+	guid = normalizeGUID(guid)
 	if guid == "" {
 		return ""
 	}
@@ -61,7 +59,7 @@ func (h *banHints) player(guid string) string {
 
 // remember records (and persists) the GUID → name link.
 func (h *banHints) remember(guid, name string) {
-	guid = strings.ToLower(strings.TrimSpace(guid))
+	guid = normalizeGUID(guid)
 	name = strings.TrimSpace(name)
 	if guid == "" || name == "" {
 		return
@@ -78,7 +76,7 @@ func (h *banHints) remember(guid, name string) {
 
 // forget drops a hint once its ban is gone.
 func (h *banHints) forget(guid string) {
-	guid = strings.ToLower(strings.TrimSpace(guid))
+	guid = normalizeGUID(guid)
 	if guid == "" {
 		return
 	}
@@ -90,6 +88,24 @@ func (h *banHints) forget(guid string) {
 	}
 	delete(h.byGUID, guid)
 	h.saveLocked()
+}
+
+// prune drops hints whose ban no longer exists. The caller passes the GUIDs
+// still present in the live ban list.
+func (h *banHints) prune(live map[string]struct{}) {
+	h.mu.Lock()
+	defer h.mu.Unlock()
+
+	changed := false
+	for guid := range h.byGUID {
+		if _, ok := live[guid]; !ok {
+			delete(h.byGUID, guid)
+			changed = true
+		}
+	}
+	if changed {
+		h.saveLocked()
+	}
 }
 
 func (h *banHints) saveLocked() {
