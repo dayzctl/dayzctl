@@ -1,6 +1,7 @@
 package rcon
 
 import (
+	"errors"
 	"fmt"
 	"os"
 	"strconv"
@@ -18,6 +19,8 @@ import (
 // Client is the subset of rcon client methods used by actions; defined
 // as an interface to allow tests to inject fakes.
 type Client interface {
+	Open() error
+	Close() error
 	Players() ([]intrcon.Player, error)
 	Bans() ([]intrcon.Ban, error)
 	Send(command string) (string, error)
@@ -26,6 +29,26 @@ type Client interface {
 	Unban(banID int) (string, error)
 	Say(msg string) (string, error)
 	Shutdown() (string, error)
+}
+
+// withSession opens one authenticated session for a whole action. Looking a
+// player up and then kicking them must not use two short-lived connections:
+// some servers only answer the session they just authenticated (the second
+// command then times out).
+func withSession(client Client, fn func() error) error {
+	if err := client.Open(); err != nil {
+		return err
+	}
+	defer func() { _ = client.Close() }()
+	return fn()
+}
+
+// sentWithoutReply reports a command the server never acknowledged. UDP has no
+// delivery guarantee and some BattlEye builds do not answer kick/ban/unban, so
+// the command may well have run: warn instead of failing.
+func sentWithoutReply(action, target, instance string, err error) {
+	logger.Warn("Command sent without a reply", "action", action, "target", target, "instance", instance, "error", err)
+	fmt.Printf("%s sent for %s (the server did not confirm it)\n", action, target)
 }
 
 // newClient is a factory for creating Client instances. Tests may override
@@ -246,7 +269,23 @@ func KickAction(instanceName string, args []string) error {
 // processKickForInstance resolves the player and kicks them.
 func processKickForInstance(inst *config.Instance, ref string, reason string, clientFactory func(int, string) Client, totalInstances int) error {
 	client := clientFactory(inst.RCON.Port, inst.RCON.Password)
-	player, err := resolvePlayerRef(client, ref)
+
+	err := withSession(client, func() error {
+		player, err := resolvePlayerRef(client, ref)
+		if err != nil {
+			return err
+		}
+
+		if _, err := client.Kick(player.ID, reason); err != nil {
+			if errors.Is(err, intrcon.ErrNoResponse) {
+				sentWithoutReply("Kick", player.Name, inst.Name, err)
+				return nil
+			}
+			return err
+		}
+		logger.Info("Kicked player", "player", player.Name, "id", player.ID, "instance", inst.Name)
+		return nil
+	})
 	if err != nil {
 		if totalInstances > 1 {
 			fmt.Printf("RCON kick failed for instance %s: %v\n", inst.Name, err)
@@ -254,15 +293,6 @@ func processKickForInstance(inst *config.Instance, ref string, reason string, cl
 		}
 		return err
 	}
-
-	if _, err := client.Kick(player.ID, reason); err != nil {
-		if totalInstances > 1 {
-			fmt.Printf("RCON kick failed for instance %s: %v\n", inst.Name, err)
-			return nil
-		}
-		return err
-	}
-	logger.Info("Kicked player", "player", player.Name, "id", player.ID, "instance", inst.Name)
 	return nil
 }
 
@@ -297,7 +327,23 @@ func BanAction(instanceName string, args []string) error {
 // processBanForInstance resolves the player and bans them.
 func processBanForInstance(inst *config.Instance, ref string, minutes int, reason string, clientFactory func(int, string) Client, totalInstances int) error {
 	client := clientFactory(inst.RCON.Port, inst.RCON.Password)
-	player, err := resolvePlayerRef(client, ref)
+
+	err := withSession(client, func() error {
+		player, err := resolvePlayerRef(client, ref)
+		if err != nil {
+			return err
+		}
+
+		if _, err := client.Ban(player.ID, minutes, reason); err != nil {
+			if errors.Is(err, intrcon.ErrNoResponse) {
+				sentWithoutReply("Ban", player.Name, inst.Name, err)
+				return nil
+			}
+			return err
+		}
+		logger.Info("Banned player", "player", player.Name, "id", player.ID, "instance", inst.Name)
+		return nil
+	})
 	if err != nil {
 		if totalInstances > 1 {
 			fmt.Printf("RCON ban failed for instance %s: %v\n", inst.Name, err)
@@ -305,15 +351,6 @@ func processBanForInstance(inst *config.Instance, ref string, minutes int, reaso
 		}
 		return err
 	}
-
-	if _, err := client.Ban(player.ID, minutes, reason); err != nil {
-		if totalInstances > 1 {
-			fmt.Printf("RCON ban failed for instance %s: %v\n", inst.Name, err)
-			return nil
-		}
-		return err
-	}
-	logger.Info("Banned player", "player", player.Name, "id", player.ID, "instance", inst.Name)
 	return nil
 }
 
@@ -392,7 +429,27 @@ func UnbanAction(instanceName string, args []string) error {
 func processUnbanForInstance(inst *config.Instance, ref string, clientFactory func(int, string) Client, totalInstances int) error {
 	client := clientFactory(inst.RCON.Port, inst.RCON.Password)
 
-	id, label, err := resolveBanID(client, ref)
+	err := withSession(client, func() error {
+		id, label, err := resolveBanID(client, ref)
+		if err != nil {
+			return err
+		}
+
+		if _, err := client.Unban(id); err != nil {
+			if errors.Is(err, intrcon.ErrNoResponse) {
+				sentWithoutReply("Unban", label, inst.Name, err)
+				return nil
+			}
+			return err
+		}
+
+		logger.Info("Unbanned player", "banId", id, "ref", ref, "instance", inst.Name)
+		if totalInstances > 1 {
+			fmt.Printf("Instance: %s\n", inst.Name)
+		}
+		fmt.Printf("Removed %s\n", label)
+		return nil
+	})
 	if err != nil {
 		if totalInstances > 1 {
 			fmt.Printf("RCON unban failed for instance %s: %v\n", inst.Name, err)
@@ -400,20 +457,6 @@ func processUnbanForInstance(inst *config.Instance, ref string, clientFactory fu
 		}
 		return err
 	}
-
-	if _, err := client.Unban(id); err != nil {
-		if totalInstances > 1 {
-			fmt.Printf("RCON unban failed for instance %s: %v\n", inst.Name, err)
-			return nil
-		}
-		return err
-	}
-
-	logger.Info("Unbanned player", "banId", id, "ref", ref, "instance", inst.Name)
-	if totalInstances > 1 {
-		fmt.Printf("Instance: %s\n", inst.Name)
-	}
-	fmt.Printf("Removed %s\n", label)
 	return nil
 }
 

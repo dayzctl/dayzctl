@@ -48,10 +48,14 @@ type fakeClient struct {
 	players  []intrcon.Player
 	bans     []intrcon.Ban
 	sendResp string
+	unbanErr error
 	kickedID int
 	bannedID int
 	unbanned int
 }
+
+func (f *fakeClient) Open() error  { return nil }
+func (f *fakeClient) Close() error { return nil }
 
 func (f *fakeClient) Players() ([]intrcon.Player, error) { return f.players, nil }
 func (f *fakeClient) Bans() ([]intrcon.Ban, error)       { return f.bans, nil }
@@ -66,7 +70,7 @@ func (f *fakeClient) Ban(id int, minutes int, reason string) (string, error) {
 }
 func (f *fakeClient) Unban(banID int) (string, error) {
 	f.unbanned = banID
-	return "ok", nil
+	return "ok", f.unbanErr
 }
 func (f *fakeClient) Say(msg string) (string, error) { return "ok", nil }
 func (f *fakeClient) Shutdown() (string, error)      { return "ok", nil }
@@ -192,6 +196,30 @@ func TestKickBanSayActions(t *testing.T) {
 	}
 	if err := ShutdownAction("testinst", nil); err != nil {
 		t.Fatalf("ShutdownAction error: %v", err)
+	}
+}
+
+// A server that never answers `unban` should not look like a failure: the
+// command was sent, so the CLI warns instead of exiting with an error.
+func TestUnbanNoReplyIsReportedAsSent(t *testing.T) {
+	cfg := setupConfig(t)
+	inst := &cfg.Instances[0]
+
+	fake := &fakeClient{
+		bans:     []intrcon.Ban{{ID: 0, GUID: "0123456789abcdef0123456789abcdef"}},
+		unbanErr: intrcon.ErrNoResponse,
+	}
+
+	out := captureStdout(func() {
+		if err := processUnbanForInstance(inst, "0123456789abcdef0123456789abcdef", func(int, string) Client { return fake }, 1); err != nil {
+			t.Fatalf("processUnbanForInstance error: %v", err)
+		}
+	})
+	if !strings.Contains(out, "did not confirm") {
+		t.Fatalf("output = %q, want a no-confirmation warning", out)
+	}
+	if fake.unbanned != 0 {
+		t.Fatalf("unban id = %d, want 0", fake.unbanned)
 	}
 }
 
