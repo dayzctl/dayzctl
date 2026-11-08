@@ -82,7 +82,7 @@ func validateWeb(c *ServerConfig) error {
 	if c.Web.Address == "" {
 		return fmt.Errorf("web.address is required when web is enabled")
 	}
-	if err := validateWebAuth(c.Web.Auth); err != nil {
+	if err := validateWebAuth(c.Web.Auth, c.Server.PasswordAdmin); err != nil {
 		return err
 	}
 	return nil
@@ -92,37 +92,15 @@ func validateWeb(c *ServerConfig) error {
 var steamIDPattern = regexp.MustCompile(`^7656[0-9]{13}$`)
 
 // validateWebAuth refuses a login switch that cannot work: enabled without any
-// way to sign in, an account without a secret, a duplicate username, or a Steam
-// block that would let everyone in.
-func validateWebAuth(a WebAuth) error {
+// way to sign in, or a Steam block that would let everyone in. The local login
+// uses server.password_admin, so it needs no separate credential here.
+func validateWebAuth(a WebAuth, adminPassword string) error {
 	if !a.Enabled {
 		return nil
 	}
 
-	accounts := a.Accounts()
-	if len(accounts) == 0 && !a.Steam.Enabled {
-		return fmt.Errorf("web.auth needs at least one local user or web.auth.steam.enabled")
-	}
-
-	seen := make(map[string]bool, len(accounts))
-	for i, u := range accounts {
-		if strings.TrimSpace(u.Username) == "" {
-			return fmt.Errorf("web.auth username is required for each account (users[%d])", i)
-		}
-		if u.Password == "" && u.PasswordHash == "" {
-			return fmt.Errorf("web.auth user %q needs a password or a password_hash", u.Username)
-		}
-		if u.Password != "" && u.PasswordHash != "" {
-			return fmt.Errorf("web.auth user %q: set either password or password_hash, not both", u.Username)
-		}
-		if u.PasswordHash != "" && len(normalizePasswordHash(u.PasswordHash)) != 64 {
-			return fmt.Errorf("web.auth.password_hash must be a SHA-256 hex digest (64 characters)")
-		}
-		key := strings.ToLower(strings.TrimSpace(u.Username))
-		if seen[key] {
-			return fmt.Errorf("web.auth username %q is configured twice", u.Username)
-		}
-		seen[key] = true
+	if strings.TrimSpace(adminPassword) == "" && !a.Steam.Enabled {
+		return fmt.Errorf("web.auth needs server.password_admin or web.auth.steam.enabled")
 	}
 
 	if !a.Steam.Enabled {

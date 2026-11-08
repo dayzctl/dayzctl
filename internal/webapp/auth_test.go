@@ -2,8 +2,6 @@ package webapp
 
 import (
 	"context"
-	"crypto/sha256"
-	"encoding/hex"
 	"errors"
 	"io"
 	"net/http"
@@ -15,11 +13,15 @@ import (
 	"github.com/dayzctl/dayzctl/internal/config"
 )
 
+// testAdminPassword stands in for server.password_admin in these tests.
+const testAdminPassword = "s3cret"
+
 func authServer(t *testing.T, auth config.WebAuth) *Server {
 	t.Helper()
 	cfg := &config.ServerConfig{}
 	cfg.Paths.Base = t.TempDir()
 	cfg.Paths.InstallDir = t.TempDir()
+	cfg.Server.PasswordAdmin = testAdminPassword
 	cfg.Web = config.Web{Enabled: true, Address: "127.0.0.1", Port: 8081, Auth: auth}
 	s, err := New(cfg)
 	if err != nil {
@@ -58,7 +60,7 @@ func TestAuthDisabledServesEverything(t *testing.T) {
 }
 
 func TestAuthRedirectsAndBlocks(t *testing.T) {
-	s := authServer(t, config.WebAuth{Enabled: true, Username: "admin", Password: "s3cret"})
+	s := authServer(t, config.WebAuth{Enabled: true})
 
 	// The API answers 401 so the UI can react instead of parsing HTML.
 	rec := doAuth(s.Handler(), http.MethodGet, "/api/health", nil, nil)
@@ -83,7 +85,7 @@ func TestAuthRedirectsAndBlocks(t *testing.T) {
 }
 
 func TestAuthLoginFlow(t *testing.T) {
-	s := authServer(t, config.WebAuth{Enabled: true, Username: "admin", Password: "s3cret"})
+	s := authServer(t, config.WebAuth{Enabled: true})
 
 	// The form itself is reachable without a session.
 	if rec := doAuth(s.Handler(), http.MethodGet, "/login", nil, nil); rec.Code != http.StatusOK {
@@ -91,7 +93,7 @@ func TestAuthLoginFlow(t *testing.T) {
 	}
 
 	// Wrong password: 401 and no cookie.
-	rec := doAuth(s.Handler(), http.MethodPost, "/login", url.Values{"username": {"admin"}, "password": {"nope"}}, nil)
+	rec := doAuth(s.Handler(), http.MethodPost, "/login", url.Values{"password": {"nope"}}, nil)
 	if rec.Code != http.StatusUnauthorized {
 		t.Fatalf("bad login = %d, want 401", rec.Code)
 	}
@@ -101,8 +103,7 @@ func TestAuthLoginFlow(t *testing.T) {
 
 	// Right password: redirect plus a session cookie that unlocks the API.
 	rec = doAuth(s.Handler(), http.MethodPost, "/login", url.Values{
-		"username": {"admin"},
-		"password": {"s3cret"},
+		"password": {testAdminPassword},
 		"next":     {"/?tab=map"},
 	}, nil)
 	if rec.Code != http.StatusSeeOther {
@@ -129,22 +130,6 @@ func TestAuthLoginFlow(t *testing.T) {
 	}
 }
 
-func TestAuthPasswordHash(t *testing.T) {
-	sum := sha256.Sum256([]byte("hunter2"))
-	hash := "sha256:" + hex.EncodeToString(sum[:])
-
-	s := authServer(t, config.WebAuth{Enabled: true, Username: "ops", PasswordHash: hash})
-
-	rec := doAuth(s.Handler(), http.MethodPost, "/login", url.Values{"username": {"ops"}, "password": {"hunter2"}}, nil)
-	if rec.Code != http.StatusSeeOther {
-		t.Fatalf("hashed login = %d, want 303", rec.Code)
-	}
-	rec = doAuth(s.Handler(), http.MethodPost, "/login", url.Values{"username": {"ops"}, "password": {"hunter3"}}, nil)
-	if rec.Code != http.StatusUnauthorized {
-		t.Fatalf("wrong password = %d, want 401", rec.Code)
-	}
-}
-
 func TestAuthSafeNextStaysLocal(t *testing.T) {
 	for _, next := range []string{"", "/", "/?tab=map", "https://evil.example/x", "//evil.example", "javascript:alert(1)"} {
 		got := safeNext(next)
@@ -155,48 +140,16 @@ func TestAuthSafeNextStaysLocal(t *testing.T) {
 }
 
 func TestAuthHealthAdvertisesLogin(t *testing.T) {
-	s := authServer(t, config.WebAuth{Enabled: true, Username: "admin", Password: "s3cret"})
-	rec := doAuth(s.Handler(), http.MethodPost, "/login", url.Values{"username": {"admin"}, "password": {"s3cret"}}, nil)
+	s := authServer(t, config.WebAuth{Enabled: true})
+	rec := doAuth(s.Handler(), http.MethodPost, "/login", url.Values{"password": {testAdminPassword}}, nil)
 	cookies := rec.Result().Cookies()
 
 	rec = doAuth(s.Handler(), http.MethodGet, "/api/health", nil, cookies)
 	if !strings.Contains(rec.Body.String(), `"auth":true`) {
 		t.Fatalf("health payload = %s, want auth:true", rec.Body.String())
 	}
-}
-
-// ---------------------------------------------------------------------------
-// Multiple local accounts
-// ---------------------------------------------------------------------------
-
-func TestAuthMultipleLocalAccounts(t *testing.T) {
-	s := authServer(t, config.WebAuth{Enabled: true, Users: []config.WebUser{
-		{Username: "admin", Password: "one", Name: "Head Admin"},
-		{Username: "ops", Password: "two"},
-	}})
-
-	rec := doAuth(s.Handler(), http.MethodPost, "/login", url.Values{"username": {"ops"}, "password": {"two"}}, nil)
-	if rec.Code != http.StatusSeeOther {
-		t.Fatalf("second account login = %d, want 303", rec.Code)
-	}
-	cookies := rec.Result().Cookies()
-
-	rec = doAuth(s.Handler(), http.MethodGet, "/api/health", nil, cookies)
-	if !strings.Contains(rec.Body.String(), `"user":"ops"`) {
-		t.Fatalf("health payload = %s, want user:ops", rec.Body.String())
-	}
-
-	// The first account still works and reports its display name.
-	rec = doAuth(s.Handler(), http.MethodPost, "/login", url.Values{"username": {"admin"}, "password": {"one"}}, nil)
-	cookies = rec.Result().Cookies()
-	rec = doAuth(s.Handler(), http.MethodGet, "/api/health", nil, cookies)
-	if !strings.Contains(rec.Body.String(), `"user":"Head Admin"`) {
-		t.Fatalf("health payload = %s, want the display name", rec.Body.String())
-	}
-
-	// A password from one account cannot log in as another.
-	if rec := doAuth(s.Handler(), http.MethodPost, "/login", url.Values{"username": {"ops"}, "password": {"one"}}, nil); rec.Code != http.StatusUnauthorized {
-		t.Fatalf("cross-account login = %d, want 401", rec.Code)
+	if !strings.Contains(rec.Body.String(), `"user":"admin"`) {
+		t.Fatalf("health payload = %s, want user:admin", rec.Body.String())
 	}
 }
 
@@ -214,10 +167,12 @@ func steamAuth() config.WebAuth {
 	}}
 }
 
-// steamServer builds a server whose Steam round-trip is stubbed.
+// steamServer builds a server whose Steam round-trip is stubbed and whose
+// password form is off (Steam-only setup).
 func steamServer(t *testing.T, auth config.WebAuth, verify steamVerifier) *Server {
 	t.Helper()
 	s := authServer(t, auth)
+	s.adminPassword = ""
 	s.steamEndpoint = "https://steam.example/openid/login"
 	if verify != nil {
 		s.verifySteam = verify
@@ -406,7 +361,7 @@ func TestLoginPageOffersEnabledMethods(t *testing.T) {
 	}
 
 	// Local-only: no Steam button, and /auth/steam bounces back to /login.
-	localOnly := authServer(t, config.WebAuth{Enabled: true, Username: "admin", Password: "s3cret"})
+	localOnly := authServer(t, config.WebAuth{Enabled: true})
 	rec = doAuth(localOnly.Handler(), http.MethodGet, "/login", nil, nil)
 	body = rec.Body.String()
 	if strings.Contains(body, "/auth/steam") {
@@ -421,8 +376,8 @@ func TestLoginPageOffersEnabledMethods(t *testing.T) {
 
 	// Both: the password form, an "or" divider and the Steam button.
 	both := authServer(t, config.WebAuth{
-		Enabled: true, Users: []config.WebUser{{Username: "admin", Password: "s3cret"}},
-		Steam: config.WebSteam{Enabled: true, AllowedIDs: []string{testSteamID}},
+		Enabled: true,
+		Steam:   config.WebSteam{Enabled: true, AllowedIDs: []string{testSteamID}},
 	})
 	body = doAuth(both.Handler(), http.MethodGet, "/login", nil, nil).Body.String()
 	for _, want := range []string{`name="password"`, "/auth/steam", `class="or"`} {

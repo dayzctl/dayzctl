@@ -40,11 +40,7 @@ web:
   auth:                # login switch, off by default
     enabled: false
     session_hours: 12
-    users:             # local accounts
-      - username: "admin"
-        # password: "change-me"
-        # password_hash: "<sha256 hex>"
-    steam:             # Steam SSO, allowlist required
+    steam:             # Steam SSO (OpenID 2.0), allowlist required
       enabled: false
       # public_url: "https://dayz.example.com"
       allowed_ids: ["76561198000000000"]
@@ -67,7 +63,7 @@ curl -s localhost:8081/api/health
 
 Access is open by default, so keep the loopback address unless you turn on the
 login switch (`web.auth.enabled`) or terminate TLS and auth in nginx/Caddy in
-front of it. With auth on, `/login` asks for a local username and password
+front of it. With auth on, `/login` asks for `server.password_admin`
 and/or offers *Sign in with Steam*; every `/api/` call needs the session
 cookie, the header shows who is signed in with a *Sign out* button, and
 `/api/health` reports `user` and `via` (password/steam). Steam sign-ins are

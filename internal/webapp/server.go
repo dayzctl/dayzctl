@@ -47,6 +47,10 @@ type Server struct {
 	banHints *banhints.Store
 	handler  http.Handler
 
+	// adminPassword is server.password_admin, the credential the password
+	// form checks. Empty means the form is not offered.
+	adminPassword string
+
 	// steamEndpoint is where /auth/steam sends the browser; verifySteam
 	// confirms what Steam sends back. Both are fields so tests do not have to
 	// talk to steamcommunity.com.
@@ -67,6 +71,7 @@ func New(cfg *config.ServerConfig) (*Server, error) {
 		auth:          cfg.Web.Auth,
 		sessions:      newSessions(cfg.Web.Auth.SessionDuration()),
 		banHints:      banhints.New(banhints.Path(cfg)),
+		adminPassword: cfg.Server.PasswordAdmin,
 		steamEndpoint: "https://steamcommunity.com/openid/login",
 		verifySteam:   verifySteamOpenID,
 		steamStates:   newPendingStates(),

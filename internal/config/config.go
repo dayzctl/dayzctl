@@ -1,9 +1,7 @@
 package config
 
 import (
-	"crypto/sha256"
 	"crypto/subtle"
-	"encoding/hex"
 	"fmt"
 	"os"
 	"path/filepath"
@@ -304,40 +302,15 @@ type Web struct {
 
 // WebAuth is the login switch for the web UI and its JSON API.
 //
-// Off by default. When enabled, a visitor must sign in with one of the local
-// accounts or, when Steam SSO is on, through Steam. Steam sign-ins are only
-// accepted for the Steam ID64s listed in steam.allowed_ids: the allowlist is
-// the authorization step, an authenticated Steam account alone is not enough.
-//
-// The single username/password/password_hash trio is kept as a shorthand for a
-// one-account setup; it is treated as one more entry in Users.
+// Off by default. When enabled, a visitor signs in with the server's existing
+// admin password (server.password_admin, the same one used in-game and by
+// RCON) and/or through Steam SSO. Steam sign-ins are only accepted for the
+// Steam ID64s listed in steam.allowed_ids: the allowlist is the authorization
+// step, an authenticated Steam account alone is not enough.
 type WebAuth struct {
-	Enabled      bool      `yaml:"enabled"`
-	SessionHours int       `yaml:"session_hours,omitempty"`
-	Users        []WebUser `yaml:"users,omitempty"`
-	Steam        WebSteam  `yaml:"steam,omitempty"`
-
-	// Shorthand for a single local account (older configs and simple setups).
-	Username     string `yaml:"username,omitempty"`
-	Password     string `yaml:"password,omitempty"`
-	PasswordHash string `yaml:"password_hash,omitempty"`
-}
-
-// WebUser is one local account. Every local account has full access; they are
-// the accounts an operator creates by hand in the config file.
-type WebUser struct {
-	Username     string `yaml:"username"`
-	Name         string `yaml:"name,omitempty"`
-	Password     string `yaml:"password,omitempty"`
-	PasswordHash string `yaml:"password_hash,omitempty"`
-}
-
-// Display is the name shown in the UI for this account.
-func (u WebUser) Display() string {
-	if name := strings.TrimSpace(u.Name); name != "" {
-		return name
-	}
-	return u.Username
+	Enabled      bool     `yaml:"enabled"`
+	SessionHours int      `yaml:"session_hours,omitempty"`
+	Steam        WebSteam `yaml:"steam,omitempty"`
 }
 
 // WebSteam configures Steam as an SSO provider.
@@ -355,25 +328,11 @@ type WebSteam struct {
 	Names      map[string]string `yaml:"names,omitempty"`
 }
 
-// Accounts lists the effective local accounts, shorthand included.
-func (a WebAuth) Accounts() []WebUser {
-	out := make([]WebUser, 0, len(a.Users)+1)
-	out = append(out, a.Users...)
-	if a.Username != "" || a.Password != "" || a.PasswordHash != "" {
-		out = append(out, WebUser{
-			Username:     a.Username,
-			Password:     a.Password,
-			PasswordHash: a.PasswordHash,
-		})
-	}
-	return out
-}
-
-// Active reports whether a login is actually required. A half-configured block
-// is rejected during validation, so this only answers "is there something to
-// protect with".
+// Active reports whether a login is actually required. Validation refuses an
+// enabled block with neither an admin password nor Steam, so this only answers
+// "is there something to protect with".
 func (a WebAuth) Active() bool {
-	return a.Enabled && (len(a.Accounts()) > 0 || a.Steam.Enabled)
+	return a.Enabled
 }
 
 // SteamEnabled reports whether the Steam SSO button should be offered.
@@ -390,36 +349,14 @@ func (a WebAuth) SessionDuration() time.Duration {
 	return time.Duration(hours) * time.Hour
 }
 
-// Authenticate returns the account matching user/password.
-//
-// Every account is compared (no early return) so the work done does not reveal
-// which usernames exist.
-func (a WebAuth) Authenticate(user, password string) (WebUser, bool) {
-	var match WebUser
-	found := false
-	for _, u := range a.Accounts() {
-		ok := subtle.ConstantTimeCompare([]byte(user), []byte(u.Username)) == 1
-		if u.PasswordHash != "" {
-			sum := sha256.Sum256([]byte(password))
-			want := normalizePasswordHash(u.PasswordHash)
-			ok = ok && subtle.ConstantTimeCompare([]byte(hex.EncodeToString(sum[:])), []byte(want)) == 1
-		} else {
-			ok = ok && subtle.ConstantTimeCompare([]byte(password), []byte(u.Password)) == 1
-		}
-		if ok && !found {
-			match, found = u, true
-		}
+// CheckAdminPassword reports whether password matches the server's admin
+// password (server.password_admin). An empty configured password never
+// matches: that is also what disables the password form.
+func CheckAdminPassword(adminPassword, password string) bool {
+	if adminPassword == "" {
+		return false
 	}
-	return match, found
-}
-
-// CheckCredentials reports whether user/password may sign in.
-func (a WebAuth) CheckCredentials(user, password string) bool {
-	if !a.Active() {
-		return true
-	}
-	_, ok := a.Authenticate(user, password)
-	return ok
+	return subtle.ConstantTimeCompare([]byte(adminPassword), []byte(password)) == 1
 }
 
 // SteamAllowed reports whether a SteamID64 may sign in, and the name to show.

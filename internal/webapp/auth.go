@@ -13,6 +13,8 @@ import (
 	"strings"
 	"sync"
 	"time"
+
+	"github.com/dayzctl/dayzctl/internal/config"
 )
 
 const (
@@ -244,12 +246,13 @@ func (s *Server) handleLoginForm(w http.ResponseWriter, r *http.Request) {
 		http.Redirect(w, r, "/", http.StatusSeeOther)
 		return
 	}
-	s.renderLogin(w, http.StatusOK, safeNext(r.URL.Query().Get("next")), "", "")
+	s.renderLogin(w, http.StatusOK, safeNext(r.URL.Query().Get("next")), "")
 }
 
-// handleLogin checks a local account's credentials and issues a session cookie.
+// handleLogin checks the server's admin password and issues a session cookie.
+// There is no username: server.password_admin is the only local credential.
 func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
-	if !s.auth.Active() || len(s.auth.Accounts()) == 0 {
+	if !s.auth.Active() || s.adminPassword == "" {
 		http.Redirect(w, r, "/login", http.StatusSeeOther)
 		return
 	}
@@ -257,18 +260,16 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 		writeError(w, http.StatusBadRequest, "malformed form")
 		return
 	}
-	user := r.PostFormValue("username")
 	pass := r.PostFormValue("password")
 	next := safeNext(r.PostFormValue("next"))
 
-	account, ok := s.auth.Authenticate(user, pass)
-	if !ok {
+	if !config.CheckAdminPassword(s.adminPassword, pass) {
 		// Slow failed attempts down a little; the form has no other backoff.
 		time.Sleep(400 * time.Millisecond)
-		s.renderLogin(w, http.StatusUnauthorized, next, user, "Wrong username or password.")
+		s.renderLogin(w, http.StatusUnauthorized, next, "Wrong admin password.")
 		return
 	}
-	s.beginSession(w, r, session{User: account.Display(), Via: "password"}, next)
+	s.beginSession(w, r, session{User: "admin", Via: "password"}, next)
 }
 
 // beginSession mints a token and sends the browser on to its destination.
@@ -291,16 +292,15 @@ func (s *Server) beginSession(w http.ResponseWriter, r *http.Request, ident sess
 }
 
 // renderLogin writes the sign-in page, offering whichever methods are enabled.
-func (s *Server) renderLogin(w http.ResponseWriter, status int, next, user, errMsg string) {
+func (s *Server) renderLogin(w http.ResponseWriter, status int, next, errMsg string) {
 	block := ""
 	if errMsg != "" {
 		block = `<p class="error">` + htmlEscape(errMsg) + `</p>`
 	}
 	local := ""
-	if len(s.auth.Accounts()) > 0 {
+	if s.adminPassword != "" {
 		local = strings.NewReplacer(
 			"{{NEXT}}", htmlEscape(next),
-			"{{USER}}", htmlEscape(user),
 		).Replace(loginLocalForm)
 	}
 	steam := ""
@@ -576,12 +576,10 @@ const loginPage = `<!DOCTYPE html>
 </html>
 `
 
-// loginLocalForm is the username/password half of the sign-in page.
+// loginLocalForm is the admin-password half of the sign-in page.
 const loginLocalForm = `<form method="post" action="/login">
-  <label for="username">Username</label>
-  <input id="username" name="username" value="{{USER}}" autocomplete="username" autofocus required />
-  <label for="password">Password</label>
-  <input id="password" name="password" type="password" autocomplete="current-password" required />
+  <label for="password">Admin password</label>
+  <input id="password" name="password" type="password" autocomplete="current-password" autofocus required />
   <input type="hidden" name="next" value="{{NEXT}}" />
   <button type="submit">Sign in</button>
 </form>`

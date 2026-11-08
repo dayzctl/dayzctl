@@ -1,8 +1,6 @@
 package config
 
 import (
-	"crypto/sha256"
-	"encoding/hex"
 	"os"
 	"path/filepath"
 	"strings"
@@ -266,43 +264,31 @@ instances:
 }
 
 func TestWebAuthValidation(t *testing.T) {
-	const hash = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
 	steamID := "76561198000000001"
 
 	cases := []struct {
-		name string
-		auth WebAuth
-		want string
+		name      string
+		auth      WebAuth
+		adminPass string
+		want      string
 	}{
-		{"off", WebAuth{}, ""},
-		{"single password", WebAuth{Enabled: true, Username: "admin", Password: "x"}, ""},
-		{"single hash", WebAuth{Enabled: true, Username: "admin", PasswordHash: hash}, ""},
-		{"users list", WebAuth{Enabled: true, Users: []WebUser{
-			{Username: "admin", Password: "x"},
-			{Username: "ops", PasswordHash: hash},
-		}}, ""},
-		{"steam only", WebAuth{Enabled: true, Steam: WebSteam{Enabled: true, AllowedIDs: []string{steamID}}}, ""},
+		{"off", WebAuth{}, "", ""},
+		{"admin password", WebAuth{Enabled: true}, "s3cret", ""},
+		{"steam only", WebAuth{Enabled: true, Steam: WebSteam{Enabled: true, AllowedIDs: []string{steamID}}}, "", ""},
+		{"both", WebAuth{Enabled: true, Steam: WebSteam{Enabled: true, AllowedIDs: []string{steamID}}}, "s3cret", ""},
 		{"steam with public url", WebAuth{Enabled: true, Steam: WebSteam{
 			Enabled: true, PublicURL: "https://dayz.example.com", AllowedIDs: []string{steamID},
-		}}, ""},
-		{"nothing to sign in with", WebAuth{Enabled: true}, "at least one local user"},
-		{"no user", WebAuth{Enabled: true, Password: "x"}, "username is required for each account"},
-		{"no secret", WebAuth{Enabled: true, Username: "admin"}, "needs a password or a password_hash"},
-		{"both secrets", WebAuth{Enabled: true, Username: "admin", Password: "x", PasswordHash: hash}, "not both"},
-		{"bad hash", WebAuth{Enabled: true, Username: "admin", PasswordHash: "abc"}, "64 characters"},
-		{"duplicate user", WebAuth{Enabled: true, Users: []WebUser{
-			{Username: "admin", Password: "x"},
-			{Username: "Admin", Password: "y"},
-		}}, "configured twice"},
-		{"steam without allowlist", WebAuth{Enabled: true, Steam: WebSteam{Enabled: true}}, "allowed_ids is required"},
-		{"steam bad id", WebAuth{Enabled: true, Steam: WebSteam{Enabled: true, AllowedIDs: []string{"12345"}}}, "not a SteamID64"},
+		}}, "s3cret", ""},
+		{"nothing to sign in with", WebAuth{Enabled: true}, "", "server.password_admin"},
+		{"steam without allowlist", WebAuth{Enabled: true, Steam: WebSteam{Enabled: true}}, "s3cret", "allowed_ids is required"},
+		{"steam bad id", WebAuth{Enabled: true, Steam: WebSteam{Enabled: true, AllowedIDs: []string{"12345"}}}, "s3cret", "not a SteamID64"},
 		{"steam bad url", WebAuth{Enabled: true, Steam: WebSteam{
 			Enabled: true, PublicURL: "dayz.example.com", AllowedIDs: []string{steamID},
-		}}, "absolute http(s) URL"},
+		}}, "s3cret", "absolute http(s) URL"},
 	}
 
 	for _, tc := range cases {
-		err := validateWebAuth(tc.auth)
+		err := validateWebAuth(tc.auth, tc.adminPass)
 		if tc.want == "" {
 			if err != nil {
 				t.Errorf("%s: unexpected error %v", tc.name, err)
@@ -315,58 +301,17 @@ func TestWebAuthValidation(t *testing.T) {
 	}
 }
 
-func TestWebAuthCheckCredentials(t *testing.T) {
-	a := WebAuth{Enabled: true, Username: "admin", Password: "s3cret"}
-	if !a.CheckCredentials("admin", "s3cret") {
-		t.Error("good credentials rejected")
+func TestCheckAdminPassword(t *testing.T) {
+	if !CheckAdminPassword("s3cret", "s3cret") {
+		t.Error("correct admin password rejected")
 	}
-	if a.CheckCredentials("admin", "nope") || a.CheckCredentials("root", "s3cret") {
-		t.Error("bad credentials accepted")
+	if CheckAdminPassword("s3cret", "s3cres") || CheckAdminPassword("s3cret", "") {
+		t.Error("wrong admin password accepted")
 	}
-
-	sum := sha256.Sum256([]byte("hunter2"))
-	h := WebAuth{Enabled: true, Username: "ops", PasswordHash: "sha256:" + hex.EncodeToString(sum[:])}
-	if !h.CheckCredentials("ops", "hunter2") {
-		t.Error("hash credentials rejected")
-	}
-	if h.CheckCredentials("ops", "hunter3") {
-		t.Error("wrong password accepted against a hash")
-	}
-
-	// A disabled switch lets everything through, which is what the middleware
-	// relies on when auth is off.
-	var off WebAuth
-	if !off.CheckCredentials("", "") {
-		t.Error("disabled auth should not reject")
-	}
-}
-
-func TestWebAuthMultipleAccounts(t *testing.T) {
-	a := WebAuth{Enabled: true, Users: []WebUser{
-		{Username: "admin", Password: "one", Name: "Head Admin"},
-		{Username: "ops", Password: "two"},
-	}}
-	// The shorthand account is honoured next to the list.
-	a.Username, a.Password = "legacy", "three"
-
-	for _, tc := range []struct{ user, pass, display string }{
-		{"admin", "one", "Head Admin"},
-		{"ops", "two", "ops"},
-		{"legacy", "three", "legacy"},
-	} {
-		acct, ok := a.Authenticate(tc.user, tc.pass)
-		if !ok {
-			t.Fatalf("%s/%s rejected", tc.user, tc.pass)
-		}
-		if got := acct.Display(); got != tc.display {
-			t.Errorf("%s display = %q, want %q", tc.user, got, tc.display)
-		}
-	}
-	if _, ok := a.Authenticate("admin", "two"); ok {
-		t.Error("password of another account accepted")
-	}
-	if _, ok := a.Authenticate("nobody", "one"); ok {
-		t.Error("unknown user accepted")
+	// No configured password means the form is off: nothing matches, not even
+	// an empty submission.
+	if CheckAdminPassword("", "") || CheckAdminPassword("", "anything") {
+		t.Error("empty admin password accepted a login")
 	}
 }
 

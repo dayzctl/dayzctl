@@ -156,7 +156,7 @@ async function boot() {
       dom.logoutForm.hidden = false;
       if (health.user) {
         dom.whoami.textContent = health.user;
-        dom.whoami.title = health.via === 'steam' ? 'Signed in with Steam' : 'Signed in with a local account';
+        dom.whoami.title = health.via === 'steam' ? 'Signed in with Steam' : 'Signed in with the admin password';
         dom.whoami.hidden = false;
       }
     }

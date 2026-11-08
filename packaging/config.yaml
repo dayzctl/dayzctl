@@ -32,10 +32,12 @@ web:
   enabled: true
   address: 127.0.0.1
   port: 8081
-  # Login switch: flip enabled to true and set a password (or a sha256
-  # password_hash) to require signing in before the UI and API answer.
+  # Login switch: flip enabled to true to require signing in before the UI and
+  # API answer. The password form checks server.password_admin; Steam SSO is
+  # offered when steam.enabled is set and the SteamID is in allowed_ids.
   auth:
     enabled: false
-    username: "admin"
-    # password: "change-me"
-    # password_hash: "<64 hex characters>"
+    steam:
+      enabled: false
+      # allowed_ids: ["76561198000000000"]
+      # names: {"76561198000000000": "Alice"}

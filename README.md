@@ -154,10 +154,13 @@ analysis tabs.
 ### Sign-in
 
 The UI is open by default, which is only safe while it listens on loopback.
-Enable `web.auth` to require a sign-in. Local accounts and Steam SSO can be
-used together:
+Enable `web.auth` to require a sign-in. The local password form uses the
+server's existing admin password, and Steam SSO can be enabled alongside it:
 
 ```yaml
+server:
+  password_admin: "change-me"   # also used in-game and by RCON
+
 web:
   enabled: true
   address: 0.0.0.0        # safe now that a login is required
@@ -165,12 +168,7 @@ web:
   auth:
     enabled: true
     session_hours: 12             # default 12
-    users:                        # local accounts, any number
-      - username: "admin"
-        password: "change-me"     # or: password_hash: "<sha256 hex>"
-      - username: "ops"
-        password_hash: "<sha256 hex>"
-    steam:                        # Steam SSO
+    steam:                        # Steam SSO (OpenID 2.0)
       enabled: true
       allowed_ids:                # only these SteamID64s are authorized
         - "76561198000000000"
@@ -178,15 +176,16 @@ web:
         "76561198000000000": "Alice"
 ```
 
-`printf %s 'change-me' | sha256sum` produces the value for `password_hash`, so
-the file does not have to hold a plain password. With the switch on:
+There is no second web credential: the password form checks
+`server.password_admin` in constant time, so the same secret that logs you into
+the game as admin also opens the UI. With the switch on:
 
-- `/login` shows the password form and, when Steam is enabled, a *Sign in with
-  Steam* button;
-- Steam sign-in sends the browser to steamcommunity.com. The server verifies
-  the OpenID assertion directly with Steam and then checks the SteamID64
-  against `allowed_ids` — an authenticated Steam account that is not listed is
-  refused (`403`);
+- `/login` shows the admin-password form and, when Steam is enabled, a *Sign in
+  with Steam* button;
+- Steam sign-in is OpenID 2.0 SSO: the browser goes to steamcommunity.com, the
+  server verifies the assertion directly with Steam and then checks the
+  SteamID64 against `allowed_ids` — an authenticated Steam account that is not
+  listed is refused (`403`, and the page prints the id to add);
 - every `/api/` call answers `401` without a session cookie, the header shows
   who is signed in plus a *Sign out* button, and `GET /api/health` reports
   `user`/`via`.
