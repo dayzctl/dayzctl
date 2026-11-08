@@ -35,6 +35,7 @@ const dom = {
   tabs: document.getElementById('tabs'),
   panels: document.getElementById('panels'),
   serverStatus: document.getElementById('server-status'),
+  whoami: document.getElementById('whoami'),
   logoutForm: document.getElementById('logout-form'),
 };
 
@@ -151,7 +152,14 @@ async function boot() {
     dom.serverStatus.textContent =
       health.instances === 1 ? `dayzctl ${health.version}` : `dayzctl ${health.version} · ${health.instances} instances`;
     // The login switch is on, so offer a way out of the session.
-    if (health.auth) dom.logoutForm.hidden = false;
+    if (health.auth) {
+      dom.logoutForm.hidden = false;
+      if (health.user) {
+        dom.whoami.textContent = health.user;
+        dom.whoami.title = health.via === 'steam' ? 'Signed in with Steam' : 'Signed in with a local account';
+        dom.whoami.hidden = false;
+      }
+    }
   } catch {
     dom.serverStatus.textContent = 'API unreachable';
   }

@@ -74,6 +74,9 @@ a:hover { text-decoration: underline; }
 
 .header-actions { display: flex; align-items: center; gap: 10px; margin-left: auto; }
 
+/* Who is signed in (only rendered when web.auth is on). */
+.who { font-size: 12.5px; color: var(--text-dim); white-space: nowrap; }
+
 .privacy-badge {
   margin: 0;
   font-size: 12.5px;

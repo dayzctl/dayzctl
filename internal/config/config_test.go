@@ -266,18 +266,39 @@ instances:
 }
 
 func TestWebAuthValidation(t *testing.T) {
+	const hash = "0123456789abcdef0123456789abcdef0123456789abcdef0123456789abcdef"
+	steamID := "76561198000000001"
+
 	cases := []struct {
 		name string
 		auth WebAuth
 		want string
 	}{
 		{"off", WebAuth{}, ""},
-		{"password", WebAuth{Enabled: true, Username: "admin", Password: "x"}, ""},
-		{"hash", WebAuth{Enabled: true, Username: "admin", PasswordHash: strings.Repeat("a", 64)}, ""},
-		{"no user", WebAuth{Enabled: true, Password: "x"}, "web.auth.username is required"},
-		{"no secret", WebAuth{Enabled: true, Username: "admin"}, "password or a password_hash"},
-		{"both secrets", WebAuth{Enabled: true, Username: "admin", Password: "x", PasswordHash: strings.Repeat("a", 64)}, "not both"},
+		{"single password", WebAuth{Enabled: true, Username: "admin", Password: "x"}, ""},
+		{"single hash", WebAuth{Enabled: true, Username: "admin", PasswordHash: hash}, ""},
+		{"users list", WebAuth{Enabled: true, Users: []WebUser{
+			{Username: "admin", Password: "x"},
+			{Username: "ops", PasswordHash: hash},
+		}}, ""},
+		{"steam only", WebAuth{Enabled: true, Steam: WebSteam{Enabled: true, AllowedIDs: []string{steamID}}}, ""},
+		{"steam with public url", WebAuth{Enabled: true, Steam: WebSteam{
+			Enabled: true, PublicURL: "https://dayz.example.com", AllowedIDs: []string{steamID},
+		}}, ""},
+		{"nothing to sign in with", WebAuth{Enabled: true}, "at least one local user"},
+		{"no user", WebAuth{Enabled: true, Password: "x"}, "username is required for each account"},
+		{"no secret", WebAuth{Enabled: true, Username: "admin"}, "needs a password or a password_hash"},
+		{"both secrets", WebAuth{Enabled: true, Username: "admin", Password: "x", PasswordHash: hash}, "not both"},
 		{"bad hash", WebAuth{Enabled: true, Username: "admin", PasswordHash: "abc"}, "64 characters"},
+		{"duplicate user", WebAuth{Enabled: true, Users: []WebUser{
+			{Username: "admin", Password: "x"},
+			{Username: "Admin", Password: "y"},
+		}}, "configured twice"},
+		{"steam without allowlist", WebAuth{Enabled: true, Steam: WebSteam{Enabled: true}}, "allowed_ids is required"},
+		{"steam bad id", WebAuth{Enabled: true, Steam: WebSteam{Enabled: true, AllowedIDs: []string{"12345"}}}, "not a SteamID64"},
+		{"steam bad url", WebAuth{Enabled: true, Steam: WebSteam{
+			Enabled: true, PublicURL: "dayz.example.com", AllowedIDs: []string{steamID},
+		}}, "absolute http(s) URL"},
 	}
 
 	for _, tc := range cases {
@@ -317,5 +338,53 @@ func TestWebAuthCheckCredentials(t *testing.T) {
 	var off WebAuth
 	if !off.CheckCredentials("", "") {
 		t.Error("disabled auth should not reject")
+	}
+}
+
+func TestWebAuthMultipleAccounts(t *testing.T) {
+	a := WebAuth{Enabled: true, Users: []WebUser{
+		{Username: "admin", Password: "one", Name: "Head Admin"},
+		{Username: "ops", Password: "two"},
+	}}
+	// The shorthand account is honoured next to the list.
+	a.Username, a.Password = "legacy", "three"
+
+	for _, tc := range []struct{ user, pass, display string }{
+		{"admin", "one", "Head Admin"},
+		{"ops", "two", "ops"},
+		{"legacy", "three", "legacy"},
+	} {
+		acct, ok := a.Authenticate(tc.user, tc.pass)
+		if !ok {
+			t.Fatalf("%s/%s rejected", tc.user, tc.pass)
+		}
+		if got := acct.Display(); got != tc.display {
+			t.Errorf("%s display = %q, want %q", tc.user, got, tc.display)
+		}
+	}
+	if _, ok := a.Authenticate("admin", "two"); ok {
+		t.Error("password of another account accepted")
+	}
+	if _, ok := a.Authenticate("nobody", "one"); ok {
+		t.Error("unknown user accepted")
+	}
+}
+
+func TestWebAuthSteamAllowed(t *testing.T) {
+	a := WebAuth{Enabled: true, Steam: WebSteam{
+		Enabled:    true,
+		AllowedIDs: []string{"76561198000000001"},
+		Names:      map[string]string{"76561198000000001": "Alice"},
+	}}
+	if name, ok := a.SteamAllowed("76561198000000001"); !ok || name != "Alice" {
+		t.Errorf("allowed id = %q, %v; want Alice, true", name, ok)
+	}
+	if name, ok := a.SteamAllowed("76561198000000002"); ok {
+		t.Errorf("unknown id accepted as %q", name)
+	}
+	// A Steam block that is configured but not switched on lets nobody in.
+	a.Steam.Enabled = false
+	if _, ok := a.SteamAllowed("76561198000000001"); ok {
+		t.Error("Steam sign-in accepted while steam.enabled is false")
 	}
 }

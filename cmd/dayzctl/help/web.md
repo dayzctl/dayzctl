@@ -19,10 +19,25 @@ Options:
 Configuration (config.yaml):
   web:
     enabled: true          # install and enable dayz-web.service on apply
-    address: 127.0.0.1     # use 0.0.0.0 only behind an authenticating proxy
+    address: 127.0.0.1     # 0.0.0.0 is safe once web.auth is on
     port: 8081
+    auth:
+      enabled: true        # require a sign-in for the UI and /api/
+      session_hours: 12
+      users:               # local accounts, any number
+        - username: admin
+          password: change-me          # or password_hash: <sha256 hex>
+      steam:               # optional Steam SSO
+        enabled: true
+        allowed_ids: ["76561198000000000"]   # authorization allowlist
+        names: {"76561198000000000": "Alice"}   # optional labels
 
 Endpoints:
+  GET  /login                              sign-in page
+  POST /login                              local account sign-in
+  GET  /auth/steam                         start Steam SSO
+  GET  /auth/steam/callback                Steam return (verified server-side)
+  POST /logout                             end the session
   GET  /api/health
   GET  /api/instances
   GET  /api/instances/<instance>/logs
@@ -43,5 +58,9 @@ systemd:
     systemctl start|stop|status dayz-web.service
     journalctl -u dayz-web.service -f
 
-There is no built-in authentication: keep the default loopback address, or
-terminate TLS and authentication in a reverse proxy such as nginx or Caddy.
+With web.auth on, every request needs a session cookie. Local accounts sign in
+with their username and password; Steam users sign in through
+steamcommunity.com and are only accepted when their SteamID64 is listed in
+web.auth.steam.allowed_ids. Sessions live in memory, so restarting the service
+signs everyone out. Keep the loopback address, or terminate TLS in a reverse
+proxy such as nginx or Caddy.

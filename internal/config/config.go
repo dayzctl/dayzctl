@@ -304,22 +304,81 @@ type Web struct {
 
 // WebAuth is the login switch for the web UI and its JSON API.
 //
-// Off by default. When enabled, every request needs a session cookie obtained
-// by posting the username and password to /login; either a plain password or a
-// SHA-256 hex digest (password_hash) can be configured.
+// Off by default. When enabled, a visitor must sign in with one of the local
+// accounts or, when Steam SSO is on, through Steam. Steam sign-ins are only
+// accepted for the Steam ID64s listed in steam.allowed_ids: the allowlist is
+// the authorization step, an authenticated Steam account alone is not enough.
+//
+// The single username/password/password_hash trio is kept as a shorthand for a
+// one-account setup; it is treated as one more entry in Users.
 type WebAuth struct {
-	Enabled      bool   `yaml:"enabled"`
+	Enabled      bool      `yaml:"enabled"`
+	SessionHours int       `yaml:"session_hours,omitempty"`
+	Users        []WebUser `yaml:"users,omitempty"`
+	Steam        WebSteam  `yaml:"steam,omitempty"`
+
+	// Shorthand for a single local account (older configs and simple setups).
 	Username     string `yaml:"username,omitempty"`
 	Password     string `yaml:"password,omitempty"`
 	PasswordHash string `yaml:"password_hash,omitempty"`
-	SessionHours int    `yaml:"session_hours,omitempty"`
+}
+
+// WebUser is one local account. Every local account has full access; they are
+// the accounts an operator creates by hand in the config file.
+type WebUser struct {
+	Username     string `yaml:"username"`
+	Name         string `yaml:"name,omitempty"`
+	Password     string `yaml:"password,omitempty"`
+	PasswordHash string `yaml:"password_hash,omitempty"`
+}
+
+// Display is the name shown in the UI for this account.
+func (u WebUser) Display() string {
+	if name := strings.TrimSpace(u.Name); name != "" {
+		return name
+	}
+	return u.Username
+}
+
+// WebSteam configures Steam as an SSO provider.
+//
+// Steam has no concept of a group we can query without an API key, so access
+// is decided by the allowed_ids allowlist. Names is an optional SteamID64 →
+// display name map so the UI shows "Alice" instead of a 17-digit id.
+type WebSteam struct {
+	Enabled bool `yaml:"enabled"`
+	// PublicURL is the external URL of the web UI (e.g. https://dayz.example.com).
+	// It fixes the OpenID return_to/realm when the server sits behind a reverse
+	// proxy. Leave it empty to derive the URL from the request.
+	PublicURL  string            `yaml:"public_url,omitempty"`
+	AllowedIDs []string          `yaml:"allowed_ids,omitempty"`
+	Names      map[string]string `yaml:"names,omitempty"`
+}
+
+// Accounts lists the effective local accounts, shorthand included.
+func (a WebAuth) Accounts() []WebUser {
+	out := make([]WebUser, 0, len(a.Users)+1)
+	out = append(out, a.Users...)
+	if a.Username != "" || a.Password != "" || a.PasswordHash != "" {
+		out = append(out, WebUser{
+			Username:     a.Username,
+			Password:     a.Password,
+			PasswordHash: a.PasswordHash,
+		})
+	}
+	return out
 }
 
 // Active reports whether a login is actually required. A half-configured block
-// (enabled without credentials) is rejected during validation, so this only
-// answers "is there something to protect with".
+// is rejected during validation, so this only answers "is there something to
+// protect with".
 func (a WebAuth) Active() bool {
-	return a.Enabled && a.Username != "" && (a.Password != "" || a.PasswordHash != "")
+	return a.Enabled && (len(a.Accounts()) > 0 || a.Steam.Enabled)
+}
+
+// SteamEnabled reports whether the Steam SSO button should be offered.
+func (a WebAuth) SteamEnabled() bool {
+	return a.Enabled && a.Steam.Enabled
 }
 
 // SessionDuration is how long a login stays valid.
@@ -331,20 +390,60 @@ func (a WebAuth) SessionDuration() time.Duration {
 	return time.Duration(hours) * time.Hour
 }
 
+// Authenticate returns the account matching user/password.
+//
+// Every account is compared (no early return) so the work done does not reveal
+// which usernames exist.
+func (a WebAuth) Authenticate(user, password string) (WebUser, bool) {
+	var match WebUser
+	found := false
+	for _, u := range a.Accounts() {
+		ok := subtle.ConstantTimeCompare([]byte(user), []byte(u.Username)) == 1
+		if u.PasswordHash != "" {
+			sum := sha256.Sum256([]byte(password))
+			want := normalizePasswordHash(u.PasswordHash)
+			ok = ok && subtle.ConstantTimeCompare([]byte(hex.EncodeToString(sum[:])), []byte(want)) == 1
+		} else {
+			ok = ok && subtle.ConstantTimeCompare([]byte(password), []byte(u.Password)) == 1
+		}
+		if ok && !found {
+			match, found = u, true
+		}
+	}
+	return match, found
+}
+
 // CheckCredentials reports whether user/password may sign in.
 func (a WebAuth) CheckCredentials(user, password string) bool {
 	if !a.Active() {
 		return true
 	}
-	if subtle.ConstantTimeCompare([]byte(user), []byte(a.Username)) != 1 {
-		return false
+	_, ok := a.Authenticate(user, password)
+	return ok
+}
+
+// SteamAllowed reports whether a SteamID64 may sign in, and the name to show.
+func (a WebAuth) SteamAllowed(id string) (string, bool) {
+	if !a.Steam.Enabled {
+		return "", false
 	}
-	if a.PasswordHash != "" {
-		sum := sha256.Sum256([]byte(password))
-		want := strings.ToLower(strings.TrimPrefix(strings.TrimSpace(a.PasswordHash), "sha256:"))
-		return subtle.ConstantTimeCompare([]byte(hex.EncodeToString(sum[:])), []byte(want)) == 1
+	id = strings.TrimSpace(id)
+	for _, allowed := range a.Steam.AllowedIDs {
+		if subtle.ConstantTimeCompare([]byte(id), []byte(strings.TrimSpace(allowed))) != 1 {
+			continue
+		}
+		if name := strings.TrimSpace(a.Steam.Names[id]); name != "" {
+			return name, true
+		}
+		return "Steam " + id, true
 	}
-	return subtle.ConstantTimeCompare([]byte(password), []byte(a.Password)) == 1
+	return "", false
+}
+
+// normalizePasswordHash accepts a bare or "sha256:"-prefixed digest and returns
+// it lower-case, ready for comparison.
+func normalizePasswordHash(hash string) string {
+	return strings.ToLower(strings.TrimPrefix(strings.TrimSpace(hash), "sha256:"))
 }
 
 // ============================================================================

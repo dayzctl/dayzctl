@@ -39,10 +39,16 @@ web:
   port: 8081
   auth:                # login switch, off by default
     enabled: false
-    username: "admin"
-    # password: "change-me"
-    # password_hash: "<sha256 hex>"
-    # session_hours: 12
+    session_hours: 12
+    users:             # local accounts
+      - username: "admin"
+        # password: "change-me"
+        # password_hash: "<sha256 hex>"
+    steam:             # Steam SSO, allowlist required
+      enabled: false
+      # public_url: "https://dayz.example.com"
+      allowed_ids: ["76561198000000000"]
+      names: {"76561198000000000": "Alice"}
 ```
 
 `dayzctl apply` generates `/etc/systemd/system/dayz-web.service`, runs
@@ -61,15 +67,19 @@ curl -s localhost:8081/api/health
 
 Access is open by default, so keep the loopback address unless you turn on the
 login switch (`web.auth.enabled`) or terminate TLS and auth in nginx/Caddy in
-front of it. With auth on, `/login` asks for the configured username and
-password, every `/api/` call needs the session cookie, and the header shows a
-*Sign out* button. Sessions are held in memory and die with the process.
+front of it. With auth on, `/login` asks for a local username and password
+and/or offers *Sign in with Steam*; every `/api/` call needs the session
+cookie, the header shows who is signed in with a *Sign out* button, and
+`/api/health` reports `user` and `via` (password/steam). Steam sign-ins are
+verified server-side with Steam and then checked against
+`web.auth.steam.allowed_ids`, so an authenticated Steam account that is not
+listed gets a 403 page. Sessions are held in memory and die with the process.
 
 ## API
 
 | Method | Path | Purpose |
 | --- | --- | --- |
-| `GET` | `/api/health` | service status, version, instance count, `auth: true` when a login is required |
+| `GET` | `/api/health` | service status, version, instance count, `auth: true` when a login is required, plus `user`/`via` once signed in |
 | `GET` | `/api/instances` | configured instances with log counts and latest mtime |
 | `GET` | `/api/instances/{instance}/logs` | log files in that instance's profiles folder |
 | `GET` | `/api/instances/{instance}/map-image` | the instance's map background, if one is configured (404 otherwise) |

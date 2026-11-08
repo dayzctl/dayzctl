@@ -46,6 +46,13 @@ type Server struct {
 	sessions *sessions
 	banHints *banhints.Store
 	handler  http.Handler
+
+	// steamEndpoint is where /auth/steam sends the browser; verifySteam
+	// confirms what Steam sends back. Both are fields so tests do not have to
+	// talk to steamcommunity.com.
+	steamEndpoint string
+	verifySteam   steamVerifier
+	steamStates   *pendingStates
 }
 
 // New builds the handler tree for the given configuration.
@@ -55,11 +62,14 @@ func New(cfg *config.ServerConfig) (*Server, error) {
 	}
 
 	s := &Server{
-		cfg:      cfg,
-		service:  logs.NewService(cfg.GetInstallDir(), logs.DefaultOptions()),
-		auth:     cfg.Web.Auth,
-		sessions: newSessions(cfg.Web.Auth.SessionDuration()),
-		banHints: banhints.New(banhints.Path(cfg)),
+		cfg:           cfg,
+		service:       logs.NewService(cfg.GetInstallDir(), logs.DefaultOptions()),
+		auth:          cfg.Web.Auth,
+		sessions:      newSessions(cfg.Web.Auth.SessionDuration()),
+		banHints:      banhints.New(banhints.Path(cfg)),
+		steamEndpoint: "https://steamcommunity.com/openid/login",
+		verifySteam:   verifySteamOpenID,
+		steamStates:   newPendingStates(),
 	}
 
 	ui, err := fs.Sub(webassets.Assets, "log-analyzer")
@@ -91,6 +101,8 @@ func New(cfg *config.ServerConfig) (*Server, error) {
 	mux.HandleFunc("GET /login", s.handleLoginForm)
 	mux.HandleFunc("POST /login", s.handleLogin)
 	mux.HandleFunc("POST /logout", s.handleLogout)
+	mux.HandleFunc("GET /auth/steam", s.handleSteamLogin)
+	mux.HandleFunc("GET /auth/steam/callback", s.handleSteamCallback)
 	mux.Handle("GET /", noCacheHTML(http.FileServerFS(ui)))
 
 	s.handler = withLogging(withGzip(s.requireAuth(mux)))
@@ -129,16 +141,23 @@ type healthResponse struct {
 	Instances int    `json:"instances"`
 	// Auth tells the UI to offer a sign-out button.
 	Auth bool `json:"auth,omitempty"`
+	// User is who is signed in, and Via how they got here (password/steam).
+	User string `json:"user,omitempty"`
+	Via  string `json:"via,omitempty"`
 }
 
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
-	writeJSON(w, http.StatusOK, healthResponse{
+	resp := healthResponse{
 		Status:    "ok",
 		Version:   version.Version,
 		Time:      time.Now().UTC().Format(time.RFC3339),
 		Instances: len(s.cfg.Instances),
 		Auth:      s.auth.Active(),
-	})
+	}
+	if ident, ok := s.sessions.get(r); ok {
+		resp.User, resp.Via = ident.User, ident.Via
+	}
+	writeJSON(w, http.StatusOK, resp)
 }
 
 type instanceView struct {

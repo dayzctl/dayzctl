@@ -101,19 +101,33 @@ server:
 # `dayzctl apply` owns the service: it writes and enables dayz-web.service when
 # enabled is true, removes and disables it when false, and only reloads
 # systemd when a unit file actually changed.
-# There is no built-in authentication: keep the loopback address, or put an
-# authenticating reverse proxy in front of it before binding to 0.0.0.0.
+# Sign-in is off by default, which is only safe on loopback. Before binding
+# anywhere else, turn on auth and add local accounts and/or Steam SSO.
 web:
   enabled: true
   address: 127.0.0.1
   port: 8081
-  # Login switch. Enabled false leaves the UI open, which is only safe on
-  # loopback. Use a password_hash (sha256 of the password, e.g.
-  # `printf %s 'secret' | sha256sum`) instead of a plain password when the
-  # config file can be read by anyone else.
+  # Login switch. With enabled: true every page and every /api/ call needs a
+  # session; visitors sign in with a local account or with Steam.
   auth:
     enabled: false
-    username: "admin"
-    # password: "change-me"
-    # password_hash: "<64 hex characters>"
-    # session_hours: 12
+    session_hours: 12
+    # Local accounts (any number, each one has full access). Use a
+    # password_hash (sha256 of the password, e.g.
+    # `printf %s 'secret' | sha256sum`) instead of a plain password when the
+    # config file can be read by anyone else.
+    users:
+      - username: "admin"
+        # password: "change-me"
+        # password_hash: "<64 hex characters>"
+    # Steam SSO. Users sign in through Steam and only the SteamID64s in
+    # allowed_ids are let in; every other Steam account is refused.
+    steam:
+      enabled: false
+      # External URL of the UI, needed behind a reverse proxy so the OpenID
+      # return_to points at the public address.
+      # public_url: "https://dayz.example.com"
+      allowed_ids:
+        # - "76561198000000000"
+      names:
+        # "76561198000000000": "Alice"

@@ -2,6 +2,8 @@ package config
 
 import (
 	"fmt"
+	"net/url"
+	"regexp"
 	"strings"
 )
 
@@ -86,23 +88,59 @@ func validateWeb(c *ServerConfig) error {
 	return nil
 }
 
-// validateWebAuth refuses a login switch that cannot work: enabled without a
-// username, or without either a password or a password hash.
+// steamIDPattern matches a SteamID64: 17 digits, all real accounts start 7656.
+var steamIDPattern = regexp.MustCompile(`^7656[0-9]{13}$`)
+
+// validateWebAuth refuses a login switch that cannot work: enabled without any
+// way to sign in, an account without a secret, a duplicate username, or a Steam
+// block that would let everyone in.
 func validateWebAuth(a WebAuth) error {
 	if !a.Enabled {
 		return nil
 	}
-	if a.Username == "" {
-		return fmt.Errorf("web.auth.username is required when web.auth.enabled is true")
+
+	accounts := a.Accounts()
+	if len(accounts) == 0 && !a.Steam.Enabled {
+		return fmt.Errorf("web.auth needs at least one local user or web.auth.steam.enabled")
 	}
-	if a.Password == "" && a.PasswordHash == "" {
-		return fmt.Errorf("web.auth needs a password or a password_hash when enabled")
+
+	seen := make(map[string]bool, len(accounts))
+	for i, u := range accounts {
+		if strings.TrimSpace(u.Username) == "" {
+			return fmt.Errorf("web.auth username is required for each account (users[%d])", i)
+		}
+		if u.Password == "" && u.PasswordHash == "" {
+			return fmt.Errorf("web.auth user %q needs a password or a password_hash", u.Username)
+		}
+		if u.Password != "" && u.PasswordHash != "" {
+			return fmt.Errorf("web.auth user %q: set either password or password_hash, not both", u.Username)
+		}
+		if u.PasswordHash != "" && len(normalizePasswordHash(u.PasswordHash)) != 64 {
+			return fmt.Errorf("web.auth.password_hash must be a SHA-256 hex digest (64 characters)")
+		}
+		key := strings.ToLower(strings.TrimSpace(u.Username))
+		if seen[key] {
+			return fmt.Errorf("web.auth username %q is configured twice", u.Username)
+		}
+		seen[key] = true
 	}
-	if a.Password != "" && a.PasswordHash != "" {
-		return fmt.Errorf("set either web.auth.password or web.auth.password_hash, not both")
+
+	if !a.Steam.Enabled {
+		return nil
 	}
-	if h := strings.ToLower(strings.TrimPrefix(strings.TrimSpace(a.PasswordHash), "sha256:")); a.PasswordHash != "" && len(h) != 64 {
-		return fmt.Errorf("web.auth.password_hash must be a SHA-256 hex digest (64 characters)")
+	if len(a.Steam.AllowedIDs) == 0 {
+		return fmt.Errorf("web.auth.steam.allowed_ids is required when steam is enabled")
+	}
+	for _, id := range a.Steam.AllowedIDs {
+		if !steamIDPattern.MatchString(strings.TrimSpace(id)) {
+			return fmt.Errorf("web.auth.steam.allowed_ids: %q is not a SteamID64 (17 digits starting 7656)", id)
+		}
+	}
+	if pu := strings.TrimSpace(a.Steam.PublicURL); pu != "" {
+		u, err := url.Parse(pu)
+		if err != nil || (u.Scheme != "http" && u.Scheme != "https") || u.Host == "" {
+			return fmt.Errorf("web.auth.steam.public_url must be an absolute http(s) URL")
+		}
 	}
 	return nil
 }

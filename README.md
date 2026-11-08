@@ -151,10 +151,11 @@ The generated config enables it (`web.enabled: true`, loopback only), and
 which of the two it did. See `web/log-analyzer/README.md` for the API and the
 analysis tabs.
 
-### Login switch
+### Sign-in
 
-The UI is open by default, which is only safe while it listens on loopback. To
-require a sign-in, enable `web.auth`:
+The UI is open by default, which is only safe while it listens on loopback.
+Enable `web.auth` to require a sign-in. Local accounts and Steam SSO can be
+used together:
 
 ```yaml
 web:
@@ -163,16 +164,37 @@ web:
   port: 8081
   auth:
     enabled: true
-    username: "admin"
-    password: "change-me"         # or: password_hash: "<sha256 hex>"
     session_hours: 12             # default 12
+    users:                        # local accounts, any number
+      - username: "admin"
+        password: "change-me"     # or: password_hash: "<sha256 hex>"
+      - username: "ops"
+        password_hash: "<sha256 hex>"
+    steam:                        # Steam SSO
+      enabled: true
+      allowed_ids:                # only these SteamID64s are authorized
+        - "76561198000000000"
+      names:                      # optional labels for the UI
+        "76561198000000000": "Alice"
 ```
 
 `printf %s 'change-me' | sha256sum` produces the value for `password_hash`, so
-the file does not have to hold a plain password. With the switch on, the UI
-serves a sign-in page at `/login`, every `/api/` call answers `401` without a
-session cookie, and the header grows a *Sign out* button. Sessions live in
-memory, so restarting `dayzctl web` (or the service) signs everyone out.
+the file does not have to hold a plain password. With the switch on:
+
+- `/login` shows the password form and, when Steam is enabled, a *Sign in with
+  Steam* button;
+- Steam sign-in sends the browser to steamcommunity.com. The server verifies
+  the OpenID assertion directly with Steam and then checks the SteamID64
+  against `allowed_ids` — an authenticated Steam account that is not listed is
+  refused (`403`);
+- every `/api/` call answers `401` without a session cookie, the header shows
+  who is signed in plus a *Sign out* button, and `GET /api/health` reports
+  `user`/`via`.
+
+Behind a reverse proxy, set `web.auth.steam.public_url` to the external URL
+(e.g. `https://dayz.example.com`) so Steam returns to the public address.
+Sessions live in memory, so restarting `dayzctl web` (or the service) signs
+everyone out.
 
 ## Commands
 
