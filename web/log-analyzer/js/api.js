@@ -96,6 +96,28 @@ export async function linkBan(instance, guid, player) {
 }
 
 /**
+ * The Steam admin list plus any refused sign-ins waiting for approval.
+ * @returns {Promise<{steam: boolean, writable: boolean, admins: Array<{steamID: string, name?: string}>, pending: Array<{steamID: string, firstAt: string, lastAt: string, attempts: number}>}>}
+ */
+export async function fetchAdmins() {
+  return requestJSON('/api/admins');
+}
+
+/**
+ * Grant or revoke Steam admin rights. The server writes web.auth.steam.admins
+ * in config.yaml and applies the change immediately.
+ * @param {'add'|'remove'} action
+ * @returns {Promise<object>} the updated admin list
+ */
+export async function updateAdmin(steamID, name, action) {
+  return requestJSON('/api/admins', {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ steamID, name: name || '', action }),
+  });
+}
+
+/**
  * Run one RCON action for a player from the analysed log. The server resolves
  * the live session id (kick/ban) or the ban-list entry (unban) itself.
  * @param {'kick'|'ban'|'unban'} action

@@ -397,12 +397,6 @@ func (a WebAuth) SteamAllowed(id string) (string, bool) {
 	return "", false
 }
 
-// normalizePasswordHash accepts a bare or "sha256:"-prefixed digest and returns
-// it lower-case, ready for comparison.
-func normalizePasswordHash(hash string) string {
-	return strings.ToLower(strings.TrimPrefix(strings.TrimSpace(hash), "sha256:"))
-}
-
 // ============================================================================
 // HELPER METHODS
 // ============================================================================

@@ -1,4 +1,7 @@
 {
+    "chat.useHooks": true,
+    "chat.useClaudeHooks": true,
+    "chatCustomizationsEvaluations.enable": false,
     "chat.tools.terminal.autoApprove": {
     
         "cd": true,

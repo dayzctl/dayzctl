@@ -6,6 +6,21 @@ argument-hint: 'Optional package or path to focus on (the gate still runs repo-w
 
 # Lint before done
 
+## Enforcement
+
+This skill is the procedure; `.github/hooks/lint-gate.json` is what makes it
+non-optional:
+
+- `PostToolUse` runs `lint-gate.sh --fast` after any edit to `.go/.js/.css/.html`
+  — gofmt + vet + build + `node --check` (~3 s) — and **blocks the tool result**
+  with the output when it fails.
+- `Stop` runs `lint-gate.sh --full`, which adds `go test ./... -count=1`, and
+  **blocks the end of the turn** when the gate is red.
+
+So a red gate cannot be ignored or forgotten: the edit is rejected and the
+session cannot finish until it is fixed. If the hook ever fails to fire, run the
+gate below by hand.
+
 ## Hard rule
 
 A change is **not** done, fixed, or "green" until the gate below has run in the

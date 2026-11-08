@@ -1,0 +1,18 @@
+{
+  "hooks": {
+    "PostToolUse": [
+      {
+        "type": "command",
+        "command": "bash .github/hooks/lint-gate.sh --fast",
+        "timeout": 90
+      }
+    ],
+    "Stop": [
+      {
+        "type": "command",
+        "command": "bash .github/hooks/lint-gate.sh --full",
+        "timeout": 300
+      }
+    ]
+  }
+}

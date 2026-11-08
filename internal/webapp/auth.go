@@ -434,8 +434,9 @@ func (s *Server) handleSteamCallback(w http.ResponseWriter, r *http.Request) {
 		s.renderAuthError(w, http.StatusBadGateway, "Steam sign-in failed", err.Error())
 		return
 	}
-	name, ok := s.auth.SteamAllowed(id)
+	name, ok := s.admins.allowed(id)
 	if !ok {
+		s.pending.record(id)
 		logger.Warn("Steam sign-in refused: account is not in web.auth.steam.admins", "steamID", id)
 		s.renderAuthError(w, http.StatusForbidden, "Not authorized",
 			"The Steam account "+id+" is not a dayzctl admin on this server. Ask the operator to add it to web.auth.steam.admins.")

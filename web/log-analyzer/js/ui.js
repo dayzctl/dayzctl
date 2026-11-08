@@ -5,7 +5,7 @@
 
 import { fmtInt, fmtDuration, fmtTime, fmtClock, fmtDistance, truncate, colorFor } from './format.js';
 import { renderMap, inferWorldSize, clampView, MAX_MAP_ZOOM } from './mapview.js';
-import { fetchMapMeta, fetchBans, linkBan, playerAction } from './api.js';
+import { fetchMapMeta, fetchBans, linkBan, playerAction, fetchAdmins, updateAdmin } from './api.js';
 
 /** Kill count per weapon, used by the overview card. */
 function topWeapons(kills, limit = 8) {
@@ -444,6 +444,160 @@ function ensureBanList(state) {
     });
 }
 
+/* ── Steam admins ───────────────────────────────────────── */
+
+const STEAM_ID64 = /^7656\d{13}$/;
+
+/** The SteamID64 of a player whose log entry carries one (older builds). */
+function playerSteamID(player) {
+  return (player.ids ?? []).find((id) => STEAM_ID64.test(String(id))) ?? '';
+}
+
+function isSteamAdmin(state, steamID) {
+  return Boolean(steamID) && (state.admins?.admins ?? []).some((a) => a.steamID === steamID);
+}
+
+async function runAdminUpdate(state, steamID, name, action) {
+  try {
+    state.admins = await updateAdmin(steamID, name, action);
+    state.adminsError = '';
+    state.actions.setState({});
+    notify(
+      action === 'remove' ? `Revoked admin rights from ${steamID}.` : `Granted admin rights to ${steamID}.`,
+      'ok',
+    );
+  } catch (err) {
+    notify(`Could not ${action === 'remove' ? 'revoke' : 'grant'} admin rights: ${err.message}`, 'error');
+  }
+}
+
+/** There is one admin list for the whole server; fetch it once per page. */
+function ensureAdmins(state) {
+  if (state.adminsLoaded || state.adminsLoading) return;
+
+  state.adminsLoading = true;
+  fetchAdmins()
+    .then((payload) => {
+      state.admins = payload;
+      state.adminsError = '';
+    })
+    .catch((err) => {
+      state.admins = null;
+      state.adminsError = err.message;
+    })
+    .finally(() => {
+      state.adminsLoaded = true;
+      state.adminsLoading = false;
+      state.actions.setState({});
+    });
+}
+
+/**
+ * Who may sign in through Steam, plus the accounts that tried and were
+ * refused. Granting writes web.auth.steam.admins in config.yaml.
+ */
+function renderSteamAdminsCard(panel, state) {
+  const data = state.admins;
+  if (!data?.steam) return;
+
+  const admins = data.admins ?? [];
+  const pending = data.pending ?? [];
+  const children = [];
+
+  if (state.adminsError) {
+    children.push(emptyState(`Admin list unavailable: ${state.adminsError}`));
+  } else {
+    if (pending.length) {
+      children.push(
+        el(
+          'p',
+          { class: 'small faint', style: 'margin:-4px 0 8px' },
+          `${fmtInt(pending.length)} Steam sign-in${pending.length === 1 ? '' : 's'} ${pending.length === 1 ? 'was' : 'were'} refused ` +
+            'because the account is not an admin yet. Grant access here, then ask them to sign in again.',
+        ),
+        table(
+          [{ label: 'SteamID64' }, { label: 'Last attempt' }, { label: 'Tries', num: true }, { label: 'Actions' }],
+          pending.map((p) =>
+            el(
+              'tr',
+              {},
+              el('td', { class: 'raw', text: p.steamID }),
+              el('td', { text: new Date(p.lastAt).toLocaleString() }),
+              el('td', { class: 'num', text: fmtInt(p.attempts) }),
+              el(
+                'td',
+                { class: 'actions' },
+                el('button', {
+                  type: 'button',
+                  class: 'btn tiny',
+                  text: 'Grant admin',
+                  title: `Add ${p.steamID} to web.auth.steam.admins`,
+                  onClick: (event) => {
+                    event.stopPropagation();
+                    runAdminUpdate(state, p.steamID, '', 'add');
+                  },
+                }),
+              ),
+            ),
+          ),
+        ),
+      );
+    }
+
+    if (admins.length) {
+      children.push(
+        table(
+          [{ label: 'SteamID64' }, { label: 'Name' }, { label: 'Actions' }],
+          admins.map((a) =>
+            el(
+              'tr',
+              {},
+              el('td', { class: 'raw', text: a.steamID }),
+              el('td', { text: a.name || '—' }),
+              el(
+                'td',
+                { class: 'actions' },
+                el('button', {
+                  type: 'button',
+                  class: 'btn tiny ghost',
+                  text: 'Revoke',
+                  title: `Remove ${a.steamID} from web.auth.steam.admins`,
+                  onClick: (event) => {
+                    event.stopPropagation();
+                    runAdminUpdate(state, a.steamID, a.name ?? '', 'remove');
+                  },
+                }),
+              ),
+            ),
+          ),
+        ),
+      );
+    } else if (!pending.length) {
+      children.push(
+        emptyState('No Steam admins yet. A player signs in with Steam once, then is approved here.'),
+      );
+    }
+
+    if (!data.writable) {
+      children.push(
+        el(
+          'p',
+          { class: 'small faint', style: 'margin:10px 0 0' },
+          'The web server was started without a config file, so admin changes cannot be saved.',
+        ),
+      );
+    }
+  }
+
+  const count = admins.length;
+  panel.append(
+    card(
+      `Steam admins (${fmtInt(count)})${pending.length ? ` \u00b7 ${fmtInt(pending.length)} pending` : ''}`,
+      ...children,
+    ),
+  );
+}
+
 /** Actions column: kick/ban while online, unban only when actually banned. */
 function playerActionsCell(state, player, online, ban) {
   const button = (label, className, action, title) =>
@@ -466,6 +620,42 @@ function playerActionsCell(state, player, online, ban) {
     const left = ban.minutes > 0 ? `, ${ban.minutes} min left` : ', permanent';
     buttons.push(button('Unban', 'ghost', 'unban', `Lift this ban (${ban.guid || ban.ip}${left}${why})`));
   }
+
+  // Steam admin rights live in config.yaml, not in RCON, so they are offered
+  // whenever Steam SSO is on.
+  if (state.admins?.steam) {
+    const steamID = playerSteamID(player);
+    if (steamID) {
+      const admin = isSteamAdmin(state, steamID);
+      buttons.push(
+        el('button', {
+          type: 'button',
+          class: `btn tiny ${admin ? 'ghost' : ''}`,
+          text: admin ? 'Revoke admin' : 'Make admin',
+          title: admin
+            ? `Remove ${steamID} from web.auth.steam.admins`
+            : `Grant dayzctl admin to ${player.name} (${steamID})`,
+          onClick: (event) => {
+            event.stopPropagation();
+            runAdminUpdate(state, steamID, player.name, admin ? 'remove' : 'add');
+          },
+        }),
+      );
+    } else {
+      buttons.push(
+        el('button', {
+          type: 'button',
+          class: 'btn tiny ghost',
+          text: 'Make admin',
+          disabled: '',
+          title:
+            'This log has no SteamID64 for this player (current DayZ builds log a session token). ' +
+            'Have them sign in with Steam once, then approve the account in the Steam admins card.',
+        }),
+      );
+    }
+  }
+
   return el('td', { class: 'actions' }, ...buttons);
 }
 
@@ -568,6 +758,11 @@ export function renderPlayers(panel, report, state) {
 
   // RCON actions need a configured RCON port/password on the instance.
   const rconReady = Boolean(state.instanceInfo?.rcon);
+  // The Steam admin list is server-wide; fetch it once, then use it to label
+  // rows and to offer the admin toggle even when RCON is off.
+  if (state.instance) ensureAdmins(state);
+  const steamReady = Boolean(state.admins?.steam);
+  const actionsReady = rconReady || steamReady;
   const notices = state.playerNotices ?? new Map();
 
   // The ban list decides which rows get an Unban button; fetch it on first
@@ -710,12 +905,13 @@ export function renderPlayers(panel, report, state) {
       el('td', { class: 'num', text: fmtInt(p.chats) }),
       el('td', { class: 'num', text: fmtInt(p.builds) }),
       el('td', { class: 'num', text: p.suspicion ? fmtInt(p.suspicion) : '' }),
-      rconReady ? playerActionsCell(state, p, online, banFor(p)) : null,
+      rconReady || steamReady ? playerActionsCell(state, p, online, banFor(p)) : null,
     );
   });
 
   // Bans that no row can claim stay in a card above the table, so they are
   // still removable; a ban linked to a player lives on that player's row.
+  if (steamReady) renderSteamAdminsCard(panel, state);
   if (rconReady) renderBansCard(panel, state, unlinkedBans, adm.players);
 
   const unmatchedCount = unlinkedBans.length;
@@ -743,7 +939,7 @@ export function renderPlayers(panel, report, state) {
               { label: 'Chat', num: true },
               { label: 'Builds', num: true },
               { label: 'Flags', num: true },
-              ...(rconReady ? [{ label: 'Actions' }] : []),
+              ...(actionsReady ? [{ label: 'Actions' }] : []),
             ],
             rows,
           )

@@ -19,6 +19,7 @@ import (
 	"path/filepath"
 	"strconv"
 	"strings"
+	"sync"
 	"time"
 
 	"github.com/dayzctl/dayzctl/internal/banhints"
@@ -51,6 +52,14 @@ type Server struct {
 	// form checks. Empty means the form is not offered.
 	adminPassword string
 
+	// admins is the live Steam admin list (seeded from the config) and
+	// configPath is the file the web UI edits when it grants or revokes one.
+	// adminMu serialises those writes so two clicks cannot interleave.
+	admins     *adminSet
+	pending    *pendingSet
+	configPath string
+	adminMu    sync.Mutex
+
 	// steamEndpoint is where /auth/steam sends the browser; verifySteam
 	// confirms what Steam sends back. Both are fields so tests do not have to
 	// talk to steamcommunity.com.
@@ -72,6 +81,8 @@ func New(cfg *config.ServerConfig) (*Server, error) {
 		sessions:      newSessions(cfg.Web.Auth.SessionDuration()),
 		banHints:      banhints.New(banhints.Path(cfg)),
 		adminPassword: cfg.Server.PasswordAdmin,
+		admins:        newAdminSet(cfg.Web.Auth.Steam.Admins),
+		pending:       newPendingSet(),
 		steamEndpoint: "https://steamcommunity.com/openid/login",
 		verifySteam:   verifySteamOpenID,
 		steamStates:   newPendingStates(),
@@ -108,6 +119,8 @@ func New(cfg *config.ServerConfig) (*Server, error) {
 	mux.HandleFunc("POST /logout", s.handleLogout)
 	mux.HandleFunc("GET /auth/steam", s.handleSteamLogin)
 	mux.HandleFunc("GET /auth/steam/callback", s.handleSteamCallback)
+	mux.HandleFunc("GET /api/admins", s.handleAdmins)
+	mux.HandleFunc("POST /api/admins", s.handleAdminUpdate)
 	mux.Handle("GET /", noCacheHTML(http.FileServerFS(ui)))
 
 	s.handler = withLogging(withGzip(s.requireAuth(mux)))
@@ -129,6 +142,10 @@ func mapsLayer(dir string) fs.FS {
 // Handler returns the root http.Handler.
 func (s *Server) Handler() http.Handler { return s.handler }
 
+// SetConfigPath tells the server which config file to edit when the web UI
+// grants or revokes a Steam admin. Without it those endpoints answer 501.
+func (s *Server) SetConfigPath(path string) { s.configPath = path }
+
 // Service exposes the log analysis service (used by tests and the CLI).
 func (s *Server) Service() *logs.Service { return s.service }
 
@@ -149,6 +166,8 @@ type healthResponse struct {
 	// User is who is signed in, and Via how they got here (password/steam).
 	User string `json:"user,omitempty"`
 	Via  string `json:"via,omitempty"`
+	// Steam tells the UI to offer the Steam admin management card.
+	Steam bool `json:"steam,omitempty"`
 }
 
 func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
@@ -158,6 +177,7 @@ func (s *Server) handleHealth(w http.ResponseWriter, r *http.Request) {
 		Time:      time.Now().UTC().Format(time.RFC3339),
 		Instances: len(s.cfg.Instances),
 		Auth:      s.auth.Active(),
+		Steam:     s.auth.SteamEnabled(),
 	}
 	if ident, ok := s.sessions.get(r); ok {
 		resp.User, resp.Via = ident.User, ident.Via

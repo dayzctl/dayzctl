@@ -58,6 +58,11 @@ const state = {
   bansLoaded: false,
   bansLoading: false,
   bansError: '',
+  // Server-wide Steam admin list, plus refused sign-ins waiting for approval.
+  admins: null,
+  adminsLoaded: false,
+  adminsLoading: false,
+  adminsError: '',
   killQuery: '',
   killsSort: 'time',
   suspiciousFilter: 'all',

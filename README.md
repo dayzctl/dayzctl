@@ -194,6 +194,14 @@ Behind a reverse proxy, set `web.auth.steam.public_url` to the external URL
 Sessions live in memory, so restarting `dayzctl web` (or the service) signs
 everyone out.
 
+Steam admins can also be managed from the web UI: the **Players** tab lists the
+configured admins, shows any Steam sign-ins that were refused, and offers
+*Make admin* / *Revoke admin*. Those actions rewrite
+`web.auth.steam.admins` in the config file (comments and the rest of the file
+are left alone) and take effect immediately. A player row only offers the
+toggle when the analysed log carries a SteamID64; for everyone else, have them
+sign in with Steam once and approve the account in the admins card.
+
 ## Commands
 
 Top-level commands (run `dayzctl <command> --help` for extended embedded help):

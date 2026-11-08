@@ -52,6 +52,8 @@ func WebAction(opts WebOptions) error {
 	if err != nil {
 		return fmt.Errorf("failed to create web server: %w", err)
 	}
+	// The Players tab can grant Steam admins; that edits this file.
+	server.SetConfigPath(shared.ConfigPath)
 
 	listenAddr := net.JoinHostPort(address, strconv.Itoa(port))
 	httpServer := &http.Server{

@@ -119,7 +119,9 @@ web:
     # Steam SSO (OpenID 2.0, handled by steamcommunity.com). When enabled, the
     # sign-in page offers "Sign in with Steam". `admins` lists the Steam users
     # allowed into dayzctl: the key is the SteamID64 and the value is the name
-    # shown in the UI (optional). Anyone not listed is refused.
+    # shown in the UI (optional). Anyone not listed is refused. The list can
+    # also be edited from the Players tab (Grant / Revoke), which rewrites this
+    # block in place.
     steam:
       enabled: false
       # External URL of the UI, needed behind a reverse proxy so the OpenID
