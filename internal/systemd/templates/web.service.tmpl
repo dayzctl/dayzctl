@@ -15,7 +15,9 @@ RestartSec=5s
 StandardOutput=journal
 StandardError=journal
 
-# The service only reads the config and the instances' profiles folders.
+# The web UI reads logs and, when an admin is granted from the Players tab,
+# rewrites only the web.auth.steam.admins block in the config file. Everything
+# else stays read-only; this path needs to be writable for that one edit.
 NoNewPrivileges=yes
 PrivateTmp=yes
 ProtectSystem=full
@@ -24,7 +26,7 @@ ProtectKernelTunables=yes
 ProtectControlGroups=yes
 RestrictSUIDSGID=yes
 LockPersonality=yes
-ReadOnlyPaths=/etc/dayzctl
+ReadWritePaths=/etc/dayzctl
 
 [Install]
 WantedBy=multi-user.target

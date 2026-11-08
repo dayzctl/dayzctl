@@ -12,6 +12,7 @@ import (
 	"sort"
 	"strings"
 	"sync"
+	"syscall"
 	"time"
 
 	"gopkg.in/yaml.v3"
@@ -237,6 +238,10 @@ func (s *Server) saveSteamAdmins(admins map[string]string) error {
 		return errNoConfigPath
 	}
 	if err := writeSteamAdmins(s.configPath, admins); err != nil {
+		if errors.Is(err, syscall.EROFS) {
+			return fmt.Errorf("config file is read-only: %s (the dayz-web.service sandbox mounts /etc read-only; "+
+				"run 'dayzctl apply' to regenerate the unit with ReadWritePaths=/etc/dayzctl)", s.configPath)
+		}
 		return err
 	}
 	s.admins.set(admins)

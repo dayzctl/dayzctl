@@ -27,7 +27,7 @@ func TestRenderWebUnit(t *testing.T) {
 		"Restart=on-failure",
 		"ProtectSystem=full",
 		"NoNewPrivileges=yes",
-		"ReadOnlyPaths=/etc/dayzctl",
+		"ReadWritePaths=/etc/dayzctl",
 		"WantedBy=multi-user.target",
 	}
 

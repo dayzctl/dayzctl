@@ -54,6 +54,10 @@ and removed (and disabled) when it is false, and an unchanged unit is left
 alone — `daemon-reload` only runs when a unit's content actually changed. The
 unit runs the binary directly, restarts on failure and applies hardening
 (`ProtectSystem=full`, `ProtectHome=read-only`, `NoNewPrivileges`, `PrivateTmp`).
+`ReadWritePaths=/etc/dayzctl` is the one exception: the Players tab can grant
+Steam admins, which rewrites `web.auth.steam.admins` in the config file. An
+older unit without that line answers *read-only file system*; run `dayzctl
+apply` again (or add `ReadWritePaths=/etc/dayzctl` in a drop-in) to fix it.
 
 ```bash
 systemctl status dayz-web.service
