@@ -6,6 +6,7 @@ import (
 	"os"
 	"path/filepath"
 	"regexp"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -305,7 +306,7 @@ type Web struct {
 // Off by default. When enabled, a visitor signs in with the server's existing
 // admin password (server.password_admin, the same one used in-game and by
 // RCON) and/or through Steam SSO. Steam sign-ins are only accepted for the
-// Steam ID64s listed in steam.allowed_ids: the allowlist is the authorization
+// Steam accounts listed under steam.admins: that list is the authorization
 // step, an authenticated Steam account alone is not enough.
 type WebAuth struct {
 	Enabled      bool     `yaml:"enabled"`
@@ -316,16 +317,17 @@ type WebAuth struct {
 // WebSteam configures Steam as an SSO provider.
 //
 // Steam has no concept of a group we can query without an API key, so access
-// is decided by the allowed_ids allowlist. Names is an optional SteamID64 →
-// display name map so the UI shows "Alice" instead of a 17-digit id.
+// is decided by the Admins map: only those SteamID64s may sign in, and the
+// value is the display name shown in the UI (it may be empty). The Steam ID is
+// what matters; a wrong or missing name only changes the label.
 type WebSteam struct {
 	Enabled bool `yaml:"enabled"`
 	// PublicURL is the external URL of the web UI (e.g. https://dayz.example.com).
 	// It fixes the OpenID return_to/realm when the server sits behind a reverse
 	// proxy. Leave it empty to derive the URL from the request.
-	PublicURL  string            `yaml:"public_url,omitempty"`
-	AllowedIDs []string          `yaml:"allowed_ids,omitempty"`
-	Names      map[string]string `yaml:"names,omitempty"`
+	PublicURL string `yaml:"public_url,omitempty"`
+	// Admins maps SteamID64 → display name (the name is optional).
+	Admins map[string]string `yaml:"admins,omitempty"`
 }
 
 // Active reports whether a login is actually required. Validation refuses an
@@ -359,17 +361,35 @@ func CheckAdminPassword(adminPassword, password string) bool {
 	return subtle.ConstantTimeCompare([]byte(adminPassword), []byte(password)) == 1
 }
 
-// SteamAllowed reports whether a SteamID64 may sign in, and the name to show.
+// SteamID is a Steam admin entry: the SteamID64 and the name to show.
+type SteamAdmin struct {
+	ID   string
+	Name string
+}
+
+// SteamAdmins lists the configured Steam admins sorted by SteamID64, so log
+// lines and tests are stable.
+func (a WebAuth) SteamAdmins() []SteamAdmin {
+	out := make([]SteamAdmin, 0, len(a.Steam.Admins))
+	for id, name := range a.Steam.Admins {
+		out = append(out, SteamAdmin{ID: strings.TrimSpace(id), Name: strings.TrimSpace(name)})
+	}
+	sort.Slice(out, func(i, j int) bool { return out[i].ID < out[j].ID })
+	return out
+}
+
+// SteamAllowed reports whether a SteamID64 is a dayzctl admin, and the name
+// to show for it.
 func (a WebAuth) SteamAllowed(id string) (string, bool) {
 	if !a.Steam.Enabled {
 		return "", false
 	}
 	id = strings.TrimSpace(id)
-	for _, allowed := range a.Steam.AllowedIDs {
-		if subtle.ConstantTimeCompare([]byte(id), []byte(strings.TrimSpace(allowed))) != 1 {
+	for adminID, name := range a.Steam.Admins {
+		if subtle.ConstantTimeCompare([]byte(id), []byte(strings.TrimSpace(adminID))) != 1 {
 			continue
 		}
-		if name := strings.TrimSpace(a.Steam.Names[id]); name != "" {
+		if name = strings.TrimSpace(name); name != "" {
 			return name, true
 		}
 		return "Steam " + id, true

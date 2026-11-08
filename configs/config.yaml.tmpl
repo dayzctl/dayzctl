@@ -117,14 +117,14 @@ web:
     enabled: false
     session_hours: 12
     # Steam SSO (OpenID 2.0, handled by steamcommunity.com). When enabled, the
-    # sign-in page offers "Sign in with Steam"; only the SteamID64s below are
-    # let in, every other Steam account is refused.
+    # sign-in page offers "Sign in with Steam". `admins` lists the Steam users
+    # allowed into dayzctl: the key is the SteamID64 and the value is the name
+    # shown in the UI (optional). Anyone not listed is refused.
     steam:
       enabled: false
       # External URL of the UI, needed behind a reverse proxy so the OpenID
       # return_to points at the public address.
       # public_url: "https://dayz.example.com"
-      allowed_ids:
-        # - "76561198000000000"
-      names:
-        # "76561198000000000": "Alice"
+      # admins:
+      #   "76561198000000000": "Alice"
+      #   "76561198000000001": "Bob"

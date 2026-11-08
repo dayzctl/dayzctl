@@ -161,9 +161,8 @@ const testSteamID = "76561198000000001"
 
 func steamAuth() config.WebAuth {
 	return config.WebAuth{Enabled: true, Steam: config.WebSteam{
-		Enabled:    true,
-		AllowedIDs: []string{testSteamID},
-		Names:      map[string]string{testSteamID: "Alice"},
+		Enabled: true,
+		Admins:  map[string]string{testSteamID: "Alice"},
 	}}
 }
 
@@ -300,7 +299,7 @@ func TestSteamCallbackDeniesUnknownAccount(t *testing.T) {
 	if rec.Code != http.StatusForbidden {
 		t.Fatalf("callback = %d, want 403", rec.Code)
 	}
-	if !strings.Contains(rec.Body.String(), "not allowed") {
+	if !strings.Contains(rec.Body.String(), "not a dayzctl admin") {
 		t.Errorf("body = %s, want a not-authorized message", rec.Body.String())
 	}
 	for _, c := range rec.Result().Cookies() {
@@ -377,7 +376,7 @@ func TestLoginPageOffersEnabledMethods(t *testing.T) {
 	// Both: the password form, an "or" divider and the Steam button.
 	both := authServer(t, config.WebAuth{
 		Enabled: true,
-		Steam:   config.WebSteam{Enabled: true, AllowedIDs: []string{testSteamID}},
+		Steam:   config.WebSteam{Enabled: true, Admins: map[string]string{testSteamID: ""}},
 	})
 	body = doAuth(both.Handler(), http.MethodGet, "/login", nil, nil).Body.String()
 	for _, want := range []string{`name="password"`, "/auth/steam", `class="or"`} {

@@ -26,8 +26,8 @@ Configuration (config.yaml):
       session_hours: 12
       steam:               # optional Steam SSO (OpenID 2.0)
         enabled: true
-        allowed_ids: ["76561198000000000"]   # authorization allowlist
-        names: {"76561198000000000": "Alice"}   # optional labels
+        admins:            # SteamID64 -> display name (the name is optional)
+          "76561198000000000": "Alice"
 
   server:
     password_admin: change-me   # the web login password (also in-game/RCON)
@@ -62,6 +62,6 @@ With web.auth on, every request needs a session cookie. The password form
 checks server.password_admin (the same admin password the game and RCON use);
 Steam users sign in through
 steamcommunity.com and are only accepted when their SteamID64 is listed in
-web.auth.steam.allowed_ids. Sessions live in memory, so restarting the service
+web.auth.steam.admins. Sessions live in memory, so restarting the service
 signs everyone out. Keep the loopback address, or terminate TLS in a reverse
 proxy such as nginx or Caddy.

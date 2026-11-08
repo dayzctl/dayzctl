@@ -106,12 +106,12 @@ func validateWebAuth(a WebAuth, adminPassword string) error {
 	if !a.Steam.Enabled {
 		return nil
 	}
-	if len(a.Steam.AllowedIDs) == 0 {
-		return fmt.Errorf("web.auth.steam.allowed_ids is required when steam is enabled")
+	if len(a.Steam.Admins) == 0 {
+		return fmt.Errorf("web.auth.steam.admins is required when steam is enabled")
 	}
-	for _, id := range a.Steam.AllowedIDs {
-		if !steamIDPattern.MatchString(strings.TrimSpace(id)) {
-			return fmt.Errorf("web.auth.steam.allowed_ids: %q is not a SteamID64 (17 digits starting 7656)", id)
+	for _, admin := range a.SteamAdmins() {
+		if !steamIDPattern.MatchString(admin.ID) {
+			return fmt.Errorf("web.auth.steam.admins: %q is not a SteamID64 (17 digits starting 7656)", admin.ID)
 		}
 	}
 	if pu := strings.TrimSpace(a.Steam.PublicURL); pu != "" {

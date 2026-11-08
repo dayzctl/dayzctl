@@ -170,10 +170,9 @@ web:
     session_hours: 12             # default 12
     steam:                        # Steam SSO (OpenID 2.0)
       enabled: true
-      allowed_ids:                # only these SteamID64s are authorized
-        - "76561198000000000"
-      names:                      # optional labels for the UI
+      admins:                     # the Steam users who are dayzctl admins
         "76561198000000000": "Alice"
+        "76561198000000001": "Bob"   # the name is optional
 ```
 
 There is no second web credential: the password form checks
@@ -184,8 +183,8 @@ the game as admin also opens the UI. With the switch on:
   with Steam* button;
 - Steam sign-in is OpenID 2.0 SSO: the browser goes to steamcommunity.com, the
   server verifies the assertion directly with Steam and then checks the
-  SteamID64 against `allowed_ids` — an authenticated Steam account that is not
-  listed is refused (`403`, and the page prints the id to add);
+  SteamID64 against `web.auth.steam.admins` — an authenticated Steam account
+  that is not listed is refused (`403`, and the page prints the id to add);
 - every `/api/` call answers `401` without a session cookie, the header shows
   who is signed in plus a *Sign out* button, and `GET /api/health` reports
   `user`/`via`.

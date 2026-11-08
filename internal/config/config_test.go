@@ -274,16 +274,16 @@ func TestWebAuthValidation(t *testing.T) {
 	}{
 		{"off", WebAuth{}, "", ""},
 		{"admin password", WebAuth{Enabled: true}, "s3cret", ""},
-		{"steam only", WebAuth{Enabled: true, Steam: WebSteam{Enabled: true, AllowedIDs: []string{steamID}}}, "", ""},
-		{"both", WebAuth{Enabled: true, Steam: WebSteam{Enabled: true, AllowedIDs: []string{steamID}}}, "s3cret", ""},
+		{"steam only", WebAuth{Enabled: true, Steam: WebSteam{Enabled: true, Admins: map[string]string{steamID: ""}}}, "", ""},
+		{"both", WebAuth{Enabled: true, Steam: WebSteam{Enabled: true, Admins: map[string]string{steamID: "Alice"}}}, "s3cret", ""},
 		{"steam with public url", WebAuth{Enabled: true, Steam: WebSteam{
-			Enabled: true, PublicURL: "https://dayz.example.com", AllowedIDs: []string{steamID},
+			Enabled: true, PublicURL: "https://dayz.example.com", Admins: map[string]string{steamID: ""},
 		}}, "s3cret", ""},
 		{"nothing to sign in with", WebAuth{Enabled: true}, "", "server.password_admin"},
-		{"steam without allowlist", WebAuth{Enabled: true, Steam: WebSteam{Enabled: true}}, "s3cret", "allowed_ids is required"},
-		{"steam bad id", WebAuth{Enabled: true, Steam: WebSteam{Enabled: true, AllowedIDs: []string{"12345"}}}, "s3cret", "not a SteamID64"},
+		{"steam without admins", WebAuth{Enabled: true, Steam: WebSteam{Enabled: true}}, "s3cret", "steam.admins is required"},
+		{"steam bad id", WebAuth{Enabled: true, Steam: WebSteam{Enabled: true, Admins: map[string]string{"12345": "x"}}}, "s3cret", "not a SteamID64"},
 		{"steam bad url", WebAuth{Enabled: true, Steam: WebSteam{
-			Enabled: true, PublicURL: "dayz.example.com", AllowedIDs: []string{steamID},
+			Enabled: true, PublicURL: "dayz.example.com", Admins: map[string]string{steamID: ""},
 		}}, "s3cret", "absolute http(s) URL"},
 	}
 
@@ -317,15 +317,27 @@ func TestCheckAdminPassword(t *testing.T) {
 
 func TestWebAuthSteamAllowed(t *testing.T) {
 	a := WebAuth{Enabled: true, Steam: WebSteam{
-		Enabled:    true,
-		AllowedIDs: []string{"76561198000000001"},
-		Names:      map[string]string{"76561198000000001": "Alice"},
+		Enabled: true,
+		Admins: map[string]string{
+			"76561198000000001": "Alice",
+			"76561198000000002": "",
+		},
 	}}
 	if name, ok := a.SteamAllowed("76561198000000001"); !ok || name != "Alice" {
 		t.Errorf("allowed id = %q, %v; want Alice, true", name, ok)
 	}
-	if name, ok := a.SteamAllowed("76561198000000002"); ok {
+	// A member without a display name is still an admin, labelled by id.
+	if name, ok := a.SteamAllowed("76561198000000002"); !ok || name != "Steam 76561198000000002" {
+		t.Errorf("unnamed id = %q, %v; want the Steam label", name, ok)
+	}
+	if name, ok := a.SteamAllowed("76561198000000003"); ok {
 		t.Errorf("unknown id accepted as %q", name)
+	}
+	// The admins list is sorted, with whitespace trimmed.
+	a.Steam.Admins[" 76561198000000000 "] = " Zed "
+	admins := a.SteamAdmins()
+	if len(admins) != 3 || admins[0].ID != "76561198000000000" || admins[0].Name != "Zed" {
+		t.Errorf("SteamAdmins = %+v", admins)
 	}
 	// A Steam block that is configured but not switched on lets nobody in.
 	a.Steam.Enabled = false

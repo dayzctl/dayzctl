@@ -15,6 +15,7 @@ import (
 	"time"
 
 	"github.com/dayzctl/dayzctl/internal/config"
+	"github.com/dayzctl/dayzctl/internal/logger"
 )
 
 const (
@@ -265,10 +266,12 @@ func (s *Server) handleLogin(w http.ResponseWriter, r *http.Request) {
 
 	if !config.CheckAdminPassword(s.adminPassword, pass) {
 		// Slow failed attempts down a little; the form has no other backoff.
+		logger.Warn("Web sign-in failed", "via", "password", "remote", r.RemoteAddr)
 		time.Sleep(400 * time.Millisecond)
 		s.renderLogin(w, http.StatusUnauthorized, next, "Wrong admin password.")
 		return
 	}
+	logger.Info("Web sign-in", "via", "password", "remote", r.RemoteAddr)
 	s.beginSession(w, r, session{User: "admin", Via: "password"}, next)
 }
 
@@ -307,7 +310,8 @@ func (s *Server) renderLogin(w http.ResponseWriter, status int, next, errMsg str
 	if s.auth.SteamEnabled() {
 		steam = `<a class="steam" href="/auth/steam?next=` + url.QueryEscape(next) + `">Sign in with Steam</a>`
 		if local != "" {
-			steam = `<p class="or">or</p>` + steam
+			steam += `
+    <p class="or">or</p>`
 		}
 	}
 	page := strings.NewReplacer(
@@ -426,15 +430,18 @@ func (s *Server) handleSteamCallback(w http.ResponseWriter, r *http.Request) {
 
 	id, err := s.verifySteam(r.Context(), q)
 	if err != nil {
+		logger.Warn("Steam sign-in verification failed", "error", err)
 		s.renderAuthError(w, http.StatusBadGateway, "Steam sign-in failed", err.Error())
 		return
 	}
 	name, ok := s.auth.SteamAllowed(id)
 	if !ok {
+		logger.Warn("Steam sign-in refused: account is not in web.auth.steam.admins", "steamID", id)
 		s.renderAuthError(w, http.StatusForbidden, "Not authorized",
-			"The Steam account "+id+" is not allowed on this server. Ask the operator to add it to web.auth.steam.allowed_ids.")
+			"The Steam account "+id+" is not a dayzctl admin on this server. Ask the operator to add it to web.auth.steam.admins.")
 		return
 	}
+	logger.Info("Web sign-in", "via", "steam", "steamID", id, "user", name)
 	s.beginSession(w, r, session{User: name, Via: "steam", SteamID: id}, next)
 }
 
@@ -569,8 +576,8 @@ const loginPage = `<!DOCTYPE html>
     <h1>DayZ Log Analyzer</h1>
     <p class="sub">Sign in to read this server's logs.</p>
     {{ERROR}}
-    {{LOCAL}}
     {{STEAM}}
+    {{LOCAL}}
   </div>
 </body>
 </html>

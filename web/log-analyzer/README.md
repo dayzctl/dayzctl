@@ -40,11 +40,11 @@ web:
   auth:                # login switch, off by default
     enabled: false
     session_hours: 12
-    steam:             # Steam SSO (OpenID 2.0), allowlist required
+    steam:             # Steam SSO (OpenID 2.0), admins required
       enabled: false
       # public_url: "https://dayz.example.com"
-      allowed_ids: ["76561198000000000"]
-      names: {"76561198000000000": "Alice"}
+      admins:
+        "76561198000000000": "Alice"   # the name is optional
 ```
 
 `dayzctl apply` generates `/etc/systemd/system/dayz-web.service`, runs
@@ -68,7 +68,7 @@ and/or offers *Sign in with Steam*; every `/api/` call needs the session
 cookie, the header shows who is signed in with a *Sign out* button, and
 `/api/health` reports `user` and `via` (password/steam). Steam sign-ins are
 verified server-side with Steam and then checked against
-`web.auth.steam.allowed_ids`, so an authenticated Steam account that is not
+`web.auth.steam.admins`, so an authenticated Steam account that is not
 listed gets a 403 page. Sessions are held in memory and die with the process.
 
 ## API
